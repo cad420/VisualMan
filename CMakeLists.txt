@@ -9,7 +9,9 @@ project ("MRE")
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
-add_subdirectory("lib/glfw-3.2.1")
+
+set(GLFW_DIR "lib/glfw")
+add_subdirectory(${GLFW_DIR})
 
 
 
@@ -19,7 +21,7 @@ if(OPENGL_FOUND)
 	include_directories(${OPENGL_INCLUDE_DIR})			#optional
 endif(OPENGL_FOUND)
 
-set(_GLFW_INCLUDE_DIR "lib/glfw-3.2.1/include")
+set(_GLFW_INCLUDE_DIR "${GLFW_DIR}/include")
 set(_GL3W_INCLUDE_DIR "lib/gl3w")
 include_directories(${_GLFW_INCLUDE_DIR} ${_GL3W_INCLUDE_DIR})
 
