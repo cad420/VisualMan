@@ -369,6 +369,8 @@ void ImGui::ShowDemoWindow(bool* p_open)
 
                 static float vec4a[4] = { 0.10f, 0.20f, 0.30f, 0.44f };
                 ImGui::InputFloat3("input float3", vec4a);
+
+				ImGui::InputFloat4("input float4", vec4a, 5);
             }
 
             {
@@ -393,6 +395,8 @@ void ImGui::ShowDemoWindow(bool* p_open)
                 ImGui::SliderFloat("slider float (curve)", &f2, -10.0f, 10.0f, "%.4f", 2.0f);
                 static float angle = 0.0f;
                 ImGui::SliderAngle("slider angle", &angle);
+
+				
             }
 
             {

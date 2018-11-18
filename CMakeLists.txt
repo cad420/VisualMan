@@ -43,10 +43,6 @@ include_directories("src/cameras/")
 include_directories("src/core/")
 
 
-
-
-
-
 # Include sub-projects.
 # add_subdirectory ("src")
 
@@ -57,6 +53,7 @@ file(GLOB CORE_HEADERS "src/core/*.h")
 file(GLOB CAMERAS_HEADERS "src/core/*.h")
 message(STATUS ${PROJECT_HEADERS})
 include_directories(${PROJECT_HEADERS})
+
 
 
 # Set srouce list needed by target
