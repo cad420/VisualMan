@@ -797,6 +797,7 @@
 
 #include <ctype.h>      // toupper, isprint
 #include <stdio.h>      // vsnprintf, sscanf, printf
+#include <cstdarg>
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
 #include <stddef.h>     // intptr_t
 #else
@@ -2155,7 +2156,7 @@ ImGuiWindow::~ImGuiWindow()
 ImGuiID ImGuiWindow::GetID(const char* str, const char* str_end)
 {
     ImGuiID seed = IDStack.back();
-    ImGuiID id = ImHash(str, str_end ? (int)(str_end - str) : 0, seed);
+	ImGuiID id = ImHash(str, str_end ? (int)(str_end - str) : 0, seed);
     ImGui::KeepAliveID(id);
     return id;
 }

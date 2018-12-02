@@ -1,18 +1,18 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "geometry.h"
+#include "../core/geometry.h"
 
-class AbstractCamera {
-public:
-	virtual const Trans3DMat & getViewMat()const = 0;
-	virtual const QVector3D & getPosition()const = 0;
-	virtual const Trans3DMat & getPerspectiveMat()const = 0;
-private:
+using namespace hsl;
 
-};
-
-
+//class AbstractCamera {
+//public:
+//	virtual const Trans3DMat & getViewMat()const = 0;
+//	virtual const QVector3D & getPosition()const = 0;
+//	virtual const Trans3DMat & getPerspectiveMat()const = 0;
+//private:
+//
+//};
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum class CameraMovement {
@@ -78,13 +78,14 @@ public:
 	}
 
 	// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
-	Trans3DMat view()
-	{
-		Trans3DMat view;
-		view.setToIdentity();
-		view.lookAt(Position, Position + Front, Up);
-		return view;
-	}
+	//Trans3DMat view()
+	//{
+	//	Trans3DMat view;
+	//	view.setToIdentity();
+	//	view.lookAt(Position, Position + Front, Up);
+	//	return view;
+	//}
+
 	Point3f position()const {
 		return Position;
 	}
@@ -133,15 +134,15 @@ private:
 	void updateCameraVectors()
 	{
 		// Calculate the new Front vector
-		Vector3f front;
-		front.x() = (cos(qDegreesToRadians(Yaw)) * cos(qDegreesToRadians(Pitch)));
-		front.y() = ((sin(qDegreesToRadians(Pitch))));
-		front.z() = (sin(qDegreesToRadians(Yaw)) * cos(qDegreesToRadians(Pitch)));
-		Front = front.normalized();
-		// Also re-calculate the Right and Up vector
-		Right = Vector3f::crossProduct(Front, WorldUp).normalized();
-		// Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-		Up = Vector3f::crossProduct(Right, Front).normalized();
+		//Vector3f front;
+		//front.x() = (cos(qDegreesToRadians(Yaw)) * cos(qDegreesToRadians(Pitch)));
+		//front.y() = ((sin(qDegreesToRadians(Pitch))));
+		//front.z() = (sin(qDegreesToRadians(Yaw)) * cos(qDegreesToRadians(Pitch)));
+		//Front = front.normalized();
+		//// Also re-calculate the Right and Up vector
+		//Right = Vector3f::crossProduct(Front, WorldUp).normalized();
+		//// Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+		//Up = Vector3f::crossProduct(Right, Front).normalized();
 	}
 };
 

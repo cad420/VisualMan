@@ -6,9 +6,12 @@
 namespace hsl 
 {
 	typedef float Float;
+
 	constexpr Float PI = 3.1415926535;
+
 	constexpr Float LOWEST_Float_VALUE = std::numeric_limits<Float>::lowest();
-	constexpr Float MAX_Float_VALUE = std::numeric_limits<Float>::max();
+
+	constexpr Float MAX_Float_VALUE = (std::numeric_limits<Float>::max)();		// For fucking min/max defined in windows.h
 }
 
 

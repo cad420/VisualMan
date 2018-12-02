@@ -51,6 +51,7 @@ include_directories("src/core/")
 file(GLOB PROJECT_HEADERS "gui/*.h")
 file(GLOB CORE_HEADERS "src/core/*.h")
 file(GLOB CAMERAS_HEADERS "src/core/*.h")
+#file(GLOB UTILS_HEADERS "src/utils/*.h")
 message(STATUS ${PROJECT_HEADERS})
 include_directories(${PROJECT_HEADERS})
 
@@ -66,4 +67,4 @@ add_executable(${PROJECT_NAME} ${SRC_LIST} ${GL3W_LIST} ${GUI_SRC_LIST})
 
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
+   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
