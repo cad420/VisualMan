@@ -2,13 +2,12 @@
 #define SCENE_H
 
 #include "shape.h"
+#include <vector>
 
-namespace hsl {
+namespace ysl {
 
 
 #include <memory>
-
-
 	class AreaLight;
 
 	class Scene
@@ -19,7 +18,8 @@ namespace hsl {
 	public:
 		Scene(std::shared_ptr<Shape> shape, const std::vector<std::shared_ptr<AreaLight>> & lights) :m_shape(shape), m_lights(lights) {}
 
-		bool intersect(const Ray & ray, Float * t, Interaction * isect)const {
+		bool intersect(const Ray & ray, Float * t, Interaction * isect)const 
+		{
 			return m_shape->intersect(ray, t, isect);
 		}
 		const std::vector<std::shared_ptr<AreaLight>> & lights()const { return m_lights; }
@@ -27,5 +27,6 @@ namespace hsl {
 			m_shape = shape;
 		}
 	};
+
 }
 #endif // SCENE_H

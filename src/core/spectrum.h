@@ -1,11 +1,10 @@
 #ifndef SPECTRUM_H_
 #define SPECTRUM_H_
-#include "hsl_def.h"
 #include <cassert>
+#include "../mathematics/basetype.h"
 
 
-
-namespace hsl 
+namespace ysl 
 {
 	template<int nSamples>
 	class CoefficientSpectrum 

@@ -7,7 +7,7 @@
 #include <mutex>
 #include <vector>
 
-namespace hsl {
+namespace ysl {
 
 	class Interaction;
 

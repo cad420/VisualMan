@@ -5,7 +5,7 @@
 #include "../core/arithmetic.h"
 
 
-namespace hsl {
+namespace ysl {
 
 
 	bool BVHTreeAccelerator::recursiveIntersect(const BVHNode * root, const Ray & ray, Interaction * interac, Float &tMin)const

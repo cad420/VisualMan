@@ -4,6 +4,7 @@
 
 #include "../core/spectrum.h"
 
-namespace hsl {
+namespace ysl 
+{
 
 }

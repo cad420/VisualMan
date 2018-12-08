@@ -3,7 +3,7 @@
 
 #include "../core/geometry.h"
 
-using namespace hsl;
+using namespace ysl;
 
 //class AbstractCamera {
 //public:

@@ -3,11 +3,10 @@
 #include <memory>
 #include <cstdlib>
 
-#include "../core/geometry.h"
+#include "../mathematics/geometry.h"
 
 
-namespace hsl {
-
+namespace ysl {
 
 	class Shape;
 	class BSDF;
