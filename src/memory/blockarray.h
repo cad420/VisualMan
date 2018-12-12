@@ -85,7 +85,7 @@ namespace ysl
 	{
 		T * m_data;
 		const int m_nx, m_ny, m_nz, m_nxBlocks, m_nyBlocks, m_nzBlocks;
-
+		bool m_valid;
 		// Delegate Constructor
 		Block3DArray(int x, int y, int z) :
 			m_data(nullptr),
@@ -94,7 +94,8 @@ namespace ysl
 			m_nz(z),
 			m_nxBlocks(RoundUp(m_nx) >> nLogBlockSize),
 			m_nyBlocks(RoundUp(m_ny) >> nLogBlockSize),
-			m_nzBlocks(RoundUp(m_nz) >> nLogBlockSize)
+			m_nzBlocks(RoundUp(m_nz) >> nLogBlockSize),
+			m_valid(true)
 		{}
 
 	public:
@@ -102,15 +103,25 @@ namespace ysl
 		{
 			const auto nAlloc = RoundUp(m_nx) * RoundUp(m_ny) * RoundUp(m_nz);
 			m_data = AllocAligned<T>(nAlloc);
-			for (auto i = 0; i < nAlloc; i++) new (&m_data[i])T();
+			if (m_data == nullptr)
+			{
+				m_valid = false;
+				return;
+			}
+
+			//for (auto i = 0; i < nAlloc; i++) new (&m_data[i])T();
 			if (linearArray)
+			{
+#pragma omp parallel for
 				for (auto z = 0; z < m_nz; z++)
 					for (auto y = 0; y < m_ny; y++)
 						for (auto x = 0; x < m_nx; x++)
 							(*this)(x, y, z) = linearArray[x + y * m_nx + z * m_nx*m_ny];
+			}
+
 		}
 		constexpr size_t BlockSize()const { return 1 << nLogBlockSize; }
-
+		bool Valid()const { return m_valid; }
 		Block3DArray(const Block3DArray & array) = delete;
 		Block3DArray & operator=(const Block3DArray & array) = delete;
 
@@ -132,6 +143,8 @@ namespace ysl
 			array.m_data = nullptr;
 			return *this;
 		}
+
+		const T * data()const { return m_data; }
 
 		int Width()const
 		{
@@ -164,7 +177,7 @@ namespace ysl
 		/**
 		 * \brief  Returns the multiple of BlockSize()
 		 */
-		int RoundUp(int x)const
+		size_t RoundUp(int x)const
 		{
 			return (x + BlockSize() - 1) & ~(BlockSize() - 1);
 		}
@@ -195,7 +208,7 @@ namespace ysl
 
 		T * BlockData(int blockIndex)
 		{
-			return const_cast<T*>(static_cast<Block3DArray&>(*this).BlockData(blockIndex));
+			return const_cast<T*>(static_cast<const Block3DArray&>(*this).BlockData(blockIndex));
 		}
 
 		const T * BlockData(int blockIndex)const
@@ -205,7 +218,7 @@ namespace ysl
 
 		T * BlockData(int xBlock, int yBlock, int zBlock)
 		{
-			return const_cast<T*>(static_cast<Block3DArray&>(*this).BlockData(xBlock, yBlock, zBlock));
+			return const_cast<T*>(static_cast<const Block3DArray&>(*this).BlockData(xBlock, yBlock, zBlock));
 		}
 
 		const T * BlockData(int xBlock, int yBlock, int zBlock)const
@@ -230,7 +243,7 @@ namespace ysl
 			for (auto z = 0; z < m_nz; z++)
 				for (auto y = 0; y < m_ny; y++)
 					for (auto x = 0; x < m_nx; x++)
-						*arr++ = (*this)(x, y,z);
+						*arr++ = (*this)(x, y, z);
 		}
 		virtual ~Block3DArray()
 		{

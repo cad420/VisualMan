@@ -7,7 +7,8 @@
 
 #include <list>
 #include <unordered_map>
-#include "../mathematics/arithmetic.h"
+#include <iostream>
+//#include "../mathematics/arithmetic.h"
 
 
 struct VolumeFormat;
@@ -117,14 +118,12 @@ class LargeVolumeCache
 		LRUListCell(int index):blockCacheIndex(index){}
 	};
 
-
-
 	BlockVolumeReader m_blockVolumeReader;
 	const uint32_t m_logBlockSize;
 	const int m_vx, m_vy, m_vz;
-
 	std::list<LRUListCell> m_lruList;
 	LRUHash	m_blockIdInCache;		// blockId---> (blockIndex,the position of blockIndex in queue)
+
 	ysl::Block3DArray<unsigned char, 5> m_volumeCached;
 
 	int blockCoordinateToBlockId(int xBlock, int yBlock, int zBlock)const
@@ -133,11 +132,10 @@ class LargeVolumeCache
 		return zBlock * nxBlock*nyBlock + yBlock * nxBlock + zBlock;
 	}
 
-	constexpr size_t cacheWidth  = 1024;
-	constexpr size_t cacheHeight = 1024;
-	constexpr size_t cacheDepth  = 1024;
-
-	constexpr size_t totalCacheBlocks = 32 * 32 * 32;
+	static constexpr size_t cacheWidth = 64;
+	static constexpr size_t cacheHeight = 64;
+	static constexpr size_t cacheDepth = 64;
+	static constexpr size_t totalCacheBlocks = 2*2*2;
 
 public:
 	explicit LargeVolumeCache(const std::string & fileName) :
@@ -146,25 +144,21 @@ public:
 		m_vx(m_blockVolumeReader.width()),
 		m_vy(m_blockVolumeReader.height()),
 		m_vz(m_blockVolumeReader.depth()),
-		m_volumeCached(cacheWidth, cacheHeight, cacheDepth)
+		m_volumeCached(cacheWidth, cacheHeight, cacheDepth,nullptr)
 	{
 		for (int i = 0; i < totalCacheBlocks; i++)
 		{
 			m_lruList.push_front(LRUListCell(i));
 		}
 	}
+
+	const BlockVolumeReader & reader()const { return m_blockVolumeReader; }
 	const unsigned char * blockData(int xBlock, int yBlock, int zBlock) { return blockData(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
 	const unsigned char * blockData(int blockId);
 
 };
 
 
-class RawVolumeReader
-{
-	size_t xSize, ySize, zSize;
-public:
-	RawVolumeReader(const std::string & fileName);
-};
 
 //class LargeVolumeRepresentation
 //{

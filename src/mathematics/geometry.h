@@ -21,7 +21,6 @@ namespace ysl
 
 	typedef Vector3<Float> Vector3f;
 	typedef Vector3<int> Vector3i;
-
 	typedef Point3<Float> Point3f;
 	typedef Point3<int> Point3i;
 
