@@ -144,7 +144,8 @@ namespace ysl
 			return *this;
 		}
 
-		const T * data()const { return m_data; }
+		const T * Data()const { return m_data; }
+		T * Data() { return m_data; }
 
 		int Width()const
 		{

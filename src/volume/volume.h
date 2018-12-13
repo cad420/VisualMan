@@ -29,18 +29,21 @@ enum VoxelFormat { Grayscale, RGB, RGBA };
 //};
 
 
+
+
 class BlockVolumeReader
 {
 	std::ifstream fileHandle;
 	std::string fileName;
 	int vx, vy, vz, bx, by, bz;
 	int logBlockSize;
+	int m_repeat;
 	bool validFlag;
 
 
 	enum { LVDFileMagicNumber = 277536 };
 	enum { LogBlockSize5 = 5 };
-	enum { LVDHeaderSize = 64 };
+	enum { LVDHeaderSize = 24 };
 public:
 	BlockVolumeReader(const std::string & fileName) :validFlag(true)
 	{
@@ -66,6 +69,7 @@ public:
 		fileHandle.read((char*)&vy, sizeof(int));
 		fileHandle.read((char*)&vz, sizeof(int));
 		fileHandle.read((char*)&logBlockSize, sizeof(int));
+		fileHandle.read((char*)&m_repeat, sizeof(int));
 		if(logBlockSize != LogBlockSize5)
 		{
 			std::cout << "Unsupported block size\n";
@@ -89,11 +93,27 @@ public:
 	int yBlockCount()const { return by; }
 	int zBlockCount()const { return bz; }
 
+	int repeat()const { return m_repeat; }
+
 	int blockSizeInLog()const { return logBlockSize; }
 	int blockSize()const { return 1 << blockSizeInLog(); }
 	int blockDataCount()const { return blockSize()*blockSize()*blockSize(); }
 
 	int totalBlocks()const { return bx * by * bz; }
+
+	template<typename T,int nLogBlockSize>
+	std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> readAll()
+	{
+		const size_t bytes = width()*height()*depth()*sizeof(T);
+		auto ptr = std::make_shared<ysl::Block3DArray<T,nLogBlockSize>>(width(), height(), depth(),nullptr);
+		if(ptr)
+		{
+			fileHandle.seekg((size_t)LVDHeaderSize, std::ifstream::_Seekbeg);
+			fileHandle.read(ptr->Data(), bytes);
+		}
+			
+		return ptr;
+	}
 
 	void readBlock(char * dest, int blockId)
 	{
@@ -101,7 +121,6 @@ public:
 		fileHandle.seekg(blockCount*blockId, std::fstream::_Seekbeg);
 		fileHandle.read(dest, sizeof(char)*blockCount);
 	}
-
 };
 
 

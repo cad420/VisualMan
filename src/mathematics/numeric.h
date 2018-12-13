@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "basetype.h"
+#include <cstdint>
 
 /*
 *
@@ -19,8 +20,8 @@ namespace ysl {
 
 
 	template<typename T, typename U, typename V> inline
-	T
-	Clamp(const T & value, const U & low, const V & high)
+		T
+		Clamp(const T & value, const U & low, const V & high)
 	{
 		if (value < low)return low;
 		if (value > high)return high;
@@ -33,58 +34,107 @@ namespace ysl {
 	*/
 
 	template<typename T> inline
-	T
-	Mod(const T & a, const T & b)
+		T
+		Mod(const T & a, const T & b)
 	{
 		const auto r = a - (a / b)*b;
 		return static_cast<T>(r > 0 ? r : r + b);
 	}
 
 	template<> inline
-	Float
-	Mod<Float>(const Float& a, const Float& b)
+		Float
+		Mod<Float>(const Float& a, const Float& b)
 	{
 		return std::fmod(static_cast<double>(a), static_cast<double>(b));
 	}
 
 
 	template<typename T> inline
-	bool
-	IsNaN(const T & t)
+		bool
+		IsNaN(const T & t)
 	{
 		return std::isnan(t);
 	}
 
 	template<> inline
-	bool
-	IsNaN(const int & t)
+		bool
+		IsNaN(const int & t)
 	{
 		return false;
 	}
 
+	inline
+		uint32_t
+		RoundUpDivide(uint32_t no, uint32_t den)
+	{
+		return (no + den - 1) / den;
+	}
+
+	inline
+		uint64_t
+		RoundUpDivide(uint64_t no, uint64_t den)
+	{
+		return (no + den - 1) / den;
+	}
+
+	inline
+		int
+		NextPowerOfTwo(uint64_t v)
+	{
+		v--;
+		v |= v >> 1;
+		v |= v >> 2;
+		v |= v >> 4;
+		v |= v >> 8;
+		v |= v >> 16;
+		v |= v >> 32;
+		++v;
+		return v;
+	}
+
+	inline
+		int
+		NextPowerOfTwo(uint32_t v)
+	{
+		v--;
+		v |= v >> 1;
+		v |= v >> 2;
+		v |= v >> 4;
+		v |= v >> 8;
+		v |= v >> 16;
+		++v;
+		return v;
+	}
+
+	template<typename T>
+	bool
+	IsPowerOfTwo(T n)
+	{
+		return(n&(n - 1)) == 0;
+	}
 
 
 	inline
-	Float
-	Lerp(Float t, Float v1, Float v2)
+		Float
+		Lerp(Float t, Float v1, Float v2)
 	{
 		return (1 - t)*v1 + t * v2;
 	}
 
 	inline
-	Float
-	DegreesToRadians(Float degrees)
+		Float
+		DegreesToRadians(Float degrees)
 	{
 		return degrees * Float(Pi / 180);
 	}
 
 	inline
-	Float
-	RadiansToDegrees(Float radians)
+		Float
+		RadiansToDegrees(Float radians)
 	{
 		return radians * Float(180 / Pi);
 	}
-	
+
 
 }
 
