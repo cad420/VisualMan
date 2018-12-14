@@ -6,7 +6,15 @@
 #include <gl/GL.h>
 #include <GLFW/glfw3.h>
 
+#include "../gui/framework.h"
 
-void RayCastingDemo();
+class RayCasterDemo:public CommandFramework
+{
+public:
+	RayCasterDemo();
+	void CommandCallback(const char* cmd) override;
+	void paintGL() override;
+
+};
 
 #endif

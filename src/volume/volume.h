@@ -1,13 +1,11 @@
 #ifndef VOLUME_H_
 #define VOLUME_H_
-#include <memory>
 #include <string>
-#include <fstream>
 #include "../memory/blockarray.h"
 
 #include <list>
 #include <unordered_map>
-#include <iostream>
+#include "volume_utils.h"
 //#include "../mathematics/arithmetic.h"
 
 
@@ -17,111 +15,6 @@ struct VolumeFormat;
 enum VoxelType { UInt8, Float32 };
 enum VoxelFormat { Grayscale, RGB, RGBA };
 
-
-
-//
-//class VolumeDataRepresentation
-//{
-//public:
-//	ysl::Vector3i getDimension()const;
-//	VolumeFormat dataFormat()const;
-//	//double sampleAt(const ysl::Point3f & pos) const;
-//};
-
-
-
-
-class BlockVolumeReader
-{
-	std::ifstream fileHandle;
-	std::string fileName;
-	int vx, vy, vz, bx, by, bz;
-	int logBlockSize;
-	int m_repeat;
-	bool validFlag;
-
-
-	enum { LVDFileMagicNumber = 277536 };
-	enum { LogBlockSize5 = 5 };
-	enum { LVDHeaderSize = 24 };
-public:
-	BlockVolumeReader(const std::string & fileName) :validFlag(true)
-	{
-		fileHandle.open(fileName, std::fstream::binary);
-		if (!fileHandle.is_open())
-		{
-			std::cout << "Can not open .lvd\n";
-			validFlag = false;
-			fileHandle.close();
-			return;
-		}
-		uint32_t magicNumber;
-		fileHandle.read((char*)&magicNumber, sizeof(int));
-		if (magicNumber != LVDFileMagicNumber)
-		{
-			std::cout << " This is not a lvd file\n";
-			validFlag = false;
-			fileHandle.close();
-			return;
-		}
-
-		fileHandle.read((char*)&vx, sizeof(int));
-		fileHandle.read((char*)&vy, sizeof(int));
-		fileHandle.read((char*)&vz, sizeof(int));
-		fileHandle.read((char*)&logBlockSize, sizeof(int));
-		fileHandle.read((char*)&m_repeat, sizeof(int));
-		if(logBlockSize != LogBlockSize5)
-		{
-			std::cout << "Unsupported block size\n";
-			validFlag = false;
-			return;
-		}
-		const size_t ablockSize = blockSize();
-		bx = ((vx + ablockSize - 1)&~(ablockSize - 1)) / ablockSize;
-		by = ((vy + ablockSize - 1)&~(ablockSize - 1)) / ablockSize;
-		bz = ((vz + ablockSize - 1)&~(ablockSize - 1)) / ablockSize;
-
-	}
-
-	bool valid()const { return validFlag; }
-
-	int width()const { return vx; }
-	int height()const { return vy; }
-	int depth()const { return vz; }
-
-	int xBlockCount()const { return bx; }
-	int yBlockCount()const { return by; }
-	int zBlockCount()const { return bz; }
-
-	int repeat()const { return m_repeat; }
-
-	int blockSizeInLog()const { return logBlockSize; }
-	int blockSize()const { return 1 << blockSizeInLog(); }
-	int blockDataCount()const { return blockSize()*blockSize()*blockSize(); }
-
-	int totalBlocks()const { return bx * by * bz; }
-
-	template<typename T,int nLogBlockSize>
-	std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> readAll()
-	{
-		const size_t bytes = width()*height()*depth()*sizeof(T);
-		auto ptr = std::make_shared<ysl::Block3DArray<T,nLogBlockSize>>(width(), height(), depth(),nullptr);
-		if(ptr)
-		{
-			fileHandle.seekg((size_t)LVDHeaderSize, std::ifstream::_Seekbeg);
-			fileHandle.read(ptr->Data(), bytes);
-		}
-			
-		return ptr;
-	}
-
-	void readBlock(char * dest, int blockId)
-	{
-		const size_t blockCount = blockDataCount();
-		fileHandle.seekg(blockCount*blockId, std::fstream::_Seekbeg);
-		fileHandle.read(dest, sizeof(char)*blockCount);
-	}
-};
 
 
 

@@ -2,7 +2,7 @@
 
 #include "bvh.h"
 #include "../core/interaction.h"
-#include "../core/arithmetic.h"
+#include "../mathematics/arithmetic.h"
 
 
 namespace ysl {
@@ -14,7 +14,7 @@ namespace ysl {
 		//If the BVH is empty or there is no intersection with current node
 		if (root == nullptr)
 			return false;
-		if (root->m_bound.intersect(ray, nullptr, nullptr) == false)
+		if (root->m_bound.Intersect(ray, nullptr, nullptr) == false)
 			return false;
 		//Interior node
 		if (root->m_nShape == -1) {
@@ -61,7 +61,7 @@ namespace ysl {
 			bool flag = false;
 
 			for (int i = 0; i < root->m_nShape; i++) {
-				if (m_shapes[i + root->m_shapeOffset]->bound().intersect(ray, &tWithBound) == true) {
+				if (m_shapes[i + root->m_shapeOffset]->bound().Intersect(ray, &tWithBound) == true) {
 					if (tMin < tWithBound)continue;
 					Interaction inter;
 					if (m_shapes[i + root->m_shapeOffset]->intersect(ray, &tWithShape, &inter) == true)
@@ -97,9 +97,9 @@ namespace ysl {
 		AABB bound;
 		for (int i = begin; i < end; i++) {
 			AABB b = shapes[i]->bound();
-			bound = bound.unionWith(shapes[i]->bound());
+			bound = bound.UnionWith(shapes[i]->bound());
 		}
-		Vector3f boundDiag = bound.diagnal();
+		Vector3f boundDiag = bound.Diagnal();
 		const auto splitAxis = findMaxVector3fComponent(boundDiag);
 		if (currentNodeCount == 1) {
 			//create leaf node and return

@@ -1,7 +1,7 @@
 #include "shape.h"
 #include "interaction.h"
 
-#include "../core/geometry.h"
+#include "../mathematics/geometry.h"
 
 namespace ysl {
 

@@ -530,19 +530,22 @@ namespace cmdline {
 			return errors.size() == 0;
 		}
 
-		void parse_check(const std::string &arg) {
+		void parse_check(const std::string &arg) 
+		{
 			if (!options.count("help"))
 				add("help", '?', "print this message");
 			check(0, parse(arg));
 		}
 
-		void parse_check(const std::vector<std::string> &args) {
+		void parse_check(const std::vector<std::string> &args) 
+		{
 			if (!options.count("help"))
 				add("help", '?', "print this message");
 			check(args.size(), parse(args));
 		}
 
-		void parse_check(int argc, char *argv[]) {
+		void parse_check(int argc, char *argv[]) 
+		{
 			if (!options.count("help"))
 				add("help", '?', "print this message");
 			check(argc, parse(argc, argv));

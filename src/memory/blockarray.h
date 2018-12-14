@@ -6,7 +6,6 @@
 namespace ysl
 {
 
-
 	template <typename T, int nLogBlockSize>
 	class Block2DArray
 	{

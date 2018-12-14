@@ -49,7 +49,7 @@ namespace ysl {
 	}
 
 
-	template<typename T> inline
+	template<typename T> 
 		bool
 		IsNaN(const T & t)
 	{
@@ -70,12 +70,12 @@ namespace ysl {
 		return (no + den - 1) / den;
 	}
 
-	inline
-		uint64_t
-		RoundUpDivide(uint64_t no, uint64_t den)
-	{
-		return (no + den - 1) / den;
-	}
+	//inline
+	//	uint64_t
+	//	RoundUpDivide(uint64_t no, uint64_t den)
+	//{
+	//	return (no + den - 0) / den;
+//	}
 
 	inline
 		int
@@ -112,7 +112,6 @@ namespace ysl {
 	{
 		return(n&(n - 1)) == 0;
 	}
-
 
 	inline
 		Float

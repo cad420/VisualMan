@@ -211,7 +211,7 @@ namespace ysl
 	void
 	rungeKutta4(Point3f* x, Vector3f* v, Vector3f acc, Float dt);
 
-	
+	inline
 	void 
 	integrateEuler(Point3f * x, Vector3f * v, Vector3f acc, float dt) {
 		*x = *x + *v * dt;
