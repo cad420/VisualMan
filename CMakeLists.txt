@@ -81,6 +81,7 @@ aux_source_directory("src/mathematics" MATH_SRC_LIST)
 aux_source_directory("src/shape" SHAPE_SRC_LIST)
 aux_source_directory("src/utility" UTILS_SRC_LIST)
 aux_source_directory("src/render" RENDER_SRC_LIST)
+aux_source_directory("src/gui" MYGUI_SRC_LIST)
 
 
 set(GL3W_LIST "lib/gl3w/GL/gl3w.c")
@@ -104,7 +105,7 @@ add_executable("test" ${TEST_SRC_LIST} ${CORE_SRC_LIST} ${MEM_SRC_LIST} ${VOLUME
 #---------------------------------------------------
 
 
-add_executable(${PROJECT_NAME} ${SRC_LIST} ${GL3W_LIST} ${GUI_SRC_LIST})
+add_executable(${PROJECT_NAME} ${SRC_LIST} ${GL3W_LIST} ${GUI_SRC_LIST} ${MYGUI_SRC_LIST} ${VOLUME_SRC_LIST} ${MEM_SRC_LIST})
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
 set_target_properties(${PROJECT_NAME} PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})

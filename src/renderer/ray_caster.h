@@ -14,7 +14,7 @@ public:
 	RayCasterDemo();
 	void CommandCallback(const char* cmd) override;
 	void paintGL() override;
-
+	 
 };
 
 #endif

@@ -14,6 +14,7 @@
 
 const unsigned char* LargeVolumeCache::blockData(int blockId)
 {
+
 	const auto it = m_blockIdInCache.find(blockId);
 	if (it == m_blockIdInCache.end())
 	{

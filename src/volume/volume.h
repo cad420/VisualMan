@@ -17,7 +17,6 @@ enum VoxelFormat { Grayscale, RGB, RGBA };
 
 
 
-
 class LargeVolumeCache
 {
 	// VolumeDataReader
@@ -67,6 +66,8 @@ public:
 	const BlockVolumeReader & reader()const { return m_blockVolumeReader; }
 	const unsigned char * blockData(int xBlock, int yBlock, int zBlock) { return blockData(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
 	const unsigned char * blockData(int blockId);
+
+
 
 };
 

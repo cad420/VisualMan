@@ -4,16 +4,32 @@
 #include "../../imgui/imgui.h"
 #include <cctype>
 #include <cstdlib>
+#include <functional>
+#include "../utility/cmdline.h"
+#include <unordered_map>
+
+class cmdline::parser;
 
 
-class ExampleAppConsole
+class TinyConsole
 {
+public:
+	using EchoCallback = std::function<void(const char* fmt, ...)>;
+	using CmdCallback = std::function<void(const char*)>;
+	TinyConsole();
+	~TinyConsole();
+	void ConfigCommand(const char * prog, CmdCallback callback);
+	void Draw(const char* title, bool* p_open);
+private:
 	char                  InputBuf[256];
 	ImVector<char*>       Items;
 	bool                  ScrollToBottom;
 	ImVector<char*>       History;
 	int                   HistoryPos;    // -1: new line, 0..History.Size-1 browsing history.
 	ImVector<const char*> Commands;
+
+	std::unordered_map<std::string,CmdCallback> Callbacks;
+
 
 	// Portable helpers
 	static int   Stricmp(const char* str1, const char* str2) { int d; while ((d = toupper(*str2) - toupper(*str1)) == 0 && *str1) { str1++; str2++; } return d; }
@@ -26,9 +42,8 @@ class ExampleAppConsole
 	static int TextEditCallbackStub(ImGuiTextEditCallbackData* data);
 	// In C++11 you are better off using lambdas for this sort of forwarding callbacks
 	int TextEditCallback(ImGuiTextEditCallbackData* data);
-public:
-	ExampleAppConsole();
-	~ExampleAppConsole();
-	void Draw(const char* title, bool* p_open);
+
 };
+
+
 #endif

@@ -1,9 +1,10 @@
 
-#include "console.h"
 
 #include <cstdio>
 
-ExampleAppConsole::ExampleAppConsole()
+#include "TinyConsole.h"
+
+TinyConsole::TinyConsole()
 {
 	ClearLog();
 	memset(InputBuf, 0, sizeof(InputBuf));
@@ -14,18 +15,17 @@ ExampleAppConsole::ExampleAppConsole()
 	Commands.push_back("CLASSIFY");
 	// "classify" is here to provide an example of "C"+[tab] completing to "CL" and displaying matches.
 	Commands.push_back("lvd"); // Rendering large volume data
-	Commands.push_back("glinfo"); // lis
 	AddLog("Welcome to Dear ImGui!");
 }
 
-ExampleAppConsole::~ExampleAppConsole()
+TinyConsole::~TinyConsole()
 {
 	ClearLog();
 	for (int i = 0; i < History.Size; i++)
 		free(History[i]);
 }
 
-void ExampleAppConsole::ClearLog()
+void TinyConsole::ClearLog()
 {
 	for (int i = 0; i < Items.Size; i++)
 		free(Items[i]);
@@ -33,7 +33,7 @@ void ExampleAppConsole::ClearLog()
 	ScrollToBottom = true;
 }
 
-void ExampleAppConsole::AddLog(const char* fmt, ...)
+void TinyConsole::AddLog(const char* fmt, ...)
 {
 	// FIXME-OPT
 	char buf[1024];
@@ -46,7 +46,7 @@ void ExampleAppConsole::AddLog(const char* fmt, ...)
 	ScrollToBottom = true;
 }
 
-void ExampleAppConsole::Draw(const char* title, bool* p_open)
+void TinyConsole::Draw(const char* title, bool* p_open)
 {
 	ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
 	if (!ImGui::Begin(title, p_open))
@@ -173,7 +173,7 @@ void ExampleAppConsole::Draw(const char* title, bool* p_open)
 	ImGui::End();
 }
 
-void ExampleAppConsole::ExecCommand(const char* command_line)
+void TinyConsole::ExecCommand(const char* command_line)
 {
 	AddLog("# %s\n", command_line);
 
@@ -208,17 +208,33 @@ void ExampleAppConsole::ExecCommand(const char* command_line)
 	}
 	else
 	{
-		AddLog("Unknown command: '%s'\n", command_line);
+		auto find = false;
+		for(int i = 0;i<Commands.Size;i++)
+		{
+			if(Stricmp(command_line,Commands[i]) == 0)
+			{
+				auto it = Callbacks.find(std::string(Commands[i]));
+				if(it == Callbacks.end())
+					// No Callback for this command
+					return;
+				else
+					(it->second)(command_line);
+				find = true;
+			}
+		}
+
+		if(!find)
+			AddLog("Unknown command: '%s'\n", command_line);
 	}
 }
 
-int ExampleAppConsole::TextEditCallbackStub(ImGuiTextEditCallbackData* data)
+int TinyConsole::TextEditCallbackStub(ImGuiTextEditCallbackData* data)
 {
-	ExampleAppConsole* console = (ExampleAppConsole*)data->UserData;
+	TinyConsole* console = (TinyConsole*)data->UserData;
 	return console->TextEditCallback(data);
 }
 
-int ExampleAppConsole::TextEditCallback(ImGuiTextEditCallbackData* data)
+int TinyConsole::TextEditCallback(ImGuiTextEditCallbackData* data)
 {
 	//AddLog("cursor: %d, selection: %d-%d", data->CursorPos, data->SelectionStart, data->SelectionEnd);
 	switch (data->EventFlag)
@@ -316,4 +332,20 @@ int ExampleAppConsole::TextEditCallback(ImGuiTextEditCallbackData* data)
 		}
 	}
 	return 0;
+}
+
+void TinyConsole::ConfigCommand(const char* prog, CmdCallback callback)
+{
+	Commands.push_back(prog);
+
+	auto it = Callbacks.find(std::string(prog));
+	if(it != Callbacks.end())
+	{
+		std::cout << "Program already exists.\n";
+		return;
+	}
+
+	Callbacks[std::string(prog)] = callback;
+
+
 }

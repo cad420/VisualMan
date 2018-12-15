@@ -86,9 +86,8 @@ int main(int argc,char *argv[])
 	//lvdConverter.save(fileName);
 	//LVDTester();
 	 // create a parser
-	using std::string;
-	using std::cout;
-	using std::endl;
+
+	
 
 
 	system("pause");
