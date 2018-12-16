@@ -209,7 +209,8 @@ std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> BlockVolumeReader::readAll(
 	auto ptr = std::make_shared<ysl::Block3DArray<T, nLogBlockSize>>(width(), height(), depth(), nullptr);
 	if (ptr)
 	{
-		fileHandle.seekg((size_t)LVDHeaderSize, std::ifstream::_Seekbeg);
+		fileHandle.seekg((size_t)LVDHeaderSize, std::ios::beg);
+
 		fileHandle.read(ptr->Data(), bytes);
 	}
 

@@ -8,7 +8,6 @@
 #include "../utility/cmdline.h"
 #include <unordered_map>
 
-class cmdline::parser;
 
 
 class TinyConsole

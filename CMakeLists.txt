@@ -9,7 +9,7 @@ project ("MRE")
 #---------------------------------------------------
 # Build Type
 #---------------------------------------------------
-
+set(CMAKE_CXX_STANDARD 14)
 
 #---------------------------------------------------
 # Dependency Module
@@ -98,7 +98,7 @@ message(STATUS "Test source list: ${TEST_SRC_LIST}")
 
 file(GLOB TEST_HEADERS "test/*.h")
 
-add_executable("test" ${TEST_SRC_LIST} ${CORE_SRC_LIST} ${MEM_SRC_LIST} ${VOLUME_SRC_LIST})
+add_executable("mytest" ${TEST_SRC_LIST} ${CORE_SRC_LIST} ${MEM_SRC_LIST} ${VOLUME_SRC_LIST})
 
 #---------------------------------------------------
 # MRE Module

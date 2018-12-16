@@ -41,6 +41,6 @@ BlockVolumeReader::BlockVolumeReader(const std::string& fileName): validFlag(tru
 void BlockVolumeReader::readBlock(char* dest, int blockId)
 {
 	const size_t blockCount = blockDataCount();
-	fileHandle.seekg(blockCount * blockId, std::fstream::_Seekbeg);
+	fileHandle.seekg(blockCount * blockId, std::ios::beg);
 	fileHandle.read(dest, sizeof(char) * blockCount);
 }
