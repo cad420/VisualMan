@@ -87,9 +87,6 @@ int main(int argc,char *argv[])
 	//LVDTester();
 	 // create a parser
 
-	
-
-
 	system("pause");
 	return 0;
 }

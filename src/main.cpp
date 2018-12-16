@@ -19,14 +19,130 @@
 #include "gui/TinyConsole.h"
 #include "gui/widget.h"
 
-#include "../utility/cmdline.h"
-#include "../volume/volume_utils.h"
-#include "../volume/volume.h"
-//#include <GL/gl.h>
-#include "GL/glcorearb.h"
+#include "utility/cmdline.h"
+#include "volume/volume_utils.h"
+#include "volume/volume.h"
 
-//#include "GL/glcorearb.h"
+#include "cameras/camera.h"
 
+#include "opengl/shader.h"
+
+
+class Event
+{
+};
+
+
+/*
+ * The reason why make the members public and supports corresponding
+ * access methods as the same time is that these class should be redesigned later conform to OO
+ */
+
+class MouseEvent :public Event
+{
+public:
+	enum { LeftButton = 1, RightButton = 2 };
+
+	ysl::Point2i m_pos;
+	int m_buttons;
+	MouseEvent(const ysl::Point2i & pos, int button) :m_pos(pos), m_buttons(button) {}
+	ysl::Point2i pos()const { return m_pos; }
+	int buttons()const { return m_buttons; }
+};
+
+class KeyboardEvent :public Event
+{
+public:
+	int m_key;
+	KeyboardEvent(int key) :m_key(key) {}
+	int key()const { return m_key; }
+};
+
+class ResizeEvent:public Event
+{
+public:
+	ysl::Vector2i m_size;
+	ResizeEvent(const ysl::Vector2i & size):m_size(size){}
+	const ysl::Vector2i & size()const { return m_size;}
+};
+
+
+
+/**************************************************/
+FocusCamera g_camera{ ysl::Point3f{0.f,0.f,10.f} };
+ysl::ShaderProgram g_shaderProgram;
+ysl::Point2i g_lastMousePos;
+
+void renderingWindowResize(ResizeEvent *event)
+{
+
+};
+
+
+void mousePressedEvent(MouseEvent * event)
+{
+	g_lastMousePos = event->pos();
+}
+
+void mouseMoveEvent(MouseEvent * event)
+{
+	const auto & p = event->pos();
+	// Update Camera
+	float dx = p.x - g_lastMousePos.x;
+	float dy = g_lastMousePos.y - p.y;
+	if ((event->buttons() & MouseEvent::LeftButton) && (event->buttons() & MouseEvent::RightButton))
+	{
+		const auto directionEx = g_camera.up()*dy + dx * g_camera.right();
+		g_camera.movement(directionEx, 0.002);
+	}
+	else if (event->buttons() & MouseEvent::LeftButton)
+	{
+		g_camera.rotation(dx, dy);
+	}
+	else if (event->buttons() == MouseEvent::RightButton)
+	{
+		const auto directionEx = g_camera.front()*dy;
+		g_camera.movement(directionEx, 0.01);
+	}
+	std::cout << g_camera.view();
+	g_lastMousePos = p;
+}
+
+void mouseReleaseEvent(MouseEvent * event)
+{
+
+}
+
+void keyboardPressEvent(KeyboardEvent)
+{
+
+}
+
+void renderLoop()
+{
+	g_shaderProgram.bind();
+	g_shaderProgram.unbind();
+}
+
+static const char trivialVertexShader[] = "#version 330\n"
+"uniform mat4 modelViewMat;\n"
+"uniform mat4 projMat;\n"
+"layout(location = 0) in vec3 vertex;\n"
+"void main()\n"
+"{\n"
+"	gl_Position = projMat * modelViewMat*vec4(vertex, 1.0);\n"
+"}\n";
+
+static const char trivialFragShader[] = "#version 330\n"
+"out vec4 fgColor;\n"
+"uniform vec4 color;\n"
+"void main()\n"
+"{\n"
+"	fgColor = color;\n"
+"}\n";
+
+
+/**************************************************/
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -53,7 +169,7 @@ int main(int argc, char** argv)
 	// Setup Dear ImGui binding
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO & io = ImGui::GetIO(); 
+	ImGuiIO & io = ImGui::GetIO();
 	(void)io;
 
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
@@ -87,26 +203,38 @@ int main(int argc, char** argv)
 	//bool show_my_first_imgui_window = true;
 
 
+	// 'Global' state
+
+	///![1] console 
 	TinyConsole app;
+		// Config Commands
+		std::shared_ptr<LargeVolumeCache> cache;
 
-	// Config Commands
-	std::shared_ptr<LargeVolumeCache> cache;
+		app.ConfigCommand("load", [&cache](const char * cmd)
+		{
+			cmdline::parser p;
+			p.add<std::string>("file", 'f', "load large volume data", false);
+			p.parse(cmd);
+			const auto fileName = p.get<std::string>("file");
 
-	app.ConfigCommand("load", [&cache](const char * cmd)
-	{
-		cmdline::parser p;
-		p.add<std::string>("file", 'f', "load large volume data", false);
-		p.parse(cmd);
-		const auto fileName = p.get<std::string>("file");
+			if (!fileName.empty())
+				cache = std::make_shared<LargeVolumeCache>(fileName);
+		});
+		auto showGLInformation = false;
+		app.ConfigCommand("glinfo", [&showGLInformation](const char * cmd)
+		{
+			showGLInformation = true;
+		});
 
-		if(!fileName.empty())
-			cache = std::make_shared<LargeVolumeCache>(fileName);
-	});
-	auto showGLInformation = false;
-	app.ConfigCommand("glinfo",[&showGLInformation](const char * cmd)
-	{
-		showGLInformation = true;
-	});
+	///![2] window size
+	ysl::Vector2i windowSize;
+
+	g_shaderProgram.create();
+	g_shaderProgram.addShaderFromSourceCode(trivialVertexShader, ysl::ShaderProgram::ShaderType::Vertex);
+	g_shaderProgram.addShaderFromSourceCode(trivialFragShader, ysl::ShaderProgram::ShaderType::Fragment);
+	g_shaderProgram.link();
+
+
 	// Main loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -123,30 +251,130 @@ int main(int argc, char** argv)
 		ImGui::NewFrame();
 
 
-		app.Draw("Welcome Mixed Render Engine",nullptr);
+		app.Draw("Welcome Mixed Render Engine", nullptr);
 
 
 		// 1. Show a simple window.
-		// Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
-		{
-			static float f = 0.0f;
-			static int counter = 0;
-			ImGui::Text("Hello, world!");                           // Display some text (you can use a format string too)
-			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f    
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+		//// Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
+		//{
+		//	static float f = 0.0f;
+		//	static int counter = 0;
+		//	ImGui::Text("Hello, world!");                           // Display some text (you can use a format string too)
+		//	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f    
+		//	ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-			ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our windows open/close state
-			ImGui::Checkbox("Another Window", &show_another_window);
-			if (ImGui::Button("Button"))                            // Buttons return true when clicked (NB: most widgets return true when edited/activated)
-				counter++;
-			ImGui::SameLine();
-			ImGui::Text("counter = %d", counter);
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		}
-		if(showGLInformation)
+		//	ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our windows open/close state
+		//	ImGui::Checkbox("Another Window", &show_another_window);
+		//	if (ImGui::Button("Button"))                            // Buttons return true when clicked (NB: most widgets return true when edited/activated)
+		//		counter++;
+		//	ImGui::SameLine();
+		//	ImGui::Text("counter = %d", counter);
+		//	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		//}
+
+		//ImGui::Begin("IO Demo", nullptr);
+		//if(ImGui::IsMousePosValid())
+		//{
+		//	ImGui::Text("Mouse Pos:[%g, %g]", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
+		//}
+		//if (ImGui::IsMouseClicked(0))
+		//	ImGui::Text("Mouse Click:%d", 0);
+
+		//ImGui::End();
+		//ImGui::ShowDemoWindow();
+
+		ImGui::Text("[%g, %g]", io.DisplaySize.x, io.DisplaySize.y);
+
+		if (showGLInformation)
 		{
 			ShowGLInformation();
 		}
+
+
+
+		// Event handle
+		if (ImGui::IsMousePosValid())
+		{
+			MouseEvent pressEvent({ 0,0 }, 0);
+			for (auto i = 0; i < IM_ARRAYSIZE(io.MouseDown); ++i)
+			{
+				// Only support two buttons now
+
+				if (ImGui::IsMouseClicked(i))
+				{
+					ysl::Point2i pos{ int(io.MousePos.x),int(io.MousePos.y) };
+					switch (i)
+					{
+					case 0:pressEvent.m_buttons |= MouseEvent::LeftButton; pressEvent.m_pos = pos; break;
+					case 1:pressEvent.m_buttons |= MouseEvent::RightButton; pressEvent.m_pos = pos; break;
+					default:break;
+					}
+				}
+			}
+			if (pressEvent.m_buttons != 0)
+			{
+				mousePressedEvent(&pressEvent);
+			}
+		}
+
+		// Move Event
+		MouseEvent moveEvent({ 0,0 }, 0);
+		for (auto i = 0; i < IM_ARRAYSIZE(io.MouseDown); ++i)
+		{
+			if (io.MouseDownDuration[i] > 0.0f)
+			{
+				
+				if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
+				{
+					ysl::Point2i pos{ int(io.MousePos.x),int(io.MousePos.y) };
+					switch (i)
+					{
+					case 0:moveEvent.m_buttons |= MouseEvent::LeftButton; moveEvent.m_pos = pos; break;
+					case 1:moveEvent.m_buttons |= MouseEvent::RightButton; moveEvent.m_pos = pos; break;
+					default:break;
+					}
+				}
+			}
+		}
+		if (moveEvent.m_buttons != 0)
+		{
+			mouseMoveEvent(&moveEvent);
+		}
+
+
+		// Release Event
+
+		MouseEvent releaseEvent({ 0,0 }, 0);
+		for (auto i = 0; i < IM_ARRAYSIZE(io.MouseDown); ++i)
+		{
+			if (ImGui::IsMouseReleased(i))
+			{
+				ysl::Point2i pos{ int(io.MousePos.x),int(io.MousePos.y) };
+				switch (i)
+				{
+				case 0:releaseEvent.m_buttons |= MouseEvent::LeftButton; releaseEvent.m_pos = pos; break;
+				case 1:releaseEvent.m_buttons |= MouseEvent::RightButton; releaseEvent.m_pos = pos; break;
+				default:break;
+				}
+			}
+		}
+
+		if (releaseEvent.m_buttons != 0)
+			mouseReleaseEvent(&releaseEvent);
+
+
+		// Rendering window resize Event
+		if(io.DisplaySize.x != windowSize.x || io.DisplaySize.y != windowSize.y)
+		{
+			windowSize = {int(io.DisplaySize.x),int(io.DisplaySize.y)};
+			ResizeEvent event(windowSize);
+			renderingWindowResize(&event);
+		}
+
+
+		renderLoop();
+
+
 		ImGui::EndFrame();
 		// Rendering
 		ImGui::Render();

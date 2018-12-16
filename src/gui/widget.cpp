@@ -26,6 +26,11 @@ void ShowGLInformation()
 	glGetIntegerv(GL_MAX_IMAGE_UNITS, &max);
 	ImGui::Text("GL_MAX_IMAGE_UNITS:%d", max);
 
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &max);
+	ImGui::Text("GL_MAX_VERTEX_ATTRIBS:%d", max);
+
+
+
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 	ImGui::End();

@@ -167,9 +167,9 @@ namespace ysl
 
 
 	template<typename T>
-	inline std::ostream & operator<<(std::ostream & os, const Vector2<T> & v)
+	std::ostream & operator<<(std::ostream & os, const Vector2<T> & v)
 	{
-		os << "[ " << v.x() << "," << v.y() << "]";
+		os << "[" << v.x << ", " << v.y << "]";
 		return os;
 	}
 
