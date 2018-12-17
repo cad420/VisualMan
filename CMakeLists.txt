@@ -32,7 +32,7 @@ include_directories(${_GLFW_INCLUDE_DIR} ${_GL3W_INCLUDE_DIR})
 #---------------------------------------------------
 # Package Find
 #---------------------------------------------------
-find_package(OPENGL REQUIRED)
+find_package(OpenGL REQUIRED)
 if(OPENGL_FOUND)
 	message(STATUS "Opengl Found:" ${OPENGL_INCLUDE_DIR} ${OPENGL_LIBRARIES})
 	include_directories(${OPENGL_INCLUDE_DIR})			#optional

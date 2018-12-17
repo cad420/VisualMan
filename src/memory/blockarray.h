@@ -2,6 +2,7 @@
 #define BLOCKARRAY_H_
 
 #include "dataarena.h"
+#include <cstring>
 
 namespace ysl
 {
@@ -229,12 +230,12 @@ namespace ysl
 
 		void SetBlockData(int blockIndex, const T * blockData)
 		{
-			::memcpy(BlockData(blockIndex), blockData, BlockSize()*BlockSize()*BlockSize() * sizeof(T));
+			std::memcpy(BlockData(blockIndex), blockData, BlockSize()*BlockSize()*BlockSize() * sizeof(T));
 		}
 
 		void SetBlockData(int xBlock, int yBlock, int zBlock, const T * blockData)
 		{
-			::memcpy(BlockData(xBlock, yBlock, zBlock), blockData, BlockSize()*BlockSize()*BlockSize() * sizeof(T));
+			std::memcpy(BlockData(xBlock, yBlock, zBlock), blockData, BlockSize()*BlockSize()*BlockSize() * sizeof(T));
 		}
 
 		void GetLinearArray(T * arr)
