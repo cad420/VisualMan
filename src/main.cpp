@@ -28,8 +28,10 @@
 #include "opengl/shader.h"
 
 
+
 class Event
 {
+
 };
 
 
@@ -70,12 +72,15 @@ public:
 
 /**************************************************/
 FocusCamera g_camera{ ysl::Point3f{0.f,0.f,10.f} };
+ysl::Transform g_projMatrix;
 ysl::ShaderProgram g_shaderProgram;
 ysl::Point2i g_lastMousePos;
+unsigned int VBO, VAO;
 
 void renderingWindowResize(ResizeEvent *event)
 {
-
+	float aspect = static_cast<float>(event->size().x) / static_cast<float>(event->size().y);
+	g_projMatrix.SetPerspective(45.0f, aspect, 0.01, 100);
 };
 
 
@@ -104,7 +109,7 @@ void mouseMoveEvent(MouseEvent * event)
 		const auto directionEx = g_camera.front()*dy;
 		g_camera.movement(directionEx, 0.01);
 	}
-	std::cout << g_camera.view();
+	//std::cout << g_camera.view();
 	g_lastMousePos = p;
 }
 
@@ -116,12 +121,21 @@ void mouseReleaseEvent(MouseEvent * event)
 void keyboardPressEvent(KeyboardEvent)
 {
 
+
 }
 
 void renderLoop()
 {
+	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+
 	g_shaderProgram.bind();
-	g_shaderProgram.unbind();
+	g_shaderProgram.setUniformValue("modelViewMat", g_camera.view().Matrix());
+	g_shaderProgram.setUniformValue("projMat", g_projMatrix.Matrix());
+	g_shaderProgram.setUniformValue("color", ysl::RGBSpectrum{ 0.3 });
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 static const char trivialVertexShader[] = "#version 330\n"
@@ -135,10 +149,10 @@ static const char trivialVertexShader[] = "#version 330\n"
 
 static const char trivialFragShader[] = "#version 330\n"
 "out vec4 fgColor;\n"
-"uniform vec4 color;\n"
+"uniform vec3 color;\n"
 "void main()\n"
 "{\n"
-"	fgColor = color;\n"
+"	fgColor = vec4(color,1.0);\n"
 "}\n";
 
 
@@ -229,10 +243,27 @@ int main(int argc, char** argv)
 	///![2] window size
 	ysl::Vector2i windowSize;
 
+	// gl resources
 	g_shaderProgram.create();
 	g_shaderProgram.addShaderFromSourceCode(trivialVertexShader, ysl::ShaderProgram::ShaderType::Vertex);
 	g_shaderProgram.addShaderFromSourceCode(trivialFragShader, ysl::ShaderProgram::ShaderType::Fragment);
 	g_shaderProgram.link();
+
+	static float vertices[] = { -0.5f, -0.5f, 0.0f,
+	 0.5f, -0.5f, 0.0f,
+	 0.0f,  0.5f, 0.0f };
+
+	
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,GL_STATIC_DRAW);			// GL_STATIC_DRAW GL_DYNAMIC_DRAW GL_STREAM_DRAW
+	GL_ERROR_REPORT(__LINE__);
+	//GL_ERROR_ASSERT
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+	glEnableVertexAttribArray(0);
 
 
 	// Main loop
@@ -361,8 +392,6 @@ int main(int argc, char** argv)
 
 		if (releaseEvent.m_buttons != 0)
 			mouseReleaseEvent(&releaseEvent);
-
-
 		// Rendering window resize Event
 		if(io.DisplaySize.x != windowSize.x || io.DisplaySize.y != windowSize.y)
 		{
@@ -371,12 +400,9 @@ int main(int argc, char** argv)
 			renderingWindowResize(&event);
 		}
 
-
-		renderLoop();
-
-
 		ImGui::EndFrame();
 		// Rendering
+
 		ImGui::Render();
 		int display_w, display_h;
 		glfwMakeContextCurrent(window);
@@ -384,8 +410,12 @@ int main(int argc, char** argv)
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+
+		// User's render is here
+		renderLoop();
+
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwMakeContextCurrent(window);
 		glfwSwapBuffers(window);
 	}

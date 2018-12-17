@@ -49,17 +49,19 @@ public:
 		arena.m_currentBlock = nullptr;
 	}
 
-	DataArena & operator=(DataArena && arena)noexcept {
-		m_blockSize(arena.m_blockSize);
-		m_currentBlockPos(arena.m_currentBlockPos);
-		m_currentAllocBlockSize(arena.m_currentAllocBlockSize);
-		m_currentBlock(arena.m_currentBlock);
+	DataArena & operator=(DataArena && arena)noexcept 
+	{
+		m_blockSize = arena.m_blockSize;
+		m_currentBlockPos = arena.m_currentBlockPos;
+		m_currentAllocBlockSize = arena.m_currentAllocBlockSize;
+		m_currentBlock=arena.m_currentBlock;
 		arena.m_currentBlock = nullptr;
-		m_fragmentSize(arena.m_fragmentSize);
-		m_used(std::move(arena.m_used));
-		m_available(std::move(arena.m_available));
+		m_fragmentSize=arena.m_fragmentSize;
+		m_used = std::move(arena.m_used);
+		m_available = std::move(arena.m_available);
 		return *this;
 	}
+
 
 	void * Alloc(size_t bytes)
 	{

@@ -1,7 +1,7 @@
-
 #include "shader.h"
-#include "../../lib/gl3w/GL/gl3w.h"
 #include "../utility/error.h"
+#include "../../lib/gl3w/GL/glcorearb.h"
+#include "../../lib/gl3w/GL/gl3w.h"
 
 #include <fstream>
 
@@ -68,13 +68,17 @@ namespace ysl
 
 		auto code = prog.c_str();
 		glShaderSource(shader, 1, &code, nullptr);
+
+		GL_ERROR_REPORT
 		glCompileShader(shader);
+		GL_ERROR_REPORT
+		
 		int success;
 		char info[512];
-		glGetShaderiv(m_program, GL_COMPILE_STATUS, &success);
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
-			glGetShaderInfoLog(m_program, 512, NULL, info);
+			glGetShaderInfoLog(shader, 512, NULL, info);
 			Warning(info);
 		}
 
@@ -99,7 +103,6 @@ namespace ysl
 			Warning(info);
 			return;
 		}
-
 		for (auto shader : m_shaders)
 			glDeleteShader(shader);
 		m_shaders.clear();
@@ -107,13 +110,11 @@ namespace ysl
 
 	void ShaderProgram::bind()
 	{
-
 		glUseProgram(m_program);
 	}
 
 	void ShaderProgram::unbind()
 	{
-
 		glUseProgram(0);
 	}
 
@@ -126,20 +127,172 @@ namespace ysl
 	{
 		if(m_program)
 			return glGetUniformLocation(m_program, name);
+		GL_ERROR_REPORT
+	}
+
+	int ShaderProgram::uniformLocation(const std::string& name) const
+	{
+		return uniformLocation(name.c_str());
+	}
+
+	void ShaderProgram::setUniformValue(int location, const ysl::Matrix4x4 & mat4x4)
+	{
+		glUniformMatrix4fv(location, 1, GL_TRUE, mat4x4.m[0]);
+		GL_ERROR_REPORT
+	}
+
+	void ShaderProgram::setUniformValue(int location, const ysl::Matrix3x3& mat3x3)
+	{
+		glUniformMatrix3fv(location, 1, GL_TRUE, mat3x3.m[0]);
+		GL_ERROR_REPORT
+	}
+
+	void ShaderProgram::setUniformValue(int location, const ysl::RGBSpectrum& rgb)
+	{
+		glUniform3fv(location, 1,rgb.c);
+		GL_ERROR_REPORT
+	}
+
+	void ShaderProgram::setUniformValue(int location, const ysl::Vector3f& fvec3)
+	{
+		glUniform3fv(location, 1, &fvec3.x);
+		GL_ERROR_REPORT
+	}
+
+	void ShaderProgram::setUniformValue(int location, const ysl::Vector3i& ivec3)
+	{
+		glUniform3iv(location, 1, &ivec3.x);
+		GL_ERROR_REPORT
+	}
+
+	void ShaderProgram::setUniformValue(int location, const ysl::Vector2f& fvec2)
+	{
+		glUniform2fv(location, 1, &fvec2.x);
+		GL_ERROR_REPORT
+	}
+
+	void ShaderProgram::setUniformValue(int location, const ysl::Vector2i& ivec2)
+	{
+		glUniform2iv(location, 1, &ivec2.x);
+		GL_ERROR_REPORT
+	}
+
+	void ShaderProgram::setUniformValue(int location, bool value)
+	{
+		glUniform1i(location, int(value));
+		GL_ERROR_REPORT
+	}
+
+	void ShaderProgram::setUniformValue(int location, int value)
+	{
+		glUniform1i(location, value);
+		GL_ERROR_REPORT
+	}
+
+	void ShaderProgram::setUniformValue(int location, float value)
+	{
+		glUniform1f(location, value);
+		GL_ERROR_REPORT
 	}
 
 	void ShaderProgram::setUniformValue(const char* name, const ysl::Matrix4x4& mat)
 	{
-		glUniformMatrix4fv(uniformLocation(name), 1, GL_TRUE, mat.m[0]);
+		setUniformValue(uniformLocation(name), mat);
 	}
+
+	void ShaderProgram::setUniformValue(const char* name, const ysl::Matrix3x3& mat)
+	{
+		setUniformValue(uniformLocation(name), mat);
+	}
+
 
 	void ShaderProgram::setUniformValue(const char* name, const ysl::RGBSpectrum& rbg)
 	{
-		glUniform3fv(uniformLocation(name), 1, rbg.c);
+		setUniformValue(uniformLocation(name), rbg);
 	}
+
+	void ShaderProgram::setUniformValue(const char* name, const ysl::Vector3f& fvec3)
+	{
+		setUniformValue(uniformLocation(name), fvec3);
+	}
+
+	void ShaderProgram::setUniformValue(const char* name, const ysl::Vector3i& ivec3)
+	{
+		setUniformValue(uniformLocation(name), ivec3);
+	}
+
+	void ShaderProgram::setUniformValue(const char* name, const ysl::Vector2f& fvec2)
+	{
+		setUniformValue(uniformLocation(name), fvec2);
+	}
+
+	void ShaderProgram::setUniformValue(const char* name, const ysl::Vector2i& ivec2)
+	{
+		setUniformValue(uniformLocation(name), ivec2);
+	}
+
 
 	void ShaderProgram::setUniformValue(const char* name, bool value)
 	{
-		glUniform1i(uniformLocation(name), value);
+		setUniformValue(uniformLocation(name), value);
+	}
+
+	void ShaderProgram::setUniformValue(const char * name, int value)
+	{
+		setUniformValue(uniformLocation(name), value);
+	}
+
+	void ShaderProgram::setUniformValue(const char* name, float value)
+	{
+		setUniformValue(uniformLocation(name), value);
+	}
+	void ShaderProgram::setUniformValue(const std::string & name, const ysl::Matrix4x4 & mat)
+	{
+		setUniformValue(name.c_str(), mat);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, const ysl::Matrix3x3& mat)
+	{
+		setUniformValue(name.c_str(), mat);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, const ysl::RGBSpectrum& rbg)
+	{
+		setUniformValue(name.c_str(), rbg);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, const ysl::Vector3f& fvec3)
+	{
+		setUniformValue(name.c_str(), fvec3);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, const ysl::Vector3i& ivec3)
+	{
+		setUniformValue(name.c_str(), ivec3);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, const ysl::Vector2f& fvec2)
+	{
+		setUniformValue(name.c_str(), fvec2);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, const ysl::Vector2i& ivec2)
+	{
+		setUniformValue(name.c_str(), ivec2);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, bool value)
+	{
+		setUniformValue(name.c_str(), value);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, int value)
+	{
+		setUniformValue(name.c_str(), value);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, float value)
+	{
+		setUniformValue(name.c_str(), value);
 	}
 }

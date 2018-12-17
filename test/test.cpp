@@ -5,6 +5,7 @@
 
 #include "../src/utility/cmdline.h"
 
+
 int LVDTester()
 {
 	std::cout << "LVDTester:\n";
@@ -86,7 +87,6 @@ int main(int argc,char *argv[])
 	//lvdConverter.save(fileName);
 	//LVDTester();
 	 // create a parser
-
 	system("pause");
 	return 0;
 }

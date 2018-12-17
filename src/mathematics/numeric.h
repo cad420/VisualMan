@@ -11,7 +11,6 @@
 */
 namespace ysl {
 
-
 	constexpr Float Pi = 3.14159265358979323846;
 
 	constexpr Float LOWEST_Float_VALUE = (std::numeric_limits<Float>::lowest)();
