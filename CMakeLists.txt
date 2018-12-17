@@ -85,6 +85,8 @@ aux_source_directory("src/gui" MYGUI_SRC_LIST)
 aux_source_directory("src/cameras" CAM_SRC_LIST)
 aux_source_directory("src/opengl" OPENGL_SRC_LIST)
 
+message(STATUS "opengl ${OPENGL_SRC_LIST}")
+
 
 set(GL3W_LIST "lib/gl3w/GL/gl3w.c")
 

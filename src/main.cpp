@@ -18,15 +18,13 @@
 
 #include "gui/TinyConsole.h"
 #include "gui/widget.h"
-
 #include "utility/cmdline.h"
 #include "volume/volume_utils.h"
 #include "volume/volume.h"
-
 #include "cameras/camera.h"
-
 #include "opengl/shader.h"
-
+#include "opengl/openglbuffer.h"
+#include "openglvertexarrayobject.h"
 
 
 class Event
@@ -69,13 +67,15 @@ public:
 };
 
 
-
 /**************************************************/
 FocusCamera g_camera{ ysl::Point3f{0.f,0.f,10.f} };
 ysl::Transform g_projMatrix;
 ysl::ShaderProgram g_shaderProgram;
 ysl::Point2i g_lastMousePos;
 unsigned int VBO, VAO;
+
+OpenGLBuffer g_vbo(OpenGLBuffer::BufferType::VertexArrayBuffer);
+OpenGLVertexArrayObject g_vao;
 
 void renderingWindowResize(ResizeEvent *event)
 {
@@ -121,21 +121,24 @@ void mouseReleaseEvent(MouseEvent * event)
 void keyboardPressEvent(KeyboardEvent)
 {
 
-
 }
 
 void renderLoop()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
 
 	g_shaderProgram.bind();
 	g_shaderProgram.setUniformValue("modelViewMat", g_camera.view().Matrix());
 	g_shaderProgram.setUniformValue("projMat", g_projMatrix.Matrix());
 	g_shaderProgram.setUniformValue("color", ysl::RGBSpectrum{ 0.3 });
-	glBindVertexArray(VAO);
+
+	//glBindVertexArray(VAO);
+	g_vao.bind();
+	GL_ERROR_REPORT
 	glDrawArrays(GL_TRIANGLES, 0, 3);
+	GL_ERROR_REPORT
 }
 
 static const char trivialVertexShader[] = "#version 330\n"
@@ -233,6 +236,8 @@ int main(int argc, char** argv)
 
 			if (!fileName.empty())
 				cache = std::make_shared<LargeVolumeCache>(fileName);
+
+
 		});
 		auto showGLInformation = false;
 		app.ConfigCommand("glinfo", [&showGLInformation](const char * cmd)
@@ -252,19 +257,30 @@ int main(int argc, char** argv)
 	static float vertices[] = { -0.5f, -0.5f, 0.0f,
 	 0.5f, -0.5f, 0.0f,
 	 0.0f,  0.5f, 0.0f };
-
 	
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
 
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,GL_STATIC_DRAW);			// GL_STATIC_DRAW GL_DYNAMIC_DRAW GL_STREAM_DRAW
-	GL_ERROR_REPORT(__LINE__);
-	//GL_ERROR_ASSERT
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+	g_vao.create();
+	GL_ERROR_REPORT
+	g_vao.bind();
+	GL_ERROR_REPORT
+	g_vbo.create();
+	GL_ERROR_REPORT
+	g_vbo.bind();
+	GL_ERROR_REPORT
+	g_vbo.allocate(vertices, sizeof(vertices));
+	GL_ERROR_REPORT
+
+	//glGenVertexArrays(1, &VAO);
+	//glBindVertexArray(VAO);
+
+	//glGenBuffers(1, &VBO);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,GL_STATIC_DRAW);			// GL_STATIC_DRAW GL_DYNAMIC_DRAW GL_STREAM_DRAW
+
+	GL_ERROR_ASSERT
+	
 	glEnableVertexAttribArray(0);
-
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
 
 	// Main loop
 	while (!glfwWindowShouldClose(window))
@@ -314,14 +330,8 @@ int main(int argc, char** argv)
 		//ImGui::End();
 		//ImGui::ShowDemoWindow();
 
-		ImGui::Text("[%g, %g]", io.DisplaySize.x, io.DisplaySize.y);
 
-		if (showGLInformation)
-		{
-			ShowGLInformation();
-		}
-
-
+		if (showGLInformation)ShowGLInformation(&showGLInformation);
 
 		// Event handle
 		if (ImGui::IsMousePosValid())
@@ -330,7 +340,6 @@ int main(int argc, char** argv)
 			for (auto i = 0; i < IM_ARRAYSIZE(io.MouseDown); ++i)
 			{
 				// Only support two buttons now
-
 				if (ImGui::IsMouseClicked(i))
 				{
 					ysl::Point2i pos{ int(io.MousePos.x),int(io.MousePos.y) };
@@ -410,7 +419,6 @@ int main(int argc, char** argv)
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
-
 
 		// User's render is here
 		renderLoop();
