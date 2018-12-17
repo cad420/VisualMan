@@ -1,5 +1,5 @@
 #include "transformation.h"
-
+#include <cstring>
 
 namespace ysl
 {
@@ -13,7 +13,7 @@ namespace ysl
 
 	Matrix3x3::Matrix3x3(Float mat[3][3])
 	{
-		::memcpy(m, mat, sizeof(Float) * 9);
+		std::memcpy(m, mat, sizeof(Float) * 9);
 	}
 
 	Matrix3x3::Matrix3x3(Float t00, Float t01, Float t02, Float t10, Float t11, Float t12, Float t20, Float t21,
@@ -150,7 +150,7 @@ namespace ysl
 
 	Matrix4x4::Matrix4x4(Float mat[4][4])
 	{
-		::memcpy(m, mat, sizeof(Float) * 16);
+		std::memcpy(m, mat, sizeof(Float) * 16);
 	}
 
 	Matrix4x4::Matrix4x4(Float t00, Float t01, Float t02, Float t03, Float t10, Float t11, Float t12, Float t13,
@@ -224,7 +224,7 @@ namespace ysl
 		int indxc[4], indxr[4];
 		int ipiv[4] = { 0, 0, 0, 0 };
 		Float minv[4][4];
-		::memcpy(minv, this->m, 4 * 4 * sizeof(Float));
+		std::memcpy(minv, this->m, 4 * 4 * sizeof(Float));
 		for (int i = 0; i < 4; i++)
 		{
 			int irow = 0, icol = 0;

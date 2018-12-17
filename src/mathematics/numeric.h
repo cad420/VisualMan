@@ -63,8 +63,8 @@ namespace ysl {
 	}
 
 	inline
-		uint32_t
-		RoundUpDivide(uint32_t no, uint32_t den)
+		std::uint32_t
+		RoundUpDivide(std::uint32_t no, std::uint32_t den)
 	{
 		return (no + den - 1) / den;
 	}
@@ -78,7 +78,7 @@ namespace ysl {
 
 	inline
 		int
-		NextPowerOfTwo(uint64_t v)
+		NextPowerOfTwo(std::uint64_t v)
 	{
 		v--;
 		v |= v >> 1;
@@ -93,7 +93,7 @@ namespace ysl {
 
 	inline
 		int
-		NextPowerOfTwo(uint32_t v)
+		NextPowerOfTwo(std::uint32_t v)
 	{
 		v--;
 		v |= v >> 1;

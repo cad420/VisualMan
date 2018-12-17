@@ -329,3 +329,6 @@ __pycache__/
 #customer
 *.vcxproj
 *.vcxproj.filters
+
+build
+.vscode
