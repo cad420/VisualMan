@@ -211,7 +211,7 @@ void TinyConsole::ExecCommand(const char* command_line)
 		auto find = false;
 		for(int i = 0;i<Commands.Size;i++)
 		{
-			if(Stricmp(command_line,Commands[i]) == 0)
+			if(Stricmp(Commands[i],command_line) == 0)
 			{
 				auto it = Callbacks.find(std::string(Commands[i]));
 				if(it == Callbacks.end())

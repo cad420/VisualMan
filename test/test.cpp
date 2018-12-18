@@ -6,6 +6,8 @@
 #include "../src/utility/cmdline.h"
 
 
+
+
 int LVDTester()
 {
 	std::cout << "LVDTester:\n";
@@ -87,6 +89,25 @@ int main(int argc,char *argv[])
 	//lvdConverter.save(fileName);
 	//LVDTester();
 	 // create a parser
+
+	std::string fileName;
+	std::cin >> fileName;
+
+	ysl::TransferFunction tf(fileName);
+	if(!tf.valid())
+	{
+		std::cout << "faild\n";
+		return 0;
+	}
+
+	std::vector<ysl::RGBASpectrum> data{256};
+	tf.FetchData(data.data(), 256);
+
+	for(int i = 0 ; i < 256;i++)
+	{
+		std::cout << data[i] << std::endl;
+	}
+
 	system("pause");
 	return 0;
 }

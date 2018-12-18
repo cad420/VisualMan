@@ -3,6 +3,7 @@
 
 #include "../memory/blockarray.h"
 #include "../mathematics/geometry.h"
+#include "../core/spectrum.h"
 #include <memory>
 #include <fstream>
 #include <iostream>
@@ -215,6 +216,53 @@ std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> BlockVolumeReader::readAll(
 	}
 
 	return ptr;
+}
+
+namespace ysl
+{
+	class TransferFunction
+	{
+		class MappingKey
+		{
+			Float m_intensity;
+			RGBASpectrum m_leftColor;
+			RGBASpectrum m_rightColor;
+		public:
+			MappingKey(Float intensity, const RGBASpectrum & lc, const RGBASpectrum & rc) :m_intensity(intensity), m_leftColor(lc), m_rightColor(rc){}
+			Float Intensity()const { return m_intensity; }
+			RGBASpectrum LeftColor()const { return m_leftColor; }
+			RGBASpectrum RightColor()const { return m_rightColor; }
+			void SetIntensity(Float intensity) { m_intensity = intensity; }
+			void SetLeftColor(const RGBASpectrum & c) { m_leftColor = c; }
+			void SetRightColor(const RGBASpectrum & c) { m_rightColor = c; }
+		};
+
+		bool m_valid;
+		std::vector<MappingKey> m_tfKeys;
+		Float m_leftThreshold;
+		Float m_rightThreshold;
+
+	public:
+		TransferFunction():m_valid(false){}
+		explicit TransferFunction(const std::string & fileName):m_valid(false)
+		{
+			read(fileName);
+		}
+
+		void read(const std::string& fileName);
+
+		bool valid()const
+		{
+			return m_valid;
+		}
+
+		void FetchData(RGBASpectrum* transferFunction, int dimension);
+
+		void FetchData(Float * transferFunction,int dimension)
+		{
+			FetchData(reinterpret_cast<RGBASpectrum*>(transferFunction), dimension);
+		}
+	};
 }
 
 

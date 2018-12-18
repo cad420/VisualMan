@@ -1,6 +1,7 @@
 #ifndef SPECTRUM_H_
 #define SPECTRUM_H_
 #include <cassert>
+#include <fstream>
 #include "../mathematics/basetype.h"
 
 
@@ -18,19 +19,11 @@ namespace ysl
 				c[i] = v;
 		}
 
-		//CoefficientSpectrum(const CoefficientSpectrum & s) 
-		//{
-		//	for(auto i = 0 ;i<nSamples;i++)
-		//		c[i] = s.c[i];
-		//}
-
-		//CoefficientSpectrum& operator=(const CoefficientSpectrum & s) 
-		//{
-		//	for(auto i = 0;i<nSamples;i++) {
-		//		c[i] = s.c[i];
-		//	}
-		//	return *this;
-		//}
+		explicit  CoefficientSpectrum(Float * v)
+		{
+			for (auto i = 0; i < nSamples; i++)
+				c[i] = v[i];
+		}
 
 		bool HasNaNs()const 
 		{
@@ -59,11 +52,26 @@ namespace ysl
 			return *this;
 		}
 
+		CoefficientSpectrum& operator*=(Float s) {
+			for (auto i = 0; i < nSamples; i++)
+				c[i] *= s;
+			return *this;
+		}
+
 		CoefficientSpectrum& operator/=(const CoefficientSpectrum & spectrum) {
 
 			assert(!spectrum.HasNaNs());
 			for (auto i = 0; i < nSamples; i++)
 				c[i] /= spectrum.c[i];
+			return *this;
+		}
+
+		CoefficientSpectrum& operator/=(Float s) {
+
+			assert(!spectrum.HasNaNs());
+			Float inv = 1 / s;
+			for (auto i = 0; i < nSamples; i++)
+				c[i] *= inv;
 			return *this;
 		}
 
@@ -74,70 +82,137 @@ namespace ysl
 			return true;
 		}
 
-		CoefficientSpectrum Clamp(Float low,Float high)const
+		void ToArray(Float * arr)const
 		{
+			for (auto i = 0; i < nSamples; i++)
+				*(arr + i) = c[i];
 
-			//Spectrum spectrum;
-			//for(auto i = 0 ; i < nSamples;i++) {
-			//	spectrum.c[i] = hsl::Clamp(low, high);
-			//}
-			assert(false);
-			return CoefficientSpectrum{};
-		}
-
-		void Clamped(Float low, Float high) {
-			//for (auto i = 0; i < nSamples; i++) {
-			//	c[i] = hsl::Clamp(low, high);
-			//}
-			//return spectrum;
-
-			assert(false);
 		}
 
 	};
 
 	template<int nSamples>
-	CoefficientSpectrum<nSamples> operator+(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
+	CoefficientSpectrum<nSamples> 
+	operator+(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
 	{
 		return CoefficientSpectrum<nSamples>(s1) += s2;			// More Effective C++: Item 22
 	}
 
 	template<int nSamples>
-	CoefficientSpectrum<nSamples> operator-(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
+	CoefficientSpectrum<nSamples> 
+	operator-(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
 	{
 		return CoefficientSpectrum<nSamples>(s1) -= s2;			// More Effective C++: Item 22
 	}
 	template<int nSamples>
-	CoefficientSpectrum<nSamples> operator*(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
+	CoefficientSpectrum<nSamples> 
+	operator*(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
 	{
 		return CoefficientSpectrum<nSamples>(s1) *= s2;			// More Effective C++: Item 22
 	}
+
 	template<int nSamples>
-	CoefficientSpectrum<nSamples> operator/(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
+	CoefficientSpectrum<nSamples> 
+	operator/(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
 	{
 		return CoefficientSpectrum<nSamples>(s1) /= s2;			// More Effective C++: Item 22
 	}
 
-
-	class RGBSpectrum: public CoefficientSpectrum<3>
+	template<int nSamples>
+	CoefficientSpectrum<nSamples> 
+	operator*(const CoefficientSpectrum<nSamples> & s,Float v)
 	{
-	public:
-		explicit RGBSpectrum(Float v = 0.f):CoefficientSpectrum<3>(v){}
-		explicit RGBSpectrum(const Float * rgb) 
-		{
-			c[0] = rgb[0];
-			c[1] = rgb[1];
-			c[2] = rgb[2];
-		}
-		void ToRGB(Float * rgb) 
-		{
-			rgb[0] = c[0];
-			rgb[1] = c[1];
-			rgb[2] = c[2];
-		}
-	};
+		auto r = s;
+		for (auto i = 0; i < nSamples; i++) r.c[i] *= v;
+		return r;
+	}
 
-	using Spectrum = RGBSpectrum;
+	template<int nSamples>
+	CoefficientSpectrum<nSamples> 
+	operator*(Float v, const CoefficientSpectrum<nSamples> & s)
+	{
+		return s * v;
+	}
+
+	template<int nSamples>
+	std::ofstream & 
+		operator<<(std::ofstream & fs,const CoefficientSpectrum<nSamples> & coe)
+	{
+		for (auto i = 0; i < nSamples; i++)
+			fs << coe.c[i] << " ";
+		return fs;
+	}
+
+	template<int nSamples>
+	std::ifstream & 
+		operator>>(std::ifstream & fs,const CoefficientSpectrum<nSamples> & coe)
+	{
+		for (auto i = 0; i < nSamples; i++)
+			fs >> coe.c[i];
+		return fs;
+	}
+
+	template<int nSamples>
+	std::ostream & 
+		operator<<(std::ostream & os, const CoefficientSpectrum<nSamples> & coe)
+	{
+		for (auto i = 0; i < nSamples; i++)
+			os << coe.c[i]<<" ";
+		os << std::endl;
+		return os;
+	}
+
+	template<int nSamples>
+	std::istream & 
+		operator>>(std::istream & is, const CoefficientSpectrum<nSamples> & coe)
+	{
+		for (auto i = 0; i < nSamples; i++)
+			is >> coe.c[i];
+		return is;
+	}
+
+
+	//class RGBSpectrum: public CoefficientSpectrum<3>
+	//{
+	//public:
+	//	explicit RGBSpectrum(Float v = 0.f):CoefficientSpectrum<3>(v){}
+	//	explicit RGBSpectrum(const Float * rgb) 
+	//	{
+	//		c[0] = rgb[0];
+	//		c[1] = rgb[1];
+	//		c[2] = rgb[2];
+	//	}
+	//	void ToRGB(Float * rgb) 
+	//	{
+	//		rgb[0] = c[0];
+	//		rgb[1] = c[1];
+	//		rgb[2] = c[2];
+	//	}
+	//};
+
+	//class RGBASpectrum:public CoefficientSpectrum<4>
+	//{
+	//public:
+	//	explicit RGBASpectrum(Float v = 0.f):CoefficientSpectrum<4>(v){}
+	//	explicit RGBASpectrum(const Float * rgba)
+	//	{
+	//		c[0] = rgba[0];
+	//		c[1] = rgba[1];
+	//		c[2] = rgba[2];
+	//		c[3] = rgba[3];
+	//	}
+	//	void ToRGBA(Float * rgba)
+	//	{
+	//		rgba[0] = c[0];
+	//		rgba[1] = c[1];
+	//		rgba[2] = c[2];
+	//		rgba[3] = c[3];
+	//	}
+	//};
+
+	using RGBASpectrum = CoefficientSpectrum<4>;
+	using RGBSpectrum = CoefficientSpectrum<3>;
+	
 }
 
 #endif

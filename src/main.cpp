@@ -58,12 +58,12 @@ public:
 	int key()const { return m_key; }
 };
 
-class ResizeEvent:public Event
+class ResizeEvent :public Event
 {
 public:
 	ysl::Vector2i m_size;
-	ResizeEvent(const ysl::Vector2i & size):m_size(size){}
-	const ysl::Vector2i & size()const { return m_size;}
+	ResizeEvent(const ysl::Vector2i & size) :m_size(size) {}
+	const ysl::Vector2i & size()const { return m_size; }
 };
 
 
@@ -72,10 +72,18 @@ FocusCamera g_camera{ ysl::Point3f{0.f,0.f,10.f} };
 ysl::Transform g_projMatrix;
 ysl::ShaderProgram g_shaderProgram;
 ysl::Point2i g_lastMousePos;
+std::shared_ptr<LargeVolumeCache> cache;
+
+std::unique_ptr<char[]> g_rawData;
+std::vector<ysl::RGBASpectrum> m_tfData{256};
+ysl::TransferFunction m_tfObject;
+unsigned int g_volumeTexture;
+unsigned int g_tfTexture;
 unsigned int VBO, VAO;
 
 OpenGLBuffer g_vbo(OpenGLBuffer::BufferType::VertexArrayBuffer);
 OpenGLVertexArrayObject g_vao;
+
 
 void renderingWindowResize(ResizeEvent *event)
 {
@@ -132,7 +140,8 @@ void renderLoop()
 	g_shaderProgram.bind();
 	g_shaderProgram.setUniformValue("modelViewMat", g_camera.view().Matrix());
 	g_shaderProgram.setUniformValue("projMat", g_projMatrix.Matrix());
-	g_shaderProgram.setUniformValue("color", ysl::RGBSpectrum{ 0.3 });
+	auto color = ysl::RGBSpectrum{ 0.3 };
+	g_shaderProgram.setUniformValue("color", color);
 
 	//glBindVertexArray(VAO);
 	g_vao.bind();
@@ -172,7 +181,7 @@ int main(int argc, char** argv)
 	glfwSetErrorCallback(glfw_error_callback);
 	if (!glfwInit())
 		return 1;
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #if __APPLE__
@@ -224,63 +233,146 @@ int main(int argc, char** argv)
 
 	///![1] console 
 	TinyConsole app;
-		// Config Commands
-		std::shared_ptr<LargeVolumeCache> cache;
+	// Config Commands
 
-		app.ConfigCommand("load", [&cache](const char * cmd)
+
+	app.ConfigCommand("load_data", [](const char * cmd)
+	{
+		//cmdline::parser p;
+		//p.add<std::string>("file", 'f', "load large volume data", false);
+		//p.parse(cmd);
+		//const auto fileName = p.get<std::string>("file");
+
+		//if (!fileName.empty())
+		//{
+		//	cache = std::make_shared<LargeVolumeCache>(fileName);
+		//	if (cache != nullptr) {
+		//		const std::size_t x = cache->reader().width();
+		//		const std::size_t y = cache->reader().height();
+		//		const std::size_t z = cache->reader().depth();
+		//		std::cout << x << " " << y << " " << z << std::endl;
+		//	}
+		//}
+
+	});
+
+	app.ConfigCommand("load_tf",[](const char * cmd)
+	{
+		cmdline::parser p;
+		p.add<std::string>("tf", 'f', "load transfer function", false);
+		p.parse(cmd);
+		const auto fileName = p.get<std::string>("tf");
+
+		std::cout << "fileName:" << fileName;
+
+		m_tfObject.read(fileName);
+		if(!m_tfObject.valid())
 		{
-			cmdline::parser p;
-			p.add<std::string>("file", 'f', "load large volume data", false);
-			p.parse(cmd);
-			const auto fileName = p.get<std::string>("file");
+			std::cout << "Reading failed\n";
+			return;
+		}
+			
+		m_tfObject.FetchData(m_tfData.data(), 256);
 
-			if (!fileName.empty())
-				cache = std::make_shared<LargeVolumeCache>(fileName);
-
-
-		});
-		auto showGLInformation = false;
-		app.ConfigCommand("glinfo", [&showGLInformation](const char * cmd)
+		for(int i = 0 ; i < 256;i++)
 		{
-			showGLInformation = true;
-		});
+			std::cout << m_tfData[i];
+		}
+
+	});
+
+	auto showGLInformation = false;
+	app.ConfigCommand("glinfo", [&showGLInformation](const char * cmd)
+	{
+		showGLInformation = true;
+	});
 
 	///![2] window size
 	ysl::Vector2i windowSize;
 
 	// gl resources
+
+	// shader
 	g_shaderProgram.create();
-	g_shaderProgram.addShaderFromSourceCode(trivialVertexShader, ysl::ShaderProgram::ShaderType::Vertex);
-	g_shaderProgram.addShaderFromSourceCode(trivialFragShader, ysl::ShaderProgram::ShaderType::Fragment);
+	//g_shaderProgram.addShaderFromSourceCode(trivialVertexShader, ysl::ShaderProgram::ShaderType::Vertex);
+	//g_shaderProgram.addShaderFromSourceCode(trivialFragShader, ysl::ShaderProgram::ShaderType::Fragment);
+	g_shaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\blockraycasting_f.glsl", ysl::ShaderProgram::ShaderType::Vertex);
+	g_shaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\blockraycasting_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
 	g_shaderProgram.link();
 
-	static float vertices[] = { -0.5f, -0.5f, 0.0f,
+	static float vertices[] = 
+	{ -0.5f, -0.5f, 0.0f,
 	 0.5f, -0.5f, 0.0f,
 	 0.0f,  0.5f, 0.0f };
-	
 
+	// vao vbo
 	g_vao.create();
-	GL_ERROR_REPORT
 	g_vao.bind();
-	GL_ERROR_REPORT
 	g_vbo.create();
-	GL_ERROR_REPORT
 	g_vbo.bind();
-	GL_ERROR_REPORT
 	g_vbo.allocate(vertices, sizeof(vertices));
-	GL_ERROR_REPORT
 
-	//glGenVertexArrays(1, &VAO);
-	//glBindVertexArray(VAO);
-
-	//glGenBuffers(1, &VBO);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,GL_STATIC_DRAW);			// GL_STATIC_DRAW GL_DYNAMIC_DRAW GL_STREAM_DRAW
-
-	GL_ERROR_ASSERT
-	
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+
+	// texture
+
+	std::string dataFileName;
+	std::cin >> dataFileName;
+
+	std::size_t width, height, depth;
+	std::cin >> width >> height >> depth;
+	std::size_t total = width * height*depth;
+	std::ifstream rawData(dataFileName);
+	if(!rawData.is_open())
+	{
+		std::cout << "Can not open raw data\n";
+		return 0;
+	}
+
+	
+
+	g_rawData.reset(new char[total]);
+	if(g_rawData == nullptr)
+	{
+		std::cout << "Bad alloc\n";
+		return 0;
+	}
+
+	rawData.read(g_rawData.get(), total * sizeof(char));
+
+	glGenTextures(1, &g_volumeTexture);
+	glBindTexture(GL_TEXTURE_3D, g_volumeTexture);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, width, height, depth, 0, GL_RED, GL_UNSIGNED_BYTE,g_rawData.get());
+
+
+	glGenTextures(1, &g_tfTexture);
+	glBindTexture(GL_TEXTURE_1D, g_tfTexture);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+	//GL_ERROR_REPORT
+
+
+
+
+	//cache = std::make_shared<LargeVolumeCache>(dataFileName);
+
+	//if(cache)
+	//{
+	//	const std::size_t x = cache->reader().width();
+	//	const std::size_t y = cache->reader().height();
+	//	const std::size_t z = cache->reader().depth();
+	//	std::cout << x << " " << y << " " << z << std::endl;
+	//}
+
 
 	// Main loop
 	while (!glfwWindowShouldClose(window))
@@ -301,31 +393,6 @@ int main(int argc, char** argv)
 		app.Draw("Welcome Mixed Render Engine", nullptr);
 
 
-		// 1. Show a simple window.
-		//// Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
-		//{
-		//	static float f = 0.0f;
-		//	static int counter = 0;
-		//	ImGui::Text("Hello, world!");                           // Display some text (you can use a format string too)
-		//	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f    
-		//	ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-		//	ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our windows open/close state
-		//	ImGui::Checkbox("Another Window", &show_another_window);
-		//	if (ImGui::Button("Button"))                            // Buttons return true when clicked (NB: most widgets return true when edited/activated)
-		//		counter++;
-		//	ImGui::SameLine();
-		//	ImGui::Text("counter = %d", counter);
-		//	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		//}
-
-		//ImGui::Begin("IO Demo", nullptr);
-		//if(ImGui::IsMousePosValid())
-		//{
-		//	ImGui::Text("Mouse Pos:[%g, %g]", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
-		//}
-		//if (ImGui::IsMouseClicked(0))
-		//	ImGui::Text("Mouse Click:%d", 0);
 
 		//ImGui::End();
 		//ImGui::ShowDemoWindow();
@@ -363,7 +430,7 @@ int main(int argc, char** argv)
 		{
 			if (io.MouseDownDuration[i] > 0.0f)
 			{
-				
+
 				if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
 				{
 					ysl::Point2i pos{ int(io.MousePos.x),int(io.MousePos.y) };
@@ -402,9 +469,9 @@ int main(int argc, char** argv)
 		if (releaseEvent.m_buttons != 0)
 			mouseReleaseEvent(&releaseEvent);
 		// Rendering window resize Event
-		if(io.DisplaySize.x != windowSize.x || io.DisplaySize.y != windowSize.y)
+		if (io.DisplaySize.x != windowSize.x || io.DisplaySize.y != windowSize.y)
 		{
-			windowSize = {int(io.DisplaySize.x),int(io.DisplaySize.y)};
+			windowSize = { int(io.DisplaySize.x),int(io.DisplaySize.y) };
 			ResizeEvent event(windowSize);
 			renderingWindowResize(&event);
 		}

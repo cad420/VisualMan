@@ -5,6 +5,7 @@
 
 #include "basetype.h"
 #include <cstdint>
+#include "spectrum.h"
 
 /*
 *
@@ -113,11 +114,26 @@ namespace ysl {
 	}
 
 	inline
-		Float
+	Float
 		Lerp(Float t, Float v1, Float v2)
 	{
 		return (1 - t)*v1 + t * v2;
 	}
+
+	inline 
+	RGBSpectrum 
+	Lerp(Float t,const RGBSpectrum & s1,const RGBSpectrum & s2)
+	{
+		return (1 - t)*s1 + t * s2;
+	}
+
+	inline
+	RGBASpectrum
+	Lerp(Float t,const RGBASpectrum & s1,const RGBASpectrum & s2)
+	{
+		return (1 - t)*s1 + t * s2;
+	}
+
 
 	inline
 		Float
