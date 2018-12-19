@@ -8,10 +8,8 @@
 #include "../imgui/imgui_impl_glfw.h"
 #include "../imgui/imgui_impl_opengl3.h"
 
-
 #include <stdio.h>
 #include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions. You may freely use any other OpenGL loader such as: glew, glad, glLoadGen, etc.
-
 #include <GLFW/glfw3.h>
 
 //#include "../mathematics/geometry.h"
@@ -24,8 +22,23 @@
 #include "cameras/camera.h"
 #include "opengl/shader.h"
 #include "opengl/openglbuffer.h"
-#include "openglvertexarrayobject.h"
+#include "opengl/openglvertexarrayobject.h"
+#include "openglutils.h"
 
+
+//const static int g_proxyGeometryVertexIndices[] = { 1, 3, 7, 5, 0, 4, 6, 2, 2, 6, 7, 3, 0, 1, 5, 4, 4, 5, 7, 6, 0, 2, 3, 1 };
+const static int g_proxyGeometryVertexIndices[] = {1,3,7,1,7,5,0,4,6,0,6,2,2,6,7,2,7,3,0,1,5,0,5,4,4,5,7,4,7,6,0,2,3,0,3,1};
+static const float xCoord = 1.0, yCoord = 1.0, zCoord = 1.0;
+static float g_proxyGeometryVertices[] = {
+	0,0,0,
+	xCoord, 0, 0 ,
+	0, yCoord, 0 ,
+	xCoord, yCoord, 0 ,
+	0, 0, zCoord ,
+	xCoord, 0, zCoord ,
+	0, yCoord, zCoord ,
+	xCoord, yCoord, zCoord ,
+};
 
 class Event
 {
@@ -68,27 +81,86 @@ public:
 
 
 /**************************************************/
+
+
+
+/**************************************************/
 FocusCamera g_camera{ ysl::Point3f{0.f,0.f,10.f} };
 ysl::Transform g_projMatrix;
-ysl::ShaderProgram g_shaderProgram;
+ysl::Transform g_orthoMatrix;
+ysl::ShaderProgram g_rayCastingShaderProgram;
+ysl::ShaderProgram g_positionShaderProgram;
 ysl::Point2i g_lastMousePos;
 std::shared_ptr<LargeVolumeCache> cache;
 
 std::unique_ptr<char[]> g_rawData;
-std::vector<ysl::RGBASpectrum> m_tfData{256};
+std::vector<ysl::RGBASpectrum> m_tfData{ 256 };
 ysl::TransferFunction m_tfObject;
+
+ysl::Vector3f g_lightDirection;
+
+static float step = 0.01;
+static float ka = 1.0;
+static float ks = 1.0;
+static float kd = 1.0;
+static float shininess = 50.0f;
+
+
+
+
 unsigned int g_volumeTexture;
 unsigned int g_tfTexture;
-unsigned int VBO, VAO;
+unsigned int g_framebufferObject;
 
-OpenGLBuffer g_vbo(OpenGLBuffer::BufferType::VertexArrayBuffer);
-OpenGLVertexArrayObject g_vao;
+unsigned int g_entryPointTextureId;
+unsigned int g_depthTextureId;
+unsigned int g_exitPointTextureId;
+OpenGLBuffer g_proxyEBO(OpenGLBuffer::BufferType::ElementArrayBuffer);
+OpenGLBuffer g_proxyVBO(OpenGLBuffer::BufferType::VertexArrayBuffer);
+OpenGLVertexArrayObject g_proxyVAO;
+
+OpenGLBuffer g_rayCastingVBO(OpenGLBuffer::BufferType::VertexArrayBuffer);
+OpenGLVertexArrayObject g_rayCastingVAO;
+
+void checkFrambufferStatus();
 
 
 void renderingWindowResize(ResizeEvent *event)
 {
-	float aspect = static_cast<float>(event->size().x) / static_cast<float>(event->size().y);
+	const auto x = event->size().x;
+	const auto y = event->size().y;
+	g_orthoMatrix.SetOrtho(0, x, 0, y, -10, 100);
+
+	//
+	const auto aspect = static_cast<float>(x) / static_cast<float>(y);
 	g_projMatrix.SetPerspective(45.0f, aspect, 0.01, 100);
+
+	
+	// Update frambuffer size
+
+
+	glBindTexture(GL_TEXTURE_RECTANGLE, g_entryPointTextureId);
+	GL_ERROR_REPORT
+	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA32F, x, y, 0, GL_RGBA, GL_FLOAT, nullptr);
+	GL_ERROR_REPORT
+	glBindTexture(GL_TEXTURE_RECTANGLE, g_exitPointTextureId);
+	GL_ERROR_REPORT
+	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA32F, x, y, 0, GL_RGBA, GL_FLOAT, nullptr);
+	GL_ERROR_REPORT
+	glBindTexture(GL_TEXTURE_RECTANGLE, g_depthTextureId);
+	GL_ERROR_REPORT
+	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_DEPTH_COMPONENT, x, y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	GL_ERROR_REPORT
+
+	// update raycastingtexture
+	float windowSize[] = 
+	{
+		0,0,x,0,0,y,0,y,x,0,x,y
+	};
+
+	g_rayCastingVBO.bind();
+	g_rayCastingVBO.allocate(windowSize, sizeof(windowSize));
+
 };
 
 
@@ -131,22 +203,126 @@ void keyboardPressEvent(KeyboardEvent)
 
 }
 
+void checkFrambufferStatus()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, g_framebufferObject);
+
+	GLenum status;
+	status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	switch (status) {
+	case GL_FRAMEBUFFER_COMPLETE: // Everything's OK
+		
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+		std::cout << "glift::CheckFramebufferStatus() ERROR:\n\t"
+			<< "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT\n";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+		std::cout << "glift::CheckFramebufferStatus() ERROR:\n\t"
+			<< "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT\n";
+		break;
+	case GL_FRAMEBUFFER_UNDEFINED:
+		std::cout << "glift::CheckFramebufferStatus() ERROR:\n\t"
+			<< "GL_FRAMEBUFFER_UNDEFINED\n";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+		std::cout << "glift::CheckFramebufferStatus() ERROR:\n\t"
+			<< "GL_FRAMEBUFFER_INCOMPLETE_FORMATS\n";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+		std::cout << "glift::CheckFramebufferStatus() ERROR:\n\t"
+			<< "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER\n";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+		std::cout << "glift::CheckFramebufferStatus() ERROR:\n\t"
+			<< "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER\n";
+		break;
+	case GL_FRAMEBUFFER_UNSUPPORTED:
+		std::cout << "glift::CheckFramebufferStatus() ERROR:\n\t"
+			<< "GL_FRAMEBUFFER_UNSUPPORTED\n";
+		break;
+	default:
+		std::cout << "glift::CheckFramebufferStatus() ERROR:\n\t"
+			<< "Unknown ERROR\n";
+
+	}
+
+}
+
 void renderLoop()
 {
 	//glClear(GL_COLOR_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	glClear(GL_DEPTH_BUFFER_BIT);
-
-	g_shaderProgram.bind();
-	g_shaderProgram.setUniformValue("modelViewMat", g_camera.view().Matrix());
-	g_shaderProgram.setUniformValue("projMat", g_projMatrix.Matrix());
-	auto color = ysl::RGBSpectrum{ 0.3 };
-	g_shaderProgram.setUniformValue("color", color);
-
-	//glBindVertexArray(VAO);
-	g_vao.bind();
 	GL_ERROR_REPORT
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glEnable(GL_DEPTH_TEST);
+	GL_ERROR_REPORT
+	g_positionShaderProgram.bind();
+	g_positionShaderProgram.setUniformValue("projMatrix", g_projMatrix.Matrix());
+	g_positionShaderProgram.setUniformValue("worldMatrix", ysl::Transform{}.Matrix());
+	g_positionShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
+	g_proxyVAO.bind();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, g_framebufferObject);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	// Draw front
+	glDepthFunc(GL_LESS);
+	
+	GL_ERROR_REPORT
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,0);
+	GL_ERROR_REPORT
+	// Draw Back
+	glDrawBuffer(GL_COLOR_ATTACHMENT1);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glDepthFunc(GL_GREATER);
+
+	GL_ERROR_REPORT
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,0);
+	GL_ERROR_REPORT
+
+	glDepthFunc(GL_LESS);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	GL_ERROR_REPORT
+
+	glEnable(GL_BLEND);
+	GL_ERROR_REPORT
+	glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
+	GL_ERROR_REPORT
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	GL_ERROR_REPORT
+	glEnable(GL_TEXTURE_RECTANGLE);
+	GL_ERROR_REPORT
+
+	GL_ERROR_REPORT
+	g_rayCastingShaderProgram.bind();
+	g_rayCastingShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
+	g_rayCastingShaderProgram.setUniformValue("orthoMatrix", g_orthoMatrix.Matrix());
+	g_rayCastingShaderProgram.setUniformSampler("texVolume", TextureUnit3, Texture3D, g_volumeTexture);
+	g_rayCastingShaderProgram.setUniformSampler("texStartPos", TextureUnit0, Texture2DRect, g_entryPointTextureId);
+	g_rayCastingShaderProgram.setUniformSampler("texEndPos", TextureUnit1, Texture2DRect, g_exitPointTextureId);
+	g_rayCastingShaderProgram.setUniformSampler("texTransfunc", TextureUnit2, Texture1D, g_tfTexture);
+
+	GL_ERROR_REPORT
+	g_rayCastingShaderProgram.setUniformValue("step", step);
+	g_rayCastingShaderProgram.setUniformValue("ka", ka);
+	g_rayCastingShaderProgram.setUniformValue("ks", ks);
+	g_rayCastingShaderProgram.setUniformValue("kd", kd);
+	g_rayCastingShaderProgram.setUniformValue("shininess", shininess);
+	g_rayCastingShaderProgram.setUniformValue("lightdir", g_lightDirection);
+
+	GL_ERROR_REPORT
+	auto halfWay = g_lightDirection - g_camera.front();
+	if (halfWay.Length() > 1e-10) halfWay.Normalize();
+	g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
+
+	g_rayCastingVAO.bind();
+	glClear(GL_COLOR_BUFFER_BIT);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	GL_ERROR_REPORT
+	//const auto color = ysl::RGBSpectrum{ 0.3 };
+	//g_rayCastingShaderProgram.setUniformValue("color", color);
+	//glBindVertexArray(VAO);
+	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_TEXTURE_RECTANGLE);
 	GL_ERROR_REPORT
 }
 
@@ -187,7 +363,10 @@ int main(int argc, char** argv)
 #if __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-	GLFWwindow* window = glfwCreateWindow(1280, 720, "Mixed Render Engine", NULL, NULL);
+
+	int initialWidth = 1280, initialHeight = 720;
+
+	GLFWwindow* window = glfwCreateWindow(initialWidth, initialHeight, "Mixed Render Engine", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1); // Enable vsync
 	gl3wInit();
@@ -237,55 +416,53 @@ int main(int argc, char** argv)
 
 
 	app.ConfigCommand("load_data", [](const char * cmd)
-	{
-		//cmdline::parser p;
-		//p.add<std::string>("file", 'f', "load large volume data", false);
-		//p.parse(cmd);
-		//const auto fileName = p.get<std::string>("file");
-
-		//if (!fileName.empty())
-		//{
-		//	cache = std::make_shared<LargeVolumeCache>(fileName);
-		//	if (cache != nullptr) {
-		//		const std::size_t x = cache->reader().width();
-		//		const std::size_t y = cache->reader().height();
-		//		const std::size_t z = cache->reader().depth();
-		//		std::cout << x << " " << y << " " << z << std::endl;
-		//	}
-		//}
-
-	});
-
-	app.ConfigCommand("load_tf",[](const char * cmd)
-	{
-		cmdline::parser p;
-		p.add<std::string>("tf", 'f', "load transfer function", false);
-		p.parse(cmd);
-		const auto fileName = p.get<std::string>("tf");
-
-		std::cout << "fileName:" << fileName;
-
-		m_tfObject.read(fileName);
-		if(!m_tfObject.valid())
 		{
-			std::cout << "Reading failed\n";
-			return;
-		}
-			
-		m_tfObject.FetchData(m_tfData.data(), 256);
+			//cmdline::parser p;
+			//p.add<std::string>("file", 'f', "load large volume data", false);
+			//p.parse(cmd);
+			//const auto fileName = p.get<std::string>("file");
 
-		for(int i = 0 ; i < 256;i++)
+			//if (!fileName.empty())
+			//{
+			//	cache = std::make_shared<LargeVolumeCache>(fileName);
+			//	if (cache != nullptr) {
+			//		const std::size_t x = cache->reader().width();
+			//		const std::size_t y = cache->reader().height();
+			//		const std::size_t z = cache->reader().depth();
+			//		std::cout << x << " " << y << " " << z << std::endl;
+			//	}
+			//}
+
+		});
+
+	app.ConfigCommand("load_tf", [](const char * cmd)
 		{
-			std::cout << m_tfData[i];
-		}
+			cmdline::parser p;
+			p.add<std::string>("tf", 'f', "load transfer function", false);
+			p.parse(cmd);
+			const auto fileName = p.get<std::string>("tf");
 
-	});
+			std::cout << "fileName:" << fileName;
+
+			ysl::TransferFunction m_tfObject;
+			m_tfObject.read(fileName);
+			if (!m_tfObject.valid())
+			{
+				std::cout << "Reading failed\n";
+				return;
+			}
+
+			m_tfObject.FetchData(m_tfData.data(), 256);
+
+			glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, 256, 0, GL_RGBA, GL_FLOAT, m_tfData.data());
+
+		});
 
 	auto showGLInformation = false;
 	app.ConfigCommand("glinfo", [&showGLInformation](const char * cmd)
-	{
-		showGLInformation = true;
-	});
+		{
+			showGLInformation = true;
+		});
 
 	///![2] window size
 	ysl::Vector2i windowSize;
@@ -293,54 +470,89 @@ int main(int argc, char** argv)
 	// gl resources
 
 	// shader
-	g_shaderProgram.create();
-	//g_shaderProgram.addShaderFromSourceCode(trivialVertexShader, ysl::ShaderProgram::ShaderType::Vertex);
-	//g_shaderProgram.addShaderFromSourceCode(trivialFragShader, ysl::ShaderProgram::ShaderType::Fragment);
-	g_shaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\blockraycasting_f.glsl", ysl::ShaderProgram::ShaderType::Vertex);
-	g_shaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\blockraycasting_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
-	g_shaderProgram.link();
+	g_rayCastingShaderProgram.create();
+	g_rayCastingShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\blockraycasting_v.glsl", ysl::ShaderProgram::ShaderType::Vertex);
+	g_rayCastingShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\blockraycasting_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
+	g_rayCastingShaderProgram.link();
 
-	static float vertices[] = 
-	{ -0.5f, -0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
-	 0.0f,  0.5f, 0.0f };
+	g_positionShaderProgram.create();
+	g_positionShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\position_v.glsl", ysl::ShaderProgram::ShaderType::Vertex);
+	g_positionShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\position_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
+	g_positionShaderProgram.link();
+
+	static float g_vertices[] =
+	{
+		-0.5f, -0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+		0.0f,  0.5f, 0.0f
+	};
 
 	// vao vbo
-	g_vao.create();
-	g_vao.bind();
-	g_vbo.create();
-	g_vbo.bind();
-	g_vbo.allocate(vertices, sizeof(vertices));
+	GL_ERROR_REPORT
+	g_proxyVAO.create();
+	g_proxyVAO.bind();
+
+	g_proxyVBO.create();
+	g_proxyVBO.bind();
+	g_proxyVBO.allocate(g_proxyGeometryVertices, sizeof(g_proxyGeometryVertices));
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+	GL_ERROR_REPORT
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+	GL_ERROR_REPORT
+
+	g_proxyEBO.create();
+	g_proxyEBO.bind();
+	g_proxyEBO.allocate(g_proxyGeometryVertexIndices, sizeof(g_proxyGeometryVertexIndices));
+	GL_ERROR_REPORT
+
+	g_proxyVAO.unbind();
+
+
+	g_rayCastingVAO.create();
+	g_rayCastingVAO.bind();
+	g_rayCastingVBO.create();
+	g_rayCastingVBO.bind();
+	g_rayCastingVBO.allocate(nullptr, 6 * sizeof(ysl::Point2f));
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
+
+	g_rayCastingVAO.unbind();
 
 	// texture
 
 	std::string dataFileName;
-	std::cin >> dataFileName;
+	//std::cin >> dataFileName;
+
+	dataFileName = "D:\\scidata\\abc\\s1_512_512_512.raw";
 
 	std::size_t width, height, depth;
-	std::cin >> width >> height >> depth;
-	std::size_t total = width * height*depth;
+	width = 512; height = 512, depth = 512;
+	//std::cin >> width >> height >> depth;
+	const std::size_t total = width * height*depth;
 	std::ifstream rawData(dataFileName);
-	if(!rawData.is_open())
+	if (!rawData.is_open())
 	{
 		std::cout << "Can not open raw data\n";
 		return 0;
 	}
 
-	
 
 	g_rawData.reset(new char[total]);
-	if(g_rawData == nullptr)
+	if (g_rawData == nullptr)
 	{
 		std::cout << "Bad alloc\n";
 		return 0;
 	}
-
 	rawData.read(g_rawData.get(), total * sizeof(char));
 
+
+	// Volume Texture
 	glGenTextures(1, &g_volumeTexture);
 	glBindTexture(GL_TEXTURE_3D, g_volumeTexture);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -348,30 +560,57 @@ int main(int argc, char** argv)
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, width, height, depth, 0, GL_RED, GL_UNSIGNED_BYTE,g_rawData.get());
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, width, height, depth, 0, GL_RED, GL_UNSIGNED_BYTE, g_rawData.get());
 
+	GL_ERROR_REPORT
 
+	// Transfer function texture
 	glGenTextures(1, &g_tfTexture);
 	glBindTexture(GL_TEXTURE_1D, g_tfTexture);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	GL_ERROR_REPORT
 
+	glGenTextures(1, &g_entryPointTextureId);
+	glBindTexture(GL_TEXTURE_RECTANGLE, g_entryPointTextureId);
+	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA32F, initialWidth,initialHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glBindTexture(GL_TEXTURE_RECTANGLE,0);
 
-	//GL_ERROR_REPORT
+	GL_ERROR_REPORT
+	glGenTextures(1, &g_exitPointTextureId);
+	glBindTexture(GL_TEXTURE_RECTANGLE, g_exitPointTextureId);
+	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA32F, initialWidth, initialHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glBindTexture(GL_TEXTURE_RECTANGLE,0);
 
+	GL_ERROR_REPORT
+	glGenTextures(1, &g_depthTextureId);
+	glBindTexture(GL_TEXTURE_RECTANGLE, g_depthTextureId);
+	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_DEPTH_COMPONENT, initialWidth, initialHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glBindTexture(GL_TEXTURE_RECTANGLE,0);
 
+	GL_ERROR_REPORT
+	glGenFramebuffers(1, &g_framebufferObject);
+	GL_ERROR_REPORT
+	glBindFramebuffer(GL_FRAMEBUFFER, g_framebufferObject);
+	GL_ERROR_REPORT
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, g_entryPointTextureId, 0);
+	GL_ERROR_REPORT
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_RECTANGLE, g_exitPointTextureId, 0);
+	GL_ERROR_REPORT
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_RECTANGLE, g_depthTextureId, 0);
+	GL_ERROR_REPORT
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	GL_ERROR_REPORT
+	checkFrambufferStatus();
 
-	//cache = std::make_shared<LargeVolumeCache>(dataFileName);
-
-	//if(cache)
-	//{
-	//	const std::size_t x = cache->reader().width();
-	//	const std::size_t y = cache->reader().height();
-	//	const std::size_t z = cache->reader().depth();
-	//	std::cout << x << " " << y << " " << z << std::endl;
-	//}
 
 
 	// Main loop
@@ -392,13 +631,20 @@ int main(int argc, char** argv)
 
 		app.Draw("Welcome Mixed Render Engine", nullptr);
 
-
-
 		//ImGui::End();
 		//ImGui::ShowDemoWindow();
 
+		ImGui::Begin("Control Panel");
+		ImGui::SliderFloat("step", &step, 0.01, 1.0);
+		ImGui::SliderFloat("ka",&ka,0.0f,1.0f);
+		ImGui::SliderFloat("kd",&kd,0.0f,1.0f);
+		ImGui::SliderFloat("ks",&ks,0.0f,1.0f);
+		ImGui::SliderFloat("shininess",&shininess,0.0f,50.f);
+		ImGui::End();
 
-		if (showGLInformation)ShowGLInformation(&showGLInformation);
+
+		if (showGLInformation)
+			ShowGLInformation(&showGLInformation);
 
 		// Event handle
 		if (ImGui::IsMousePosValid())
@@ -428,9 +674,8 @@ int main(int argc, char** argv)
 		MouseEvent moveEvent({ 0,0 }, 0);
 		for (auto i = 0; i < IM_ARRAYSIZE(io.MouseDown); ++i)
 		{
-			if (io.MouseDownDuration[i] > 0.0f)
+			if (io.MouseDownDuration[i] > 0.0f && !ImGui::IsMouseHoveringAnyWindow())
 			{
-
 				if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
 				{
 					ysl::Point2i pos{ int(io.MousePos.x),int(io.MousePos.y) };
@@ -494,6 +739,11 @@ int main(int argc, char** argv)
 		glfwMakeContextCurrent(window);
 		glfwSwapBuffers(window);
 	}
+
+	glDeleteTextures(1, &g_tfTexture);
+	glDeleteTextures(1, &g_volumeTexture);
+	glDeleteTextures(1, &g_framebufferObject);
+
 	// Test Code
 	// Cleanup
 	ImGui_ImplOpenGL3_Shutdown();

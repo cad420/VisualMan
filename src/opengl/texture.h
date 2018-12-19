@@ -3,34 +3,49 @@
 
 #include "../../lib/gl3w/GL/glcorearb.h"
 
+//#include "openglutils.h"
+
+enum TextureUnit
+{
+	TextureUnit0 = GL_TEXTURE0,
+	TextureUnit1 = GL_TEXTURE1,
+	TextureUnit2 = GL_TEXTURE2,
+	TextureUnit3 = GL_TEXTURE3,
+	TextureUnit4 = GL_TEXTURE4,
+	TextureUnit5 = GL_TEXTURE5,
+	TextureUnit6 = GL_TEXTURE6
+};
+enum TextureTarget
+{
+	Texture1D = GL_TEXTURE_1D,
+	Texture2D = GL_TEXTURE_2D,
+	Texture3D = GL_TEXTURE_3D,
+	Texture2DRect = GL_TEXTURE_RECTANGLE
+};
+enum WrapMode
+{
+	Repeat = GL_REPEAT,
+	MirrorRepeat = GL_MIRRORED_REPEAT,
+	ClampToEdge = GL_CLAMP_TO_EDGE,
+	ClampToBorder = GL_CLAMP_TO_BORDER
+};
+enum FilterMode
+{
+	Nearest = GL_NEAREST,
+	Linear = GL_LINEAR
+};
+enum InternalFormat
+{
+	R8 = GL_R8,
+	R16 = GL_R16,
+	RGB8 = GL_RGB8
+};
+
 class OpenGLTexture
 {
 public:
-	enum TextureTarget
-	{	
-		Texture1D = GL_TEXTURE_1D,
-		Texture2D = GL_TEXTURE_2D,
-		Texture3D = GL_TEXTURE_3D,
-		Texture2DRect = GL_TEXTURE_RECTANGLE
-	};
-	enum WrapMode
-	{
-		Repeat = GL_REPEAT,
-		MirrorRepeat = GL_MIRRORED_REPEAT,
-		ClampToEdge = GL_CLAMP_TO_EDGE,
-		ClampToBorder = GL_CLAMP_TO_BORDER
-	};
-	enum FilterMode
-	{
-		Nearest = GL_NEAREST,
-		Linear = GL_LINEAR
-	};
-	enum InternalFormat
-	{
-		R8 = GL_R8,
-		R16 = GL_R16,
-		RGB8= GL_RGB8
-	};
+
+
 	enum class ExternalDataFormat{};
 	enum class ExternalDataType{};
 

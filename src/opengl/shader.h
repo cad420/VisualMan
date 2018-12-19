@@ -4,9 +4,9 @@
 #include "../mathematics/transformation.h"
 #include "../mathematics/geometry.h"
 #include "../core/spectrum.h"
-#include "openglutils.h"
 
 #include <vector>
+#include "texture.h"
 
 
 namespace ysl
@@ -15,6 +15,7 @@ namespace ysl
 	{
 	public:
 		enum class ShaderType { Vertex, Fragment };
+
 
 		ShaderProgram();
 		void create();		// Check OpenGL context
@@ -40,6 +41,7 @@ namespace ysl
 		void setUniformValue(int location, const ysl::Vector3i & ivec3);
 		void setUniformValue(int location, const ysl::Vector2f & fvec2);
 		void setUniformValue(int location, const ysl::Vector2i & ivec2);
+		void setUniformSampler(int location, TextureUnit texUnit, TextureTarget target, unsigned int textureId);
 
 		void setUniformValue(const char * name, bool value);
 		void setUniformValue(const char * name, int value);
@@ -51,7 +53,7 @@ namespace ysl
 		void setUniformValue(const char * name, const ysl::Vector3i & ivec3);
 		void setUniformValue(const char * name, const ysl::Vector2f & fvec2);
 		void setUniformValue(const char * name, const ysl::Vector2i & ivec2);
-
+		void setUniformSampler(const char * name, TextureUnit texUnit, TextureTarget target, unsigned int textureId);
 
 		void setUniformValue(const std::string & name, bool value);
 		void setUniformValue(const std::string & name, int value);
@@ -63,7 +65,7 @@ namespace ysl
 		void setUniformValue(const std::string & name, const ysl::Vector3i & ivec3);
 		void setUniformValue(const std::string & name, const ysl::Vector2f & fvec2);
 		void setUniformValue(const std::string & name, const ysl::Vector2i & ivec2);
-
+		void setUniformSampler(const std::string & name, TextureUnit texUnit, TextureTarget target, unsigned int textureId);
 
 
 	private:

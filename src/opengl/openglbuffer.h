@@ -18,9 +18,9 @@ public:
 
 	void create();
 	void bind();
-	void allocate(void * data,std::size_t size);
+	void allocate(const void* data, std::size_t size);
 	void setUsage(BufferUsage usage);
-	void write(void * data);
+	void write(const void* data);
 	void unbind();
 	void destroy();
 	~OpenGLBuffer()=default;

@@ -1,8 +1,6 @@
 
 #include "openglbuffer.h"
 
-#include "openglutils.h"
-
 #include "../../lib/gl3w/GL/gl3w.h"
 
 OpenGLBuffer::OpenGLBuffer(BufferType type,BufferUsage usage):
@@ -23,7 +21,7 @@ void OpenGLBuffer::bind()
 	glBindBuffer(glEnumTarget(), m_buffer);
 }
 
-void OpenGLBuffer::allocate(void* data, std::size_t size)
+void OpenGLBuffer::allocate(const void* data, std::size_t size)
 {
 	m_dataSize = size;
 	write(data);
@@ -34,7 +32,7 @@ void OpenGLBuffer::setUsage(BufferUsage usage)
 	m_usage = usage;
 }
 
-void OpenGLBuffer::write(void * data)
+void OpenGLBuffer::write(const void* data)
 {
 	glBufferData(glEnumTarget(), m_dataSize, data,glBufferUsage());
 }

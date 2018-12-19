@@ -64,7 +64,7 @@ int LVDTester()
 	std::cout << "Writing as:" << outFileName << std::endl;
 	std::ofstream rawFile(outFileName, std::fstream::binary);
 
-	
+
 
 	if (!rawFile.is_open())
 	{
@@ -78,7 +78,7 @@ int LVDTester()
 
 }
 
-int main(int argc,char *argv[])
+int main(int argc, char *argv[])
 {
 	//std::string fileName;
 	//int x, y, z, repeat;
@@ -90,24 +90,46 @@ int main(int argc,char *argv[])
 	//LVDTester();
 	 // create a parser
 
-	std::string fileName;
-	std::cin >> fileName;
+	//std::string fileName;
+	//std::cin >> fileName;
 
-	ysl::TransferFunction tf(fileName);
-	if(!tf.valid())
-	{
-		std::cout << "faild\n";
-		return 0;
+	//ysl::TransferFunction tf(fileName);
+	//if(!tf.valid())
+	//{
+	//	std::cout << "faild\n";
+	//	return 0;
+	//}
+
+	//std::vector<ysl::RGBASpectrum> data{256};
+	//tf.FetchData(data.data(), 256);
+
+	//for(int i = 0 ; i < 256;i++)
+	//{
+	//	std::cout << data[i] << std::endl;
+	//}
+
+
+	char str[5][85];
+	for (int i = 0; i < 5; i++)
+		scanf("%s", str[i]);
+
+	for (int i = 4; i > 0; i--) {
+		for (int j = 0; j < i; j++) {
+			if (strcmp(str[j], str[j + 1]) > 0) {
+				char t[85];
+				strcpy(t, str[j]);
+				strcpy(str[j], str[j + 1]);
+				strcpy(str[j + 1], t);
+			}
+		}
 	}
+	printf("After sorted:\n");
+	for (int i = 0; i < 5; i++)
+		printf("%s\n", str[i]);
 
-	std::vector<ysl::RGBASpectrum> data{256};
-	tf.FetchData(data.data(), 256);
-
-	for(int i = 0 ; i < 256;i++)
-	{
-		std::cout << data[i] << std::endl;
-	}
 
 	system("pause");
 	return 0;
+
 }
+

@@ -33,3 +33,13 @@ void ShowGLInformation(bool *open)
 	}
 	
 }
+
+void ControlPanel(bool* open)
+{
+	if(ImGui::Begin("Control Panel", open))
+	{
+
+		ImGui::End();
+	}
+
+}

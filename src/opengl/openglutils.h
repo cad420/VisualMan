@@ -2,6 +2,7 @@
 #define _OPENGLUTILS_H_
 
 #include "../utility/error.h"
+//#include "../../lib/gl3w/GL/glcorearb.h"
 
 #ifdef NDEBUG
 #define GL_ERROR_REPORT(str) (void(0))
@@ -18,6 +19,11 @@
 
 #define GL_ERROR_ASSERT							\
 		assert(glGetError() == GL_NO_ERROR);	\
+
+
+
+
+
 
 #endif /*NDBUG*/
 

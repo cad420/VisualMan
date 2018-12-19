@@ -16,6 +16,45 @@ enum VoxelType { UInt8, Float32 };
 enum VoxelFormat { Grayscale, RGB, RGBA };
 
 
+using PageDirectoryIndex_t = int;
+using PageTableIndex_t = int;
+using DataBlockTableIndex_t = int;
+
+
+struct PageDirectoryAbstractIndex
+{
+	using internal_type = int;
+	internal_type x, y, z;
+};
+
+struct PageTableAbstractIndex
+{
+	using internal_type = int;
+	internal_type x, y, z;
+};
+
+struct DataBlockAbstractIndex			// DataBlock start in 3d texture
+{
+	using internal_type = int;
+	internal_type x, y, z;
+};
+
+
+struct PageDirectorySize
+{
+	using size_type = std::size_t;
+	size_type x, y, z;
+};
+
+struct PageTableSize
+{
+	using size_type = std::size_t;
+	size_type x, y, z;
+};
+
+
+
+
 
 class LargeVolumeCache
 {

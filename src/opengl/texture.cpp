@@ -32,7 +32,7 @@ void OpenGLTexture::setMinificationFilter(FilterMode mode)
 	m_minFilterMode = mode;
 }
 
-void OpenGLTexture::setWrapMode(OpenGLTexture::WrapMode mode)
+void OpenGLTexture::setWrapMode(WrapMode mode)
 {
 	m_wrapMode = mode;
 }

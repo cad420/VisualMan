@@ -1,13 +1,9 @@
-#version 330
+#version 410
 
 uniform sampler1D texTransfunc;
 uniform sampler2DRect texStartPos;
 uniform sampler2DRect texEndPos;
-
 uniform sampler3D texVolume;
-
-
-
 uniform float step;
 uniform float ka;
 uniform float kd;
@@ -15,9 +11,9 @@ uniform float shininess;
 uniform float ks;
 uniform vec3 lightdir;
 uniform vec3 halfway;
+
 in vec2 textureRectCoord;
 out vec4 fragColor;
-
 
 
 vec3 PhongShading(vec3 samplePos, vec3 diffuseColor)
@@ -55,11 +51,12 @@ void main()
 	vec3 rayEnd = texture2DRect(texEndPos, textureRectCoord).xyz;
 
 	vec3 start2end = rayEnd - rayStart;
-	vec4 bg = vec4(1.0, 1.0, 1.0, 1.0);
+	vec4 bg = vec4(.1, .2, .3, 1.0);
 	if (start2end.x == 0.0 && start2end.y == 0.0 && start2end.z == 0.0) {
 		fragColor = bg; // Background Colors
 		return;
 	}
+
 	vec4 color = vec4(0, 0, 0, 0);
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);

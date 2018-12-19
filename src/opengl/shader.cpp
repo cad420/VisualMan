@@ -4,6 +4,7 @@
 #include "../../lib/gl3w/GL/gl3w.h"
 
 #include <fstream>
+#include "openglutils.h"
 
 namespace ysl
 {
@@ -177,6 +178,13 @@ namespace ysl
 		GL_ERROR_REPORT
 	}
 
+	void ShaderProgram::setUniformSampler(int location, TextureUnit texUnit, TextureTarget target, unsigned textureId)
+	{
+		glActiveTexture(texUnit);
+		glBindTexture(target, textureId);
+		glUniform1i(location, texUnit - TextureUnit0);
+	}
+
 	void ShaderProgram::setUniformValue(int location, bool value)
 	{
 		glUniform1i(location, int(value));
@@ -231,6 +239,12 @@ namespace ysl
 		setUniformValue(uniformLocation(name), ivec2);
 	}
 
+	void ShaderProgram::setUniformSampler(const char* name, TextureUnit texUnit, TextureTarget target,
+		unsigned textureId)
+	{
+		setUniformSampler(uniformLocation(name), texUnit, target, textureId);
+	}
+
 
 	void ShaderProgram::setUniformValue(const char* name, bool value)
 	{
@@ -279,6 +293,12 @@ namespace ysl
 	void ShaderProgram::setUniformValue(const std::string& name, const ysl::Vector2i& ivec2)
 	{
 		setUniformValue(name.c_str(), ivec2);
+	}
+
+	void ShaderProgram::setUniformSampler(const std::string& name, TextureUnit texUnit, TextureTarget target,
+		unsigned textureId)
+	{
+		setUniformSampler(name.c_str(), texUnit, target, textureId);
 	}
 
 	void ShaderProgram::setUniformValue(const std::string& name, bool value)
