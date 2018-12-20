@@ -1,4 +1,4 @@
-#version 410
+#version 420
 
 uniform sampler1D texTransfunc;
 uniform sampler2DRect texStartPos;
@@ -15,6 +15,34 @@ uniform vec3 halfway;
 in vec2 textureRectCoord;
 out vec4 fragColor;
 
+uniform sampler3D cacheVolume;
+uniform ivec3 pageDirSize;
+uniform ivec3 pageTableSize;
+uniform ivec3 pageTableEntrySize;
+uniform ivec3 volumeDataSize;
+uniform ivec3 blockDataSize;
+uniform ivec3 repeatSize;
+
+layout(binding = 0, rgba32i) uniform iimage3D pageDirTexutre;
+layout(binding = 1, rgba32i) uniform iimage3D pageTableTexture;
+layout(binding = 2, r32i) uniform iimage1D cacheMissedTexture;
+
+float virtualVolumeSample(vec3 samplePos)
+{
+	ivec3 pDirAddress = ivec3(samplePos*pageDirSize);
+	ivec4 pageDirEntry = imageLoad(pageDirTexutre,pDirAddress);
+	ivec3 pTableAddress = ivec3(pageDirEntry) + ivec3(samplePos*pageTableSize) % pageTableEntrySize;
+	ivec4 pageTableEntry = imageLoad(pageTableTexture,pTableAddress);
+	if(pageTableEntry.w == 2)		// Unmapped flag
+	{
+		
+	}else{
+		vec3 samplePoint = pageTableEntry.xyz + ivec3(samplePos * volumeDataSize) % blockDataSize;
+		vec4 scalar = texture(cacheVolume,samplePoint);
+
+	}
+	return 1.0;
+}
 
 vec3 PhongShading(vec3 samplePos, vec3 diffuseColor)
 {
@@ -51,7 +79,7 @@ void main()
 	vec3 rayEnd = texture2DRect(texEndPos, textureRectCoord).xyz;
 
 	vec3 start2end = rayEnd - rayStart;
-	vec4 bg = vec4(.1, .2, .3, 1.0);
+	vec4 bg = vec4(.2, .3, .4, 1.0);
 	if (start2end.x == 0.0 && start2end.y == 0.0 && start2end.z == 0.0) {
 		fragColor = bg; // Background Colors
 		return;

@@ -186,10 +186,10 @@ public:
 	int width()const { return vx; }
 	int height()const { return vy; }
 	int depth()const { return vz; }
-
 	int xBlockCount()const { return bx; }
 	int yBlockCount()const { return by; }
 	int zBlockCount()const { return bz; }
+
 	int repeat()const { return m_repeat; }
 	int blockSizeInLog()const { return logBlockSize; }
 	int blockSize()const { return 1 << blockSizeInLog(); }
@@ -197,6 +197,7 @@ public:
 	int totalBlocks()const { return bx * by * bz; }
 
 	template<typename T, int nLogBlockSize>
+
 	std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> readAll();
 
 	void readBlock(char* dest, int blockId);

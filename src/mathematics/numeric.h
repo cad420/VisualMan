@@ -64,8 +64,8 @@ namespace ysl {
 	}
 
 	inline
-		std::uint32_t
-		RoundUpDivide(std::uint32_t no, std::uint32_t den)
+		constexpr std::uint64_t
+		RoundUpDivide( std::uint64_t no, std::uint64_t den)
 	{
 		return (no + den - 1) / den;
 	}

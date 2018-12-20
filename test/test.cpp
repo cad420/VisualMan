@@ -4,8 +4,8 @@
 #include "../src/volume/volume_utils.h"
 
 #include "../src/utility/cmdline.h"
-
-
+#include "../src/volume/volume.h"
+#include "../src/volume/virtualvolumehierachy.h"
 
 
 int LVDTester()
@@ -90,8 +90,41 @@ int main(int argc, char *argv[])
 	//LVDTester();
 	 // create a parser
 
-	//std::string fileName;
-	//std::cin >> fileName;
+
+	const std::string lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
+
+	VolumeVirtualMemoryHierachyGenerator<16,16,16> cache(lvdFileName);
+
+	if(cache.valid())
+	{
+		std::cout << cache.width() << std::endl;
+		std::cout << cache.height() << std::endl;
+		std::cout << cache.depth() << std::endl;
+		std::cout << cache.xBlockCount() << std::endl;
+		std::cout << cache.yBlockCount() << std::endl;
+		std::cout << cache.zBlockCount() << std::endl;
+		std::cout << cache.blockSize() << std::endl;
+	}
+
+	//std::cout << ysl::RoundUpDivide(cache.width(), 32);
+	//std::cout << ysl::RoundUpDivide(cache.height(), 32);
+	//std::cout << ysl::RoundUpDivide(cache.depth(), 32);
+
+	std::cout << cache.m_pageTable->Width() << std::endl;
+	std::cout << cache.m_pageTable->Height() << std::endl;
+	std::cout << cache.m_pageTable->Depth() << std::endl;
+	std::cout << cache.m_pageDir->Width() << std::endl;
+	std::cout << cache.m_pageDir->Depth() << std::endl;
+	std::cout << cache.m_pageDir->Height() << std::endl;
+
+
+	int blockId;
+	while(std::cin>>blockId)
+	{
+		cache.blockData(blockId);
+	}
+
+
 
 	//ysl::TransferFunction tf(fileName);
 	//if(!tf.valid())
@@ -100,6 +133,7 @@ int main(int argc, char *argv[])
 	//	return 0;
 	//}
 
+
 	//std::vector<ysl::RGBASpectrum> data{256};
 	//tf.FetchData(data.data(), 256);
 
@@ -107,26 +141,6 @@ int main(int argc, char *argv[])
 	//{
 	//	std::cout << data[i] << std::endl;
 	//}
-
-
-	char str[5][85];
-	for (int i = 0; i < 5; i++)
-		scanf("%s", str[i]);
-
-	for (int i = 4; i > 0; i--) {
-		for (int j = 0; j < i; j++) {
-			if (strcmp(str[j], str[j + 1]) > 0) {
-				char t[85];
-				strcpy(t, str[j]);
-				strcpy(str[j], str[j + 1]);
-				strcpy(str[j + 1], t);
-			}
-		}
-	}
-	printf("After sorted:\n");
-	for (int i = 0; i < 5; i++)
-		printf("%s\n", str[i]);
-
 
 	system("pause");
 	return 0;

@@ -6,6 +6,7 @@
 #include <list>
 #include <unordered_map>
 #include "volume_utils.h"
+#include "lineararray.h"
 //#include "../mathematics/arithmetic.h"
 
 
@@ -16,101 +17,82 @@ enum VoxelType { UInt8, Float32 };
 enum VoxelFormat { Grayscale, RGB, RGBA };
 
 
-using PageDirectoryIndex_t = int;
-using PageTableIndex_t = int;
-using DataBlockTableIndex_t = int;
-
-
-struct PageDirectoryAbstractIndex
+struct GlobalBlockAbstractIndex
 {
-	using internal_type = int;
-	internal_type x, y, z;
-};
-
-struct PageTableAbstractIndex
-{
-	using internal_type = int;
-	internal_type x, y, z;
-};
-
-struct DataBlockAbstractIndex			// DataBlock start in 3d texture
-{
-	using internal_type = int;
-	internal_type x, y, z;
-};
-
-
-struct PageDirectorySize
-{
-	using size_type = std::size_t;
-	size_type x, y, z;
-};
-
-struct PageTableSize
-{
-	using size_type = std::size_t;
+	using size_type = int;
 	size_type x, y, z;
 };
 
 
-
-
-
-class LargeVolumeCache
+class LargeVolumeCache:public BlockVolumeReader
 {
-	// VolumeDataReader
+	static constexpr int nLogBlockSize = 5;
+
+	static constexpr size_t cacheBlockCountAtWidth = 20;
+	static constexpr size_t cacheBlockCountAtHeight = 20;
+	static constexpr size_t cacheBlockCountAtDepth = 20;
+
+	static constexpr size_t m_cacheWidth = cacheBlockCountAtWidth*(1<<nLogBlockSize);
+	static constexpr size_t m_cacheHeight = cacheBlockCountAtHeight*(1 << nLogBlockSize);
+	static constexpr size_t m_cacheDepth = cacheBlockCountAtDepth*(1 << nLogBlockSize);
+
+	static constexpr size_t totalCacheBlocks = cacheBlockCountAtWidth*cacheBlockCountAtHeight*cacheBlockCountAtDepth;
+
+	using Cache = ysl::Block3DArray<unsigned char, nLogBlockSize>;
 	struct LRUListCell;
 	using LRUHash = std::unordered_map<int,std::list<LRUListCell>::iterator>;
 	struct LRUListCell
 	{
 		int blockCacheIndex;
 		LRUHash::iterator hashIter;
-		LRUListCell(int index):blockCacheIndex(index){}
+		LRUListCell(int index, LRUHash::iterator itr) :blockCacheIndex{ index }, hashIter{itr}{}
 	};
-
-	BlockVolumeReader m_blockVolumeReader;
-	const uint32_t m_logBlockSize;
-	const int m_vx, m_vy, m_vz;
 	std::list<LRUListCell> m_lruList;
-	LRUHash	m_blockIdInCache;		// blockId---> (blockIndex,the position of blockIndex in queue)
+	LRUHash	m_blockIdInCache;		// blockId---> (blockIndex,the position of blockIndex in list)
 
-	ysl::Block3DArray<unsigned char, 5> m_volumeCached;
+	bool m_valid;
+	
+
+	std::unique_ptr<Cache> m_volumeCache;
 
 	int blockCoordinateToBlockId(int xBlock, int yBlock, int zBlock)const
 	{
-		const auto nxBlock = m_vx / m_volumeCached.BlockSize(), nyBlock = m_vy / m_volumeCached.BlockSize(), nzBlock = m_vz / m_volumeCached.BlockSize();
+		//const auto nxBlock = width() / m_volumeCache.BlockSize(), nyBlock = height() / m_volumeCache.BlockSize(), nzBlock = depth() / m_volumeCache.BlockSize();
+		const auto nxBlock = xBlockCount(), nyBlock = yBlockCount(), nzBlock = zBlockCount();
 		return zBlock * nxBlock*nyBlock + yBlock * nxBlock + zBlock;
 	}
 
-	static constexpr size_t cacheWidth = 64;
-	static constexpr size_t cacheHeight = 64;
-	static constexpr size_t cacheDepth = 64;
-	static constexpr size_t totalCacheBlocks = 2*2*2;
 
 public:
-	explicit LargeVolumeCache(const std::string & fileName) :
-		m_blockVolumeReader(fileName),
-		m_logBlockSize(m_blockVolumeReader.blockSizeInLog()),
-		m_vx(m_blockVolumeReader.width()),
-		m_vy(m_blockVolumeReader.height()),
-		m_vz(m_blockVolumeReader.depth()),
-		m_volumeCached(cacheWidth, cacheHeight, cacheDepth,nullptr)
+	explicit LargeVolumeCache(const std::string & fileName) :BlockVolumeReader(fileName),m_valid(true)
 	{
-		for (int i = 0; i < totalCacheBlocks; i++)
+		if (blockSizeInLog() != nLogBlockSize)
 		{
-			m_lruList.push_front(LRUListCell(i));
+			m_valid = false;
+			return;
 		}
+		m_volumeCache.reset(new Cache(m_cacheWidth, m_cacheHeight, m_cacheDepth, nullptr));
+		//
+		for (int i = 0; i < totalCacheBlocks; i++)
+			m_lruList.push_front(LRUListCell(i,m_blockIdInCache.end()));
 	}
 
-	const BlockVolumeReader & reader()const { return m_blockVolumeReader; }
+	bool valid()const { return m_valid; }
+
+	//int blockCount()const { totalCacheBlocks; }
+
+	constexpr std::size_t cacheBlockCount() const { return totalCacheBlocks; }
+	constexpr std::size_t xCacheBlockCount()const { return cacheBlockCountAtWidth; }
+	constexpr std::size_t yCacheBlockCount()const { return cacheBlockCountAtHeight; }
+	constexpr std::size_t zCacheBlockCount()const { return cacheBlockCountAtDepth; }
+	constexpr std::size_t cacheWidth()const { return m_cacheWidth; }
+	constexpr std::size_t cacheHeight()const { return m_cacheHeight; }
+	constexpr std::size_t cacheDepth()const { return m_cacheDepth; }
+
 	const unsigned char * blockData(int xBlock, int yBlock, int zBlock) { return blockData(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
 	const unsigned char * blockData(int blockId);
-
-
-
+	const unsigned char * blockData(const GlobalBlockAbstractIndex & index){ return blockData(index.x, index.y, index.z); };
 };
-
-
 
 //class LargeVolumeRepresentation
 //{

@@ -6,6 +6,7 @@ uniform vec3 light_color;
 uniform vec3 object_color;
 uniform vec3 view_pos;
 out vec4 frag_color;
+
 void main()
 {
     vec3 frag_norm = normalize(frag_normal);
