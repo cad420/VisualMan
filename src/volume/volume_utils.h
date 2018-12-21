@@ -158,6 +158,9 @@ public:
 		lvdFile.write((char*)&m_dataSize.x, 3 * sizeof(LVDTraits::DimensionSize_t));
 		lvdFile.write((char*)&logBlockSize, sizeof(LVDTraits::LogBlockSize_t));
 		lvdFile.write((char*)&m_repeat, sizeof(LVDTraits::BoundarySize_t));
+		lvdFile.write((char*)&g_xSize, sizeof(LVDTraits::DimensionSize_t));
+		lvdFile.write((char*)&g_ySize, sizeof(LVDTraits::DimensionSize_t));
+		lvdFile.write((char*)&g_zSize, sizeof(LVDTraits::DimensionSize_t));
 		lvdFile.write(m_lvdBuf.get(), lvdBytes);
 		std::cout << "writing .lvd file finished\n";
 		return true;
@@ -170,6 +173,7 @@ class BlockVolumeReader
 	std::ifstream fileHandle;
 	std::string fileName;
 	int vx, vy, vz, bx, by, bz;
+	int m_originalWidth, m_originalHeight, m_originalDepth;
 	int logBlockSize;
 	int m_repeat;
 	bool validFlag;
@@ -195,6 +199,9 @@ public:
 	int blockSize()const { return 1 << blockSizeInLog(); }
 	int blockDataCount()const { return blockSize()*blockSize()*blockSize(); }
 	int totalBlocks()const { return bx * by * bz; }
+	int originalWidth()const { return m_originalWidth; }
+	int originalHeight()const { return m_originalHeight; }
+	int originalDepth()const { return m_originalDepth; }
 
 	template<typename T, int nLogBlockSize>
 

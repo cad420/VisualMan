@@ -26,6 +26,9 @@ BlockVolumeReader::BlockVolumeReader(const std::string& fileName): validFlag(tru
 	fileHandle.read((char*)&vz, sizeof(int));
 	fileHandle.read((char*)&logBlockSize, sizeof(int));
 	fileHandle.read((char*)&m_repeat, sizeof(int));
+	fileHandle.read((char*)&m_originalWidth, sizeof(int));
+	fileHandle.read((char*)&m_originalHeight, sizeof(int));
+	fileHandle.read((char*)&m_originalDepth, sizeof(int));
 	if (logBlockSize != LogBlockSize5)
 	{
 		std::cout << "Unsupported block size\n";

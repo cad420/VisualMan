@@ -5,8 +5,8 @@
 //#include "../../lib/gl3w/GL/glcorearb.h"
 
 #ifdef NDEBUG
-#define GL_ERROR_REPORT(str) (void(0))
-#define GL_ERROR_ASSERT	(void(0))
+#define GL_ERROR_REPORT(str) (void(0);)
+#define GL_ERROR_ASSERT	(void(0);)
 #else
 #define GL_ERROR_REPORT								\
 	{												\

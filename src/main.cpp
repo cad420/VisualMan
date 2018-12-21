@@ -25,6 +25,7 @@
 #include "opengl/openglvertexarrayobject.h"
 #include "openglutils.h"
 #include "volume/virtualvolumehierachy.h"
+#include "GL/glcorearb.h"
 
 
 //const static int g_proxyGeometryVertexIndices[] = { 1, 3, 7, 5, 0, 4, 6, 2, 2, 6, 7, 3, 0, 1, 5, 4, 4, 5, 7, 6, 0, 2, 3, 1 };
@@ -32,13 +33,21 @@ const static int g_proxyGeometryVertexIndices[] = { 1,3,7,1,7,5,0,4,6,0,6,2,2,6,
 static const float xCoord = 1.0, yCoord = 1.0, zCoord = 1.0;
 static float g_proxyGeometryVertices[] = {
 	0,0,0,
-	xCoord, 0, 0 ,
-	0, yCoord, 0 ,
-	xCoord, yCoord, 0 ,
-	0, 0, zCoord ,
-	xCoord, 0, zCoord ,
-	0, yCoord, zCoord ,
-	xCoord, yCoord, zCoord ,
+	xCoord, 0.0, 0.0 ,
+	0 , yCoord , 0 ,
+	xCoord , yCoord , 0 ,
+	0 , 0 , zCoord  ,
+	xCoord , 0 , zCoord ,
+	0 , yCoord , zCoord,
+	xCoord , yCoord , zCoord ,
+		-0.5,0 - 0.5,0 - 0.5,
+	xCoord - 0.5, 0.0 - 0.5, 0.0 - 0.5 ,
+	0 - 0.5 , yCoord - 0.5, 0 - 0.5,
+	xCoord - 0.5, yCoord - 0.5 , 0 - 0.5,
+	0 - 0.5, 0 - 0.5 , zCoord - 0.5 ,
+	xCoord - 0.5 , 0 - 0.5, zCoord - 0.5,
+	0 - 0.5 , yCoord - 0.5, zCoord - 0.5,
+	xCoord - 0.5, yCoord - 0.5, zCoord - 0.5,
 };
 
 class Event
@@ -113,8 +122,11 @@ namespace
 	float shininess = 50.0f;
 
 
-	unsigned int g_volumeTexture;
 
+	constexpr int pageTableBlockEntry = 16;
+	const std::size_t missedBlockCapacity = 10000 + sizeof(unsigned int) + 2 * sizeof(unsigned int);
+
+	unsigned int g_volumeTexture;
 	unsigned int g_tfTexture;
 	unsigned int g_framebufferObject;
 	unsigned int g_entryPointTextureId;
@@ -131,6 +143,32 @@ namespace
 	unsigned int g_pageDirTexture;
 	unsigned int g_pageTableTexture;
 	unsigned int g_cacheTexture;
+	unsigned int g_existBufferId;
+	unsigned int g_missedBlockBufferId;
+
+
+	std::unique_ptr<VolumeVirtualMemoryHierachyGenerator<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>> largeVolumeData;
+
+	int pageDirX;
+	int pageDirY;
+	int pageDirZ;
+
+	int pageTableX;
+	int pageTableY;
+	int pageTableZ;
+
+	int cacheWidth;
+	int cacheHeight;
+	int cacheDepth;
+	int repeat;
+	int blockDataSize;
+	int originalDataWidth;
+	int originalDataHeight;
+	int originalDataDepth;
+
+	int xBlockCount;
+	int yBlockCount;
+	int zBlockCount;
 
 }
 
@@ -257,6 +295,29 @@ void checkFrambufferStatus()
 
 }
 
+void initBlockExistsHash()
+{
+	// exist buffer id
+	glGenBuffers(1, &g_existBufferId);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_existBufferId);
+	auto ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
+	const std::size_t totalBlockCount = std::size_t(xBlockCount) * std::size_t(yBlockCount)*std::size_t(zBlockCount) * sizeof(int);
+	memset(ptr, 0, totalBlockCount);
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+}
+
+void initMissedBlockVector()
+{
+
+	// missing block id
+	glGenBuffers(1, &g_missedBlockBufferId);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_missedBlockBufferId);
+	auto ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
+	memset(ptr, 0, missedBlockCapacity);
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+}
+
 bool isCacheMissed()
 {
 	return false;
@@ -268,13 +329,15 @@ void processCacheMiss()
 }
 
 
+
+
 void renderLoop()
 {
 	//glClear(GL_COLOR_BUFFER_BIT);
-	GL_ERROR_REPORT
-		glEnable(GL_DEPTH_TEST);
-	GL_ERROR_REPORT
-		g_positionShaderProgram.bind();
+	GL_ERROR_REPORT;
+	glEnable(GL_DEPTH_TEST);
+	GL_ERROR_REPORT;
+	g_positionShaderProgram.bind();
 	g_positionShaderProgram.setUniformValue("projMatrix", g_projMatrix.Matrix());
 	g_positionShaderProgram.setUniformValue("worldMatrix", ysl::Transform{}.Matrix());
 	g_positionShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
@@ -286,32 +349,32 @@ void renderLoop()
 	// Draw front
 	glDepthFunc(GL_LESS);
 
-	GL_ERROR_REPORT
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-	GL_ERROR_REPORT
-		// Draw Back
-		glDrawBuffer(GL_COLOR_ATTACHMENT1);
+	GL_ERROR_REPORT;
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	GL_ERROR_REPORT;
+	// Draw Back
+	glDrawBuffer(GL_COLOR_ATTACHMENT1);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDepthFunc(GL_GREATER);
 
-	GL_ERROR_REPORT
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-	GL_ERROR_REPORT
+	GL_ERROR_REPORT;
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	GL_ERROR_REPORT;
 
-		glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LESS);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	GL_ERROR_REPORT
+	GL_ERROR_REPORT;
 
-		glEnable(GL_BLEND);
-	GL_ERROR_REPORT
-		glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
-	GL_ERROR_REPORT
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	GL_ERROR_REPORT
-		glEnable(GL_TEXTURE_RECTANGLE);
-	GL_ERROR_REPORT
+	glEnable(GL_BLEND);
+	GL_ERROR_REPORT;
+	glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
+	GL_ERROR_REPORT;
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	GL_ERROR_REPORT;
+	glEnable(GL_TEXTURE_RECTANGLE);
+	GL_ERROR_REPORT;
 
-		g_rayCastingShaderProgram.bind();
+	g_rayCastingShaderProgram.bind();
 	g_rayCastingShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
 	g_rayCastingShaderProgram.setUniformValue("orthoMatrix", g_orthoMatrix.Matrix());
 	g_rayCastingShaderProgram.setUniformSampler("texVolume", TextureUnit3, Texture3D, g_volumeTexture);
@@ -331,9 +394,14 @@ void renderLoop()
 	g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
 
 	g_rayCastingVAO.bind();
+
 	glClear(GL_COLOR_BUFFER_BIT);
+
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+
 	glDisable(GL_DEPTH_TEST);
+
+
 
 	if (isCacheMissed())
 	{
@@ -514,7 +582,7 @@ int main(int argc, char** argv)
 	g_proxyVBO.allocate(g_proxyGeometryVertices, sizeof(g_proxyGeometryVertices));
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(sizeof(g_proxyGeometryVertices) / 2));
 	GL_ERROR_REPORT
 		glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
@@ -545,10 +613,10 @@ int main(int argc, char** argv)
 
 	std::string dataFileName;
 	//std::cin >> dataFileName;
-	dataFileName = "D:\\scidata\\abc\\s1_512_512_512.raw";
+	dataFileName = "D:\\scidata\\abc\\s1_302_302_302.raw";
 
 	std::size_t width, height, depth;
-	width = 512; height = 512, depth = 512;
+	width = 302; height = 302, depth = 302;
 	//std::cin >> width >> height >> depth;
 	const std::size_t total = width * height * depth;
 	std::ifstream rawData(dataFileName);
@@ -569,20 +637,35 @@ int main(int argc, char** argv)
 
 	std::string lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
 
-	VolumeVirtualMemoryHierachyGenerator<16, 16, 16> largeVolumeData(lvdFileName);
+
+	//VolumeVirtualMemoryHierachyGenerator<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry> largeVolumeData(lvdFileName);
+	largeVolumeData.reset(new VolumeVirtualMemoryHierachyGenerator<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(lvdFileName));
+
+
 	//largeVolumeData.m_pageDir->Width();
 
-	const auto pageDirX = largeVolumeData.m_pageDir->Width();
-	const auto pageDirY = largeVolumeData.m_pageDir->Height();
-	const auto pageDirZ = largeVolumeData.m_pageDir->Depth();
+	pageDirX = largeVolumeData->m_pageDir->Width();
+	pageDirY = largeVolumeData->m_pageDir->Height();
+	pageDirZ = largeVolumeData->m_pageDir->Depth();
 
-	const auto pageTableX = largeVolumeData.m_pageTable->Width();
-	const auto pageTableY = largeVolumeData.m_pageTable->Height();
-	const auto pageTableZ = largeVolumeData.m_pageTable->Depth();
+	pageTableX = largeVolumeData->m_pageTable->Width();
+	pageTableY = largeVolumeData->m_pageTable->Height();
+	pageTableZ = largeVolumeData->m_pageTable->Depth();
 
-	const auto cacheWidth = largeVolumeData.cacheWidth();
-	const auto cacheHeight = largeVolumeData.cacheHeight();
-	const auto cacheDepth = largeVolumeData.cacheDepth();
+	cacheWidth = largeVolumeData->cacheWidth();
+	cacheHeight = largeVolumeData->cacheHeight();
+	cacheDepth = largeVolumeData->cacheDepth();
+	repeat = largeVolumeData->repeat();
+	blockDataSize = largeVolumeData->blockSize();
+	originalDataWidth = largeVolumeData->originalWidth();
+	originalDataHeight = largeVolumeData->originalHeight();
+	originalDataDepth = largeVolumeData->originalDepth();
+
+	xBlockCount = largeVolumeData->xBlockCount();
+	yBlockCount = largeVolumeData->yBlockCount();
+	zBlockCount = largeVolumeData->zBlockCount();
+
+	const std::size_t totalBlockCountBytes = std::size_t(xBlockCount) * std::size_t(yBlockCount)*std::size_t(zBlockCount)*sizeof(int);
 
 	std::cout << "pageDirX:" << pageDirX << std::endl;
 	std::cout << "pageDirY:" << pageDirY << std::endl;
@@ -596,6 +679,15 @@ int main(int argc, char** argv)
 	std::cout << "cacheHeight:" << cacheHeight << std::endl;
 	std::cout << "cacheDepth:" << cacheDepth << std::endl;
 
+	std::cout << "repeat:" << repeat << std::endl;
+	std::cout << "data size:" << largeVolumeData->width() << std::endl;
+	std::cout << "original data x:" << originalDataWidth << std::endl;
+	std::cout << "original data y:" << originalDataHeight << std::endl;
+	std::cout << "original data z:" << originalDataDepth << std::endl;
+
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 	// Volume Texture
 	glGenTextures(1, &g_volumeTexture);
 	glBindTexture(GL_TEXTURE_3D, g_volumeTexture);
@@ -605,17 +697,18 @@ int main(int argc, char** argv)
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, width, height, depth, 0, GL_RED, GL_UNSIGNED_BYTE, g_rawData.get());
+	GL_ERROR_REPORT;
 
 	// page dir
 	glGenTextures(1, &g_pageDirTexture);
 	GL_ERROR_REPORT;
 	glBindTexture(GL_TEXTURE_3D, g_pageDirTexture);
 	GL_ERROR_REPORT;
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32UI, pageDirX, pageDirY, pageDirZ, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, largeVolumeData.m_pageDir->Data());
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32UI, pageDirX, pageDirY, pageDirZ, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, largeVolumeData->m_pageDir->Data());
 	GL_ERROR_REPORT;
 	glBindTexture(GL_TEXTURE_3D, 0);
 	GL_ERROR_REPORT;
-	glBindImageTexture(0, g_pageDirTexture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32UI);
+	glBindImageTexture(0, g_pageDirTexture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32UI);			// layout(binding = 0)
 	GL_ERROR_REPORT;
 
 	// page table
@@ -623,11 +716,10 @@ int main(int argc, char** argv)
 	GL_ERROR_REPORT;
 	glBindTexture(GL_TEXTURE_3D, g_pageTableTexture);
 	GL_ERROR_REPORT;
-	//glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA32UI, pageTableX, pageTableY, pageTableZ);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32UI, pageTableX, pageTableY, pageTableZ, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, largeVolumeData.m_pageTable->Data());
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32UI, pageTableX, pageTableY, pageTableZ, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, largeVolumeData->m_pageTable->Data());
 	GL_ERROR_REPORT;
 	glBindTexture(GL_TEXTURE_3D, 0);
-	glBindImageTexture(1, g_pageTableTexture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32UI);
+	glBindImageTexture(1, g_pageTableTexture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32UI);		// layout(binding = 1)
 	GL_ERROR_REPORT;
 
 	// data cache
@@ -637,7 +729,37 @@ int main(int argc, char** argv)
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, cacheWidth, cacheHeight, cacheDepth, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 	GL_ERROR_REPORT;
 
-		// Transfer function texture
+
+	/// TODO::
+	// exist buffer id
+	glGenBuffers(1, &g_existBufferId);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_existBufferId);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, totalBlockCountBytes, nullptr, GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, g_existBufferId);
+	//glBufferData(GL_SHADER_STORAGE_BUFFER, 0);
+
+	// missing block id
+	glGenBuffers(1, &g_missedBlockBufferId);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_missedBlockBufferId);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, missedBlockCapacity, nullptr, GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, g_missedBlockBufferId);
+	//auto ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
+
+
+
+	// shader program
+	g_rayCastingShaderProgram.bind();
+	g_rayCastingShaderProgram.setUniformSampler("cacheVolume", TextureUnit4, Texture3D, g_cacheTexture);
+	g_rayCastingShaderProgram.setUniformValue("totalPageDirSize", ysl::Vector3i{ pageDirX,pageDirY,pageDirZ });
+	g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ pageTableX,pageTableY,pageTableZ });
+	g_rayCastingShaderProgram.setUniformValue("blockDataSize", ysl::Vector3i{ blockDataSize - 2 * repeat,blockDataSize - 2 * repeat,blockDataSize - 2 * repeat });
+	g_rayCastingShaderProgram.setUniformValue("volumeDataSize", ysl::Vector3i{ originalDataWidth,originalDataDepth,originalDataDepth });
+	g_rayCastingShaderProgram.setUniformValue("pageTableBlockEntrySize", ysl::Vector3i{ pageTableBlockEntry ,pageTableBlockEntry ,pageTableBlockEntry });
+	g_rayCastingShaderProgram.setUniformValue("repeatSize", ysl::Vector3i{ repeat,repeat,repeat });
+	g_rayCastingShaderProgram.unbind();
+
+
+	// Transfer function texture
 	glGenTextures(1, &g_tfTexture);
 	glBindTexture(GL_TEXTURE_1D, g_tfTexture);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -667,6 +789,7 @@ int main(int argc, char** argv)
 	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_DEPTH_COMPONENT, initialWidth, initialHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glBindTexture(GL_TEXTURE_RECTANGLE, 0);
+
 
 	GL_ERROR_REPORT;
 	glGenFramebuffers(1, &g_framebufferObject);

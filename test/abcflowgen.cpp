@@ -14,9 +14,9 @@ int ABCFlowGen()
 
 
 
-	size_t sideX = 64;
-	size_t sideY = 64;
-	size_t sideZ = 64;
+	size_t sideX = 302;
+	size_t sideY = 302;
+	size_t sideZ = 302;
 
 	//std::cin >> sideX >> sideY >> sideZ;
 

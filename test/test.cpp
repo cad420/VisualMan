@@ -6,6 +6,11 @@
 #include "../src/utility/cmdline.h"
 #include "../src/volume/volume.h"
 #include "../src/volume/virtualvolumehierachy.h"
+#include <forward_list>
+#include "abcflowgen.h"
+
+#include <atomic>
+#include <thread>
 
 
 int LVDTester()
@@ -78,8 +83,36 @@ int LVDTester()
 
 }
 
+int g_sum = 0;
+
+std::atomic_bool flag;
+
+int atomicTest()
+{
+	auto f = []()
+	{
+		for(int i = 1 ;i<=10000000;i++)
+		{
+			bool expected = false;
+			while (flag.compare_exchange_strong(expected, true) != true)
+				expected = false;
+			g_sum += 1;
+			flag = false;
+			//std::cout << i << std::endl;
+		}
+	};
+	std::thread t1(f);
+	std::thread t2(f);
+	t1.join();
+	t2.join();
+	std::cout << g_sum << std::endl;
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
+	atomicTest();
+
 	//std::string fileName;
 	//int x, y, z, repeat;
 	//std::cin >> fileName >> x >> y >> z >> repeat;
@@ -91,38 +124,38 @@ int main(int argc, char *argv[])
 	 // create a parser
 
 
-	const std::string lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
+	//const std::string lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
 
-	VolumeVirtualMemoryHierachyGenerator<16,16,16> cache(lvdFileName);
+	//VolumeVirtualMemoryHierachyGenerator<16,16,16> cache(lvdFileName);
 
-	if(cache.valid())
-	{
-		std::cout << cache.width() << std::endl;
-		std::cout << cache.height() << std::endl;
-		std::cout << cache.depth() << std::endl;
-		std::cout << cache.xBlockCount() << std::endl;
-		std::cout << cache.yBlockCount() << std::endl;
-		std::cout << cache.zBlockCount() << std::endl;
-		std::cout << cache.blockSize() << std::endl;
-	}
+	//if(cache.valid())
+	//{
+	//	std::cout << cache.width() << std::endl;
+	//	std::cout << cache.height() << std::endl;
+	//	std::cout << cache.depth() << std::endl;
+	//	std::cout << cache.xBlockCount() << std::endl;
+	//	std::cout << cache.yBlockCount() << std::endl;
+	//	std::cout << cache.zBlockCount() << std::endl;
+	//	std::cout << cache.blockSize() << std::endl;
+	//}
 
-	//std::cout << ysl::RoundUpDivide(cache.width(), 32);
-	//std::cout << ysl::RoundUpDivide(cache.height(), 32);
-	//std::cout << ysl::RoundUpDivide(cache.depth(), 32);
+	////std::cout << ysl::RoundUpDivide(cache.width(), 32);
+	////std::cout << ysl::RoundUpDivide(cache.height(), 32);
+	////std::cout << ysl::RoundUpDivide(cache.depth(), 32);
 
-	std::cout << cache.m_pageTable->Width() << std::endl;
-	std::cout << cache.m_pageTable->Height() << std::endl;
-	std::cout << cache.m_pageTable->Depth() << std::endl;
-	std::cout << cache.m_pageDir->Width() << std::endl;
-	std::cout << cache.m_pageDir->Depth() << std::endl;
-	std::cout << cache.m_pageDir->Height() << std::endl;
+	//std::cout << cache.m_pageTable->Width() << std::endl;
+	//std::cout << cache.m_pageTable->Height() << std::endl;
+	//std::cout << cache.m_pageTable->Depth() << std::endl;
+	//std::cout << cache.m_pageDir->Width() << std::endl;
+	//std::cout << cache.m_pageDir->Depth() << std::endl;
+	//std::cout << cache.m_pageDir->Height() << std::endl;
 
 
-	int blockId;
-	while(std::cin>>blockId)
-	{
-		cache.blockData(blockId);
-	}
+	//int blockId;
+	//while(std::cin>>blockId)
+	//{
+	//	cache.blockData(blockId);
+	//}
 
 
 
@@ -141,6 +174,11 @@ int main(int argc, char *argv[])
 	//{
 	//	std::cout << data[i] << std::endl;
 	//}
+
+
+	//ABCFlowGen();
+
+
 
 	system("pause");
 	return 0;
