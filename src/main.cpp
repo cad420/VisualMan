@@ -120,7 +120,11 @@ namespace
 	float ks = 1.0;
 	float kd = 1.0;
 	float shininess = 50.0f;
-
+	float tmin = 2;
+	float alpha = 0.4;
+	float beta = 0.5;
+	float radius = 0.5;
+	float v[3];
 
 
 	constexpr int pageTableBlockEntry = 16;
@@ -381,6 +385,13 @@ void renderLoop()
 	g_rayCastingShaderProgram.setUniformSampler("texStartPos", TextureUnit0, Texture2DRect, g_entryPointTextureId);
 	g_rayCastingShaderProgram.setUniformSampler("texEndPos", TextureUnit1, Texture2DRect, g_exitPointTextureId);
 	g_rayCastingShaderProgram.setUniformSampler("texTransfunc", TextureUnit2, Texture1D, g_tfTexture);
+	g_rayCastingShaderProgram.setUniformValue("eye", g_camera.position());
+	g_rayCastingShaderProgram.setUniformValue("forward",g_camera.front());
+	g_rayCastingShaderProgram.setUniformValue("tmin", tmin);
+	g_rayCastingShaderProgram.setUniformValue("alpha", alpha);
+	g_rayCastingShaderProgram.setUniformValue("beta", beta);
+	g_rayCastingShaderProgram.setUniformValue("radius", radius);
+	g_rayCastingShaderProgram.setUniformValue("axis", ysl::Vector3f{v[0],v[1],v[2]});
 
 	g_rayCastingShaderProgram.setUniformValue("step", step);
 	g_rayCastingShaderProgram.setUniformValue("ka", ka);
@@ -396,12 +407,8 @@ void renderLoop()
 	g_rayCastingVAO.bind();
 
 	glClear(GL_COLOR_BUFFER_BIT);
-
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-
 	glDisable(GL_DEPTH_TEST);
-
-
 
 	if (isCacheMissed())
 	{
@@ -556,8 +563,8 @@ int main(int argc, char** argv)
 
 	// shader
 	g_rayCastingShaderProgram.create();
-	g_rayCastingShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\blockraycasting_v.glsl", ysl::ShaderProgram::ShaderType::Vertex);
-	g_rayCastingShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\blockraycasting_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
+	g_rayCastingShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\raycasting_v.glsl", ysl::ShaderProgram::ShaderType::Vertex);
+	g_rayCastingShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\raycasting_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
 	g_rayCastingShaderProgram.link();
 
 	g_positionShaderProgram.create();
@@ -829,13 +836,22 @@ int main(int argc, char** argv)
 
 		//ImGui::End();
 		//ImGui::ShowDemoWindow();
-
+		static bool lock = true;
 		ImGui::Begin("Control Panel");
 		ImGui::SliderFloat("step", &step, 0.001, 1.0);
+		ImGui::SliderFloat("plane", &tmin, 0.01, 10);
+		ImGui::SliderFloat("alpha", &alpha, 0.00, 10);
+		ImGui::SliderFloat("beta", &beta, 0.0, 100);
+		ImGui::SliderFloat("radius", &radius, 0.05, 100);
 		ImGui::SliderFloat("ka", &ka, 0.0f, 1.0f);
 		ImGui::SliderFloat("kd", &kd, 0.0f, 1.0f);
 		ImGui::SliderFloat("ks", &ks, 0.0f, 1.0f);
 		ImGui::SliderFloat("shininess", &shininess, 0.0f, 50.f);
+		ImGui::SliderFloat3("axis:", v, 0, 1);
+		if(ImGui::Button("lock"))
+		{
+			lock = !lock;
+		}
 		ImGui::End();
 
 
@@ -870,7 +886,7 @@ int main(int argc, char** argv)
 		MouseEvent moveEvent({ 0,0 }, 0);
 		for (auto i = 0; i < IM_ARRAYSIZE(io.MouseDown); ++i)
 		{
-			if (io.MouseDownDuration[i] > 0.0f && !ImGui::IsMouseHoveringAnyWindow())
+			if (io.MouseDownDuration[i] > 0.0f && !ImGui::IsMouseHoveringAnyWindow() && !lock)
 			{
 				if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
 				{

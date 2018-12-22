@@ -139,43 +139,49 @@ namespace ysl
 	void ShaderProgram::setUniformValue(int location, const ysl::Matrix4x4 & mat4x4)
 	{
 		glUniformMatrix4fv(location, 1, GL_TRUE, mat4x4.m[0]);
-		GL_ERROR_REPORT
+		GL_ERROR_REPORT;
 	}
 
 	void ShaderProgram::setUniformValue(int location, const ysl::Matrix3x3& mat3x3)
 	{
 		glUniformMatrix3fv(location, 1, GL_TRUE, mat3x3.m[0]);
-		GL_ERROR_REPORT
+		GL_ERROR_REPORT;
 	}
 
 	void ShaderProgram::setUniformValue(int location, const ysl::RGBSpectrum& rgb)
 	{
 		glUniform3fv(location, 1,rgb.c);
-		GL_ERROR_REPORT
+		GL_ERROR_REPORT;
 	}
 
 	void ShaderProgram::setUniformValue(int location, const ysl::Vector3f& fvec3)
 	{
 		glUniform3fv(location, 1, &fvec3.x);
-		GL_ERROR_REPORT
+		GL_ERROR_REPORT;
+	}
+
+	void ShaderProgram::setUniformValue(int location, const ysl::Point3f& fpos3)
+	{
+		glUniform3fv(location, 1, &fpos3.x);
+		GL_ERROR_REPORT;
 	}
 
 	void ShaderProgram::setUniformValue(int location, const ysl::Vector3i& ivec3)
 	{
 		glUniform3iv(location, 1, &ivec3.x);
-		GL_ERROR_REPORT
+		GL_ERROR_REPORT;
 	}
 
 	void ShaderProgram::setUniformValue(int location, const ysl::Vector2f& fvec2)
 	{
 		glUniform2fv(location, 1, &fvec2.x);
-		GL_ERROR_REPORT
+		GL_ERROR_REPORT;
 	}
 
 	void ShaderProgram::setUniformValue(int location, const ysl::Vector2i& ivec2)
 	{
 		glUniform2iv(location, 1, &ivec2.x);
-		GL_ERROR_REPORT
+		GL_ERROR_REPORT;
 	}
 
 	void ShaderProgram::setUniformSampler(int location, TextureUnit texUnit, TextureTarget target, unsigned textureId)
@@ -222,6 +228,11 @@ namespace ysl
 	void ShaderProgram::setUniformValue(const char* name, const ysl::Vector3f& fvec3)
 	{
 		setUniformValue(uniformLocation(name), fvec3);
+	}
+
+	void ShaderProgram::setUniformValue(const char* name, const ysl::Point3f& fpos3)
+	{
+		setUniformValue(uniformLocation(name), fpos3);
 	}
 
 	void ShaderProgram::setUniformValue(const char* name, const ysl::Vector3i& ivec3)
@@ -278,6 +289,11 @@ namespace ysl
 	void ShaderProgram::setUniformValue(const std::string& name, const ysl::Vector3f& fvec3)
 	{
 		setUniformValue(name.c_str(), fvec3);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, const ysl::Point3f& fpos3)
+	{
+		setUniformValue(name.c_str(), fpos3);
 	}
 
 	void ShaderProgram::setUniformValue(const std::string& name, const ysl::Vector3i& ivec3)
