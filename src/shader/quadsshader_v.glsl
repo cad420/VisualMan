@@ -5,8 +5,7 @@ layout (location = 1 ) in vec2 tex;
 out vec2 textureRectCoord;
 uniform mat4 orthoMatrix;
 uniform mat4 viewMatrix;
-void main() 
-{
+void main() {
    textureRectCoord = tex;
    gl_Position = orthoMatrix*vec4(vertex.x,vertex.y,0.0,1.0);
 };

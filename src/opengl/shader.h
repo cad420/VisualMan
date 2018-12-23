@@ -43,7 +43,8 @@ namespace ysl
 		void setUniformValue(int location, const ysl::Vector3i & ivec3);
 		void setUniformValue(int location, const ysl::Vector2f & fvec2);
 		void setUniformValue(int location, const ysl::Vector2i & ivec2);
-		void setUniformSampler(int location, TextureUnit texUnit, TextureTarget target, unsigned int textureId);
+		void setUniformSampler(int location, OpenGLTexture::TextureUnit texUnit, OpenGLTexture::TextureTarget target, unsigned int textureId);
+		void setUniformSampler(int location, OpenGLTexture::TextureUnit texUnit,const OpenGLTexture & texture);
 
 		void setUniformValue(const char * name, bool value);
 		void setUniformValue(const char * name, int value);
@@ -56,7 +57,8 @@ namespace ysl
 		void setUniformValue(const char * name, const ysl::Vector3i & ivec3);
 		void setUniformValue(const char * name, const ysl::Vector2f & fvec2);
 		void setUniformValue(const char * name, const ysl::Vector2i & ivec2);
-		void setUniformSampler(const char * name, TextureUnit texUnit, TextureTarget target, unsigned int textureId);
+		void setUniformSampler(const char * name, OpenGLTexture::TextureUnit texUnit, OpenGLTexture::TextureTarget target, unsigned int textureId);
+		void setUniformSampler(const char * name, OpenGLTexture::TextureUnit texUnit,const OpenGLTexture & texture);
 
 		void setUniformValue(const std::string & name, bool value);
 		void setUniformValue(const std::string & name, int value);
@@ -69,7 +71,8 @@ namespace ysl
 		void setUniformValue(const std::string & name, const ysl::Vector3i & ivec3);
 		void setUniformValue(const std::string & name, const ysl::Vector2f & fvec2);
 		void setUniformValue(const std::string & name, const ysl::Vector2i & ivec2);
-		void setUniformSampler(const std::string & name, TextureUnit texUnit, TextureTarget target, unsigned int textureId);
+		void setUniformSampler(const std::string & name, OpenGLTexture::TextureUnit texUnit, OpenGLTexture::TextureTarget target, unsigned int textureId);
+		void setUniformSampler(const std::string & name, OpenGLTexture::TextureUnit texUnit,const OpenGLTexture & texture);
 
 
 	private:

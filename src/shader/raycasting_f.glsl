@@ -4,6 +4,7 @@ uniform sampler1D texTransfunc;
 uniform sampler2DRect texStartPos;
 uniform sampler2DRect texEndPos;
 uniform sampler3D texVolume;
+uniform sampler2DRect texIntermediateResult;
 uniform float step;
 uniform float ka;
 uniform float kd;
@@ -62,7 +63,8 @@ void main()
 	vec3 rayEnd = texture2DRect(texEndPos, textureRectCoord).xyz;
 	vec3 start2end = rayEnd - rayStart;
 	vec3 direction = normalize(start2end);
-	vec4 color = vec4(0.0,0.0,0.0,0.0);
+	//vec4 color = texture2DRect(texIntermediateResult,textureRectCoord);
+	vec4 color = vec4(0,0,0,0);
 	float distance = dot(direction, start2end);
 
 	int steps = int(distance / step);
@@ -84,7 +86,7 @@ void main()
 		for (int i = 0; i < 10000; ++i)
 		{
 //			vec3 pos = rayStart + direction * step * (float(i) + 0.5);
-			vec3 pos = rayStart +direction * step * (float(i) + 0.5); 
+			vec3 pos = rayStart + direction * step * (float(i) + 0.5); 
 			float t = length(pos-eye)*dot(direction,eyeDir) - tmin;
 			if(t <=0)
 			{

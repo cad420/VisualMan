@@ -2,68 +2,112 @@
 #include "openglbuffer.h"
 
 #include "../../lib/gl3w/GL/gl3w.h"
+#include "error.h"
 
-OpenGLBuffer::OpenGLBuffer(BufferType type,BufferUsage usage):
-m_type(type),
-m_usage(usage),
-m_buffer(0)
+OpenGLBuffer::OpenGLBuffer(BufferTarget type,BufferUsage usage):
+target(type),
+usage(usage),
+bufferId(0),
+currentContext(OpenGLCurrentContext::GetCurrentOpenGLContext())
 {
-
-}
-
-void OpenGLBuffer::create()
-{
-	glGenBuffers(1, &m_buffer);
-}
-
-void OpenGLBuffer::bind()
-{
-	glBindBuffer(glEnumTarget(), m_buffer);
-}
-
-void OpenGLBuffer::allocate(const void* data, std::size_t size)
-{
-	m_dataSize = size;
-	write(data);
-}
-
-void OpenGLBuffer::setUsage(BufferUsage usage)
-{
-	m_usage = usage;
-}
-
-void OpenGLBuffer::write(const void* data)
-{
-	glBufferData(glEnumTarget(), m_dataSize, data,glBufferUsage());
-}
-
-void OpenGLBuffer::unbind()
-{
-	glBindBuffer(glEnumTarget(), 0);
-}
-
-void OpenGLBuffer::destroy()
-{
-	glDeleteBuffers(1, &m_buffer);
+	if (!currentContext)
+	{
+		ysl::Error("No OpenGL Context");
+	}
+	glGenBuffers(1, &bufferId);
+	Bind();
 }
 
 
-GLenum OpenGLBuffer::glEnumTarget() const
+
+OpenGLBuffer::BufferTarget OpenGLBuffer::Target()const
 {
-	if (m_type == BufferType::VertexArrayBuffer)
-		return GL_ARRAY_BUFFER;
-	if (m_type == BufferType::ElementArrayBuffer)
-		return GL_ELEMENT_ARRAY_BUFFER;
-	return 0;
+	return target;
 }
 
-GLenum OpenGLBuffer::glBufferUsage() const
+void OpenGLBuffer::Bind()
 {
-	if (m_usage == BufferUsage::Dynamic)
-		return GL_DYNAMIC_DRAW;
-	if (m_usage == BufferUsage::Static)
-		return GL_STATIC_DRAW;
-	if (m_usage == BufferUsage::Stream)
-		return GL_STREAM_DRAW;
-	return 0;
+	glBindBuffer(target, bufferId);
 }
+
+void OpenGLBuffer::SetSize(std::size_t size)
+{
+	dataSize = size;
+}
+
+std::size_t OpenGLBuffer::Size() const
+{
+	return dataSize;
+}
+
+void OpenGLBuffer::AllocateFor(const void* data, std::size_t size)
+{
+	dataSize = size;
+	Write(data);
+}
+
+void OpenGLBuffer::Write(const void* data)
+{
+	glBufferData(target, dataSize, data, usage);
+}
+
+void OpenGLBuffer::Unbind()
+{
+	glBindBuffer(target, 0);
+}
+
+bool OpenGLBuffer::ShaderStorageBufferBind(int index)
+{
+	if (target != ShaderStorageBuffer)
+	{
+		ysl::Warning("The target of buffer is wrong");
+		return false;
+	}
+	Bind();
+	glBindBufferBase(target, index, bufferId);
+
+}
+
+void * OpenGLBuffer::Map(Access access)
+{
+	Bind();
+	const auto ptr = glMapBuffer(target, access);
+	Unbind();
+	return ptr;
+}
+
+void OpenGLBuffer::Unmap()
+{
+	Bind();
+	glUnmapBuffer(target);
+	Unbind();
+}
+
+OpenGLBuffer::~OpenGLBuffer()
+{
+	const auto ctx = OpenGLCurrentContext::GetCurrentOpenGLContext();
+	if (!ctx || *currentContext != *ctx)
+		ysl::Warning("The context is different from the one with which the resource is created");
+	glDeleteBuffers(1, &bufferId);
+}
+
+//
+//GLenum OpenGLBuffer::glEnumTarget() const
+//{
+//	if (m_target == BufferTarget::VertexArrayBuffer)
+//		return GL_ARRAY_BUFFER;
+//	if (m_target == BufferTarget::ElementArrayBuffer)
+//		return GL_ELEMENT_ARRAY_BUFFER;
+//	return 0;
+//}
+//
+//GLenum OpenGLBuffer::glBufferUsage() const
+//{
+//	if (m_usage == BufferUsage::Dynamic)
+//		return GL_DYNAMIC_DRAW;
+//	if (m_usage == BufferUsage::Static)
+//		return GL_STATIC_DRAW;
+//	if (m_usage == BufferUsage::Stream)
+//		return GL_STREAM_DRAW;
+//	return 0;
+//}

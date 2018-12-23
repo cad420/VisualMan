@@ -184,11 +184,17 @@ namespace ysl
 		GL_ERROR_REPORT;
 	}
 
-	void ShaderProgram::setUniformSampler(int location, TextureUnit texUnit, TextureTarget target, unsigned textureId)
+	void ShaderProgram::setUniformSampler(int location, OpenGLTexture::TextureUnit texUnit, OpenGLTexture::TextureTarget target, unsigned textureId)
 	{
 		glActiveTexture(texUnit);
 		glBindTexture(target, textureId);
-		glUniform1i(location, texUnit - TextureUnit0);
+		glUniform1i(location, texUnit - OpenGLTexture::TextureUnit0);
+	}
+
+	void ShaderProgram::setUniformSampler(int location, OpenGLTexture::TextureUnit texUnit,
+		const OpenGLTexture& texture)
+	{
+		setUniformSampler(location, texUnit, texture.Target(), texture.NativeTextureId());
 	}
 
 	void ShaderProgram::setUniformValue(int location, bool value)
@@ -250,10 +256,16 @@ namespace ysl
 		setUniformValue(uniformLocation(name), ivec2);
 	}
 
-	void ShaderProgram::setUniformSampler(const char* name, TextureUnit texUnit, TextureTarget target,
+	void ShaderProgram::setUniformSampler(const char* name, OpenGLTexture::TextureUnit texUnit, OpenGLTexture::TextureTarget target,
 		unsigned textureId)
 	{
 		setUniformSampler(uniformLocation(name), texUnit, target, textureId);
+	}
+
+	void ShaderProgram::setUniformSampler(const char* name, OpenGLTexture::TextureUnit texUnit,
+		const OpenGLTexture& texture)
+	{
+		setUniformSampler(uniformLocation(name), texUnit, texture);
 	}
 
 
@@ -311,10 +323,16 @@ namespace ysl
 		setUniformValue(name.c_str(), ivec2);
 	}
 
-	void ShaderProgram::setUniformSampler(const std::string& name, TextureUnit texUnit, TextureTarget target,
+	void ShaderProgram::setUniformSampler(const std::string& name, OpenGLTexture::TextureUnit texUnit, OpenGLTexture::TextureTarget target,
 		unsigned textureId)
 	{
 		setUniformSampler(name.c_str(), texUnit, target, textureId);
+	}
+
+	void ShaderProgram::setUniformSampler(const std::string& name, OpenGLTexture::TextureUnit texUnit,
+		const OpenGLTexture& texture)
+	{
+		setUniformSampler(name.c_str(), texUnit, texture);
 	}
 
 	void ShaderProgram::setUniformValue(const std::string& name, bool value)
