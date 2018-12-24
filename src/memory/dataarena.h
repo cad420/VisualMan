@@ -1,13 +1,15 @@
 #ifndef DATAARENA_H_
 #define DATAARENA_H_
 
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <list>
-
 #include <vector>
 
-constexpr size_t CashLine = 64;
+constexpr std::size_t CashLine = 64;
 
-void *AllocAligned(size_t size, int align);
+void *AllocAligned(std::size_t size, int align);
 
 void  FreeAligned(void * ptr);
 
@@ -49,14 +51,14 @@ public:
 		arena.m_currentBlock = nullptr;
 	}
 
-	DataArena & operator=(DataArena && arena)noexcept 
+	DataArena & operator=(DataArena && arena)noexcept
 	{
 		m_blockSize = arena.m_blockSize;
 		m_currentBlockPos = arena.m_currentBlockPos;
 		m_currentAllocBlockSize = arena.m_currentAllocBlockSize;
-		m_currentBlock=arena.m_currentBlock;
+		m_currentBlock = arena.m_currentBlock;
 		arena.m_currentBlock = nullptr;
-		m_fragmentSize=arena.m_fragmentSize;
+		m_fragmentSize = arena.m_fragmentSize;
 		m_used = std::move(arena.m_used);
 		m_available = std::move(arena.m_available);
 		return *this;
