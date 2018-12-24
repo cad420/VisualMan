@@ -19,6 +19,12 @@ enum VoxelFormat { Grayscale, RGB, RGBA };
 
 struct GlobalBlockAbstractIndex
 {
+	GlobalBlockAbstractIndex(std::size_t linearId,int xb,int yb,int zb)
+	{
+		z = linearId / (xb*yb);
+		y = (linearId - z * xb*yb) / xb;
+		x = linearId - z * xb*yb - y * xb;
+	}
 	using size_type = int;
 	size_type x, y, z;
 };

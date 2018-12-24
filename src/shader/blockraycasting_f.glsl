@@ -3,6 +3,7 @@
 uniform sampler1D texTransfunc;
 uniform sampler2DRect texStartPos;
 uniform sampler2DRect texEndPos;
+uniform sampler2DRect texIntermediateResult;
 uniform sampler3D texVolume;
 uniform float step;
 uniform float ka;
@@ -25,7 +26,7 @@ uniform ivec3 repeatOffset;							// repeat boarder size
 
 layout(binding = 0, rgba32i) uniform iimage3D pageDirTexutre;
 layout(binding = 1, rgba32i) uniform iimage3D pageTableTexture;
-//layout(binding = 2, r32i) uniform iimage1D cacheMissedTexture;
+layout(binding = 2, rgba32f) uniform image2DRect entryPos;
 
 // keywords buffer shows the read-write feature of the buffer.
 layout(std430, binding = 0) buffer HashTable
@@ -33,7 +34,8 @@ layout(std430, binding = 0) buffer HashTable
 	int blockId[];
 }hashTable;
 
-layout(std430, binding = 1) buffer MissedBlock{
+layout(std430, binding = 1) buffer MissedBlock
+{
 	int spinLock;
 	int count;
 	int blockId[];
@@ -42,22 +44,24 @@ layout(std430, binding = 1) buffer MissedBlock{
 
 float virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
-	ivec3 pDirAddress = ivec3(samplePos*totalPageDirSize);
-	ivec4 pageDirEntry = imageLoad(pageDirTexutre,pDirAddress);
-	ivec3 pTableAddress = ivec3(pageDirEntry) + ivec3(samplePos*totalPageTableSize) % pageTableBlockEntrySize;
-	ivec4 pageTableEntry = imageLoad(pageTableTexture,pTableAddress);
-
-	ivec3 voxelCoord = ivec3(samplePos * volumeDataSize);
+	ivec3 pDirAddress= ivec3(samplePos*totalPageDirSize);
+	ivec4 pageDirEntry= imageLoad(pageDirTexutre,pDirAddress);
+	ivec3 pTableAddress= ivec3(pageDirEntry) + ivec3(samplePos*totalPageTableSize) % pageTableBlockEntrySize;
+	ivec4 pageTableEntry= imageLoad(pageTableTexture,pTableAddress);
+	ivec3 voxelCoord=ivec3(samplePos * volumeDataSize);
 	ivec3 blockOffset = voxelCoord % blockDataSize;
+
+	// pageTableEntry has a problem
 
 	if(pageTableEntry.w == 2)		// Unmapped flag
 	{
-		//calculate block id
+
 		ivec3 blockCoord = voxelCoord/blockDataSize;
 		int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
 				+blockCoord.y * totalPageTableSize.x 
 				+blockCoord.x;
-		int exist = atomicCompSwap(hashTable.blockId[blockId],0,1);
+				int exist;
+		exist = atomicCompSwap(hashTable.blockId[blockId],0,1);
 		if(exist == 0)
 		{
 			// lock
@@ -69,7 +73,6 @@ float virtualVolumeSample(vec3 samplePos,out bool mapped)
 			// unlock
 			missedBlock.spinLock = 0;
 		}
-		
 		mapped = false;
 		return 0.0;
 	}
@@ -80,6 +83,7 @@ float virtualVolumeSample(vec3 samplePos,out bool mapped)
 		mapped = true;
 		return scalar.r;
 	}
+
 }
 
 vec3 PhongShading(vec3 samplePos, vec3 diffuseColor)
@@ -113,32 +117,51 @@ vec3 PhongShading(vec3 samplePos, vec3 diffuseColor)
 void main()
 {
 
-	vec3 rayStart = texture2DRect(texStartPos, textureRectCoord).xyz;
+	//vec3 rayStart = texture2DRect(texStartPos, textureRectCoord).xyz;
+	vec3 rayStart = imageLoad(entryPos,ivec2(textureRectCoord)).xyz;
 	vec3 rayEnd = texture2DRect(texEndPos, textureRectCoord).xyz;
 
 	vec3 start2end = rayEnd - rayStart;
 	vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
-	if (start2end.x == 0.0 && start2end.y == 0.0 && start2end.z == 0.0) {
+
+	if (start2end.x == 0.0 && start2end.y == 0.0 && start2end.z == 0.0) 
+	{
 		fragColor = bg; // Background Colors
 		return;
 	}
 
-	vec4 color = vec4(0.0,0.0,0.0,0.0);
+	vec4 color = texture2DRect(texIntermediateResult,textureRectCoord);
+
+	//vec4 color = vec4(0,0,0,0);
+	//fragColor = color;
+
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
 	for (int i = 0; i < steps; ++i) {
+
 		vec3 samplePoint = rayStart + direction * step * (float(i) + 0.5);
-		vec4 scalar = texture(texVolume, samplePoint);
-		vec4 sampledColor = texture(texTransfunc, scalar.r);
+
+		bool map = true;
+		float scalar = virtualVolumeSample(samplePoint,map);
+		if (map == true) 
+		{
+			imageStore(entryPos,ivec2(textureRectCoord),color);
+			fragColor = color;
+			return;
+		}
+		//vec4 scalar = texture(texVolume, samplePoint);
+
+		vec4 sampledColor = texture(texTransfunc, scalar);
 		sampledColor.rgb = PhongShading(samplePoint, sampledColor.rgb);
+
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)
 			break;
 	}
-	if (color.a == 0.0)discard;
-	
 
+	//if (color.a == 0.0)
+	//	discard;
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;
 	fragColor = color;

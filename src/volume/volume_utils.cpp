@@ -29,16 +29,19 @@ BlockVolumeReader::BlockVolumeReader(const std::string& fileName): validFlag(tru
 	fileHandle.read((char*)&m_originalWidth, sizeof(int));
 	fileHandle.read((char*)&m_originalHeight, sizeof(int));
 	fileHandle.read((char*)&m_originalDepth, sizeof(int));
-	if (logBlockSize != LogBlockSize5)
+	if (logBlockSize != LogBlockSize5 && logBlockSize != LogBlockSize6)
 	{
 		std::cout << "Unsupported block size\n";
 		validFlag = false;
 		return;
 	}
-	const size_t ablockSize = blockSize();
-	bx = ((vx + ablockSize - 1) & ~(ablockSize - 1)) / ablockSize;
-	by = ((vy + ablockSize - 1) & ~(ablockSize - 1)) / ablockSize;
-	bz = ((vz + ablockSize - 1) & ~(ablockSize - 1)) / ablockSize;
+
+	const size_t aBlockSize = blockSize();
+
+	// aBlockSize must be power of 2, e.g. 32 or 64
+	bx = ((vx + aBlockSize - 1) & ~(aBlockSize - 1)) / aBlockSize;
+	by = ((vy + aBlockSize - 1) & ~(aBlockSize - 1)) / aBlockSize;
+	bz = ((vz + aBlockSize - 1) & ~(aBlockSize - 1)) / aBlockSize;
 }
 
 void BlockVolumeReader::readBlock(char* dest, int blockId)

@@ -6,7 +6,7 @@
 
 #include "../mathematics/numeric.h"
 
-int ABCFlowGen()
+int ABCFlowGen(std::size_t x,std::size_t y, std::size_t z)
 {
 	const auto A = std::sqrt(3);
 	const auto B = std::sqrt(2);
@@ -14,9 +14,9 @@ int ABCFlowGen()
 
 
 
-	size_t sideX = 302;
-	size_t sideY = 302;
-	size_t sideZ = 302;
+	size_t sideX = x;
+	size_t sideY = y;
+	size_t sideZ = z;
 
 	//std::cin >> sideX >> sideY >> sideZ;
 

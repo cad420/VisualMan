@@ -59,6 +59,20 @@ void OpenGLTexture::SetData(InternalFormat internalFmt,
 		glTexImage3D(target, 0, internalFmt, x, y, z, 0, extFmt, extType, data);
 }
 
+void OpenGLTexture::SetSubData(
+	ExternalDataFormat extFmt, 
+	ExternalDataType extType, int xOffset,int x,
+	int yOffset,int y, int zOffset, int z,const void* data)
+{
+	Bind();
+	if (target == Texture1D)
+		glTexSubImage1D(target, 0, xOffset, x,  extFmt, extType, data);
+	if (target == Texture2D || target == Texture2DRect)
+		glTexSubImage2D(target, 0, xOffset,yOffset, x, y,  extFmt, extType, data);
+	if (target == Texture3D)
+		glTexSubImage3D(target, 0, xOffset,yOffset,zOffset,x, y, z, extFmt, extType, data);
+}
+
 OpenGLTexture::TextureTarget OpenGLTexture::Target() const
 {
 	return target;

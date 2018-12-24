@@ -94,9 +94,6 @@ public:
 
 /**************************************************/
 
-
-
-
 /**************************************************/
 
 namespace
@@ -107,7 +104,7 @@ namespace
 	ysl::ShaderProgram g_rayCastingShaderProgram;
 	ysl::ShaderProgram g_positionShaderProgram;
 	ysl::ShaderProgram g_quadsShaderProgram;
-	ysl::ShaderProgram g_clearIntermediaProgram;
+	ysl::ShaderProgram g_clearIntermediateProgram;
 	ysl::Point2i g_lastMousePos;
 	std::shared_ptr<LargeVolumeCache> cache;
 
@@ -135,7 +132,6 @@ namespace
 	std::shared_ptr<OpenGLTexture> g_texDepth;
 	std::shared_ptr<OpenGLTexture> g_texIntermediateResult;
 
-
 	std::shared_ptr<OpenGLBuffer> g_proxyEBO;
 	std::shared_ptr<OpenGLBuffer> g_proxyVBO;
 	OpenGLVertexArrayObject g_proxyVAO;
@@ -154,7 +150,7 @@ namespace
 	unsigned int g_existBufferId;
 	unsigned int g_missedBlockBufferId;*/
 
-	std::unique_ptr<VolumeVirtualMemoryHierachyGenerator<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>> largeVolumeData;
+	std::unique_ptr<VolumeVirtualMemoryHierachyGenerator<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>> g_largeVolumeData;
 
 	int pageDirX;
 	int pageDirY;
@@ -256,34 +252,88 @@ void initBlockExistsHash()
 	//glGenBuffers(1, &g_existBufferId);
 	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_existBufferId);
 	const auto ptr = g_bufMissedHash->Map(OpenGLBuffer::WriteOnly);
-	std::cout <<"Hash Table Size:"<< g_bufMissedHash->Size() << std::endl;
+	std::cout << "Hash Table Size:" << g_bufMissedHash->Size() << std::endl;
 	//const std::size_t totalBlockCount = std::size_t(xBlockCount) * std::size_t(yBlockCount)*std::size_t(zBlockCount) * sizeof(int);
 	memset(ptr, 0, g_bufMissedHash->Size());
 	g_bufMissedHash->Unmap();
+	GL_ERROR_REPORT
 
 }
 
 void initMissedBlockVector()
 {
-
-	// missing block id
-	//glGenBuffers(1, &g_missedBlockBufferId);
-	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_missedBlockBufferId);
 	const auto ptr = g_bufMissedTable->Map(OpenGLBuffer::WriteOnly);
 	std::cout << "Missed Cache Table Size:" << g_bufMissedTable->Size() << std::endl;
 	memset(ptr, 0, g_bufMissedTable->Size());
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	g_bufMissedTable->Unmap();
+	GL_ERROR_REPORT
 }
 
-bool isCacheMissed()
-{
-	return false;
-}
+
 
 void processCacheMiss()
 {
 
+	const auto ptr = static_cast<int*>(g_bufMissedTable->Map(OpenGLBuffer::ReadOnly));
+	int count = ptr[1];
+	if (count == 0)
+	{
+		g_bufMissedTable->Unmap();
+		return;
+	}
+
+	const std::size_t blockSize = g_largeVolumeData->blockSize();
+
+	std::vector<GlobalBlockAbstractIndex> hits;
+
+	for (int i = 0; i < count; i++) 
+	{
+		int blockId = ptr[2 + i];
+		const auto p = g_largeVolumeData->blockData(blockId);
+		
+		GlobalBlockAbstractIndex index(blockId, xBlockCount, yBlockCount, zBlockCount);
+		hits.push_back(index);
+	}
+	GL_ERROR_REPORT;
+	g_bufMissedTable->Unmap();
+
+	auto & pageTable = *g_largeVolumeData->PageTable;
+	auto & LRUList = g_largeVolumeData->m_lruList;
+
+	g_texCache->Bind();
+	for (const auto & i : hits)
+	{
+		auto & pageTableEntry = pageTable(i.x, i.y, i.z);
+		//pageTable(i.x, i.y, i.z).w = EntryFlag::Mapped;
+		auto & last = g_largeVolumeData->m_lruList.back();
+		pageTableEntry.w = EntryFlag::Mapped;		// Map the flag of page table entry
+
+		// last.second is the cache block index
+		const auto xInCache = last.second.x;
+		const auto yInCache = last.second.y;
+		const auto zInCache = last.second.z;
+		pageTableEntry.x = xInCache;			// fill the page table entry
+		pageTableEntry.y = yInCache;
+		pageTableEntry.z = zInCache;
+
+		// Unmapped the previous table entry
+		pageTable(last.first.x, last.first.y, last.first.z).w = EntryFlag::Unmapped;
+		LRUList.splice(LRUList.begin(), LRUList, --LRUList.end());		// move from tail to head, LRU policy
+		auto d = g_largeVolumeData->blockData(i);
+
+		g_texCache->SetSubData(OpenGLTexture::RED, OpenGLTexture::UInt8,xInCache,blockSize,yInCache,blockSize,zInCache,blockSize,d);
+
+	}
+	g_texCache->Unbind();
+	GL_ERROR_REPORT;
+	// update page table
+	g_texPageTable->Bind();
+	g_texPageTable->SetData(OpenGLTexture::RGBA32UI, OpenGLTexture::RGBAInteger, OpenGLTexture::UInt32, pageTableX, pageTableY, pageTableZ, g_largeVolumeData->PageTable->Data());
+	g_texPageTable->Unbind();
+
+	initBlockExistsHash();
+	initMissedBlockVector();
+	GL_ERROR_REPORT;
 }
 
 
@@ -292,83 +342,79 @@ void processCacheMiss()
 void renderLoop()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-
 	glEnable(GL_DEPTH_TEST);
+	// clear intermediate result
+	g_framebuffer->Bind();
+	g_proxyVAO.bind();
+	g_clearIntermediateProgram.bind();
+	g_clearIntermediateProgram.setUniformValue("projMatrix", g_projMatrix.Matrix());
+	g_clearIntermediateProgram.setUniformValue("worldMatrix", ysl::Transform{}.Matrix());
+	g_clearIntermediateProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
+	glDrawBuffer(GL_COLOR_ATTACHMENT2);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	// Cull face
 	g_positionShaderProgram.bind();
 	g_positionShaderProgram.setUniformValue("projMatrix", g_projMatrix.Matrix());
 	g_positionShaderProgram.setUniformValue("worldMatrix", ysl::Transform{}.Matrix());
 	g_positionShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
-	g_proxyVAO.bind();
 
-	//glBindFramebuffer(GL_FRAMEBUFFER, g_framebufferObject);
-	g_framebuffer->Bind();
-	
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);					// Draw into attachment 0
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
 	// Draw front
 	glDepthFunc(GL_LESS);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
 	// Draw Back
-	glDrawBuffer(GL_COLOR_ATTACHMENT1);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glDrawBuffer(GL_COLOR_ATTACHMENT1);					// Draw into attachment 1
+	glClear(GL_COLOR_BUFFER_BIT);						// Do not clear depth buffer here.
 	glDepthFunc(GL_GREATER);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	glDepthFunc(GL_LESS);
+	GL_ERROR_REPORT;
+	// loop begin
 
-
-	glDrawBuffer(GL_COLOR_ATTACHMENT2);		// Draw intermediate result into a texture
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//g_framebuffer->Unbind();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// clear intermediate result
+	glDrawBuffer(GL_COLOR_ATTACHMENT2);		// Draw intermediate result into attachment 2
 	glDepthFunc(GL_LESS);
-	glEnable(GL_BLEND);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
-	glEnable(GL_TEXTURE_RECTANGLE);
+	for (int i = 0; i < 1; i++)
+	{
+		g_rayCastingShaderProgram.bind();
+		g_rayCastingShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
+		g_rayCastingShaderProgram.setUniformValue("orthoMatrix", g_orthoMatrix.Matrix());
+		g_rayCastingShaderProgram.setUniformSampler("texVolume", OpenGLTexture::TextureUnit3, *g_texVolume);
+		g_rayCastingShaderProgram.setUniformSampler("texStartPos", OpenGLTexture::TextureUnit0, *g_texEntryPos);
+		g_rayCastingShaderProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, *g_texExitPos);
+		g_rayCastingShaderProgram.setUniformSampler("texTransfunc", OpenGLTexture::TextureUnit2, *g_texTransferFunction);
+		g_rayCastingShaderProgram.setUniformSampler("texIntermediateResult", OpenGLTexture::TextureUnit4, *g_texIntermediateResult);
+		g_rayCastingShaderProgram.setUniformValue("step", step);
+		g_rayCastingShaderProgram.setUniformValue("ka", ka);
+		g_rayCastingShaderProgram.setUniformValue("ks", ks);
+		g_rayCastingShaderProgram.setUniformValue("kd", kd);
+		g_rayCastingShaderProgram.setUniformValue("shininess", shininess);
+		g_rayCastingShaderProgram.setUniformValue("lightdir", g_lightDirection);
+		auto halfWay = g_lightDirection - g_camera.front();
+		if (halfWay.Length() > 1e-10) halfWay.Normalize();
+		g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
+		g_rayCastingVAO.bind();
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		processCacheMiss();
+	}
 
-	// clear intermediate result
-
-	g_rayCastingShaderProgram.bind();
-	g_rayCastingShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
-	g_rayCastingShaderProgram.setUniformValue("orthoMatrix", g_orthoMatrix.Matrix());
-	g_rayCastingShaderProgram.setUniformSampler("texVolume", OpenGLTexture::TextureUnit3, OpenGLTexture::Texture3D, g_texVolume->NativeTextureId());
-	g_rayCastingShaderProgram.setUniformSampler("texStartPos", OpenGLTexture::TextureUnit0, OpenGLTexture::Texture2DRect, g_texEntryPos->NativeTextureId());
-	g_rayCastingShaderProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, OpenGLTexture::Texture2DRect, g_texExitPos->NativeTextureId());
-	g_rayCastingShaderProgram.setUniformSampler("texTransfunc", OpenGLTexture::TextureUnit2, OpenGLTexture::Texture1D, g_texTransferFunction->NativeTextureId());
-	g_rayCastingShaderProgram.setUniformValue("step", step);
-	g_rayCastingShaderProgram.setUniformValue("ka", ka);
-	g_rayCastingShaderProgram.setUniformValue("ks", ks);
-	g_rayCastingShaderProgram.setUniformValue("kd", kd);
-	g_rayCastingShaderProgram.setUniformValue("shininess", shininess);
-	g_rayCastingShaderProgram.setUniformValue("lightdir", g_lightDirection);
-	auto halfWay = g_lightDirection - g_camera.front();
-	if (halfWay.Length() > 1e-10) halfWay.Normalize();
-	g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
-	g_rayCastingVAO.bind();
-	//glClear(GL_COLOR_BUFFER_BIT);			// TODO:: This should be remove to the outsider of the multi pass loop
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	g_framebuffer->Unbind();
-
 	glDepthFunc(GL_LESS);
 	g_quadsShaderProgram.bind();
 	g_quadsShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
 	g_quadsShaderProgram.setUniformValue("orthoMatrix", g_orthoMatrix.Matrix());
-	g_quadsShaderProgram.setUniformSampler("resTex", OpenGLTexture::TextureUnit2, OpenGLTexture::Texture2DRect, g_texIntermediateResult->NativeTextureId());
-	GL_ERROR_REPORT;
+	g_quadsShaderProgram.setUniformSampler("resTex", OpenGLTexture::TextureUnit2, *g_texIntermediateResult);
 	g_rayCastingVAO.bind();
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDrawArrays(GL_TRIANGLES, 0, 6);			// Draw into default framebuffer
 	glDisable(GL_DEPTH_TEST);
-
 	g_quadsShaderProgram.unbind();
-	if (isCacheMissed())
-	{
-		processCacheMiss();
-	}
 
-	GL_ERROR_REPORT
 }
 
 static const char trivialVertexShader[] = "#version 330\n"
@@ -411,8 +457,11 @@ int main(int argc, char** argv)
 
 	int initialWidth = 1280, initialHeight = 720;
 
-	GLFWwindow* window = glfwCreateWindow(initialWidth, initialHeight, "Mixed Render Engine", NULL, NULL);
-	glfwMakeContextCurrent(window);
+	std::shared_ptr<GLFWwindow> window{
+		glfwCreateWindow(initialWidth, initialHeight, "Mixed Render Engine", NULL, NULL),
+		[](GLFWwindow*window) {glfwDestroyWindow(window); } };
+
+	glfwMakeContextCurrent(window.get());
 	glfwSwapInterval(1); // Enable vsync
 	gl3wInit();
 
@@ -425,7 +474,7 @@ int main(int argc, char** argv)
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplGlfw_InitForOpenGL(window.get(), true);
 	ImGui_ImplOpenGL3_Init();
 
 	// Setup style
@@ -470,7 +519,6 @@ int main(int argc, char** argv)
 			m_tfObject.FetchData(m_tfData.data(), 256);
 			g_texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256, 0, 0, m_tfData.data());
 		});
-
 	auto showGLInformation = false;
 	app.ConfigCommand("glinfo", [&showGLInformation](const char * cmd)
 		{
@@ -483,27 +531,37 @@ int main(int argc, char** argv)
 	// gl resources
 
 	// shader
+
+	// Ray casting in gpu
 	g_rayCastingShaderProgram.create();
-	g_rayCastingShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\raycasting_v.glsl", ysl::ShaderProgram::ShaderType::Vertex);
-	g_rayCastingShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\raycasting_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
+	g_rayCastingShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\blockraycasting_v.glsl", ysl::ShaderProgram::ShaderType::Vertex);
+	g_rayCastingShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\blockraycasting_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
 	g_rayCastingShaderProgram.link();
 
+	// Generate entry and exit position
 	g_positionShaderProgram.create();
 	g_positionShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\position_v.glsl", ysl::ShaderProgram::ShaderType::Vertex);
 	g_positionShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\position_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
 	g_positionShaderProgram.link();
 
+	//  Draw the result texture into the default framebuffer
 	g_quadsShaderProgram.create();
 	g_quadsShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\quadsshader_v.glsl", ysl::ShaderProgram::ShaderType::Vertex);
 	g_quadsShaderProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\quadsshader_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
 	g_quadsShaderProgram.link();
 
-	static float g_vertices[] =
-	{
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f,  0.5f, 0.0f
-	};
+	// Initialize the result texture
+	g_clearIntermediateProgram.create();
+	g_clearIntermediateProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\clear_v.glsl", ysl::ShaderProgram::ShaderType::Vertex);
+	g_clearIntermediateProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\clear_f.glsl", ysl::ShaderProgram::ShaderType::Fragment);
+	g_clearIntermediateProgram.link();
+
+	//static float g_vertices[] =
+	//{
+	//	-0.5f, -0.5f, 0.0f,
+	//	0.5f, -0.5f, 0.0f,
+	//	0.0f,  0.5f, 0.0f
+	//};
 
 	// vao vbo
 	GL_ERROR_REPORT;
@@ -569,35 +627,31 @@ int main(int argc, char** argv)
 	}
 	rawData.read(g_rawData.get(), total * sizeof(char));
 
-	std::string lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
-
-
-	//VolumeVirtualMemoryHierachyGenerator<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry> largeVolumeData(lvdFileName);
-	largeVolumeData.reset(new VolumeVirtualMemoryHierachyGenerator<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(lvdFileName));
-
+	std::string lvdFileName = "D:\\scidata\\abc\\s1_128_128_128.lvd";
+	g_largeVolumeData.reset(new VolumeVirtualMemoryHierachyGenerator<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(lvdFileName));
 
 	//largeVolumeData.m_pageDir->Width();
 
-	pageDirX = largeVolumeData->m_pageDir->Width();
-	pageDirY = largeVolumeData->m_pageDir->Height();
-	pageDirZ = largeVolumeData->m_pageDir->Depth();
+	pageDirX = g_largeVolumeData->PageDir->Width();
+	pageDirY = g_largeVolumeData->PageDir->Height();
+	pageDirZ = g_largeVolumeData->PageDir->Depth();
 
-	pageTableX = largeVolumeData->m_pageTable->Width();
-	pageTableY = largeVolumeData->m_pageTable->Height();
-	pageTableZ = largeVolumeData->m_pageTable->Depth();
+	pageTableX = g_largeVolumeData->PageTable->Width();
+	pageTableY = g_largeVolumeData->PageTable->Height();
+	pageTableZ = g_largeVolumeData->PageTable->Depth();
 
-	cacheWidth = largeVolumeData->cacheWidth();
-	cacheHeight = largeVolumeData->cacheHeight();
-	cacheDepth = largeVolumeData->cacheDepth();
-	repeat = largeVolumeData->repeat();
-	blockDataSize = largeVolumeData->blockSize();
-	originalDataWidth = largeVolumeData->originalWidth();
-	originalDataHeight = largeVolumeData->originalHeight();
-	originalDataDepth = largeVolumeData->originalDepth();
+	cacheWidth = g_largeVolumeData->cacheWidth();
+	cacheHeight = g_largeVolumeData->cacheHeight();
+	cacheDepth = g_largeVolumeData->cacheDepth();
+	repeat = g_largeVolumeData->repeat();
+	blockDataSize = g_largeVolumeData->blockSize();
+	originalDataWidth = g_largeVolumeData->originalWidth();
+	originalDataHeight = g_largeVolumeData->originalHeight();
+	originalDataDepth = g_largeVolumeData->originalDepth();
 
-	xBlockCount = largeVolumeData->xBlockCount();
-	yBlockCount = largeVolumeData->yBlockCount();
-	zBlockCount = largeVolumeData->zBlockCount();
+	xBlockCount = g_largeVolumeData->xBlockCount();
+	yBlockCount = g_largeVolumeData->yBlockCount();
+	zBlockCount = g_largeVolumeData->zBlockCount();
 
 	const std::size_t totalBlockCountBytes = std::size_t(xBlockCount) * std::size_t(yBlockCount)*std::size_t(zBlockCount) * sizeof(int);
 
@@ -614,7 +668,7 @@ int main(int argc, char** argv)
 	std::cout << "cacheDepth:" << cacheDepth << std::endl;
 
 	std::cout << "repeat:" << repeat << std::endl;
-	std::cout << "data size:" << largeVolumeData->width() << std::endl;
+	std::cout << "data size:" << g_largeVolumeData->width() << std::endl;
 	std::cout << "original data x:" << originalDataWidth << std::endl;
 	std::cout << "original data y:" << originalDataHeight << std::endl;
 	std::cout << "original data z:" << originalDataDepth << std::endl;
@@ -623,16 +677,16 @@ int main(int argc, char** argv)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);		// This is important
 
 	g_texVolume = OpenGLTexture::CreateTexture3D(OpenGLTexture::R16F,
-	                                             OpenGLTexture::Linear,
+		OpenGLTexture::Linear,
 		OpenGLTexture::Linear,
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::ClampToEdge,
-		OpenGLTexture::ClampToEdge, 
-		OpenGLTexture::RED, 
-		OpenGLTexture::UInt8, 
-		width, 
-		height, 
-		depth, 
+		OpenGLTexture::ClampToEdge,
+		OpenGLTexture::RED,
+		OpenGLTexture::UInt8,
+		width,
+		height,
+		depth,
 		g_rawData.get());
 
 
@@ -643,68 +697,37 @@ int main(int argc, char** argv)
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::RGBAInteger,
-		OpenGLTexture::UInt32, pageDirX, pageDirY, pageDirZ, largeVolumeData->m_pageDir->Data());
+		OpenGLTexture::UInt32, pageDirX, pageDirY, pageDirZ, g_largeVolumeData->PageDir->Data());
 	g_texPageDir->BindToDataImage(0, 0, false, 0, OpenGLTexture::Read, OpenGLTexture::RGBA32UI);
 
 	GL_ERROR_REPORT;
 
-	//glGenTextures(1, &g_pageDirTexture);
-	//glBindTexture(GL_TEXTURE_3D, g_pageDirTexture);
-	//glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32UI, pageDirX, pageDirY, pageDirZ, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, largeVolumeData->m_pageDir->Data());
-	//glBindTexture(GL_TEXTURE_3D, 0);
-	//glBindImageTexture(0, g_pageDirTexture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32UI);			// layout(binding = 0)
-
-	//// page table
-	//glGenTextures(1, &g_pageTableTexture);
-	//glBindTexture(GL_TEXTURE_3D, g_pageTableTexture);
-	//glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32UI, pageTableX, pageTableY, pageTableZ, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, largeVolumeData->m_pageTable->Data());
-	//glBindTexture(GL_TEXTURE_3D, 0);
-	//glBindImageTexture(1, g_pageTableTexture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32UI);		// layout(binding = 1)
-
+	// page table
 	g_texPageTable = OpenGLTexture::CreateTexture3D(OpenGLTexture::RGBA32UI, OpenGLTexture::Linear,
 		OpenGLTexture::Linear, OpenGLTexture::ClampToEdge,
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::RGBAInteger,
-		OpenGLTexture::UInt32, pageTableX, pageTableY, pageTableZ, largeVolumeData->m_pageTable->Data());
+		OpenGLTexture::UInt32, pageTableX, pageTableY, pageTableZ, g_largeVolumeData->PageTable->Data());
+
+	// Bind to iimage3D
 	g_texPageTable->BindToDataImage(1, 0, false, 0, OpenGLTexture::Read, OpenGLTexture::RGBA32UI);
 
-
-	//// data cache
-	//glGenTextures(1, &g_cacheTexture);
-	//glBindTexture(GL_TEXTURE_3D, g_cacheTexture);
-	//glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, cacheWidth, cacheHeight, cacheDepth, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
-
+	// allocate for volume data block cache
 	g_texCache = OpenGLTexture::CreateTexture3D(OpenGLTexture::R16F, OpenGLTexture::Linear, OpenGLTexture::Linear, OpenGLTexture::ClampToEdge,
 		OpenGLTexture::ClampToEdge, OpenGLTexture::ClampToEdge, OpenGLTexture::RED, OpenGLTexture::UInt8, cacheWidth, cacheHeight, cacheDepth, nullptr);
-
-	// exist buffer id
-	//unsigned int g_existBufferId;
-	//glGenBuffers(1, &g_existBufferId);
-	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_existBufferId);
-	//glBufferData(GL_SHADER_STORAGE_BUFFER, totalBlockCountBytes, nullptr, GL_DYNAMIC_DRAW);
-	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, g_existBufferId);
 
 	g_bufMissedHash = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::Dynamic);
 	g_bufMissedHash->AllocateFor(nullptr, totalBlockCountBytes);
 	g_bufMissedHash->ShaderStorageBufferBind(0);
 
-	//glBufferData(GL_SHADER_STORAGE_BUFFER, 0);
-
-	//// missing block id
-	//glGenBuffers(1, &g_missedBlockBufferId);
-	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_missedBlockBufferId);
-	//glBufferData(GL_SHADER_STORAGE_BUFFER, missedBlockCapacity, nullptr, GL_DYNAMIC_DRAW);
-	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, g_missedBlockBufferId);
-	//auto ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
 	g_bufMissedTable = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::Dynamic);
 	g_bufMissedTable->AllocateFor(nullptr, missedBlockCapacity);
 	g_bufMissedTable->ShaderStorageBufferBind(1);
-	GL_ERROR_REPORT
 
 	// shader program
 	g_rayCastingShaderProgram.bind();
-	g_rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit4,*g_texCache);
+	g_rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit4, *g_texCache);
 	g_rayCastingShaderProgram.setUniformValue("totalPageDirSize", ysl::Vector3i{ pageDirX,pageDirY,pageDirZ });
 	g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ pageTableX,pageTableY,pageTableZ });
 	g_rayCastingShaderProgram.setUniformValue("blockDataSize", ysl::Vector3i{ blockDataSize - 2 * repeat,blockDataSize - 2 * repeat,blockDataSize - 2 * repeat });
@@ -713,15 +736,10 @@ int main(int argc, char** argv)
 	g_rayCastingShaderProgram.setUniformValue("repeatSize", ysl::Vector3i{ repeat,repeat,repeat });
 	g_rayCastingShaderProgram.unbind();
 
-
-
-
 	g_texTransferFunction = OpenGLTexture::CreateTexture1D(OpenGLTexture::RGBA32F,
-		OpenGLTexture::Linear,OpenGLTexture::Linear,OpenGLTexture::ClampToEdge,OpenGLTexture::RGBA,OpenGLTexture::Float32,256,nullptr);
+		OpenGLTexture::Linear, OpenGLTexture::Linear, OpenGLTexture::ClampToEdge, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256, nullptr);
 
-
-
-	g_texEntryPos = OpenGLTexture::CreateTexture2DRect(OpenGLTexture::RGBA32F, 
+	g_texEntryPos = OpenGLTexture::CreateTexture2DRect(OpenGLTexture::RGBA32F,
 		OpenGLTexture::Linear,
 		OpenGLTexture::Linear,
 		OpenGLTexture::ClampToEdge,
@@ -731,7 +749,9 @@ int main(int argc, char** argv)
 		initialWidth,
 		initialHeight,
 		nullptr);
-
+	GL_ERROR_REPORT;
+	g_texEntryPos->BindToDataImage(2, 0, false, 0, OpenGLTexture::ReadAndWrite, OpenGLTexture::RGBA32F);
+	GL_ERROR_REPORT;
 	g_texExitPos = OpenGLTexture::CreateTexture2DRect(OpenGLTexture::RGBA32F,
 		OpenGLTexture::Linear,
 		OpenGLTexture::Linear,
@@ -755,7 +775,7 @@ int main(int argc, char** argv)
 		nullptr);
 
 
-	g_texDepth= OpenGLTexture::CreateTexture2DRect(OpenGLTexture::InternalDepthComponent,
+	g_texDepth = OpenGLTexture::CreateTexture2DRect(OpenGLTexture::InternalDepthComponent,
 		OpenGLTexture::Linear,
 		OpenGLTexture::Linear,
 		OpenGLTexture::ClampToEdge,
@@ -766,7 +786,6 @@ int main(int argc, char** argv)
 		initialHeight,
 		nullptr);
 
-
 	g_framebuffer = std::shared_ptr<OpenGLFramebufferObject>(new OpenGLFramebufferObject);
 	g_framebuffer->Bind();
 	g_framebuffer->AttachTexture(OpenGLFramebufferObject::ColorAttachment0, g_texEntryPos);
@@ -775,11 +794,13 @@ int main(int argc, char** argv)
 	g_framebuffer->AttachTexture(OpenGLFramebufferObject::DepthAttachment, g_texDepth);
 	g_framebuffer->CheckFramebufferStatus();
 	g_framebuffer->Unbind();
-
-
-
+	GL_ERROR_REPORT;
+	//init 
+	initBlockExistsHash();
+	initMissedBlockVector();
+	GL_ERROR_REPORT;
 	// Main loop
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(window.get()))
 	{
 		// Poll and handle events (inputs, window resize, etc.)
 		// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -894,8 +915,8 @@ int main(int argc, char** argv)
 
 		ImGui::Render();
 		int display_w, display_h;
-		glfwMakeContextCurrent(window);
-		glfwGetFramebufferSize(window, &display_w, &display_h);
+		glfwMakeContextCurrent(window.get());
+		glfwGetFramebufferSize(window.get(), &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -904,8 +925,8 @@ int main(int argc, char** argv)
 		renderLoop();
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		glfwMakeContextCurrent(window);
-		glfwSwapBuffers(window);
+		glfwMakeContextCurrent(window.get());
+		glfwSwapBuffers(window.get());
 	}
 
 
@@ -916,8 +937,12 @@ int main(int argc, char** argv)
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
-	glfwDestroyWindow(window);
+	//glfwDestroyWindow(window);
+
+
 	glfwTerminate();
+
+	system("pause");
 
 	return 0;
 }

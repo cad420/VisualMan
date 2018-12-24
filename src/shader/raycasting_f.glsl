@@ -56,9 +56,6 @@ vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 void main()
 {
-	
-
-
 	vec3 rayStart = texture2DRect(texStartPos, textureRectCoord).xyz;
 	vec3 rayEnd = texture2DRect(texEndPos, textureRectCoord).xyz;
 	vec3 start2end = rayEnd - rayStart;
@@ -66,55 +63,7 @@ void main()
 	//vec4 color = texture2DRect(texIntermediateResult,textureRectCoord);
 	vec4 color = vec4(0,0,0,0);
 	float distance = dot(direction, start2end);
-
 	int steps = int(distance / step);
-	ivec2 screenSize = textureSize(texStartPos);
-	//float LenRadius = 0.05*screenSize.x;
-	vec2 center= screenSize/2;
-	float d = length(center-gl_FragCoord.xy);
-
-	if(d <= radius)
-	{
-		vec3 eyeDir = normalize(forward);
-		vec3 offset = normalize(1.0/dot(eyeDir,direction)*direction - eyeDir);
-		
-		//vec3 start = direction*(tmin/dot(eyeDir,direction)) + eye;
-		//float newDistantce=length(rayEnd-start);
-		//int steps = int(newDistantce/step);
-		bool first = true;
-		vec3 pos,planeStart;
-		for (int i = 0; i < 10000; ++i)
-		{
-//			vec3 pos = rayStart + direction * step * (float(i) + 0.5);
-			vec3 pos = rayStart + direction * step * (float(i) + 0.5); 
-			float t = length(pos-eye)*dot(direction,eyeDir) - tmin;
-			if(t <=0)
-			{
-				continue;
-			}
-			if(first == true)
-			{
-				planeStart = pos;
-				first = false;
-			}
-			vec3 p = (1-d*d/radius/radius)*(((1-alpha)*eyeDir +alpha * direction)*(t+tmin) + beta*offset*t)+ d*d/radius/radius*direction;
-			vec3 samplePoint = planeStart + normalize(p) * step * (float(i) + 0.5);
-			vec4 scalar = texture(texVolume, samplePoint);
-			vec4 sampledColor = texture(texTransfunc, scalar.r);
-			sampledColor.rgb = PhongShading(samplePoint, sampledColor.rgb);
-			color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
-			if (color.a > 0.99)
-				break;
-		}
-
-		if (color.a == 0.0)
-			discard;
-		color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
-		color.a = 1.0;
-		fragColor = color;
-	}
-
-	
 	if (start2end.x == 0.0 && start2end.y == 0.0 && start2end.z == 0.0) {
 		fragColor = bg; // Background Colors
 		return;

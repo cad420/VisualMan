@@ -16,8 +16,11 @@
 int LVDTester()
 {
 	std::cout << "LVDTester:\n";
+
 	std::string fileName;
+
 	std::cin >> fileName;
+
 	BlockVolumeReader reader(fileName);
 	if (reader.valid())
 	{
@@ -62,14 +65,10 @@ int LVDTester()
 		std::cout << "Unsupported block size.\n";
 		return 0;
 	}
-
-
 	// Output
 	const std::string outFileName{ fileName.substr(0,fileName.find_last_of(".")) + "_fromlvd.raw" };
 	std::cout << "Writing as:" << outFileName << std::endl;
 	std::ofstream rawFile(outFileName, std::fstream::binary);
-
-
 
 	if (!rawFile.is_open())
 	{
@@ -111,74 +110,20 @@ int atomicTest()
 
 int main(int argc, char *argv[])
 {
-	atomicTest();
-
-	//std::string fileName;
+	int x, y, z;
+	std::cin >> x >> y >> z;
+	ABCFlowGen(x,y,z);
+	std::string fileName;
+	std::cin >> fileName;
 	//int x, y, z, repeat;
-	//std::cin >> fileName >> x >> y >> z >> repeat;
-	//RawToLVDConverter<5> lvdConverter(fileName, x, y, z, repeat);
-	//lvdConverter.setBoundaryValue(0);
-	//lvdConverter.convert();
-	//lvdConverter.save(fileName);
-	//LVDTester();
-	 // create a parser
+	int repeat;
+	std::cin >> x >> y >> z >> repeat;
+	RawToLVDConverter<6> converter(fileName,x,y,z,repeat);
+	converter.convert();
+	converter.save(fileName);
 
 
-	//const std::string lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
-
-	//VolumeVirtualMemoryHierachyGenerator<16,16,16> cache(lvdFileName);
-
-	//if(cache.valid())
-	//{
-	//	std::cout << cache.width() << std::endl;
-	//	std::cout << cache.height() << std::endl;
-	//	std::cout << cache.depth() << std::endl;
-	//	std::cout << cache.xBlockCount() << std::endl;
-	//	std::cout << cache.yBlockCount() << std::endl;
-	//	std::cout << cache.zBlockCount() << std::endl;
-	//	std::cout << cache.blockSize() << std::endl;
-	//}
-
-	////std::cout << ysl::RoundUpDivide(cache.width(), 32);
-	////std::cout << ysl::RoundUpDivide(cache.height(), 32);
-	////std::cout << ysl::RoundUpDivide(cache.depth(), 32);
-
-	//std::cout << cache.m_pageTable->Width() << std::endl;
-	//std::cout << cache.m_pageTable->Height() << std::endl;
-	//std::cout << cache.m_pageTable->Depth() << std::endl;
-	//std::cout << cache.m_pageDir->Width() << std::endl;
-	//std::cout << cache.m_pageDir->Depth() << std::endl;
-	//std::cout << cache.m_pageDir->Height() << std::endl;
-
-
-	//int blockId;
-	//while(std::cin>>blockId)
-	//{
-	//	cache.blockData(blockId);
-	//}
-
-
-
-	//ysl::TransferFunction tf(fileName);
-	//if(!tf.valid())
-	//{
-	//	std::cout << "faild\n";
-	//	return 0;
-	//}
-
-
-	//std::vector<ysl::RGBASpectrum> data{256};
-	//tf.FetchData(data.data(), 256);
-
-	//for(int i = 0 ; i < 256;i++)
-	//{
-	//	std::cout << data[i] << std::endl;
-	//}
-
-
-	//ABCFlowGen();
-
-
+	LVDTester();
 
 	system("pause");
 	return 0;

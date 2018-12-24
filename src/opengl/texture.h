@@ -98,6 +98,9 @@ public:
 	void SetFilterMode(FilterMode minMode = Linear, FilterMode magMode= Linear);
 	void SetWrapMode(WrapMode rMode,WrapMode sMode = ClampToEdge,WrapMode tMode = ClampToEdge);
 	void SetData(InternalFormat internalFmt,ExternalDataFormat extFmt,ExternalDataType extType,int x,int y,int z,void * data);
+	void SetSubData(
+		ExternalDataFormat extFmt, 
+		ExternalDataType extType,int xOffset, int x, int yOffset,int y, int zOffset,int z, const void * data);
 	TextureTarget Target()const;
 	void BindToDataImage(int imageUnit,int level,bool layered,int layer,Access access,InternalFormat fmt);
 	unsigned int NativeTextureId()const;

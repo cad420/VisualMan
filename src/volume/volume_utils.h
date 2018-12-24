@@ -178,9 +178,8 @@ class BlockVolumeReader
 	int m_repeat;
 	bool validFlag;
 
-
 	enum { LVDFileMagicNumber = 277536 };
-	enum { LogBlockSize5 = 5 };
+	enum { LogBlockSize5 = 5,LogBlockSize6 = 6 };
 	enum { LVDHeaderSize = 24 };
 public:
 	explicit BlockVolumeReader(const std::string& fileName);
