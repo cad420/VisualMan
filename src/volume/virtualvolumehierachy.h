@@ -107,8 +107,9 @@ public:
 		const auto w = xCacheBlockCount(), h = yCacheBlockCount(), d = zCacheBlockCount();
 		for (auto z = 0; z < d; z++)
 			for (auto y = 0; y < h; y++)
-				for (auto x = 0; x < w; x++)
-					m_lruList.push_back(std::make_pair({-1,-1,-1}, {x,y,z}));
+				for (auto x = 0; x < w; x++) {
+					m_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1,-1,-1), CacheBlockAbstractIndex(x,y,z)));
+				}
 	}
 
 public:
