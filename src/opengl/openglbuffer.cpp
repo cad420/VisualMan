@@ -72,7 +72,6 @@ void * OpenGLBuffer::Map(Access access)
 {
 	Bind();
 	const auto ptr = glMapBuffer(target, access);
-	Unbind();
 	return ptr;
 }
 
@@ -80,7 +79,6 @@ void OpenGLBuffer::Unmap()
 {
 	Bind();
 	glUnmapBuffer(target);
-	Unbind();
 }
 
 OpenGLBuffer::~OpenGLBuffer()

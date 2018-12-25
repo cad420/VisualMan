@@ -44,10 +44,11 @@ BlockVolumeReader::BlockVolumeReader(const std::string& fileName): validFlag(tru
 	bz = ((vz + aBlockSize - 1) & ~(aBlockSize - 1)) / aBlockSize;
 }
 
-void BlockVolumeReader::readBlock(char* dest, int blockId)
+void BlockVolumeReader::readBlock(char * dest, int blockId)
 {
 	const size_t blockCount = blockDataCount();
-	fileHandle.seekg(blockCount * blockId, std::ios::beg);
+	// 32 is the size of file header
+	fileHandle.seekg(blockCount * blockId + 36, std::ios::beg);
 	fileHandle.read(dest, sizeof(char) * blockCount);
 }
 

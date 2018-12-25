@@ -42,4 +42,12 @@ namespace ysl
 		_internal_msg_process_(fmt, args, "Warning");
 		va_end(args);
 	}
+
+	void Log(const char* fmt, ...)
+	{
+		va_list args;
+		va_start(args, fmt);
+		_internal_msg_process_(fmt, args, "Log");
+		va_end(args);
+	}
 }

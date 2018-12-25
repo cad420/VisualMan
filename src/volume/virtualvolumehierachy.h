@@ -48,11 +48,9 @@ template<
 int xPageTableEntry,
 int yPageTableEntry, 
 int zPageTableEntry>
-class VolumeVirtualMemoryHierachyGenerator:public LargeVolumeCache
+class VolumeVirtualMemoryHierachy:public LargeVolumeCache
 {
 public:
-	
-
 	struct PageDirEntry
 	{
 		int x, y, z, w;
@@ -64,11 +62,7 @@ public:
 
 	std::unique_ptr<ysl::Linear3DArray<PageDirEntry>> PageDir;
 	std::unique_ptr<ysl::Linear3DArray<PageTableEntry>> PageTable;
-
 	std::list<std::pair<PageTableEntryAbstractIndex, CacheBlockAbstractIndex>> m_lruList;
-	//unsigned int m_pageDirTextureId;
-	//unsigned int m_pageTableTextureId;
-	//unsigned int m_cacheTextureId;
 
 	void initPageDir() 
 	{
@@ -86,10 +80,13 @@ public:
 				}
 	}
 
+	/**
+	 * \brief Initializes the page table with all entries are unmapped
+	 */
 	void initPageTable()
 	{
 		// Only initialization flag filed, the table entry is determined by cache miss at run time using lazy evaluation policy.
-		auto d = PageTable->Data();
+		//auto d = PageTable->Data();
 		for (auto z = 0; z < PageTable->Depth(); z++)
 			for (auto y = 0; y < PageTable->Height(); y++)
 				for (auto x = 0; x < PageTable->Width(); x++)
@@ -98,11 +95,29 @@ public:
 					entry.x = -1;
 					entry.y = -1;
 					entry.z = -1;
-					entry.w = Unmapped;
+					entry.w = Mapped;
 					(*PageTable)(x, y, z) = entry;
 				}
 	}
 
+	/**
+	 * \brief  Initializes the page table with all entries are mapped
+	 */
+	void initPageTable(int xBlockSize,int yBlockSize,int zBlockSize)
+	{
+		//auto d = PageTable->Data();
+		for (auto z = 0; z < PageTable->Depth(); z++)
+			for (auto y = 0; y < PageTable->Height(); y++)
+				for (auto x = 0; x < PageTable->Width(); x++)
+				{
+					PageTableEntry entry;
+					entry.x = x*xBlockSize;
+					entry.y = y*yBlockSize;
+					entry.z = z*zBlockSize;
+					entry.w = Unmapped;
+					(*PageTable)(x, y, z) = entry;
+				}
+	}
 
 
 	void initLRUList()
@@ -118,35 +133,27 @@ public:
 
 public:
 	using size_type = std::size_t;
-	VolumeVirtualMemoryHierachyGenerator(const std::string fileName):LargeVolumeCache(fileName)
-		
+	VolumeVirtualMemoryHierachy(const std::string fileName):LargeVolumeCache(fileName)
 	{
 		using ysl::RoundUpDivide;
 		using ysl::Linear3DArray;
 
-		PageTable.reset(new Linear3DArray<PageTableEntry>(xBlockCount(), yBlockCount(), zBlockCount(), nullptr));
-		PageDir.reset(new Linear3DArray<PageDirEntry>(RoundUpDivide(PageTable->Width(), xPageTableEntry), RoundUpDivide(PageTable->Height(), yPageTableEntry), RoundUpDivide(PageTable->Depth(), zPageTableEntry), nullptr));
+		PageTable.reset(new Linear3DArray<PageTableEntry>(
+			xBlockCount(),
+			yBlockCount(),
+			zBlockCount(),
+			nullptr ));
+		PageDir.reset(new Linear3DArray<PageDirEntry> (
+			RoundUpDivide(PageTable->Width(), xPageTableEntry),
+			RoundUpDivide(PageTable->Height(), yPageTableEntry),
+			RoundUpDivide(PageTable->Depth(), zPageTableEntry),
+			nullptr)
+		);
+
 		initPageDir();
-		initPageTable();
-
+		initPageTable(blockSize(), blockSize(), blockSize());
+		initLRUList();
 	}
-
-	void bindPageDirectoryTexture(unsigned int textureId)
-	{
-		
-	}
-
-	void bindPageTableTexture(unsigned int textureId)
-	{
-		
-	}
-
-	void bindBlockCacheTexture(unsigned int textureId)
-	{
-		
-	}
-
-
 
 	void updateCacheMiss(const std::vector<GlobalBlockAbstractIndex> & hits)
 	{

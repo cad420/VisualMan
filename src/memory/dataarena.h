@@ -96,7 +96,7 @@ public:
 			if (!m_currentBlock)
 			{
 				// Available space can not be found. Allocates new memory
-				m_currentAllocBlockSize = std::max(bytes, m_blockSize);
+				m_currentAllocBlockSize = (std::max)(bytes, m_blockSize);
 				m_currentBlock = static_cast<uint8_t*>(AllocAligned(m_currentAllocBlockSize, nCashLine));
 				if (m_currentBlock == nullptr)
 				{

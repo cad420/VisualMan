@@ -32,11 +32,11 @@ struct GlobalBlockAbstractIndex
 
 class LargeVolumeCache:public BlockVolumeReader
 {
-	static constexpr int nLogBlockSize = 5;
+	static constexpr int nLogBlockSize = 6;
 
-	static constexpr size_t cacheBlockCountAtWidth = 20;
-	static constexpr size_t cacheBlockCountAtHeight = 20;
-	static constexpr size_t cacheBlockCountAtDepth = 20;
+	static constexpr size_t cacheBlockCountAtWidth = 10;
+	static constexpr size_t cacheBlockCountAtHeight = 10;
+	static constexpr size_t cacheBlockCountAtDepth = 10;
 
 	static constexpr size_t m_cacheWidth = cacheBlockCountAtWidth*(1<<nLogBlockSize);
 	static constexpr size_t m_cacheHeight = cacheBlockCountAtHeight*(1 << nLogBlockSize);
@@ -45,6 +45,7 @@ class LargeVolumeCache:public BlockVolumeReader
 	static constexpr size_t totalCacheBlocks = cacheBlockCountAtWidth*cacheBlockCountAtHeight*cacheBlockCountAtDepth;
 
 	using Cache = ysl::Block3DArray<unsigned char, nLogBlockSize>;
+
 	struct LRUListCell;
 	using LRUHash = std::unordered_map<int,std::list<LRUListCell>::iterator>;
 	struct LRUListCell
@@ -65,7 +66,8 @@ class LargeVolumeCache:public BlockVolumeReader
 	{
 		//const auto nxBlock = width() / m_volumeCache.BlockSize(), nyBlock = height() / m_volumeCache.BlockSize(), nzBlock = depth() / m_volumeCache.BlockSize();
 		const auto nxBlock = xBlockCount(), nyBlock = yBlockCount(), nzBlock = zBlockCount();
-		return zBlock * nxBlock*nyBlock + yBlock * nxBlock + zBlock;
+		//std::cout<<zBlock * nxBlock*nyBlock + yBlock * nxBlock + xBlock<<std::endl;
+		return zBlock * nxBlock*nyBlock + yBlock * nxBlock + xBlock;
 	}
 
 

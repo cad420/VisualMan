@@ -19,8 +19,8 @@ uniform sampler3D cacheVolume;						// volume block cache
 uniform ivec3 totalPageDirSize;						// page dir texture size
 uniform ivec3 totalPageTableSize;					// page table texture size
 uniform ivec3 pageTableBlockEntrySize;				// page table block entry size
-uniform ivec3 volumeDataSize;						// real volume data size (no repeat)
-uniform ivec3 blockDataSize;						// block data size (no repeat)
+uniform ivec3 volumeDataSizeNoRepeat;						// real volume data size (no repeat)
+uniform ivec3 blockDataSizeNoRepeat;						// block data size (no repeat)
 uniform ivec3 repeatOffset;							// repeat boarder size
 
 
@@ -42,59 +42,96 @@ layout(std430, binding = 1) buffer MissedBlock
 }missedBlock;
 
 
-float virtualVolumeSample(vec3 samplePos,out bool mapped)
+vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
-	ivec3 pDirAddress= ivec3(samplePos*totalPageDirSize);
-	ivec4 pageDirEntry= imageLoad(pageDirTexutre,pDirAddress);
-	ivec3 pTableAddress= ivec3(pageDirEntry) + ivec3(samplePos*totalPageTableSize) % pageTableBlockEntrySize;
-	ivec4 pageTableEntry= imageLoad(pageTableTexture,pTableAddress);
-	ivec3 voxelCoord=ivec3(samplePos * volumeDataSize);
-	ivec3 blockOffset = voxelCoord % blockDataSize;
+//	ivec3 pDirAddress= ivec3(samplePos*totalPageDirSize);
+//	ivec4 pageDirEntry= imageLoad(pageDirTexutre,pDirAddress);
+//	ivec3 pTableAddress= ivec3(pageDirEntry) + ivec3(samplePos*totalPageTableSize) % pageTableBlockEntrySize;
+//	ivec4 pageTableEntry= imageLoad(pageTableTexture,pTableAddress);
 
-	// pageTableEntry has a problem
+
+	ivec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
+	ivec3 voxelCoord=ivec3(samplePos * volumeDataSizeNoRepeat);
+	ivec3 blockOffset = voxelCoord % blockDataSizeNoRepeat;
 
 	if(pageTableEntry.w == 2)		// Unmapped flag
 	{
-
-		ivec3 blockCoord = voxelCoord/blockDataSize;
+		ivec3 blockCoord = voxelCoord/blockDataSizeNoRepeat;
 		int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
 				+blockCoord.y * totalPageTableSize.x 
 				+blockCoord.x;
-				int exist;
-		exist = atomicCompSwap(hashTable.blockId[blockId],0,1);
+		int exist;
+		//exist = atomicCompSwap(hashTable.blockId[blockId],0,1);
+		exist = hashTable.blockId[blockId];
+
+
+		//// TODO:: Lock issue
 		if(exist == 0)
 		{
 			// lock
-			int expect=0;
-			while(atomicCompSwap(missedBlock.spinLock,expect,1) != 0)
-				expect = 0;
+//			int expect=0;
+//			while(atomicCompSwap(missedBlock.spinLock,expect,1) != 0)
+//				expect = 0;
 			int index = missedBlock.count++;
-			missedBlock.blockId[index];
+			missedBlock.blockId[index] = blockId;
+			hashTable.blockId[blockId] = 1;		// exits
 			// unlock
-			missedBlock.spinLock = 0;
+			//missedBlock.spinLock = 0;
 		}
+
 		mapped = false;
-		return 0.0;
+		return vec4(0,0,0,0);
 	}
 	else
 	{
 		vec3 samplePoint = pageTableEntry.xyz + blockOffset + repeatOffset;
+		samplePoint = samplePoint/textureSize(cacheVolume,0);
 		vec4 scalar = texture(cacheVolume,samplePoint);
 		mapped = true;
-		return scalar.r;
+		return scalar;
 	}
+}
 
+vec3 PhongShadingEx(vec3 samplePos, vec3 diffuseColor)
+{
+	vec3 shadedValue = vec3(0, 0, 0);
+	//virtualVolumeSample(vec3 samplePos,out bool mapped)
+	vec3 N;
+//	N.x = (texture(texVolume, samplePos+vec3(step,0,0) ).w - texture(texVolume, samplePos+vec3(-step,0,0) ).w) - 1.0;
+//	N.y = (texture(texVolume, samplePos+vec3(0,step,0) ).w - texture(texVolume, samplePos+vec3(0,-step,0) ).w) - 1.0;
+//	N.z = (texture(texVolume, samplePos+vec3(0,0,step) ).w - texture(texVolume, samplePos+vec3(0,0,-step) ).w) - 1.0;
+	bool placeHolder;
+	N.x = (virtualVolumeSample(samplePos+vec3(step,0,0) ,placeHolder).w - virtualVolumeSample(samplePos+vec3(-step,0,0),placeHolder ).w) - 1.0;
+	N.y = (virtualVolumeSample(samplePos+vec3(0,step,0) ,placeHolder).w - virtualVolumeSample(samplePos+vec3(0,-step,0) ,placeHolder).w) - 1.0;
+	N.z = (virtualVolumeSample(samplePos+vec3(0,0,step) ,placeHolder).w - virtualVolumeSample(samplePos+vec3(0,0,-step) ,placeHolder).w) - 1.0;
+
+	N = N * 2.0 - 1.0;
+	N = -normalize(N);
+
+	vec3 L = lightdir;
+	vec3 H = halfway;
+
+	//specularcolor
+	//vec3 H = normalize(V+L);
+	float NdotH = pow(max(dot(N, H), 0.0), shininess);
+	float NdotL = max(dot(N, L), 0.0);
+
+	vec3 ambient = ka * diffuseColor.rgb;
+	vec3 specular = ks * NdotH * vec3(1.0, 1.0, 1.0);
+	vec3 diffuse = kd * NdotL * diffuseColor.rgb;
+
+	shadedValue = specular + diffuse + ambient;
+	return shadedValue;
 }
 
 vec3 PhongShading(vec3 samplePos, vec3 diffuseColor)
 {
 	vec3 shadedValue = vec3(0, 0, 0);
-
+	//virtualVolumeSample(vec3 samplePos,out bool mapped)
 	vec3 N;
 	N.x = (texture(texVolume, samplePos+vec3(step,0,0) ).w - texture(texVolume, samplePos+vec3(-step,0,0) ).w) - 1.0;
 	N.y = (texture(texVolume, samplePos+vec3(0,step,0) ).w - texture(texVolume, samplePos+vec3(0,-step,0) ).w) - 1.0;
 	N.z = (texture(texVolume, samplePos+vec3(0,0,step) ).w - texture(texVolume, samplePos+vec3(0,0,-step) ).w) - 1.0;
-
 	N = N * 2.0 - 1.0;
 	N = -normalize(N);
 
@@ -139,21 +176,21 @@ void main()
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
 	for (int i = 0; i < steps; ++i) {
-
 		vec3 samplePoint = rayStart + direction * step * (float(i) + 0.5);
+		bool map;
+		vec4 scalar = virtualVolumeSample(samplePoint,map);
 
-		bool map = true;
-		float scalar = virtualVolumeSample(samplePoint,map);
-		if (map == true) 
+		if (map == false) 
 		{
+		// If this block is unmaped, store the intermediate rendering result and the entry position
 			imageStore(entryPos,ivec2(textureRectCoord),color);
 			fragColor = color;
 			return;
 		}
 		//vec4 scalar = texture(texVolume, samplePoint);
-
-		vec4 sampledColor = texture(texTransfunc, scalar);
-		sampledColor.rgb = PhongShading(samplePoint, sampledColor.rgb);
+		
+		vec4 sampledColor = texture(texTransfunc, scalar.r);
+		//sampledColor.rgb = PhongShading(samplePoint, sampledColor.rgb);
 
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)
@@ -165,4 +202,5 @@ void main()
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;
 	fragColor = color;
+
 }

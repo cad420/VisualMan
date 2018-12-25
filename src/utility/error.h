@@ -20,6 +20,8 @@ namespace ysl
 	void Error(const char* fmt, ...);
 
 	void Warning(const char* fmt, ...);
+
+	void Log(const char * fmt, ...);
 }
 
 
