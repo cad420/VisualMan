@@ -33,10 +33,9 @@ struct GlobalBlockAbstractIndex
 class LargeVolumeCache:public BlockVolumeReader
 {
 	static constexpr int nLogBlockSize = 6;
-
-	static constexpr size_t cacheBlockCountAtWidth = 10;
-	static constexpr size_t cacheBlockCountAtHeight = 10;
-	static constexpr size_t cacheBlockCountAtDepth = 10;
+	static constexpr size_t cacheBlockCountAtWidth = 1;
+	static constexpr size_t cacheBlockCountAtHeight= 1;
+	static constexpr size_t cacheBlockCountAtDepth = 1;
 
 	static constexpr size_t m_cacheWidth = cacheBlockCountAtWidth*(1<<nLogBlockSize);
 	static constexpr size_t m_cacheHeight = cacheBlockCountAtHeight*(1 << nLogBlockSize);

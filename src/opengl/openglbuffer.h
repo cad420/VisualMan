@@ -12,13 +12,23 @@ class OpenGLBuffer
 {
 public:
 	// Disable copy semantics
-	enum  BufferTarget{
+	enum  BufferTarget
+	{
 		VertexArrayBuffer = GL_ARRAY_BUFFER,
 		ElementArrayBuffer = GL_ELEMENT_ARRAY_BUFFER, 
-		ShaderStorageBuffer = GL_SHADER_STORAGE_BUFFER};		// Only support these now.
-	enum  BufferUsage{Static = GL_STATIC_DRAW,
-		Dynamic = GL_DYNAMIC_DRAW,
-		Stream = GL_STREAM_DRAW};
+		ShaderStorageBuffer = GL_SHADER_STORAGE_BUFFER,
+		AtomicCounterBuffer = GL_ATOMIC_COUNTER_BUFFER
+	};		
+	// Only support these now.
+	enum  BufferUsage
+	{
+		StaticDraw = GL_STATIC_DRAW,
+		DynamicDraw = GL_DYNAMIC_DRAW,
+		StreamDraw = GL_STREAM_DRAW,
+		StaticCopy = GL_STATIC_COPY,
+		DynamicCopy = GL_DYNAMIC_COPY,
+		StreamCopy = GL_STREAM_COPY
+	};
 
 	enum Access
 	{
@@ -27,7 +37,7 @@ public:
 		ReadWrite = GL_READ_WRITE
 	};
 
-	explicit  OpenGLBuffer(BufferTarget type,BufferUsage usage = BufferUsage::Static);
+	explicit  OpenGLBuffer(BufferTarget type,BufferUsage usage = BufferUsage::StaticDraw);
 	OpenGLBuffer(const OpenGLBuffer &) = delete;
 	OpenGLBuffer& operator=(const OpenGLBuffer &) = delete;
 
@@ -40,7 +50,8 @@ public:
 	//void setUsage(BufferUsage usage);
 	void Write(const void* data);
 	void Unbind();
-	bool ShaderStorageBufferBind(int index);
+
+	void BindBufferBase(int index);
 	void * Map(Access access);
 	void Unmap();
 

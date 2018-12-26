@@ -56,16 +56,10 @@ void OpenGLBuffer::Unbind()
 	glBindBuffer(target, 0);
 }
 
-bool OpenGLBuffer::ShaderStorageBufferBind(int index)
+void OpenGLBuffer::BindBufferBase(int index)
 {
-	if (target != ShaderStorageBuffer)
-	{
-		ysl::Warning("The target of buffer is wrong");
-		return false;
-	}
 	Bind();
 	glBindBufferBase(target, index, bufferId);
-
 }
 
 void * OpenGLBuffer::Map(Access access)

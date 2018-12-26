@@ -7,7 +7,7 @@
 #include "volume.h"
 
 #include <list>
-
+#include "texture.h"
 
 
 struct PageDirectoryEntryAbstractIndex
@@ -23,11 +23,12 @@ struct PageDirectoryEntryAbstractIndex
 struct PageTableEntryAbstractIndex
 {
 	using internal_type = int;
-	const internal_type x, y, z;
+	internal_type x, y, z;
 	PageTableEntryAbstractIndex(internal_type x_ = -1,
 		internal_type y_ = -1,
 		internal_type z_ = -1) :
 		x(x_), y(y_), z(z_) {}
+
 };
 
 struct CacheBlockAbstractIndex			// DataBlock start in 3d texture
@@ -76,13 +77,13 @@ public:
 					dirEntry.z = z * zPageTableEntry;
 					dirEntry.w = Mapped;
 					(*PageDir)(x, y, z) = dirEntry;
-
 				}
 	}
 
 	/**
 	 * \brief Initializes the page table with all entries are unmapped
 	 */
+
 	void initPageTable()
 	{
 		// Only initialization flag filed, the table entry is determined by cache miss at run time using lazy evaluation policy.
@@ -95,7 +96,7 @@ public:
 					entry.x = -1;
 					entry.y = -1;
 					entry.z = -1;
-					entry.w = Mapped;
+					entry.w = Unmapped;
 					(*PageTable)(x, y, z) = entry;
 				}
 	}
@@ -122,12 +123,13 @@ public:
 
 	void initLRUList()
 	{
-		const auto tot = cacheBlockCount();
+		//const auto tot = cacheBlockCount();
+		const auto size = blockSize();
 		const auto w = xCacheBlockCount(), h = yCacheBlockCount(), d = zCacheBlockCount();
 		for (auto z = 0; z < d; z++)
 			for (auto y = 0; y < h; y++)
 				for (auto x = 0; x < w; x++) {
-					m_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1,-1,-1), CacheBlockAbstractIndex(x,y,z)));
+					m_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1,-1,-1), CacheBlockAbstractIndex(x*size,y*size,z*size)));
 				}
 	}
 
@@ -169,4 +171,44 @@ public:
 	}
 
 };
+
+
+class BlockCacheTexture:public OpenGLTexture
+{
+	ysl::Size3 cacheSize;
+public:
+	BlockCacheTexture(const ysl::Size3 & size):OpenGLTexture(Texture3D,
+		OpenGLTexture::Linear, 
+		OpenGLTexture::Linear,
+		OpenGLTexture::ClampToEdge, 
+		OpenGLTexture::ClampToEdge, 
+		OpenGLTexture::ClampToEdge),cacheSize(size)
+	{
+
+	}
+
+	void Resize(const ysl::Size3 & size);
+
+};
+
+class PageTableTexture:public OpenGLTexture
+{
+	ysl::Size3 pageTableSize;
+	const static InternalFormat internalFormat = InternalFormat::RGBA32UI;
+	const static ExternalDataFormat extFormat = RGBAInteger;
+	const static ExternalDataType extType = UInt32;
+public:
+	PageTableTexture(const ysl::Size3 & size) :OpenGLTexture(Texture3D,
+		OpenGLTexture::Linear,
+		OpenGLTexture::Linear,
+		OpenGLTexture::ClampToEdge,
+		OpenGLTexture::ClampToEdge,
+		OpenGLTexture::ClampToEdge),pageTableSize(size)
+	{
+
+	}
+	void LoadPageTable(const void * data);
+	//void UpdateDataPageTableEntry(const PageTableEntryAbstractIndex & index);
+};
+
 #endif

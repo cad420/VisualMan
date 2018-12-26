@@ -20,14 +20,14 @@ const unsigned char* LargeVolumeCache::blockData(int blockId)
 	{
 		// replace the last block in cache
 		auto & lastCell = m_lruList.back();
-		std::cout << "The block:"<<blockId<<" is not in cache, read it from disk and put it at cache"<<lastCell.blockCacheIndex<<"\n";
+		//std::cout << "The block:"<<blockId<<" is not in cache, read it from disk and put it at cache"<<lastCell.blockCacheIndex<<"\n";
 		m_lruList.splice(m_lruList.begin(), m_lruList,--m_lruList.end());		// move last to head
 
 
 		const auto newItr = m_blockIdInCache.insert(std::make_pair(blockId, m_lruList.begin()));
 		if(lastCell.hashIter != m_blockIdInCache.end())
 		{
-			std::cout << "Cache is full. Block "<< lastCell.hashIter->first<<" mapped at cache "<<lastCell.blockCacheIndex<<" must be replace\n";
+			//std::cout << "Cache is full. Block "<< lastCell.hashIter->first<<" mapped at cache "<<lastCell.blockCacheIndex<<" must be replace\n";
 			m_blockIdInCache.erase(lastCell.hashIter); // Unmapped old
 		}
 
@@ -38,7 +38,7 @@ const unsigned char* LargeVolumeCache::blockData(int blockId)
 	}
 	else
 	{
-		std::cout << "The block:" << blockId << " is cached at "<<it->second->blockCacheIndex<<", just use it\n";
+		//std::cout << "The block:" << blockId << " is cached at "<<it->second->blockCacheIndex<<", just use it\n";
 		m_lruList.splice(m_lruList.begin(), m_lruList, it->second);			// move the node that it->second points to the head.
 		//SHOW_LIST_STATE
 		return m_volumeCache->BlockData(it->second->blockCacheIndex);

@@ -26,6 +26,10 @@ void ShowGLInformation(bool *open)
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &max);
 		ImGui::Text("GL_MAX_VERTEX_ATTRIBS:%d", max);
 
+		glGetIntegerv(GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS, &max);
+		ImGui::Text("GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS:%d", max);
+
+
 		ImGui::Text("Window Size:[%d, %d].", int(ImGui::GetWindowSize().x), int(ImGui::GetWindowSize().y));
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 

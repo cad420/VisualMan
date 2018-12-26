@@ -63,6 +63,13 @@ namespace ysl {
 		return false;
 	}
 
+	template<> inline
+		bool
+		IsNaN(const std::size_t & t)
+	{
+		return false;
+	}
+
 	inline
 		constexpr std::uint64_t
 		RoundUpDivide( std::uint64_t no, std::uint64_t den)

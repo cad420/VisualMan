@@ -106,11 +106,11 @@ namespace
 	ysl::ShaderProgram g_quadsShaderProgram;
 	ysl::ShaderProgram g_clearIntermediateProgram;
 	ysl::Point2i g_lastMousePos;
-	std::shared_ptr<LargeVolumeCache> cache;
+	//std::shared_ptr<LargeVolumeCache> cache;
 
 	std::unique_ptr<char[]> g_rawData;
 	std::vector<ysl::RGBASpectrum> m_tfData{ 256 };
-	ysl::TransferFunction m_tfObject;
+	//ysl::TransferFunction m_tfObject;
 
 	ysl::Vector3f g_lightDirection;
 
@@ -121,28 +121,47 @@ namespace
 	float shininess = 50.0f;
 
 	constexpr int pageTableBlockEntry = 16;
-	const std::size_t missedBlockCapacity = 10000 + sizeof(unsigned int) + 2 * sizeof(unsigned int);
+	const std::size_t missedBlockCapacity = 5000*sizeof(unsigned int);
 
 	std::shared_ptr<OpenGLTexture> g_texVolume;
+
 	std::shared_ptr<OpenGLTexture> g_texTransferFunction;
+
 	std::shared_ptr<OpenGLFramebufferObject> g_framebuffer;
 
+
 	std::shared_ptr<OpenGLTexture> g_texEntryPos;
+
 	std::shared_ptr<OpenGLTexture> g_texExitPos;
+
 	std::shared_ptr<OpenGLTexture> g_texDepth;
+
 	std::shared_ptr<OpenGLTexture> g_texIntermediateResult;
 
+
 	std::shared_ptr<OpenGLBuffer> g_proxyEBO;
+
 	std::shared_ptr<OpenGLBuffer> g_proxyVBO;
+
 	OpenGLVertexArrayObject g_proxyVAO;
+
 	std::shared_ptr<OpenGLBuffer> g_rayCastingVBO;
+
 	OpenGLVertexArrayObject g_rayCastingVAO;
 
+
 	std::shared_ptr<OpenGLTexture> g_texPageDir;
+
 	std::shared_ptr<OpenGLTexture> g_texPageTable;
+
 	std::shared_ptr<OpenGLTexture> g_texCache;
+	//ysl::Size3;
+
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
+
 	std::shared_ptr<OpenGLBuffer> g_bufMissedTable;
+
+	std::shared_ptr<OpenGLBuffer> g_atomicCounter;
 
 	/*unsigned int g_pageDirTexture;
 	unsigned int g_pageTableTexture;
@@ -248,12 +267,8 @@ void keyboardPressEvent(KeyboardEvent)
 
 void initBlockExistsHash()
 {
-	// exist buffer id
-	//glGenBuffers(1, &g_existBufferId);
-	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_existBufferId);
+
 	const auto ptr = g_bufMissedHash->Map(OpenGLBuffer::WriteOnly);
-	std::cout << "Hash Table Size:" << g_bufMissedHash->Size() << std::endl;
-	//const std::size_t totalBlockCount = std::size_t(xBlockCount) * std::size_t(yBlockCount)*std::size_t(zBlockCount) * sizeof(int);
 	memset(ptr, 0, g_bufMissedHash->Size());
 	g_bufMissedHash->Unmap();
 	GL_ERROR_REPORT;
@@ -263,35 +278,39 @@ void initBlockExistsHash()
 void initMissedBlockVector()
 {
 	const auto ptr = g_bufMissedTable->Map(OpenGLBuffer::WriteOnly);
-	std::cout << "Missed Cache Table Size:" << g_bufMissedTable->Size() << std::endl;
 	memset(ptr, 0, g_bufMissedTable->Size());
 	g_bufMissedTable->Unmap();
+	g_atomicCounter->BindBufferBase(3);
+	unsigned int zero = 0;
+	g_atomicCounter->AllocateFor(&zero, sizeof(unsigned int));
 	GL_ERROR_REPORT;
 }
 
 
-
-void processCacheMiss()
+/**
+ * \brief  Returns \a true if cache missed, otherwise returns false
+ */
+bool CaptureAndHandleCacheMiss()
 {
-
-	const auto ptr = static_cast<int*>(g_bufMissedTable->Map(OpenGLBuffer::ReadWrite));
-	// There is a run-time error at nvoglv64.dll 
-	const int count = ptr[1];
+	// There is a run-time error at nvoglv64.dll
+	const auto counters = static_cast<int*>(g_atomicCounter->Map(OpenGLBuffer::ReadOnly));
+	const int count = counters[0];
 	if (count == 0)
-	{
-		g_bufMissedTable->Unmap();
-		return;
-	}
-
+		return false;
+	//For Debug
+	const auto hashPtr = static_cast<int*>(g_bufMissedHash->Map(OpenGLBuffer::ReadWrite));
+	g_bufMissedHash->Unmap();
+	//
 	const std::size_t blockSize = g_largeVolumeData->blockSize();
-
 	std::vector<GlobalBlockAbstractIndex> hits;
+	const auto ptr = static_cast<int*>(g_bufMissedTable->Map(OpenGLBuffer::ReadWrite));
+	int maxCache = 8;
 
-	for (int i = 0; i < count; i++) 
+	/// TODO:: The loop count should smaller than the number of block count in gpu cache
+	for (int i = 0; i < count &&i<2; i++) 
 	{
-		int blockId = ptr[2 + i];
+		int blockId = ptr[i];
 		const auto p = g_largeVolumeData->blockData(blockId);
-		
 		GlobalBlockAbstractIndex index(blockId, xBlockCount, yBlockCount, zBlockCount);
 		hits.push_back(index);
 	}
@@ -301,9 +320,9 @@ void processCacheMiss()
 	auto & pageTable = *g_largeVolumeData->PageTable;
 	auto & LRUList = g_largeVolumeData->m_lruList;
 
-
 	///TODO:: 
 	g_texCache->Bind();
+	//static int hitCount = 0;
 	for (const auto & i : hits)
 	{
 		auto & pageTableEntry = pageTable(i.x, i.y, i.z);
@@ -319,17 +338,19 @@ void processCacheMiss()
 		pageTableEntry.y = yInCache;
 		pageTableEntry.z = zInCache;
 
-		// Unmapped the previous table entry
+
 		if(last.first.x != -1)
 		{
 			pageTable(last.first.x, last.first.y, last.first.z).w = EntryFlag::Unmapped;
+			//ysl::Log("Pull [%d %d %d] from cache.\n", last.first.x, last.first.y, last.first.z);
 		}
-		
+
+		last.first.x = i.x;
+		last.first.y = i.y;
+		last.first.z = i.z;
 		LRUList.splice(LRUList.begin(), LRUList, --LRUList.end());		// move from tail to head, LRU policy
 		auto d = g_largeVolumeData->blockData(i);
-
 		g_texCache->SetSubData(OpenGLTexture::RED, OpenGLTexture::UInt8,xInCache,blockSize,yInCache,blockSize,zInCache,blockSize,d);
-
 	}
 
 	g_texCache->Unbind();
@@ -338,13 +359,9 @@ void processCacheMiss()
 	g_texPageTable->Bind();
 	g_texPageTable->SetData(OpenGLTexture::RGBA32UI, OpenGLTexture::RGBAInteger, OpenGLTexture::UInt32, pageTableX, pageTableY, pageTableZ, g_largeVolumeData->PageTable->Data());
 	g_texPageTable->Unbind();
-
-	initBlockExistsHash();
-	initMissedBlockVector();
 	GL_ERROR_REPORT;
+	return true;
 }
-
-
 
 
 void renderLoop()
@@ -386,8 +403,14 @@ void renderLoop()
 	glDepthFunc(GL_LESS);
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
-	for (int i = 0; i < 4; i++)
+
+	// init gpu hash table and missed cache block id
+	//GLsync s;
+	int maxLoopCount = 0;
+	do
 	{
+		initBlockExistsHash();
+		initMissedBlockVector();
 		g_rayCastingShaderProgram.bind();
 		//g_rayCastingShaderProgram.setUniformValue("totalPageDirSize", ysl::Vector3i{ pageDirX,pageDirY,pageDirZ });
 		g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ pageTableX,pageTableY,pageTableZ });
@@ -395,7 +418,7 @@ void renderLoop()
 		g_rayCastingShaderProgram.setUniformValue("volumeDataSizeNoRepeat", ysl::Vector3i{ originalDataWidth,originalDataDepth,originalDataDepth });
 		g_rayCastingShaderProgram.setUniformValue("pageTableBlockEntrySize", ysl::Vector3i{ pageTableBlockEntry ,pageTableBlockEntry ,pageTableBlockEntry });
 		g_rayCastingShaderProgram.setUniformValue("repeatOffset", ysl::Vector3i{ repeat,repeat,repeat });
-		g_rayCastingShaderProgram.setUniformSampler("cacheVolume",OpenGLTexture::TextureUnit5, *g_texCache);
+		g_rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *g_texCache);
 
 		g_rayCastingShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
 		g_rayCastingShaderProgram.setUniformValue("orthoMatrix", g_orthoMatrix.Matrix());
@@ -414,11 +437,22 @@ void renderLoop()
 		if (halfWay.Length() > 1e-10) halfWay.Normalize();
 		g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
 		g_rayCastingVAO.bind();
+		
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		processCacheMiss();
-	}
+		//s = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		//glClientWaitSync(s, 0, 1000000);
+		//glDeleteSync(s);
+		//maxLoopCount++;
+	} while (CaptureAndHandleCacheMiss() && maxLoopCount < 10);
+
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	CaptureAndHandleCacheMiss();
+	//}
 
 	g_framebuffer->Unbind();
+
+
 	glDepthFunc(GL_LESS);
 	g_quadsShaderProgram.bind();
 	g_quadsShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
@@ -642,7 +676,7 @@ int main(int argc, char** argv)
 	}
 	rawData.read(g_rawData.get(), total * sizeof(char));
 
-	std::string lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
+	std::string lvdFileName = "D:\\scidata\\abc\\sb__128_128_128.lvd";
 
 	g_largeVolumeData.reset(new VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(lvdFileName));
 
@@ -729,8 +763,17 @@ int main(int argc, char** argv)
 	g_texPageTable->BindToDataImage(1, 0, false, 0, OpenGLTexture::Read, OpenGLTexture::RGBA32UI);
 
 	// allocate for volume data block cache
-	g_texCache = OpenGLTexture::CreateTexture3D(OpenGLTexture::R16F, OpenGLTexture::Linear, OpenGLTexture::Linear, OpenGLTexture::ClampToEdge,
-		OpenGLTexture::ClampToEdge, OpenGLTexture::ClampToEdge, OpenGLTexture::RED, OpenGLTexture::UInt8, cacheWidth, cacheHeight, cacheDepth, nullptr);
+	g_texCache = OpenGLTexture::CreateTexture3D(OpenGLTexture::R16F,
+		OpenGLTexture::Linear,
+		OpenGLTexture::Linear, 
+		OpenGLTexture::ClampToEdge,
+		OpenGLTexture::ClampToEdge, 
+		OpenGLTexture::ClampToEdge,
+		OpenGLTexture::RED,
+		OpenGLTexture::UInt8,
+		cacheWidth,
+		cacheHeight,
+		cacheDepth, nullptr);
 
 	// For Debugging, texCache should be fully filled for a small data set.
 	//{
@@ -754,18 +797,23 @@ int main(int argc, char** argv)
 	//	g_texCache->Unbind();
 	//}
 
-
-
-	g_bufMissedHash = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::Dynamic);
+	g_bufMissedHash = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::DynamicDraw);
 	g_bufMissedHash->AllocateFor(nullptr, totalBlockCountBytes);
-	g_bufMissedHash->ShaderStorageBufferBind(0);
+	g_bufMissedHash->BindBufferBase(0);
 
-	g_bufMissedTable = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::Dynamic);
+	g_bufMissedTable = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::DynamicDraw);
 	g_bufMissedTable->AllocateFor(nullptr, missedBlockCapacity);
-	g_bufMissedTable->ShaderStorageBufferBind(1);
+	g_bufMissedTable->BindBufferBase(1);
 
+	g_atomicCounter = std::make_shared<OpenGLBuffer>(OpenGLBuffer::AtomicCounterBuffer,
+		OpenGLBuffer::DynamicCopy);
+	g_atomicCounter->AllocateFor(nullptr,sizeof(GLuint));
+	g_atomicCounter->BindBufferBase(3);
+	g_atomicCounter->Unbind();
+	GL_ERROR_REPORT;
 	// shader program
 	g_rayCastingShaderProgram.bind();
+	GL_ERROR_REPORT;
 	//g_rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit4, *g_texCache);
 	g_rayCastingShaderProgram.setUniformValue("totalPageDirSize", ysl::Vector3i{ pageDirX,pageDirY,pageDirZ });
 	g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ pageTableX,pageTableY,pageTableZ });
@@ -788,9 +836,10 @@ int main(int argc, char** argv)
 		initialWidth,
 		initialHeight,
 		nullptr);
-	GL_ERROR_REPORT;
 	g_texEntryPos->BindToDataImage(2, 0, false, 0, OpenGLTexture::ReadAndWrite, OpenGLTexture::RGBA32F);
-	GL_ERROR_REPORT;
+
+
+
 	g_texExitPos = OpenGLTexture::CreateTexture2DRect(OpenGLTexture::RGBA32F,
 		OpenGLTexture::Linear,
 		OpenGLTexture::Linear,

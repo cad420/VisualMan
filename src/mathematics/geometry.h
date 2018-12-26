@@ -19,15 +19,33 @@ namespace ysl
 	template <class T> class Point3;
 	template <class T> class Point2;
 
-	typedef Vector3<Float> Vector3f;
-	typedef Vector3<int> Vector3i;
-	typedef Point3<Float> Point3f;
-	typedef Point3<int> Point3i;
+	using Vector3f = Vector3<Float>;
+	using Vector3i = Vector3<int>;
+	using Point3f = Point3<Float>;
+	using Point3i = Point3<int>;
 
-	typedef Point2<Float> Point2f;
-	typedef Vector2<Float> Vector2f;
-	typedef Point2<int> Point2i;
-	typedef Vector2<int> Vector2i;
+	using Vector2f = Vector2<Float>;
+	using Vector2i = Vector2<int>;
+	using Point2f = Point2<Float>;
+	using Point2i = Point2<int>;
+
+	//typedef Vector3<Float> Vector3f;
+	//typedef Vector3<int> Vector3i;
+	//typedef Point3<Float> Point3f;
+	//typedef Point3<int> Point3i;
+
+	//typedef Point2<Float> Point2f;
+	//typedef Vector2<Float> Vector2f;
+	//typedef Point2<int> Point2i;
+	//typedef Vector2<int> Vector2i;
+
+	using Size3 = Vector3<std::size_t>;
+	using Size2 = Vector2<std::size_t>;
+
+	using Vec3f = Vector3f;
+	using Vec3i = Vector3i;
+	using Vec2f = Vector2f;
+	using Vec2i = Vector2i;
 
 	template<typename T>
 	class Vector2 {
