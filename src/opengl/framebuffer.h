@@ -39,15 +39,16 @@ public:
 	OpenGLFramebufferObject& operator=(OpenGLFramebufferObject &&) = delete;
 
 	void AttachTexture(Attachment attach ,const std::shared_ptr<OpenGLTexture> & texture,int level = 0,int offset = 0);
+	void UnattachedTexture(const std::shared_ptr<OpenGLTexture> & texture);
 	void Bind();
 	void Unbind();
+	void SaveAsImage(const std::string & fileName, Attachment attach);
 	void CheckFramebufferStatus();
 	~OpenGLFramebufferObject();
 
 private:
 	unsigned int framebufferObjectId;
 	std::shared_ptr<OpenGLCurrentContext> currentContext;
-	std::vector<std::shared_ptr<OpenGLTexture>> attachedTextures;
-
+	std::unordered_map<Attachment, std::shared_ptr<OpenGLTexture>> attachedTextures;
 };
 #endif

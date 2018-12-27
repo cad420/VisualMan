@@ -103,6 +103,7 @@ public:
 		ExternalDataType extType,int xOffset, int x, int yOffset,int y, int zOffset,int z, const void * data);
 	TextureTarget Target()const;
 	void BindToDataImage(int imageUnit,int level,bool layered,int layer,Access access,InternalFormat fmt);
+	void SaveAsImage(const std::string & fileName);
 	unsigned int NativeTextureId()const;
 	~OpenGLTexture();
 

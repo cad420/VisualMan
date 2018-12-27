@@ -53,6 +53,7 @@ include_directories("src/memory")
 include_directories("src/shape")
 include_directories("src/utility")
 include_directories("src/opengl")
+include_directories("lib/3rdparty")
 
 # Set headers neede by target
 #file(GLOB PROJECT_HEADERS "gui/*.h")

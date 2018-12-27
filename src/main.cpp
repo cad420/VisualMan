@@ -286,7 +286,6 @@ void initMissedBlockVector()
 	GL_ERROR_REPORT;
 }
 
-
 /**
  * \brief  Returns \a true if cache missed, otherwise returns false
  */
@@ -297,17 +296,18 @@ bool CaptureAndHandleCacheMiss()
 	const int count = counters[0];
 	if (count == 0)
 		return false;
-	//For Debug
-	const auto hashPtr = static_cast<int*>(g_bufMissedHash->Map(OpenGLBuffer::ReadWrite));
-	g_bufMissedHash->Unmap();
-	//
+	////For Debug
+	//const auto hashPtr = static_cast<int*>(g_bufMissedHash->Map(OpenGLBuffer::ReadWrite));
+	//g_bufMissedHash->Unmap();
+	////
+
 	const std::size_t blockSize = g_largeVolumeData->blockSize();
 	std::vector<GlobalBlockAbstractIndex> hits;
 	const auto ptr = static_cast<int*>(g_bufMissedTable->Map(OpenGLBuffer::ReadWrite));
 	int maxCache = 8;
 
 	/// TODO:: The loop count should smaller than the number of block count in gpu cache
-	for (int i = 0; i < count &&i<2; i++) 
+	for (int i = 0; i < count && i < 64; i++) 
 	{
 		int blockId = ptr[i];
 		const auto p = g_largeVolumeData->blockData(blockId);
@@ -439,20 +439,24 @@ void renderLoop()
 		g_rayCastingVAO.bind();
 		
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		//s = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-		//glClientWaitSync(s, 0, 1000000);
-		//glDeleteSync(s);
-		//maxLoopCount++;
-	} while (CaptureAndHandleCacheMiss() && maxLoopCount < 10);
 
+	/*	std::stringstream ss;
+		ss << maxLoopCount;
+		std::string str;
+		ss >> str;
+		g_texIntermediateResult->SaveAsImage("C:\\Users\\ysl\\Desktop\\debugimage\\result"+str+".jpg");
+		g_texEntryPos->SaveAsImage("C:\\Users\\ysl\\Desktop\\debugimage\\entry" + str + ".jpg");*/
+		maxLoopCount++;
+
+	} while (CaptureAndHandleCacheMiss());
+
+	ysl::Log("Render pass per frame:%d.\n", maxLoopCount);
 	//for (int i = 0; i < 4; i++)
 	//{
 	//	CaptureAndHandleCacheMiss();
 	//}
 
 	g_framebuffer->Unbind();
-
-
 	glDepthFunc(GL_LESS);
 	g_quadsShaderProgram.bind();
 	g_quadsShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
@@ -463,7 +467,6 @@ void renderLoop()
 	glDrawArrays(GL_TRIANGLES, 0, 6);			// Draw into default framebuffer
 	glDisable(GL_DEPTH_TEST);
 	g_quadsShaderProgram.unbind();
-
 }
 
 static const char trivialVertexShader[] = "#version 330\n"
@@ -676,7 +679,7 @@ int main(int argc, char** argv)
 	}
 	rawData.read(g_rawData.get(), total * sizeof(char));
 
-	std::string lvdFileName = "D:\\scidata\\abc\\sb__128_128_128.lvd";
+	std::string lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
 
 	g_largeVolumeData.reset(new VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(lvdFileName));
 
@@ -887,6 +890,18 @@ int main(int argc, char** argv)
 	initBlockExistsHash();
 	initMissedBlockVector();
 	GL_ERROR_REPORT;
+
+	{
+		
+
+		ysl::TransferFunction m_tfObject;
+		m_tfObject.read("d:\\scidata\\std_tf1d.TF1D");
+
+		m_tfObject.FetchData(m_tfData.data(), 256);
+		g_texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256, 0, 0, m_tfData.data());
+	}
+
+
 	// Main loop
 	while (!glfwWindowShouldClose(window.get()))
 	{

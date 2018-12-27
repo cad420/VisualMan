@@ -19,6 +19,11 @@ void OpenGLFramebufferObject::AttachTexture(Attachment attach, const std::shared
 		glFramebufferTexture3D(GL_FRAMEBUFFER,attach,texTarget,texture->NativeTextureId(),level,offset);
 }
 
+void OpenGLFramebufferObject::UnattachedTexture(const std::shared_ptr<OpenGLTexture>& texture)
+{
+
+}
+
 void OpenGLFramebufferObject::Bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, framebufferObjectId);
@@ -27,6 +32,11 @@ void OpenGLFramebufferObject::Bind()
 void OpenGLFramebufferObject::Unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void OpenGLFramebufferObject::SaveAsImage(const std::string& fileName, Attachment attach)
+{
+
 }
 
 void OpenGLFramebufferObject::CheckFramebufferStatus()

@@ -1,4 +1,5 @@
-#version 430 core
+#version 430 core
+
 uniform sampler1D texTransfunc;
 uniform sampler2DRect texStartPos;
 uniform sampler2DRect texEndPos;
@@ -30,19 +31,9 @@ layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
 
 
 // keywords buffer shows the read-write feature of the buffer.
-layout(std430, binding = 0) buffer HashTable
-{
-	int blockId[];
-}hashTable;
+layout(std430, binding = 0) buffer HashTable {int blockId[];}hashTable;
 
-layout(std430, binding = 1) buffer MissedBlock
-{
-	int blockId[];
-}missedBlock;
-
-
-
-
+layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
 
 vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
@@ -141,20 +132,22 @@ void main()
 	vec3 rayEnd = texture2DRect(texEndPos, textureRectCoord).xyz;
 	vec3 start2end = rayEnd - rayStart;
 	vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
+
 	if (start2end.x == 0.0 && start2end.y == 0.0 && start2end.z == 0.0) 
 	{
 		fragColor = bg; // Background Colors
 		discard;
 	}
+
 	vec4 color = texture2DRect(texIntermediateResult,textureRectCoord);
 	//vec4 color = vec4(0,0,0,0);
 	//fragColor = color;
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
-
+	vec3 samplePoint;
 	for (int i = 0; i < steps; ++i) {
-		vec3 samplePoint = rayStart + direction * step * (float(i) + 0.5);
+		samplePoint = rayStart + direction * step * (float(i) + 0.5);
 		//sample a scalar at samplePoint
 		bool mapped;
 		vec4 scalar = virtualVolumeSample(samplePoint,mapped);
@@ -162,19 +155,20 @@ void main()
 		{
 			// If this block is unmaped,
 			// store the intermediate rendering result and the entry position
-			imageStore(entryPos,ivec2(textureRectCoord),vec4(samplePoint,0.0));
+			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
 			fragColor = color;
-			return;
+			discard;
+			//discard;
 		}
-
 		//vec4 scalar = texture(texVolume, samplePoint);
 		vec4 sampledColor = texture(texTransfunc, scalar.r);
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)
 			break;
 	}
-	//if (color.a == 0.0)
-	//	discard;
+
+	imageStore(entryPos,ivec2(gl_FragCoord),vec4(rayEnd ,0.0));
+
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;
 	fragColor = color;

@@ -1,7 +1,11 @@
 
-#include "texture.h"
-
 #include "../../lib/gl3w/GL/gl3w.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../../lib/3rdparty/stb_image_write.h"
+
+#include "texture.h"
+#include "openglutils.h"
 #include "error.h"
 #include "openglcontext.h"
 
@@ -83,6 +87,20 @@ void OpenGLTexture::BindToDataImage(int imageUnit, int level, bool layered, int 
 {
 	Bind();
 	glBindImageTexture(imageUnit, textureId, level, layered, layer, access, fmt);
+}
+
+void OpenGLTexture::SaveAsImage(const std::string& fileName)
+{
+	Bind();
+	int texDim[2];
+	glGetTexLevelParameteriv(target, 0, GL_TEXTURE_WIDTH, texDim);
+	glGetTexLevelParameteriv(target, 0, GL_TEXTURE_HEIGHT, texDim+1);
+	GL_ERROR_REPORT;
+	std::unique_ptr<char[]> imageBuf(new char[std::size_t(texDim[0])*texDim[1] * 4 * sizeof(char)]);
+	glGetTexImage(target, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageBuf.get());
+	GL_ERROR_REPORT;
+	stbi_write_jpg(fileName.c_str(), texDim[0], texDim[1], 4, imageBuf.get(), 100);
+
 }
 
 unsigned OpenGLTexture::NativeTextureId()const
