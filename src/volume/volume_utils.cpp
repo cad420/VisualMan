@@ -97,6 +97,7 @@ BlockVolumeReader::BlockVolumeReader(const std::string& fileName): validFlag(tru
 	bx = ((vx + aBlockSize - 1) & ~(aBlockSize - 1)) / aBlockSize;
 	by = ((vy + aBlockSize - 1) & ~(aBlockSize - 1)) / aBlockSize;
 	bz = ((vz + aBlockSize - 1) & ~(aBlockSize - 1)) / aBlockSize;
+
 }
 
 void BlockVolumeReader::readBlock(char * dest, int blockId)

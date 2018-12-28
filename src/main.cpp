@@ -455,7 +455,6 @@ void renderLoop()
 	//{
 	//	CaptureAndHandleCacheMiss();
 	//}
-
 	g_framebuffer->Unbind();
 	glDepthFunc(GL_LESS);
 	g_quadsShaderProgram.bind();
@@ -693,9 +692,10 @@ int main(int argc, char** argv)
 	pageTableY = g_largeVolumeData->PageTable->Height();
 	pageTableZ = g_largeVolumeData->PageTable->Depth();
 
-	cacheWidth = g_largeVolumeData->cacheWidth();
-	cacheHeight = g_largeVolumeData->cacheHeight();
-	cacheDepth = g_largeVolumeData->cacheDepth();
+	cacheWidth = g_largeVolumeData->CacheSize().x;
+	cacheHeight = g_largeVolumeData->CacheSize().y;
+	cacheDepth = g_largeVolumeData->CacheSize().z;
+
 	repeat = g_largeVolumeData->repeat();
 	blockDataSize = g_largeVolumeData->blockSize();
 	originalDataWidth = g_largeVolumeData->originalWidth();

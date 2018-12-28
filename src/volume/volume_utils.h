@@ -218,7 +218,8 @@ public:
 };
 
 
-class RawReader {
+class RawReader 
+{
 	std::string fileName;
 	ysl::Size3 dimensions;
 	size_t voxelSize;
@@ -247,6 +248,9 @@ private:
 	}
 };
 
+/**
+ * \brief This should be designed as a boundary-repeated block reader
+ */
 
 class BlockVolumeReader
 {
@@ -267,23 +271,38 @@ public:
 	bool valid()const { return validFlag; }
 
 	int width()const { return vx; }
+
 	int height()const { return vy; }
+
 	int depth()const { return vz; }
+
+
 	int xBlockCount()const { return bx; }
+
 	int yBlockCount()const { return by; }
+
 	int zBlockCount()const { return bz; }
 
 	int repeat()const { return m_repeat; }
+
 	int blockSizeInLog()const { return logBlockSize; }
+
+
 	int blockSize()const { return 1 << blockSizeInLog(); }
+
 	int blockDataCount()const { return blockSize()*blockSize()*blockSize(); }
+
 	int totalBlocks()const { return bx * by * bz; }
+
 	int originalWidth()const { return m_originalWidth; }
+
 	int originalHeight()const { return m_originalHeight; }
+
 	int originalDepth()const { return m_originalDepth; }
+
 	template<typename T, int nLogBlockSize>
 	std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> readAll();
-	void readBlock(char* dest, int blockId);
+	void readBlock(char * dest, int blockId);
 };
 
 

@@ -125,10 +125,11 @@ public:
 	{
 		//const auto tot = cacheBlockCount();
 		const auto size = blockSize();
-		const auto w = xCacheBlockCount(), h = yCacheBlockCount(), d = zCacheBlockCount();
-		for (auto z = 0; z < d; z++)
-			for (auto y = 0; y < h; y++)
-				for (auto x = 0; x < w; x++) {
+		//const auto w = xCacheBlockCount(), h = yCacheBlockCount(), d = zCacheBlockCount();
+		const auto dim = CacheDim();
+		for (auto z = 0; z < dim.z; z++)
+			for (auto y = 0; y < dim.x; y++)
+				for (auto x = 0; x < dim.y; x++) {
 					m_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1,-1,-1), CacheBlockAbstractIndex(x*size,y*size,z*size)));
 				}
 	}

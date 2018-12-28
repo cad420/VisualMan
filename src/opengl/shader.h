@@ -15,8 +15,6 @@ namespace ysl
 	{
 	public:
 		enum class ShaderType { Vertex, Fragment };
-
-
 		ShaderProgram();
 		void create();		// Check OpenGL context
 
