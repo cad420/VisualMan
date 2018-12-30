@@ -1,14 +1,9 @@
 #include <iostream>
 #include <string>
-
 #include "../src/volume/volume_utils.h"
-
 #include "../src/utility/cmdline.h"
 #include "../src/volume/volume.h"
-#include "../src/volume/virtualvolumehierachy.h"
-#include <forward_list>
 #include "abcflowgen.h"
-
 #include <atomic>
 #include <thread>
 #include "error.h"
@@ -21,21 +16,17 @@ int LVDTester()
 	std::string fileName;
 	std::cin >> fileName;
 
-	BlockVolumeReader reader(fileName);
+	LVDReader reader(fileName);
 	if (reader.valid())
 	{
 		std::cout << "lvd file information:" << std::endl;
-		std::cout << "X:" << reader.width() << std::endl;
-		std::cout << "Y:" << reader.height() << std::endl;
-		std::cout << "Z:" << reader.depth() << std::endl;
-		std::cout << "xBlock:" << reader.xBlockCount() << std::endl;
-		std::cout << "yBlock:" << reader.yBlockCount() << std::endl;
-		std::cout << "zBlock:" << reader.zBlockCount() << std::endl;
-		std::cout << "Block size in log:" << reader.blockSizeInLog() << std::endl;
-		std::cout << "Block Size:" << reader.blockSize() << std::endl;
-		std::cout << "Block Data Count:" << reader.blockDataCount() << std::endl;
-		std::cout << "Total Blocks:" << reader.totalBlocks() << std::endl;
-		ysl::Log("Original Data Size:[%d, %d, %d]\n", reader.originalWidth(), reader.originalHeight(), reader.originalDepth());
+		std::cout <<"data size:"<< reader.Size();
+		std::cout << "size by block:" << reader.SizeByBlock();
+		std::cout << "Block size in log:" << reader.BlockSizeInLog() << std::endl;
+		std::cout << "Block Size:" << reader.BlockSize() << std::endl;
+		std::cout << "Block Data Count:" << reader.BlockDataCount() << std::endl;
+		std::cout << "Total Blocks:" << reader.BlockCount() << std::endl;
+		std::cout << "Original data size:" << reader.OriginalDataSize() << std::endl;
 	}
 	else
 	{
@@ -49,15 +40,15 @@ int LVDTester()
 	std::cin >> blockId;
 	if (blockId == -1)
 	{
-
-		const auto bytes = reader.width()*reader.height()*reader.depth();
+		const auto s = reader.Size();
+		const auto bytes = s.x*s.y*s.z;
 		//const auto bytes = 32 * 32 * 32;
 
 		std::unique_ptr<char[]> buffer(new char[bytes]);
 		std::cout << " Read lvd file..\n";
-		if (reader.blockSizeInLog() == 5)
+		if (reader.BlockSizeInLog() == 5)
 		{
-			auto data = reader.readAll<char, 5>();
+			auto data = reader.ReadAll<char, 5>();
 			data->GetLinearArray(buffer.get());
 			//auto d = data->BlockData(1);
 			//::memcpy(buffer.get(), d, bytes);
@@ -65,9 +56,9 @@ int LVDTester()
 			std::cout << data->BlockHeight() << std::endl;
 			std::cout << data->BlockDepth() << std::endl;
 		}
-		else if (reader.blockSizeInLog() == 6)
+		else if (reader.BlockSizeInLog() == 6)
 		{
-			auto data = reader.readAll<char, 6>();
+			auto data = reader.ReadAll<char, 6>();
 			data->GetLinearArray(buffer.get());
 		}
 		else
@@ -91,21 +82,21 @@ int LVDTester()
 	}else if(blockId > -1)
 	{
 
-		const auto bytes = reader.blockSize()*reader.blockSize()*reader.blockSize();
+		const auto bytes = reader.BlockSize()*reader.BlockSize()*reader.BlockSize();
 		std::unique_ptr<char[]> buffer(new char[bytes]);
 		std::cout << " Read lvd file..\n";
 
 		do
 		{
-			if (reader.blockSizeInLog() == 5)
+			if (reader.BlockSizeInLog() == 5)
 			{
-				auto data = reader.readAll<char, 5>();
+				auto data = reader.ReadAll<char, 5>();
 				memcpy(buffer.get(), data->BlockData(blockId), bytes);
 				//data->GetLinearArray(buffer.get());
 			}
-			else if (reader.blockSizeInLog() == 6)
+			else if (reader.BlockSizeInLog() == 6)
 			{
-				auto data = reader.readAll<char, 6>();
+				auto data = reader.ReadAll<char, 6>();
 				//data->GetLinearArray(buffer.get());
 				memcpy(buffer.get(), data->BlockData(blockId), bytes);
 			}
@@ -134,32 +125,6 @@ int LVDTester()
 	return 0;
 }
 
-int g_sum = 0;
-
-std::atomic_bool flag;
-
-int atomicTest()
-{
-	auto f = []()
-	{
-		for(int i = 1 ;i<=10000000;i++)
-		{
-			bool expected = false;
-			while (flag.compare_exchange_strong(expected, true) != true)
-				expected = false;
-			g_sum += 1;
-			flag = false;
-			//std::cout << i << std::endl;
-		}
-	};
-	std::thread t1(f);
-	std::thread t2(f);
-	t1.join();
-	t2.join();
-	std::cout << g_sum << std::endl;
-	return 0;
-}
-
 int main(int argc, char *argv[])
 {
 	int x, y, z, xc, yc, zc;
@@ -174,11 +139,8 @@ int main(int argc, char *argv[])
 	RawToLVDConverter<6> converter(fileName,x,y,z,repeat);
 	converter.convert();
 	converter.save(fileName);
+	//LVDTester();
 
-
-	LVDTester();
-
-	system("pause");
 	return 0;
 
 }

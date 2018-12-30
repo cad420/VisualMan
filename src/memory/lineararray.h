@@ -84,17 +84,26 @@ namespace ysl
 	{
 		using size_type = std::size_t;
 		T * m_data;
-		const size_type m_nx, m_ny,m_nz;
+		//const size_type m_nx, m_ny, m_nz;
+		const ysl::Size3 size;
 		const size_type m_xy;
-		bool m_own;
+		bool own;
 	public:
 		Linear3DArray(size_type x,
 			size_type y,
 			size_type z,
 			T * data,
-			bool own) :m_nx(x),m_ny(y),m_nz(z),m_data(data),m_own(own),m_xy(x*y)
+			bool own) :size(x,y,z),m_data(data),own(own),m_xy(x*y)
 		{
 		}
+
+		Linear3DArray(const ysl::Size3 & sze,
+			T * data
+			):Linear3DArray(sze.x, sze.y ,sze.z, data,true)
+		{
+
+		}
+
 		Linear3DArray(size_type x, size_type y,size_type z ,const T * data) :Linear3DArray(x,y,z, nullptr, true)
 		{
 			const auto t = x*y*z;
@@ -111,26 +120,31 @@ namespace ysl
 		Linear3DArray & operator=(const Linear3DArray &) = delete;
 
 		Linear3DArray(Linear3DArray && array)noexcept :
-			Linear3DArray(array.m_nx, array.m_ny,array.m_nz, array.m_data, array.m_own)
+			Linear3DArray(array.size.x, array.size.y,array.size.z, array.m_data, array.own)
 		{
 			array.m_data = nullptr;
 		}
 
 		Linear3DArray & operator=(Linear3DArray && array)noexcept
 		{
-			m_nx = array.m_nx;
-			m_ny = array.m_ny;
-			m_nx = array.m_nz;
+			//m_nx = array.m_nx;
+			//m_ny = array.m_ny;
+			//m_nx = array.m_nz;
+			size = array.size;
 			m_data = array.m_data;
-			m_own = array.m_own;
+			own = array.own;
 			array.m_data = nullptr;
 			return *this;
 		}
 
-		int Width()const { return m_nx; }
-		int Height()const { return m_ny; }
-		int Depth()const { return m_nz; }
-		std::size_t Count()const { return m_nx * m_nx * m_nz; }
+		//int Width()const { return m_nx; }
+		//int Height()const { return m_ny; }
+		//int Depth()const { return m_nz; }
+
+		ysl::Size3 Size()const { return size; }
+		
+
+		std::size_t Count()const { return size.x*size.y*size.z; }
 
 		T & operator()(int x, int y,int z)
 		{
@@ -139,7 +153,7 @@ namespace ysl
 
 		const T & operator()(int x, int y,int z)const
 		{
-			return m_data[z*m_xy +y * m_nx + x];
+			return m_data[z*m_xy +y * size.x + x];
 		}
 
 		const T * Data()const { return m_data; }
@@ -147,7 +161,7 @@ namespace ysl
 
 		~Linear3DArray()
 		{
-			if (m_own)
+			if (own)
 				FreeAligned(m_data);
 		}
 	};

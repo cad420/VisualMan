@@ -4,7 +4,6 @@ uniform sampler1D texTransfunc;
 uniform sampler2DRect texStartPos;
 uniform sampler2DRect texEndPos;
 uniform sampler2DRect texIntermediateResult;
-uniform sampler3D texVolume;
 uniform float step;
 uniform float ka;
 uniform float kd;
@@ -85,32 +84,6 @@ vec3 PhongShadingEx(vec3 samplePos, vec3 diffuseColor)
 	vec3 L = lightdir;
 	vec3 H = halfway;
 
-	//specularcolor
-	//vec3 H = normalize(V+L);
-	float NdotH = pow(max(dot(N, H), 0.0), shininess);
-	float NdotL = max(dot(N, L), 0.0);
-
-	vec3 ambient = ka * diffuseColor.rgb;
-	vec3 specular = ks * NdotH * vec3(1.0, 1.0, 1.0);
-	vec3 diffuse = kd * NdotL * diffuseColor.rgb;
-
-	shadedValue = specular + diffuse + ambient;
-	return shadedValue;
-}
-
-vec3 PhongShading(vec3 samplePos, vec3 diffuseColor)
-{
-	vec3 shadedValue = vec3(0, 0, 0);
-	//virtualVolumeSample(vec3 samplePos,out bool mapped)
-	vec3 N;
-	N.x = (texture(texVolume, samplePos+vec3(step,0,0) ).w - texture(texVolume, samplePos+vec3(-step,0,0) ).w) - 1.0;
-	N.y = (texture(texVolume, samplePos+vec3(0,step,0) ).w - texture(texVolume, samplePos+vec3(0,-step,0) ).w) - 1.0;
-	N.z = (texture(texVolume, samplePos+vec3(0,0,step) ).w - texture(texVolume, samplePos+vec3(0,0,-step) ).w) - 1.0;
-	N = N * 2.0 - 1.0;
-	N = -normalize(N);
-
-	vec3 L = lightdir;
-	vec3 H = halfway;
 	//specularcolor
 	//vec3 H = normalize(V+L);
 	float NdotH = pow(max(dot(N, H), 0.0), shininess);

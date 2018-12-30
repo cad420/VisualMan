@@ -67,9 +67,9 @@ public:
 
 	void initPageDir() 
 	{
-		for (auto z = 0; z < PageDir->Depth(); z++)
-			for (auto y = 0; y < PageDir->Height(); y++)
-				for (auto x = 0; x < PageDir->Width(); x++)
+		for (auto z = 0; z < PageDir->Size().z; z++)
+			for (auto y = 0; y < PageDir->Size().y; y++)
+				for (auto x = 0; x < PageDir->Size().x; x++)
 				{
 					PageDirEntry dirEntry;
 					dirEntry.x = x * xPageTableEntry;
@@ -88,9 +88,9 @@ public:
 	{
 		// Only initialization flag filed, the table entry is determined by cache miss at run time using lazy evaluation policy.
 		//auto d = PageTable->Data();
-		for (auto z = 0; z < PageTable->Depth(); z++)
-			for (auto y = 0; y < PageTable->Height(); y++)
-				for (auto x = 0; x < PageTable->Width(); x++)
+		for (auto z = 0; z < PageTable->Size().z; z++)
+			for (auto y = 0; y < PageTable->Size().y; y++)
+				for (auto x = 0; x < PageTable->Size().x; x++)
 				{
 					PageTableEntry entry;
 					entry.x = -1;
@@ -107,9 +107,9 @@ public:
 	void initPageTable(int xBlockSize,int yBlockSize,int zBlockSize)
 	{
 		//auto d = PageTable->Data();
-		for (auto z = 0; z < PageTable->Depth(); z++)
-			for (auto y = 0; y < PageTable->Height(); y++)
-				for (auto x = 0; x < PageTable->Width(); x++)
+		for (auto z = 0; z < PageTable->Size().z; z++)
+			for (auto y = 0; y < PageTable->Size().y; y++)
+				for (auto x = 0; x < PageTable->Size().x; x++)
 				{
 					PageTableEntry entry;
 					entry.x = x*xBlockSize;
@@ -124,7 +124,7 @@ public:
 	void initLRUList()
 	{
 		//const auto tot = cacheBlockCount();
-		const auto size = blockSize();
+		const auto size = BlockSize();
 		//const auto w = xCacheBlockCount(), h = yCacheBlockCount(), d = zCacheBlockCount();
 		const auto dim = CacheDim();
 		for (auto z = 0; z < dim.z; z++)
@@ -141,20 +141,22 @@ public:
 		using ysl::RoundUpDivide;
 		using ysl::Linear3DArray;
 
+		auto sizeByBlock = SizeByBlock();
+
 		PageTable.reset(new Linear3DArray<PageTableEntry>(
-			xBlockCount(),
-			yBlockCount(),
-			zBlockCount(),
+			sizeByBlock.x,
+			sizeByBlock.y,
+			sizeByBlock.z,
 			nullptr ));
 		PageDir.reset(new Linear3DArray<PageDirEntry> (
-			RoundUpDivide(PageTable->Width(), xPageTableEntry),
-			RoundUpDivide(PageTable->Height(), yPageTableEntry),
-			RoundUpDivide(PageTable->Depth(), zPageTableEntry),
+			RoundUpDivide(PageTable->Size().x, xPageTableEntry),
+			RoundUpDivide(PageTable->Size().y, yPageTableEntry),
+			RoundUpDivide(PageTable->Size().z, zPageTableEntry),
 			nullptr)
 		);
 
 		initPageDir();
-		initPageTable(blockSize(), blockSize(), blockSize());
+		initPageTable(BlockSize(), BlockSize(), BlockSize());
 		initLRUList();
 	}
 
@@ -166,7 +168,7 @@ public:
 			auto & last = m_lruList.back();
 			(*PageTable)(last.first.x, last.first.y, last.first.z).w = Unmapped;
 			m_lruList.splice(m_lruList.begin(), m_lruList, --m_lruList.end());		// move from tail to head
-			auto d = blockData(i);
+			auto d = ReadBlockDataFromCache(i);
 
 		}
 	}

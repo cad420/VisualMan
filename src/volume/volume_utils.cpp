@@ -1,6 +1,8 @@
 
 #include "volume_utils.h"
 
+#include <exception>
+
 RawReader::RawReader(const std::string &fileName, const ysl::Size3 &dimensions, size_t voxelSize)
 	: fileName(fileName), dimensions(dimensions), voxelSize(voxelSize),
 	file(fopen(fileName.c_str(), "rb")), offset(0)
@@ -56,7 +58,7 @@ size_t RawReader::readRegion(const ysl::Size3 &start, const ysl::Size3 &size, un
 
 
 
-BlockVolumeReader::BlockVolumeReader(const std::string& fileName): validFlag(true)
+LVDReader::LVDReader(const std::string& fileName): validFlag(true)
 {
 	fileHandle.open(fileName, std::fstream::binary);
 	if (!fileHandle.is_open())
@@ -66,7 +68,9 @@ BlockVolumeReader::BlockVolumeReader(const std::string& fileName): validFlag(tru
 		fileHandle.close();
 		return;
 	}
+
 	uint32_t magicNumber;
+
 	fileHandle.read((char*)&magicNumber, sizeof(int));
 	if (magicNumber != LVDFileMagicNumber)
 	{
@@ -76,14 +80,18 @@ BlockVolumeReader::BlockVolumeReader(const std::string& fileName): validFlag(tru
 		return;
 	}
 
+	int vx, vy, vz, bx, by, bz;
+	int m_originalWidth, m_originalHeight, m_originalDepth;
+
 	fileHandle.read((char*)&vx, sizeof(int));
 	fileHandle.read((char*)&vy, sizeof(int));
 	fileHandle.read((char*)&vz, sizeof(int));
 	fileHandle.read((char*)&logBlockSize, sizeof(int));
-	fileHandle.read((char*)&m_repeat, sizeof(int));
+	fileHandle.read((char*)&repeat, sizeof(int));
 	fileHandle.read((char*)&m_originalWidth, sizeof(int));
 	fileHandle.read((char*)&m_originalHeight, sizeof(int));
 	fileHandle.read((char*)&m_originalDepth, sizeof(int));
+
 	if (logBlockSize != LogBlockSize5 && logBlockSize != LogBlockSize6)
 	{
 		std::cout << "Unsupported block size\n";
@@ -91,18 +99,22 @@ BlockVolumeReader::BlockVolumeReader(const std::string& fileName): validFlag(tru
 		return;
 	}
 
-	const size_t aBlockSize = blockSize();
+	const size_t aBlockSize = BlockSize();
 
 	// aBlockSize must be power of 2, e.g. 32 or 64
 	bx = ((vx + aBlockSize - 1) & ~(aBlockSize - 1)) / aBlockSize;
 	by = ((vy + aBlockSize - 1) & ~(aBlockSize - 1)) / aBlockSize;
 	bz = ((vz + aBlockSize - 1) & ~(aBlockSize - 1)) / aBlockSize;
 
+	vSize = ysl::Size3((vx),(vy),(vz));
+	bSize = ysl::Size3(bx,by,bz);
+	oSize = ysl::Size3(m_originalWidth,m_originalHeight,m_originalDepth);
+
 }
 
-void BlockVolumeReader::readBlock(char * dest, int blockId)
+void LVDReader::ReadBlock(char * dest, int blockId)
 {
-	const size_t blockCount = blockDataCount();
+	const size_t blockCount = BlockDataCount();
 	// 32 is the size of file header
 	fileHandle.seekg(blockCount * blockId + 36, std::ios::beg);
 	fileHandle.read(dest, sizeof(char) * blockCount);

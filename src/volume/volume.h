@@ -33,12 +33,12 @@ struct GlobalBlockAbstractIndex
 };
 
 
-class LargeVolumeCache:public BlockVolumeReader
+class LargeVolumeCache:public LVDReader
 {
 	static constexpr int nLogBlockSize = 6;
 
 	static constexpr ysl::Size3 cacheBlockSize{1<<nLogBlockSize,1<<nLogBlockSize,1<<nLogBlockSize};
-	static constexpr ysl::Size3 cacheDim{ 4,4,4 };
+	static constexpr ysl::Size3 cacheDim{4,4,4};
 	static constexpr ysl::Size3 cacheSize = cacheDim * (1 << nLogBlockSize);
 
 	//static constexpr size_t cacheBlockCountAtWidth = 4;
@@ -51,9 +51,7 @@ class LargeVolumeCache:public BlockVolumeReader
 
 	static constexpr size_t totalCacheBlocks = cacheDim.x*cacheDim.y*cacheDim.z;
 
-
 	using Cache = ysl::Block3DArray<unsigned char, nLogBlockSize>;
-
 	struct LRUListCell;
 	using LRUHash = std::unordered_map<int,std::list<LRUListCell>::iterator>;
 	struct LRUListCell
@@ -66,29 +64,25 @@ class LargeVolumeCache:public BlockVolumeReader
 	LRUHash	m_blockIdInCache;		// blockId---> (blockIndex,the position of blockIndex in list)
 
 	bool m_valid;
-	
-
 	std::unique_ptr<Cache> m_volumeCache;
+
+	//ysl::Size3 sizeByBlock;
+	//ysl::Size3 cacheSize;
+	//ysl::Size3 blockSize;
+
 
 	int blockCoordinateToBlockId(int xBlock, int yBlock, int zBlock)const
 	{
-		const auto nxBlock = xBlockCount(), nyBlock = yBlockCount(), nzBlock = zBlockCount();
-		return zBlock * nxBlock*nyBlock + yBlock * nxBlock + xBlock;
+		const auto x = SizeByBlock().x, y = SizeByBlock().y, z = SizeByBlock().z;
+		return zBlock * x*y + yBlock * x + xBlock;
 	}
+
+	void createCache();
+
+	void initLRU();
 
 public:
-	explicit LargeVolumeCache(const std::string & fileName) :BlockVolumeReader(fileName),m_valid(true)
-	{
-		if (blockSizeInLog() != nLogBlockSize)
-		{
-			m_valid = false;
-			return;
-		}
-
-		m_volumeCache.reset(new Cache(cacheSize.x, cacheSize.y, cacheSize.z, nullptr));
-		for (auto i =std::size_t(0) ; i < totalCacheBlocks; i++)
-			m_lruList.push_front(LRUListCell(i,m_blockIdInCache.end()));
-	}
+	explicit LargeVolumeCache(const std::string& fileName);
 
 	bool IsValid()const { return m_valid; }
 
@@ -100,9 +94,10 @@ public:
 	constexpr ysl::Size3 CacheSize()const { return cacheSize; }
 
 
-	const unsigned char * blockData(int xBlock, int yBlock, int zBlock) { return blockData(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
-	const unsigned char * blockData(int blockId);
-	const unsigned char * blockData(const GlobalBlockAbstractIndex & index){ return blockData(index.x, index.y, index.z); };
+	const unsigned char * ReadBlockDataFromCache(int xBlock, int yBlock, int zBlock) { return ReadBlockDataFromCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
+	const unsigned char * ReadBlockDataFromCache(int blockId);
+	const unsigned char * ReadBlockDataFromCache(const GlobalBlockAbstractIndex & index){ return ReadBlockDataFromCache(index.x, index.y, index.z); };
+
 
 };
 

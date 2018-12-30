@@ -19,6 +19,16 @@ public:
 	static constexpr int MagicNumber = 277536;
 };
 
+struct LVDFileHeader
+{
+	uint32_t magicNumber;	//  4
+	uint32_t vSize[3];		//	12
+	uint32_t oSize[3];		//  12
+	uint32_t repeat;		//  4
+	uint32_t logBlockSize;	//  4
+	char reserved[28];		// 28	 == 64bytes in total
+};
+
 //#define WRITE_SINGLE_BLOCK
 
 template<int nLogBlockSize, typename LVDTraits = LVDFileTraits>
@@ -217,6 +227,15 @@ public:
 	}
 };
 
+//struct LVDFileHeader
+//{
+//	uint32_t magicNumber;	//  4
+//	uint32_t vSize[3];		//	12
+//	uint32_t oSize[3];		//  12
+//	uint32_t repeat;		//  4
+//	uint32_t logBlockSize;	//  4
+//	char reserved[28];		// 28	 == 64bytes in total
+//};
 
 class RawReader 
 {
@@ -252,72 +271,66 @@ private:
  * \brief This should be designed as a boundary-repeated block reader
  */
 
-class BlockVolumeReader
+
+
+class LVDReader
 {
 	std::ifstream fileHandle;
 	std::string fileName;
-	int vx, vy, vz, bx, by, bz;
-	int m_originalWidth, m_originalHeight, m_originalDepth;
+
+	ysl::Size3 vSize;
+	ysl::Size3 bSize;
+	ysl::Size3 oSize;
+	//int vx, vy, vz, bx, by, bz;
+	//int m_originalWidth, m_originalHeight, m_originalDepth;
 	int logBlockSize;
-	int m_repeat;
+	int repeat;
 	bool validFlag;
 
 	enum { LVDFileMagicNumber = 277536 };
+
 	enum { LogBlockSize5 = 5,LogBlockSize6 = 6 };
+
 	enum { LVDHeaderSize = 24 };
+
 public:
-	explicit BlockVolumeReader(const std::string& fileName);
+	explicit LVDReader(const std::string& fileName);
 
 	bool valid()const { return validFlag; }
 
-	int width()const { return vx; }
+	ysl::Size3 Size()const { return vSize; }
 
-	int height()const { return vy; }
+	ysl::Size3 SizeByBlock()const { return bSize; }
 
-	int depth()const { return vz; }
+	int BoundaryRepeat()const { return repeat; }
 
+	int BlockSizeInLog()const { return logBlockSize; }
 
-	int xBlockCount()const { return bx; }
+	int BlockSize()const { return 1 << BlockSizeInLog(); }
 
-	int yBlockCount()const { return by; }
+	int BlockDataCount()const { return BlockSize()*BlockSize()*BlockSize(); }
 
-	int zBlockCount()const { return bz; }
+	int BlockCount()const { return bSize.x*bSize.y*bSize.z; }
 
-	int repeat()const { return m_repeat; }
-
-	int blockSizeInLog()const { return logBlockSize; }
-
-
-	int blockSize()const { return 1 << blockSizeInLog(); }
-
-	int blockDataCount()const { return blockSize()*blockSize()*blockSize(); }
-
-	int totalBlocks()const { return bx * by * bz; }
-
-	int originalWidth()const { return m_originalWidth; }
-
-	int originalHeight()const { return m_originalHeight; }
-
-	int originalDepth()const { return m_originalDepth; }
+	ysl::Size3 OriginalDataSize()const { return oSize; }
 
 	template<typename T, int nLogBlockSize>
-	std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> readAll();
-	void readBlock(char * dest, int blockId);
+	std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> ReadAll();
+	void ReadBlock(char * dest, int blockId);
 };
 
 
 template <typename T, int nLogBlockSize>
-std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> BlockVolumeReader::readAll()
+std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> LVDReader::ReadAll()
 {
-	const size_t bytes = width() * height() * depth() * sizeof(T);
-	auto ptr = std::make_shared<ysl::Block3DArray<T, nLogBlockSize>>(width(), height(), depth(), nullptr);
+	const auto s = Size();
+	const size_t bytes = s.x*s.y*s.z* sizeof(T);
+	auto ptr = std::make_shared<ysl::Block3DArray<T, nLogBlockSize>>(s.x,s.y,s.z, nullptr);
 	if (ptr)
 	{
 		fileHandle.seekg((size_t)LVDHeaderSize, std::ios::beg);
-
 		fileHandle.read(ptr->Data(), bytes);
 	}
-
 	return ptr;
 }
 
