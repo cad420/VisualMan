@@ -128,8 +128,8 @@ int LVDTester()
 int main(int argc, char *argv[])
 {
 	int x, y, z, xc, yc, zc;
-	std::cin >> x >> y >> z;
-	ABCFlowGen(x,y,z);
+	//std::cin >> x >> y >> z;
+	//ABCFlowGen(x,y,z);
 	//SimpleBlockGen(x,y,z,2,2,2);
 	std::string fileName;
 	std::cin >> fileName;

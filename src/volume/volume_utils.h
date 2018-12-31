@@ -36,12 +36,16 @@ class RawToLVDConverter
 {
 	using RawType = char;
 
+	//ysl::Size3 size;
+	//ysl::Size3 offset;
+	//ysl::Size3 blockSize;
+
 	int g_xOffset, g_yOffset, g_zOffset;
 	int g_xSize, g_ySize, g_zSize;
 	int g_xBlockSize, g_yBlockSize, g_zBlockSize;
 	RawType g_emptyValue;
 
-	std::unique_ptr<ysl::Block3DArray<RawType, nLogBlockSize>> m_blockedData;
+	//std::unique_ptr<ysl::Block3DArray<RawType, nLogBlockSize>> m_blockedData;
 
 	void getData(RawType * dest, const RawType * src, size_t width, size_t height, size_t depth,size_t xb,size_t yb,size_t zb)const
 	{
@@ -73,23 +77,23 @@ class RawToLVDConverter
 
 					if (gx >= 0 && gx < g_xSize && gy >= 0 && gy < g_ySize && gz >= 0 && gz < g_zSize)
 					{
-						const size_t linearIndex = (gx)+(gy)*g_xSize + (gz)*g_xSize*g_ySize;
-						//*(dest+blockIndex) = *(src + linearIndex);
+						const size_t linearIndex = (gx)+(gy)*std::size_t(g_xSize) + (gz)*g_xSize*std::size_t(g_ySize);
+						*(dest+blockIndex) = *(src + linearIndex);
 						///TODO::
 #ifdef WRITE_SINGLE_BLOCK
 						buf[blockIndex] = *(src + linearIndex);
 #endif
 
-						(*m_blockedData)(blockedGlobalX, blockedGlobalY, blockedGlobalZ) = *(src + linearIndex);
+						//(*m_blockedData)(blockedGlobalX, blockedGlobalY, blockedGlobalZ) = *(src + linearIndex);
 					}
 					else
 					{
 #ifdef WRITE_SINGLE_BLOCK
 						buf[blockIndex] = g_emptyValue;
 #endif
-						(*m_blockedData)(blockedGlobalX, blockedGlobalY, blockedGlobalZ) = g_emptyValue;
+						//(*m_blockedData)(blockedGlobalX, blockedGlobalY, blockedGlobalZ) = g_emptyValue;
 						///TODO::
-						//*(dest+blockIndex) = g_emptyValue;
+						*(dest+blockIndex) = g_emptyValue;
 					}
 				}
 #ifdef  WRITE_SINGLE_BLOCK
@@ -148,7 +152,7 @@ public:
 
 		std::cout << "lvd data dimension: " << m_dataSize << std::endl;
 
-		const auto rawBytes = xSize * ySize * zSize * sizeof(RawType);
+		const auto rawBytes = std::size_t(xSize) * ySize * zSize * sizeof(RawType);
 		if (rawBytes == 0)
 		{
 			std::cout << "empty data.\n";
@@ -164,14 +168,20 @@ public:
 		const auto lvdBytes = size_t(m_dataSize.x)*size_t(m_dataSize.y)*size_t(m_dataSize.z) * sizeof(RawType);
 
 		///TODO::
-		m_blockedData.reset(new ysl::Block3DArray<RawType,nLogBlockSize>(m_dataSize.x, m_dataSize.y, m_dataSize.z,nullptr));
-
-		//m_lvdBuf.reset(new RawType[lvdBytes]);
-		//if (!m_lvdBuf)
-		//{
+		//auto p = new ysl::Block3DArray<RawType, nLogBlockSize>(m_dataSize.x, m_dataSize.y, m_dataSize.z, nullptr);
+		//if (p == nullptr) {
 		//	std::cout << " bad alloc." << __LINE__ << std::endl;
 		//	return;
 		//}
+		//m_blockedData.reset(p);
+
+		m_lvdBuf.reset(new RawType[lvdBytes]);
+		if (!m_lvdBuf)
+		{
+			std::cout << " bad alloc." << __LINE__ << std::endl;
+			return;
+		}
+
 
 		std::cout << "Reading raw file...\n";
 		rawFile.read(m_rawBuf.get(), rawBytes);
@@ -221,7 +231,7 @@ public:
 		lvdFile.write((char*)&g_zSize, sizeof(LVDTraits::DimensionSize_t));
 
 		///TODO::
-		lvdFile.write(m_blockedData->Data(), lvdBytes);
+		lvdFile.write(m_lvdBuf.get(), lvdBytes);
 		std::cout << "writing .lvd file finished\n";
 		return true;
 	}

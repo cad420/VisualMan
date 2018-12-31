@@ -201,7 +201,7 @@ namespace ysl
 		{
 			const auto xBlock = Block(x), yBlock = Block(y), zBlock = Block(z);
 			const auto xOffset = Offset(x), yOffset = Offset(y), zOffset = Offset(z);
-			const auto index = (m_nyBlocks*m_nxBlocks*zBlock + m_nxBlocks * yBlock + xBlock)*BlockSize()*BlockSize()*BlockSize() +
+			const auto index = (std::size_t(m_nyBlocks)*m_nxBlocks*zBlock + std::size_t(m_nxBlocks) * yBlock + xBlock)*std::size_t(BlockSize())*BlockSize()*BlockSize() +
 				BlockSize()*BlockSize()*zOffset +
 				BlockSize()*yOffset + xOffset;
 			return m_data[index];

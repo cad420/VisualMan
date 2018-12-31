@@ -238,7 +238,6 @@ void initBlockExistsHash()
 	memset(ptr, 0, g_bufMissedHash->Size());
 	g_bufMissedHash->Unmap();
 	GL_ERROR_REPORT;
-
 }
 
 void initMissedBlockVector()
@@ -273,13 +272,16 @@ bool CaptureAndHandleCacheMiss()
 	int maxCache = 8;
 
 	/// TODO:: The loop count should smaller than the number of block count in gpu cache
-	for (int i = 0; i < count ; i++) 
+
+	for (int i = 0; i < count && i<64 ; i++) 
 	{
 		int blockId = ptr[i];
 		const auto p = g_largeVolumeData->ReadBlockDataFromCache(blockId);
 		GlobalBlockAbstractIndex index(blockId, xBlockCount, yBlockCount, zBlockCount);
 		hits.push_back(index);
 	}
+
+
 	GL_ERROR_REPORT;
 	g_bufMissedTable->Unmap();
 
@@ -397,7 +399,6 @@ void initializeProxyGeometry() {
 
 void initializeGPUTexture()
 {
-
 }
 
 
