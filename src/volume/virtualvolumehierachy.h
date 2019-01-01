@@ -129,7 +129,8 @@ public:
 		const auto dim = CacheDim();
 		for (auto z = 0; z < dim.z; z++)
 			for (auto y = 0; y < dim.x; y++)
-				for (auto x = 0; x < dim.y; x++) {
+				for (auto x = 0; x < dim.y; x++) 
+				{
 					m_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1,-1,-1), CacheBlockAbstractIndex(x*size,y*size,z*size)));
 				}
 	}
