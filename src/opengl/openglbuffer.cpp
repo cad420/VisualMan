@@ -3,6 +3,7 @@
 
 #include "../../lib/gl3w/GL/gl3w.h"
 #include "error.h"
+#include "openglutils.h"
 
 OpenGLBuffer::OpenGLBuffer(BufferTarget type,BufferUsage usage):
 target(type),
@@ -47,6 +48,9 @@ void OpenGLBuffer::AllocateFor(const void* data, std::size_t size)
 void OpenGLBuffer::Write(const void* data)
 {
 	glBufferData(target, dataSize, data, usage);
+	
+	//glBufferStorage(target, dataSize, data,GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT);
+	//std::cout << dataSize;
 }
 
 void OpenGLBuffer::Unbind()
