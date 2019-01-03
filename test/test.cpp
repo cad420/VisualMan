@@ -128,63 +128,21 @@ int LVDTester()
 
 int main(int argc, char *argv[])
 {
-	//int x, y, z, xc, yc, zc;
-	////std::cin >> x >> y >> z;
-	////ABCFlowGen(x,y,z);
-	////SimpleBlockGen(x,y,z,2,2,2);
-	//std::string fileName;
-	//std::cin >> fileName;
-	////int x, y, z, repeat;
-	//int repeat;
-	//std::cin >> x >> y >> z >> repeat;
-	//RawToLVDConverter<6> converter(fileName,x,y,z,repeat);
-	//converter.convert();
-	//converter.save(fileName);
-	//LVDTester();
+	int x, y, z, xc, yc, zc;
+	std::cin >> x >> y >> z;
+	ABCFlowGen(x,y,z);
+	//SimpleBlockGen(x,y,z,2,2,2);
+	std::string fileName;
+	std::cin >> fileName;
+	//int x, y, z, repeat;
+	int repeat;
+	std::cin >> x >> y >> z >> repeat;
+	RawToLVDConverter<6> converter(fileName,x,y,z,repeat);
+	converter.convert();
+	converter.save(fileName);
+	LVDTester();
 
-	struct time {
-		int h;
-		int m;
-		int s;
-	};
 
-	struct time t;
-	int n;
-
-	scanf("%d:%d:%d\n", &t.h, &t.m, &t.s);
-	scanf("%d", &n);
-	printf("%d %d %d %d\n", t.h, t.m, t.s,n);
-
-	t.s += n;
-	if (t.s >= 60) {
-		t.s -= 60;
-		t.m += 1;
-	}
-	if (t.m >= 60) {
-		t.m -= 60;
-		t.h += 1;
-	}
-	if (t.h >= 24) {
-		t.h -= 24;
-	}
-	if (t.h < 10) {
-		printf("0%d:", t.h);
-	}
-	else {
-		printf("%d:", t.h);
-	}
-	if (t.m < 10) {
-		printf("0%d:", t.m);
-	}
-	else {
-		printf("%d:", t.m);
-	}
-	if (t.s < 10) {
-		printf("0%d", t.s);
-	}
-	else {
-		printf("%d", t.s);
-	}
 
 	system("pause");
 	return 0;

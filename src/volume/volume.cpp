@@ -34,7 +34,13 @@ void LargeVolumeCache::createCache()
 
 	//	cacheSize = Size();
 	//}
-	m_volumeCache.reset(new Cache(cacheSize.x,cacheSize.y,cacheSize.z, nullptr));
+	auto p = new Cache(cacheSize.x, cacheSize.y, cacheSize.z, nullptr);
+	if(!p)
+	{
+		std::cerr << "Can not allocate memory for cache\n";
+		exit(0);
+	}
+	m_volumeCache.reset(p);
 }
 
 void LargeVolumeCache::initLRU()
@@ -60,35 +66,31 @@ LargeVolumeCache::LargeVolumeCache(const std::string& fileName):
 const unsigned char* LargeVolumeCache::ReadBlockDataFromCache(int blockId)
 {
 	//assert(m_volumeCache != nullptr);
+	std::lock_guard<std::mutex> guard(m_lock);
+
 	const auto it = m_blockIdInCache.find(blockId);
 	if (it == m_blockIdInCache.end())
 	{
 		// replace the last block in cache
 		auto & lastCell = m_lruList.back();
-		//std::cout << "The block:"<<blockId<<" is not in cache, read it from disk and put it at cache"<<lastCell.blockCacheIndex<<"\n";
 		m_lruList.splice(m_lruList.begin(), m_lruList,--m_lruList.end());		// move last to head
-
 
 		const auto newItr = m_blockIdInCache.insert(std::make_pair(blockId, m_lruList.begin()));
 		if(lastCell.hashIter != m_blockIdInCache.end())
 		{
-			//std::cout << "Cache is full. Block "<< lastCell.hashIter->first<<" mapped at cache "<<lastCell.blockCacheIndex<<" must be replace\n";
 			m_blockIdInCache.erase(lastCell.hashIter); // Unmapped old
 		}
 
 		lastCell.hashIter = newItr.first;		// Mapping new 
 		ReadBlock((char*)m_volumeCache->BlockData(lastCell.blockCacheIndex), blockId);
 		//SHOW_LIST_STATE
+		//std::cout << "**" << std::endl;
 		return m_volumeCache->BlockData(lastCell.blockCacheIndex);
 	}
 	else
 	{
-		//std::cout << "The block:" << blockId << " is cached at "<<it->second->blockCacheIndex<<", just use it\n";
 		m_lruList.splice(m_lruList.begin(), m_lruList, it->second);			// move the node that it->second points to the head.
-		//SHOW_LIST_STATE
 		return m_volumeCache->BlockData(it->second->blockCacheIndex);
 	}
-
-
 	return nullptr;
 }

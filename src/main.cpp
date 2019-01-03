@@ -29,6 +29,7 @@
 #include "volume/virtualvolumehierachy.h"
 #include "GL/glcorearb.h"
 #include "framebuffer.h"
+#include "timer.h"
 
 
 //const static int g_proxyGeometryVertexIndices[] = { 1, 3, 7, 5, 0, 4, 6, 2, 2, 6, 7, 3, 0, 1, 5, 4, 4, 5, 7, 6, 0, 2, 3, 1 };
@@ -63,9 +64,9 @@ static float g_proxyGeometryVertices[] = {
 
 
 
-/**************************************************/
+ /**************************************************/
 
-/**************************************************/
+ /**************************************************/
 
 namespace
 {
@@ -81,18 +82,21 @@ namespace
 	//std::unique_ptr<char[]> g_rawData;
 	std::vector<ysl::RGBASpectrum> m_tfData{ 256 };
 
+	std::string g_lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
+
 	ysl::Vector3f g_lightDirection;
 
-	float step = 0.01;
+	float step = 0.001;
 	float ka = 1.0;
 	float ks = 1.0;
 	float kd = 1.0;
 	float shininess = 50.0f;
 
 	constexpr int pageTableBlockEntry = 16;
+	Timer g_timer;
+	Timer g_timer2;
 
-
-	const std::size_t missedBlockCapacity = 5000*sizeof(unsigned int);
+	const std::size_t missedBlockCapacity = 5000 * sizeof(unsigned int);
 
 
 	std::shared_ptr<OpenGLTexture> g_texTransferFunction;
@@ -122,7 +126,13 @@ namespace
 	std::shared_ptr<OpenGLTexture> g_texPageTable;
 
 	std::shared_ptr<OpenGLTexture> g_texCache;
-	//ysl::Size3;
+	std::list<std::pair<PageTableEntryAbstractIndex, CacheBlockAbstractIndex>> g_lruList;
+	std::shared_ptr<OpenGLBuffer> g_blockPingBuf;
+	std::shared_ptr<OpenGLBuffer> g_blockPongBuf;
+	std::vector<GlobalBlockAbstractIndex> g_hits;
+	std::vector<int> g_posInCache;
+	ysl::Size3 g_gpuCacheBlockSize{ 4,4,4};
+
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
 
@@ -155,7 +165,7 @@ namespace
 	int yBlockCount;
 	int zBlockCount;
 
-	int initialWidth = 1280, initialHeight = 720;
+	int initialWidth = 800, initialHeight = 600;
 
 }
 
@@ -251,6 +261,20 @@ void initMissedBlockVector()
 	GL_ERROR_REPORT;
 }
 
+void initGPUCacheLRUPolicyList()
+{
+	const auto size = g_largeVolumeData->BlockSize();
+	//const auto w = xCacheBlockCount(), h = yCacheBlockCount(), d = zCacheBlockCount();
+	for (auto z = 0; z < g_gpuCacheBlockSize.x; z++)
+		for (auto y = 0; y < g_gpuCacheBlockSize.y; y++)
+			for (auto x = 0; x < g_gpuCacheBlockSize.z; x++)
+			{
+				g_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1, -1, -1), CacheBlockAbstractIndex(x*size, y*size, z*size)));
+			}
+
+	g_texPageTable->SetData(OpenGLTexture::RGBA32UI, OpenGLTexture::RGBAInteger, OpenGLTexture::UInt32, pageTableX, pageTableY, pageTableZ, g_largeVolumeData->PageTable->Data());
+}
+
 /**
  * \brief  Returns \a true if cache missed, otherwise returns false
  */
@@ -261,72 +285,137 @@ bool CaptureAndHandleCacheMiss()
 	const int count = counters[0];
 	if (count == 0)
 		return false;
-	////For Debug
-	//const auto hashPtr = static_cast<int*>(g_bufMissedHash->Map(OpenGLBuffer::ReadWrite));
-	//g_bufMissedHash->Unmap();
-	////
 
+	const std::size_t cacheBlockThreshold = g_gpuCacheBlockSize.x*g_gpuCacheBlockSize.y*g_gpuCacheBlockSize.z*0.8;
 	const std::size_t blockSize = g_largeVolumeData->BlockSize();
-	std::vector<GlobalBlockAbstractIndex> hits;
+	const auto missedBlocks = (std::min)(count, (int)cacheBlockThreshold);
+
+
+	g_hits.clear();
+	g_posInCache.clear();
+	g_hits.reserve(missedBlocks);
+	g_posInCache.reserve(missedBlocks * 3);
+
 	const auto ptr = static_cast<int*>(g_bufMissedTable->Map(OpenGLBuffer::ReadWrite));
-	int maxCache = 8;
-
-	/// TODO:: The loop count should smaller than the number of block count in gpu cache
-
-	for (int i = 0; i < count && i<64 ; i++) 
+	for (auto i = 0; i < missedBlocks; i++)
 	{
-		int blockId = ptr[i];
-		const auto p = g_largeVolumeData->ReadBlockDataFromCache(blockId);
-		GlobalBlockAbstractIndex index(blockId, xBlockCount, yBlockCount, zBlockCount);
-		hits.push_back(index);
+		const auto blockId = ptr[i];
+		g_hits.emplace_back(blockId, xBlockCount, yBlockCount, zBlockCount);
 	}
-
-
-	GL_ERROR_REPORT;
 	g_bufMissedTable->Unmap();
 
+
 	auto & pageTable = *g_largeVolumeData->PageTable;
-	auto & LRUList = g_largeVolumeData->m_lruList;
+	auto & LRUList = g_lruList;
 
-	///TODO:: 
-	g_texCache->Bind();
+	
 	//static int hitCount = 0;
-	for (const auto & i : hits)
-	{
-		auto & pageTableEntry = pageTable(i.x, i.y, i.z);
-		//pageTable(i.x, i.y, i.z).w = EntryFlag::Mapped;
-		auto & last = g_largeVolumeData->m_lruList.back();
-		pageTableEntry.w = EntryFlag::Mapped;		// Map the flag of page table entry
 
+	;
+
+	// Update LRU List 
+	for (int i = 0; i < missedBlocks; i++)
+	{
+		const auto & index = g_hits[i];
+		auto & pageTableEntry = pageTable(index.x, index.y, index.z);
+		auto & last = LRUList.back();
+		pageTableEntry.w = EntryFlag::Mapped;		// Map the flag of page table entry
 		// last.second is the cache block index
+
 		const auto xInCache = last.second.x;
 		const auto yInCache = last.second.y;
 		const auto zInCache = last.second.z;
+
 		pageTableEntry.x = xInCache;			// fill the page table entry
 		pageTableEntry.y = yInCache;
 		pageTableEntry.z = zInCache;
 
-		if(last.first.x != -1)
+		if (last.first.x != -1)
 		{
 			pageTable(last.first.x, last.first.y, last.first.z).w = EntryFlag::Unmapped;
-			//ysl::Log("Pull [%d %d %d] from cache.\n", last.first.x, last.first.y, last.first.z);
 		}
 
-		last.first.x = i.x;
-		last.first.y = i.y;
-		last.first.z = i.z;
+		last.first.x = index.x;
+		last.first.y = index.y;
+		last.first.z = index.z;
 		LRUList.splice(LRUList.begin(), LRUList, --LRUList.end());		// move from tail to head, LRU policy
-		auto d = g_largeVolumeData->ReadBlockDataFromCache(i);
-		g_texCache->SetSubData(OpenGLTexture::RED, OpenGLTexture::UInt8,xInCache,blockSize,yInCache,blockSize,zInCache,blockSize,d);
+
+		g_posInCache.push_back(xInCache);
+		g_posInCache.push_back(yInCache);
+		g_posInCache.push_back(zInCache);
 	}
+	// Update load missed block  data to GPU
+
+	const auto blockBytes = blockSize * blockSize*blockSize * sizeof(char);
+
+	// initialize second pbo 
+	// Ping-Pong PBO Transfer
+	
+	long long accessPageTableTime = 0, 
+	readDataTime = 0, 
+	copyDataTime = 0, 
+	dmaTime = 0,
+	totalTime = 0,
+	bindTime = 0 ;
+	
+	std::shared_ptr<OpenGLBuffer> pbo[2] = { g_blockPingBuf,g_blockPongBuf };
+	auto curPBO = 0;
+	auto i = 0;
+	const auto & idx = g_hits[i];
+	const auto dd = g_largeVolumeData->ReadBlockDataFromCache(idx);
+
+	pbo[1 - curPBO]->Bind();
+	auto pp = pbo[1 - curPBO]->Map(OpenGLBuffer::WriteOnly);
+	memcpy(pp, dd, blockBytes);
+	pbo[1 - curPBO]->Unmap();		// copy data to pbo
+	pbo[1 - curPBO]->Bind();
+	
+	g_texCache->Bind();
+	for (;i < missedBlocks-1;)
+	{
+		pbo[1 - curPBO]->Bind();
+		g_texCache->SetSubData(OpenGLTexture::RED,
+			OpenGLTexture::UInt8,
+			g_posInCache[3 * i], blockSize,
+			g_posInCache[3 * i + 1], blockSize,
+			g_posInCache[3 * i + 2], blockSize,
+			nullptr);
+		pbo[1 - curPBO]->Unbind();
+		i++;
+		const auto & index = g_hits[i];
+		const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
+
+		pbo[curPBO]->Bind();
+		auto p = pbo[curPBO]->Map(OpenGLBuffer::WriteOnly);
+
+		memcpy(p, d, blockBytes);
+
+		pbo[curPBO]->Unmap();		// copy data to pbo
+		curPBO = 1 - curPBO;
+	}
+	pbo[1 - curPBO]->Bind();
+	g_texCache->SetSubData(OpenGLTexture::RED,
+		OpenGLTexture::UInt8,
+		g_posInCache[3 * i], blockSize,
+		g_posInCache[3 * i + 1], blockSize,
+		g_posInCache[3 * i + 2], blockSize,
+		nullptr);
+	pbo[1 - curPBO]->Unbind();
+	//ysl::Log("blockCount:%d\nreadDataTime:%d\ncopyDataTime:%d\nDMATime:%d\ntotalTime:%d\nbindTime:%d\n", missedBlocks,readDataTime,copyDataTime,dmaTime,totalTime,bindTime);
 
 	g_texCache->Unbind();
-	GL_ERROR_REPORT;
 	// update page table
 	g_texPageTable->Bind();
-	g_texPageTable->SetData(OpenGLTexture::RGBA32UI, OpenGLTexture::RGBAInteger, OpenGLTexture::UInt32, pageTableX, pageTableY, pageTableZ, g_largeVolumeData->PageTable->Data());
+	g_texPageTable->SetData(OpenGLTexture::RGBA32UI,
+		OpenGLTexture::RGBAInteger,
+		OpenGLTexture::UInt32,
+		pageTableX,
+		pageTableY,
+		pageTableZ,
+		pageTable.Data());
+
 	g_texPageTable->Unbind();
-	GL_ERROR_REPORT;
+
 	return true;
 }
 
@@ -360,6 +449,7 @@ void initializeShaders()
 
 void initializeProxyGeometry() {
 	GL_ERROR_REPORT;
+
 	g_proxyVAO.create();
 	g_proxyVAO.bind();
 
@@ -405,15 +495,14 @@ void initializeGPUTexture()
 void initializeResource()
 {
 
-	
+
 	initializeShaders();
 
 	initializeProxyGeometry();
 
 
-	std::string lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
 
-	g_largeVolumeData.reset(new VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(lvdFileName));
+	g_largeVolumeData.reset(new VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(g_lvdFileName));
 
 	pageDirX = g_largeVolumeData->PageDir->Size().x;
 	pageDirY = g_largeVolumeData->PageDir->Size().y;
@@ -428,8 +517,7 @@ void initializeResource()
 	cacheDepth = g_largeVolumeData->CacheSize().z;
 
 	int blockSize = g_largeVolumeData->BlockSize();
-	ysl::Size3 gpuBlockCacheSize{8,8,8};  // number of block at every dim
-	gpuBlockCacheSize *= blockSize;
+	ysl::Size3 gpuBlockCacheSize = g_gpuCacheBlockSize * blockSize;  // number of block at every dim
 
 
 
@@ -472,9 +560,12 @@ void initializeResource()
 		OpenGLTexture::RGBAInteger,
 		OpenGLTexture::UInt32, pageTableX, pageTableY, pageTableZ, g_largeVolumeData->PageTable->Data());
 	// Bind to iimage3D
+	g_texPageTable->Bind();
 	g_texPageTable->BindToDataImage(1, 0, false, 0, OpenGLTexture::Read, OpenGLTexture::RGBA32UI);
 
 	// allocate for volume data block cache
+
+	initGPUCacheLRUPolicyList();
 	g_texCache = OpenGLTexture::CreateTexture3D(OpenGLTexture::R16F,
 		OpenGLTexture::Linear,
 		OpenGLTexture::Linear,
@@ -486,7 +577,13 @@ void initializeResource()
 		gpuBlockCacheSize.x,
 		gpuBlockCacheSize.y,
 		gpuBlockCacheSize.z, nullptr);
-
+	g_blockPingBuf = std::make_shared<OpenGLBuffer>(OpenGLBuffer::PixelUnpackBuffer, OpenGLBuffer::StreamDraw);
+	g_blockPingBuf->AllocateFor(nullptr, blockDataSize*blockDataSize*blockDataSize * sizeof(char));
+	g_blockPingBuf->Unbind();
+	g_blockPongBuf = std::make_shared<OpenGLBuffer>(OpenGLBuffer::PixelUnpackBuffer, OpenGLBuffer::StreamDraw);
+	g_blockPongBuf->AllocateFor(nullptr, blockDataSize*blockDataSize*blockDataSize * sizeof(char));
+	g_blockPongBuf->Unbind();
+	GL_ERROR_REPORT;
 
 	g_bufMissedHash = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::DynamicDraw);
 	g_bufMissedHash->AllocateFor(nullptr, totalBlockCountBytes);
@@ -660,20 +757,20 @@ void renderLoop()
 		if (halfWay.Length() > 1e-10) halfWay.Normalize();
 		g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
 		g_rayCastingVAO.bind();
-		
+
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	/*	std::stringstream ss;
-		ss << maxLoopCount;
-		std::string str;
-		ss >> str;
-		g_texIntermediateResult->SaveAsImage("C:\\Users\\ysl\\Desktop\\debugimage\\result"+str+".jpg");
-		g_texEntryPos->SaveAsImage("C:\\Users\\ysl\\Desktop\\debugimage\\entry" + str + ".jpg");*/
+		/*	std::stringstream ss;
+			ss << maxLoopCount;
+			std::string str;
+			ss >> str;
+			g_texIntermediateResult->SaveAsImage("C:\\Users\\ysl\\Desktop\\debugimage\\result"+str+".jpg");
+			g_texEntryPos->SaveAsImage("C:\\Users\\ysl\\Desktop\\debugimage\\entry" + str + ".jpg");*/
 		maxLoopCount++;
 
 	} while (CaptureAndHandleCacheMiss());
 
-	ysl::Log("Render pass per frame:%d.\n", maxLoopCount);
+	//ysl::Log("Render pass per frame:%d.\n", maxLoopCount);
 
 	g_framebuffer->Unbind();
 	glDepthFunc(GL_LESS);
@@ -725,8 +822,6 @@ int main(int argc, char** argv)
 #if __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-
-
 
 	std::shared_ptr<GLFWwindow> window{
 		glfwCreateWindow(initialWidth, initialHeight, "Mixed Render Engine", NULL, NULL),

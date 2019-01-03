@@ -10,6 +10,7 @@
 #include "lineararray.h"
 
 #include "../mathematics/geometry.h"
+#include <mutex>
 //#include "../mathematics/arithmetic.h"
 
 
@@ -38,7 +39,7 @@ class LargeVolumeCache:public LVDReader
 	static constexpr int nLogBlockSize = 6;
 
 	static constexpr ysl::Size3 cacheBlockSize{1<<nLogBlockSize,1<<nLogBlockSize,1<<nLogBlockSize};
-	static constexpr ysl::Size3 cacheDim{ 8,8,8 };
+	static constexpr ysl::Size3 cacheDim{16,16,16};
 	static constexpr ysl::Size3 cacheSize = cacheDim * (1 << nLogBlockSize);
 
 	//static constexpr size_t cacheBlockCountAtWidth = 4;
@@ -69,6 +70,8 @@ class LargeVolumeCache:public LVDReader
 	//ysl::Size3 sizeByBlock;
 	//ysl::Size3 cacheSize;
 	//ysl::Size3 blockSize;
+
+	std::mutex m_lock;
 
 
 	int blockCoordinateToBlockId(int xBlock, int yBlock, int zBlock)const

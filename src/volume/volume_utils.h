@@ -47,10 +47,10 @@ class RawToLVDConverter
 
 	//std::unique_ptr<ysl::Block3DArray<RawType, nLogBlockSize>> m_blockedData;
 
-	void getData(RawType * dest, const RawType * src, size_t width, size_t height, size_t depth,size_t xb,size_t yb,size_t zb)const
+	void getData(RawType * dest, const RawType * src, size_t width, size_t height, size_t depth, size_t xb, size_t yb, size_t zb)const
 	{
-		
-		
+
+
 		//#pragma omp parallel for
 
 		// write temp file
@@ -70,15 +70,15 @@ class RawToLVDConverter
 					const size_t blockIndex = x + y * g_xBlockSize + z * g_xBlockSize*g_yBlockSize;
 
 
-					int blockedGlobalX = x + xb*g_xBlockSize;
-					int blockedGlobalY = y + yb*g_yBlockSize;
-					int blockedGlobalZ = z + zb*g_zBlockSize;
+					int blockedGlobalX = x + xb * g_xBlockSize;
+					int blockedGlobalY = y + yb * g_yBlockSize;
+					int blockedGlobalZ = z + zb * g_zBlockSize;
 
 
 					if (gx >= 0 && gx < g_xSize && gy >= 0 && gy < g_ySize && gz >= 0 && gz < g_zSize)
 					{
 						const size_t linearIndex = (gx)+(gy)*std::size_t(g_xSize) + (gz)*g_xSize*std::size_t(g_ySize);
-						*(dest+blockIndex) = *(src + linearIndex);
+						*(dest + blockIndex) = *(src + linearIndex);
 						///TODO::
 #ifdef WRITE_SINGLE_BLOCK
 						buf[blockIndex] = *(src + linearIndex);
@@ -93,7 +93,7 @@ class RawToLVDConverter
 #endif
 						//(*m_blockedData)(blockedGlobalX, blockedGlobalY, blockedGlobalZ) = g_emptyValue;
 						///TODO::
-						*(dest+blockIndex) = g_emptyValue;
+						*(dest + blockIndex) = g_emptyValue;
 					}
 				}
 #ifdef  WRITE_SINGLE_BLOCK
@@ -101,8 +101,8 @@ class RawToLVDConverter
 		ss << xb << "." << yb << "." << zb << ".raw";
 		std::string str;
 		ss >> str;
-		std::ofstream outFile(fileName +str );
-		outFile.write((char*)buf.get(),bytes);
+		std::ofstream outFile(fileName + str);
+		outFile.write((char*)buf.get(), bytes);
 		std::cout << "Write single block finished\n";
 #endif
 
@@ -203,7 +203,7 @@ public:
 					g_yOffset = -m_repeat + yb * step;
 					g_zOffset = -m_repeat + zb * step;
 					const int blockIndex = xb + yb * m_blockDimension.x + zb * m_blockDimension.x*m_blockDimension.y;
-					getData(m_lvdBuf.get() + blockIndex * size_t(blockSize)*blockSize*blockSize, m_rawBuf.get(), blockSize, blockSize, blockSize,xb,yb,zb);
+					getData(m_lvdBuf.get() + blockIndex * size_t(blockSize)*blockSize*blockSize, m_rawBuf.get(), blockSize, blockSize, blockSize, xb, yb, zb);
 				}
 		return true;
 	}
@@ -247,7 +247,7 @@ public:
 //	char reserved[28];		// 28	 == 64bytes in total
 //};
 
-class RawReader 
+class RawReader
 {
 	std::string fileName;
 	ysl::Size3 dimensions;
@@ -299,7 +299,7 @@ class LVDReader
 
 	enum { LVDFileMagicNumber = 277536 };
 
-	enum { LogBlockSize5 = 5,LogBlockSize6 = 6 };
+	enum { LogBlockSize5 = 5, LogBlockSize6 = 6 };
 
 	enum { LVDHeaderSize = 24 };
 
@@ -334,8 +334,8 @@ template <typename T, int nLogBlockSize>
 std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> LVDReader::ReadAll()
 {
 	const auto s = Size();
-	const size_t bytes = s.x*s.y*s.z* sizeof(T);
-	auto ptr = std::make_shared<ysl::Block3DArray<T, nLogBlockSize>>(s.x,s.y,s.z, nullptr);
+	const size_t bytes = s.x*s.y*s.z * sizeof(T);
+	auto ptr = std::make_shared<ysl::Block3DArray<T, nLogBlockSize>>(s.x, s.y, s.z, nullptr);
 	if (ptr)
 	{
 		fileHandle.seekg((size_t)LVDHeaderSize, std::ios::beg);
@@ -354,7 +354,7 @@ namespace ysl
 			RGBASpectrum m_leftColor;
 			RGBASpectrum m_rightColor;
 		public:
-			MappingKey(Float intensity, const RGBASpectrum & lc, const RGBASpectrum & rc) :m_intensity(intensity), m_leftColor(lc), m_rightColor(rc){}
+			MappingKey(Float intensity, const RGBASpectrum & lc, const RGBASpectrum & rc) :m_intensity(intensity), m_leftColor(lc), m_rightColor(rc) {}
 			Float Intensity()const { return m_intensity; }
 			RGBASpectrum LeftColor()const { return m_leftColor; }
 			RGBASpectrum RightColor()const { return m_rightColor; }
@@ -369,8 +369,8 @@ namespace ysl
 		Float m_rightThreshold;
 
 	public:
-		TransferFunction():m_valid(false){}
-		explicit TransferFunction(const std::string & fileName):m_valid(false)
+		TransferFunction() :m_valid(false) {}
+		explicit TransferFunction(const std::string & fileName) :m_valid(false)
 		{
 			read(fileName);
 		}
@@ -384,7 +384,7 @@ namespace ysl
 
 		void FetchData(RGBASpectrum* transferFunction, int dimension);
 
-		void FetchData(Float * transferFunction,int dimension)
+		void FetchData(Float * transferFunction, int dimension)
 		{
 			FetchData(reinterpret_cast<RGBASpectrum*>(transferFunction), dimension);
 		}

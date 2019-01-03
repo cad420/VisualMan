@@ -17,7 +17,8 @@ public:
 		VertexArrayBuffer = GL_ARRAY_BUFFER,
 		ElementArrayBuffer = GL_ELEMENT_ARRAY_BUFFER, 
 		ShaderStorageBuffer = GL_SHADER_STORAGE_BUFFER,
-		AtomicCounterBuffer = GL_ATOMIC_COUNTER_BUFFER
+		AtomicCounterBuffer = GL_ATOMIC_COUNTER_BUFFER,
+		PixelUnpackBuffer = GL_PIXEL_UNPACK_BUFFER
 	};		
 	// Only support these now.
 	enum  BufferUsage

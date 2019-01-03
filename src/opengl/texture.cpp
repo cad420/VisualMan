@@ -190,6 +190,10 @@ std::shared_ptr<OpenGLTexture> OpenGLTexture::CreateTexture3D(InternalFormat fmt
 {
 	auto ptr = std::make_shared<OpenGLTexture>(Texture3D, min, mag, rWrapMode, sWrapMode, tWrapMode);
 	if (ptr)
+	{
+		ptr->Bind();
 		ptr->SetData(fmt, extFmt, type, width, height, depth, data);
+	}
+		
 	return ptr;
 }

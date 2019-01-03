@@ -27,6 +27,7 @@ layout(binding = 0, rgba32i) uniform iimage3D pageDirTexutre;
 layout(binding = 1, rgba32i) uniform iimage3D pageTableTexture;
 layout(binding = 2, rgba32f) uniform image2DRect entryPos;
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
+layout(binding = 4, offset = 4) uniform atomic_uint atomic_need_to_draw_count;
 
 
 // keywords buffer shows the read-write feature of the buffer.

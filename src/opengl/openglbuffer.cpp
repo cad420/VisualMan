@@ -18,8 +18,6 @@ currentContext(OpenGLCurrentContext::GetCurrentOpenGLContext())
 	Bind();
 }
 
-
-
 OpenGLBuffer::BufferTarget OpenGLBuffer::Target()const
 {
 	return target;

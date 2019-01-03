@@ -23,5 +23,9 @@ public:
 	{
 		std::cout << "Duration:" << duration_.count() << "ms.\n";
 	}
+	auto duration()const
+	{
+		return duration_.count();
+	}
 };
 #endif

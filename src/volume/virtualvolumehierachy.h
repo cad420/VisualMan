@@ -63,7 +63,8 @@ public:
 
 	std::unique_ptr<ysl::Linear3DArray<PageDirEntry>> PageDir;
 	std::unique_ptr<ysl::Linear3DArray<PageTableEntry>> PageTable;
-	std::list<std::pair<PageTableEntryAbstractIndex, CacheBlockAbstractIndex>> m_lruList;
+
+	//std::list<std::pair<PageTableEntryAbstractIndex, CacheBlockAbstractIndex>> m_lruList;
 
 	void initPageDir() 
 	{
@@ -104,6 +105,7 @@ public:
 	/**
 	 * \brief  Initializes the page table with all entries are mapped
 	 */
+
 	void initPageTable(int xBlockSize,int yBlockSize,int zBlockSize)
 	{
 		//auto d = PageTable->Data();
@@ -124,15 +126,15 @@ public:
 	void initLRUList()
 	{
 		//const auto tot = cacheBlockCount();
-		const auto size = BlockSize();
-		//const auto w = xCacheBlockCount(), h = yCacheBlockCount(), d = zCacheBlockCount();
-		const auto dim = CacheDim();
-		for (auto z = 0; z < dim.z; z++)
-			for (auto y = 0; y < dim.x; y++)
-				for (auto x = 0; x < dim.y; x++) 
-				{
-					m_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1,-1,-1), CacheBlockAbstractIndex(x*size,y*size,z*size)));
-				}
+		//const auto size = BlockSize();
+		////const auto w = xCacheBlockCount(), h = yCacheBlockCount(), d = zCacheBlockCount();
+		//const auto dim = CacheDim();
+		//for (auto z = 0; z < dim.x; z++)
+		//	for (auto y = 0; y < dim.y; y++)
+		//		for (auto x = 0; x < dim.z; x++) 
+		//		{
+		//			m_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1,-1,-1), CacheBlockAbstractIndex(x*size,y*size,z*size)));
+		//		}
 	}
 
 public:
@@ -149,6 +151,7 @@ public:
 			sizeByBlock.y,
 			sizeByBlock.z,
 			nullptr ));
+
 		PageDir.reset(new Linear3DArray<PageDirEntry> (
 			RoundUpDivide(PageTable->Size().x, xPageTableEntry),
 			RoundUpDivide(PageTable->Size().y, yPageTableEntry),
@@ -161,18 +164,17 @@ public:
 		initLRUList();
 	}
 
-	void updateCacheMiss(const std::vector<GlobalBlockAbstractIndex> & hits)
-	{
-		for(const auto & i:hits)
-		{
-			(*PageTable)(i.x, i.y, i.z).w = Mapped;
-			auto & last = m_lruList.back();
-			(*PageTable)(last.first.x, last.first.y, last.first.z).w = Unmapped;
-			m_lruList.splice(m_lruList.begin(), m_lruList, --m_lruList.end());		// move from tail to head
-			auto d = ReadBlockDataFromCache(i);
-
-		}
-	}
+	//void updateCacheMiss(const std::vector<GlobalBlockAbstractIndex> & hits)
+	//{
+	//	for(const auto & i:hits)
+	//	{
+	//		(*PageTable)(i.x, i.y, i.z).w = Mapped;
+	//		auto & last = m_lruList.back();
+	//		(*PageTable)(last.first.x, last.first.y, last.first.z).w = Unmapped;
+	//		m_lruList.splice(m_lruList.begin(), m_lruList, --m_lruList.end());		// move from tail to head
+	//		auto d = ReadBlockDataFromCache(i);
+	//	}
+	//}
 
 };
 
