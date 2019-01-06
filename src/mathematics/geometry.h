@@ -347,6 +347,7 @@ namespace ysl
 		{
 			return IsNaN(x) || IsNaN(y) || IsNaN(z);
 		}
+
 		constexpr Vector3<T> operator+(const Vector3<T> & v)const
 		{
 			//assert(!v.HasNaN());

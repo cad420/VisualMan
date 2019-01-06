@@ -5,10 +5,12 @@
 #include "error.h"
 #include "openglutils.h"
 
-OpenGLBuffer::OpenGLBuffer(BufferTarget type,BufferUsage usage):
+OpenGLBuffer::OpenGLBuffer(BufferTarget type,BufferUsage usage,BufferType typ):
 target(type),
 usage(usage),
+type(typ),
 bufferId(0),
+dataSize(0),
 currentContext(OpenGLCurrentContext::GetCurrentOpenGLContext())
 {
 	if (!currentContext)
@@ -18,6 +20,7 @@ currentContext(OpenGLCurrentContext::GetCurrentOpenGLContext())
 	glGenBuffers(1, &bufferId);
 	Bind();
 }
+
 
 OpenGLBuffer::BufferTarget OpenGLBuffer::Target()const
 {
@@ -29,11 +32,6 @@ void OpenGLBuffer::Bind()
 	glBindBuffer(target, bufferId);
 }
 
-void OpenGLBuffer::SetSize(std::size_t size)
-{
-	dataSize = size;
-}
-
 std::size_t OpenGLBuffer::Size() const
 {
 	return dataSize;
@@ -41,15 +39,21 @@ std::size_t OpenGLBuffer::Size() const
 
 void OpenGLBuffer::AllocateFor(const void* data, std::size_t size)
 {
+	if(type == Immutable && !dataSize && size != dataSize)
+	{
+		ysl::Warning("Buffer is immutable, size is different from previous one");
+		return;
+	}
 	dataSize = size;
 	Write(data);
 }
 
 void OpenGLBuffer::Write(const void* data)
 {
-	glBufferData(target, dataSize, data, usage);
-	
-	//glBufferStorage(target, dataSize, data,GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT);
+	if(type == Mutable)
+		glBufferData(target, dataSize, data, usage);
+	else if(type == Immutable)
+		glBufferStorage(target, dataSize, data,GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT);
 	//std::cout << dataSize;
 }
 
@@ -75,6 +79,11 @@ void OpenGLBuffer::Unmap()
 {
 	Bind();
 	glUnmapBuffer(target);
+}
+
+OpenGLBuffer::BufferType OpenGLBuffer::Type() const
+{
+	return type;
 }
 
 OpenGLBuffer::~OpenGLBuffer()

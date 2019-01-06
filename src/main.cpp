@@ -14,6 +14,8 @@
 
 //#include "../mathematics/geometry.h"
 
+#include <thread>
+
 #include "gui/TinyConsole.h"
 #include "gui/widget.h"
 #include "gui/eventhandler.h"
@@ -55,8 +57,6 @@ static float g_proxyGeometryVertices[] = {
 };
 
 
-
-
 /*
  * The reason why make the members public and supports corresponding
  * access methods as the same time is that these class should be redesigned later conform to OO
@@ -82,7 +82,7 @@ namespace
 	//std::unique_ptr<char[]> g_rawData;
 	std::vector<ysl::RGBASpectrum> m_tfData{ 256 };
 
-	std::string g_lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
+	std::string g_lvdFileName = "D:\\scidata\\abc\\sb__192_192_192.lvd";
 
 	ysl::Vector3f g_lightDirection;
 
@@ -137,7 +137,7 @@ namespace
 
 	std::vector<GlobalBlockAbstractIndex> g_hits;
 	std::vector<int> g_posInCache;
-	ysl::Size3 g_gpuCacheBlockSize{ 4,4,4};
+	ysl::Size3 g_gpuCacheBlockSize{2,2,2};
 
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
@@ -292,7 +292,7 @@ bool CaptureAndHandleCacheMiss()
 	if (count == 0)
 		return false;
 
-	const std::size_t cacheBlockThreshold = g_gpuCacheBlockSize.x*g_gpuCacheBlockSize.y*g_gpuCacheBlockSize.z*0.8;
+	const std::size_t cacheBlockThreshold = g_gpuCacheBlockSize.x*g_gpuCacheBlockSize.y*g_gpuCacheBlockSize.z;
 	const std::size_t blockSize = g_largeVolumeData->BlockSize();
 	const auto missedBlocks = (std::min)(count, (int)cacheBlockThreshold);
 
@@ -413,66 +413,76 @@ bool CaptureAndHandleCacheMiss()
 	//pbo[1 - curPBO]->Unbind();
 
 	//////////////////
-	g_texCache->Bind();
-	unsigned int pbo[2] = { g_pingPBO,g_pongPBO };
-	auto curPBO = 0;
-	auto i = 0;
-	const auto & idx = g_hits[i];
-	const auto dd = g_largeVolumeData->ReadBlockDataFromCache(idx);
-	//glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo[1 - curPBO]);
-	memcpy(g_pboPtr[1-curPBO], dd, blockBytes);
-	for (; i < missedBlocks - 1;)
-	{
-
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo[1 - curPBO]);
-		GL_ERROR_REPORT;
-		g_texCache->SetSubData(OpenGLTexture::RED,
-			OpenGLTexture::UInt8,
-			g_posInCache[3 * i], blockSize,
-			g_posInCache[3 * i + 1], blockSize,
-			g_posInCache[3 * i + 2], blockSize,
-			nullptr);
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-		i++;
-		const auto & index = g_hits[i];
-		const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
-		memcpy(g_pboPtr[curPBO], d, blockBytes);
-		curPBO = 1 - curPBO;
-	}
-
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo[1 - curPBO]);
-	g_texCache->SetSubData(OpenGLTexture::RED,
-		OpenGLTexture::UInt8,
-		g_posInCache[3 * i], blockSize,
-		g_posInCache[3 * i + 1], blockSize,
-		g_posInCache[3 * i + 2], blockSize,
-		nullptr);
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-	g_texCache->Unbind();
-	
-	/////////
 	//g_texCache->Bind();
-	////glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pingPBO);
-	//g_blockPingBuf->Bind();
-	//for(int i = 0;i<missedBlocks;i++)
+	//unsigned int pbo[2] = { g_pingPBO,g_pongPBO };
+	//auto curPBO = 0;
+	//auto i = 0;
+	//const auto & idx = g_hits[i];
+	//const auto dd = g_largeVolumeData->ReadBlockDataFromCache(idx);
+	////glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo[1 - curPBO]);
+	//memcpy(g_pboPtr[1-curPBO], dd, blockBytes);
+	//for (; i < missedBlocks - 1;)
 	//{
-	//	const auto & index = g_hits[i];
-	//	const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
-	//	auto p = g_blockPingBuf->Map(OpenGLBuffer::WriteOnly);
-	//	memcpy(p, d, blockBytes);
-	//	g_blockPingBuf->Unmap();
-	//	
+	//	//using namespace std::chrono_literals;
+	//	//std::this_thread::sleep_for(50ms);
+	//	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo[1 - curPBO]);
+	//	GL_ERROR_REPORT;
 	//	g_texCache->SetSubData(OpenGLTexture::RED,
 	//		OpenGLTexture::UInt8,
 	//		g_posInCache[3 * i], blockSize,
 	//		g_posInCache[3 * i + 1], blockSize,
 	//		g_posInCache[3 * i + 2], blockSize,
 	//		nullptr);
-	//	
+	//	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	//	ysl::Log("pos in cache:[%d, %d, %d], write to %u\n", 
+	//		g_posInCache[3 * i],
+	//		g_posInCache[3 * i + 1],
+	//		g_posInCache[3 * i + 2],g_pboPtr[1-curPBO]);
+
+	//	i++;
+	//	const auto & index = g_hits[i];
+	//	const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
+	//	memcpy(g_pboPtr[curPBO], d, blockBytes);
+	//	curPBO = 1 - curPBO;
+
 	//}
-	////glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-	//g_blockPingBuf->Unbind();
+
+	//glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo[1 - curPBO]);
+	//g_texCache->SetSubData(OpenGLTexture::RED,
+	//	OpenGLTexture::UInt8,
+	//	g_posInCache[3 * i], blockSize,
+	//	g_posInCache[3 * i + 1], blockSize,
+	//	g_posInCache[3 * i + 2], blockSize,
+	//	nullptr);
+	//glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 	//g_texCache->Unbind();
+	
+	/////////
+	g_texCache->Bind();
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pingPBO);
+	//g_blockPingBuf->Bind();
+	for(int i = 0;i<missedBlocks;i++)
+	{
+		const auto & index = g_hits[i];
+		const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
+		//auto p = g_blockPingBuf->Map(OpenGLBuffer::WriteOnly);
+		memcpy(g_pboPtr[0], d, blockBytes);
+		//g_blockPingBuf->Unmap();
+		using namespace std::chrono_literals;
+		std::this_thread::sleep_for(50ms);
+		g_texCache->SetSubData(OpenGLTexture::RED,
+			OpenGLTexture::UInt8,
+			g_posInCache[3 * i], blockSize,
+			g_posInCache[3 * i + 1], blockSize,
+			g_posInCache[3 * i + 2], blockSize,
+			nullptr);
+		
+
+	}
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	//g_blockPingBuf->Unbind();
+	g_texCache->Unbind();
 
 
 
@@ -909,7 +919,6 @@ int main(int argc, char** argv)
 	//}
 
 	gl3wInit();
-
 
 
 	// Setup Dear ImGui binding

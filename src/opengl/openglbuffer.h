@@ -15,11 +15,11 @@ public:
 	enum  BufferTarget
 	{
 		VertexArrayBuffer = GL_ARRAY_BUFFER,
-		ElementArrayBuffer = GL_ELEMENT_ARRAY_BUFFER, 
+		ElementArrayBuffer = GL_ELEMENT_ARRAY_BUFFER,
 		ShaderStorageBuffer = GL_SHADER_STORAGE_BUFFER,
 		AtomicCounterBuffer = GL_ATOMIC_COUNTER_BUFFER,
 		PixelUnpackBuffer = GL_PIXEL_UNPACK_BUFFER
-	};		
+	};
 	// Only support these now.
 	enum  BufferUsage
 	{
@@ -33,12 +33,18 @@ public:
 
 	enum Access
 	{
-		ReadOnly= GL_READ_ONLY,
+		ReadOnly = GL_READ_ONLY,
 		WriteOnly = GL_WRITE_ONLY,
 		ReadWrite = GL_READ_WRITE
 	};
 
-	explicit  OpenGLBuffer(BufferTarget type,BufferUsage usage = BufferUsage::StaticDraw);
+	enum BufferType
+	{
+		Mutable,
+		Immutable
+	};
+
+	explicit  OpenGLBuffer(BufferTarget type,BufferUsage usage = BufferUsage::StaticDraw, BufferType typ = Mutable);
 	OpenGLBuffer(const OpenGLBuffer &) = delete;
 	OpenGLBuffer& operator=(const OpenGLBuffer &) = delete;
 
@@ -55,12 +61,14 @@ public:
 	void BindBufferBase(int index);
 	void * Map(Access access);
 	void Unmap();
+	BufferType Type() const;
 
 	~OpenGLBuffer();
 private:
 	unsigned int bufferId;
 	BufferUsage usage;
 	BufferTarget target;
+	BufferType type;
 	std::size_t dataSize;
 
 	std::shared_ptr<OpenGLCurrentContext> currentContext;
