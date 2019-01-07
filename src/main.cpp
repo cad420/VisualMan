@@ -82,7 +82,7 @@ namespace
 	//std::unique_ptr<char[]> g_rawData;
 	std::vector<ysl::RGBASpectrum> m_tfData{ 256 };
 
-	std::string g_lvdFileName = "D:\\scidata\\abc\\sb__192_192_192.lvd";
+	std::string g_lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
 
 	ysl::Vector3f g_lightDirection;
 
@@ -137,7 +137,7 @@ namespace
 
 	std::vector<GlobalBlockAbstractIndex> g_hits;
 	std::vector<int> g_posInCache;
-	ysl::Size3 g_gpuCacheBlockSize{2,2,2};
+	ysl::Size3 g_gpuCacheBlockSize{4,4,4};
 
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
@@ -146,6 +146,7 @@ namespace
 
 	std::shared_ptr<OpenGLBuffer> g_atomicCounter;
 
+	char * g_data;
 
 
 	std::unique_ptr<VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>> g_largeVolumeData;
@@ -177,6 +178,20 @@ namespace
 
 
 void checkFrambufferStatus();
+
+
+bool compareTexture(const unsigned char* buf1, const unsigned char* buf2, std::size_t bytes)
+{
+	for(auto i = 0ULL ; i < bytes;i++)
+	{
+		if (*(buf1 + i) != *(buf2 + i))
+		{
+			return false;
+		}
+			
+	}
+	return true;
+}
 
 
 void renderingWindowResize(ResizeEvent *event)
@@ -367,7 +382,9 @@ bool CaptureAndHandleCacheMiss()
 	dmaTime = 0,
 	totalTime = 0,
 	bindTime = 0 ;
+
 	
+
 	//std::shared_ptr<OpenGLBuffer> pbo[2] = { g_blockPingBuf,g_blockPongBuf };
 	//auto curPBO = 0;
 	//auto i = 0;
@@ -393,6 +410,7 @@ bool CaptureAndHandleCacheMiss()
 	//	pbo[1 - curPBO]->Unbind();
 	//	i++;
 	//	const auto & index = g_hits[i];
+
 	//	const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
 
 	//	pbo[curPBO]->Bind();
@@ -412,7 +430,12 @@ bool CaptureAndHandleCacheMiss()
 	//	nullptr);
 	//pbo[1 - curPBO]->Unbind();
 
+	
+
 	//////////////////
+
+
+	//g_timer.begin();
 	//g_texCache->Bind();
 	//unsigned int pbo[2] = { g_pingPBO,g_pongPBO };
 	//auto curPBO = 0;
@@ -435,10 +458,14 @@ bool CaptureAndHandleCacheMiss()
 	//		nullptr);
 	//	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-	//	ysl::Log("pos in cache:[%d, %d, %d], write to %u\n", 
-	//		g_posInCache[3 * i],
-	//		g_posInCache[3 * i + 1],
-	//		g_posInCache[3 * i + 2],g_pboPtr[1-curPBO]);
+	//	//ysl::Log("pos in cache:[%d, %d, %d], write to %u\n", 
+	//	//	g_posInCache[3 * i],
+	//	//	g_posInCache[3 * i + 1],
+	//	//	g_posInCache[3 * i + 2],g_pboPtr[1-curPBO]);
+
+	//	GLsync s = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+	//	glClientWaitSync(s, 0, 1000000);
+	//	glDeleteSync(s);
 
 	//	i++;
 	//	const auto & index = g_hits[i];
@@ -457,35 +484,39 @@ bool CaptureAndHandleCacheMiss()
 	//	nullptr);
 	//glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 	//g_texCache->Unbind();
-	
-	/////////
+
+	//g_timer.end();
+	//ysl::Log("%d %d %d\n", missedBlocks, g_timer.duration(), g_timer.duration() / missedBlocks);
+
+
+	///////
+
 	g_texCache->Bind();
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pingPBO);
-	//g_blockPingBuf->Bind();
+	g_timer.begin();
+	//GL_ERROR_REPORT;
 	for(int i = 0;i<missedBlocks;i++)
 	{
 		const auto & index = g_hits[i];
-		const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
-		//auto p = g_blockPingBuf->Map(OpenGLBuffer::WriteOnly);
-		memcpy(g_pboPtr[0], d, blockBytes);
-		//g_blockPingBuf->Unmap();
-		using namespace std::chrono_literals;
-		std::this_thread::sleep_for(50ms);
+		//const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
+		memcpy(g_pboPtr[0], g_data, blockBytes);
+
 		g_texCache->SetSubData(OpenGLTexture::RED,
 			OpenGLTexture::UInt8,
 			g_posInCache[3 * i], blockSize,
 			g_posInCache[3 * i + 1], blockSize,
 			g_posInCache[3 * i + 2], blockSize,
 			nullptr);
-		
+
+		GLsync s = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		glClientWaitSync(s, 0, 1000000);
+		glDeleteSync(s);
 
 	}
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-	//g_blockPingBuf->Unbind();
 	g_texCache->Unbind();
 
-
-
+	//ysl::Log("%d %d %d\n", missedBlocks, g_timer.duration(), g_timer.duration() / missedBlocks);
 	//ysl::Log("blockCount:%d\nreadDataTime:%d\ncopyDataTime:%d\nDMATime:%d\ntotalTime:%d\nbindTime:%d\n", missedBlocks,readDataTime,copyDataTime,dmaTime,totalTime,bindTime);
 	// update page table
 	g_texPageTable->Bind();
@@ -746,6 +777,8 @@ void initializeResource()
 		initialHeight,
 		nullptr);
 
+	
+
 	g_framebuffer = std::shared_ptr<OpenGLFramebufferObject>(new OpenGLFramebufferObject);
 	g_framebuffer->Bind();
 	g_framebuffer->AttachTexture(OpenGLFramebufferObject::ColorAttachment0, g_texEntryPos);
@@ -796,6 +829,7 @@ void renderLoop()
 	glDepthFunc(GL_LESS);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	GL_ERROR_REPORT;
+
 	// Draw Back
 	glDrawBuffer(GL_COLOR_ATTACHMENT1);					// Draw into attachment 1
 	glClear(GL_COLOR_BUFFER_BIT);						// Do not clear depth buffer here.
@@ -912,14 +946,16 @@ int main(int argc, char** argv)
 	glfwMakeContextCurrent(window.get());
 	glfwSwapInterval(1); // Enable vsync
 
-	//if(!gl3wIsSupported(4,4))
-	//{
-	//	std::cout << "OpenGL 4.4 or later must be needed\n";
-	//	return 0;
-	//}
+
 
 	gl3wInit();
 
+	if (!gl3wIsSupported(4, 4))
+	{
+		std::cout << "OpenGL 4.6 or later must be needed\n";
+		system("pause");
+		return 0;
+	}
 
 	// Setup Dear ImGui binding
 	IMGUI_CHECKVERSION();
@@ -980,7 +1016,6 @@ int main(int argc, char** argv)
 		{
 			showGLInformation = true;
 		});
-
 	///![2] window size
 	ysl::Vector2i windowSize;
 
@@ -988,19 +1023,23 @@ int main(int argc, char** argv)
 
 	int blockBytes = g_largeVolumeData->BlockSize() *  g_largeVolumeData->BlockSize() *  g_largeVolumeData->BlockSize()*sizeof(char);
 
-	GLbitfield flgs = GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT  | GL_MAP_WRITE_BIT;
+	GLbitfield flgs = GL_MAP_PERSISTENT_BIT |GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT;
 	
 	glGenBuffers(1, &g_pingPBO);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pingPBO);
 	glBufferStorage(GL_PIXEL_UNPACK_BUFFER, blockBytes, nullptr,flgs);
 	g_pboPtr[0] = (char*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER,0,blockBytes,flgs);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	GL_ERROR_REPORT;
+
 
 	glGenBuffers(1, &g_pongPBO);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pongPBO);
 	glBufferStorage(GL_PIXEL_UNPACK_BUFFER, blockBytes, nullptr,flgs);
 	g_pboPtr[1] = (char*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, blockBytes, flgs);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	g_data = new char[blockBytes];
 
 	GL_ERROR_REPORT;
 

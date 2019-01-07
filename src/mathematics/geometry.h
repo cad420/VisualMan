@@ -294,6 +294,7 @@ namespace ysl
 			assert(i >= 0 && i < 2);
 			return *(&x + i);
 		}
+
 		T & operator[](int i)
 		{
 			assert(i >= 0 && i < 2);
@@ -756,7 +757,7 @@ namespace ysl
 
 		AABB(const Point3f & p0, const Point3f & p1)noexcept;
 
-		AABB(const Point3f& p);
+		explicit AABB(const Point3f& p);
 
 		const Point3f & operator[](int i)const
 		{
@@ -771,7 +772,7 @@ namespace ysl
 			return const_cast<Point3f&>(static_cast<const AABB &>(*this)[i]);
 		}
 
-		Point3f corner(int i)const
+		Point3f Corner(int i)const
 		{
 			return Point3f{ (*this)[i & 1].x, (*this)[i & 2].y, (*this)[i & 4].z };
 		}

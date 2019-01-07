@@ -66,7 +66,7 @@ LargeVolumeCache::LargeVolumeCache(const std::string& fileName):
 const unsigned char* LargeVolumeCache::ReadBlockDataFromCache(int blockId)
 {
 	//assert(m_volumeCache != nullptr);
-	std::lock_guard<std::mutex> guard(m_lock);
+	//std::lock_guard<std::mutex> guard(m_lock);
 
 	const auto it = m_blockIdInCache.find(blockId);
 	if (it == m_blockIdInCache.end())
@@ -89,6 +89,7 @@ const unsigned char* LargeVolumeCache::ReadBlockDataFromCache(int blockId)
 	}
 	else
 	{
+		//std::cout << "$" << std::endl;
 		m_lruList.splice(m_lruList.begin(), m_lruList, it->second);			// move the node that it->second points to the head.
 		return m_volumeCache->BlockData(it->second->blockCacheIndex);
 	}

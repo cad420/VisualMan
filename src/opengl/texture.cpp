@@ -82,6 +82,23 @@ OpenGLTexture::TextureTarget OpenGLTexture::Target() const
 	return target;
 }
 
+void OpenGLTexture::GetTexture(int level,
+                               int xOffset,
+                               int yOffset,
+                               int zOffset,
+                               std::size_t width,
+                               std::size_t height,
+                               std::size_t depth,
+                               OpenGLTexture::ExternalDataFormat fmt,
+                               OpenGLTexture::ExternalDataType type,
+                               std::size_t bufSize, void* pixels)
+{
+	glGetTextureSubImage(textureId, 
+		level, xOffset, yOffset,zOffset, 
+		width, height, depth, 
+		fmt, type, bufSize, pixels);
+}
+
 void OpenGLTexture::BindToDataImage(int imageUnit, int level, bool layered, int layer, Access access,
 	InternalFormat fmt)
 {

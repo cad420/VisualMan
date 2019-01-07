@@ -99,7 +99,7 @@ namespace ysl {
 			AABB b = shapes[i]->bound();
 			bound = bound.UnionWith(shapes[i]->bound());
 		}
-		Vector3f boundDiag = bound.Diagnal();
+		Vector3f boundDiag = bound.Diagonal();
 		const auto splitAxis = findMaxVector3fComponent(boundDiag);
 		if (currentNodeCount == 1) {
 			//create leaf node and return
@@ -113,7 +113,7 @@ namespace ysl {
 		else {
 			AABB centroidBound;
 			for (int i = begin; i < end; i++) {
-				centroidBound = centroidBound.unionWith(shapes[i]->bound().center());
+				centroidBound = centroidBound.UnionWith(shapes[i]->bound().Center());
 			}
 			/*
 			* if the maximum component of centroids of the
@@ -140,26 +140,26 @@ namespace ysl {
 			bucketInfo buckets[nBuckets];
 
 			for (int i = begin; i < end; i++) {
-				Point3f center = shapes[i]->bound().center();
+				Point3f center = shapes[i]->bound().Center();
 				int bucketIndex = nBuckets * ((center[splitAxis] - bound.m_min[splitAxis]) / boundDiag[splitAxis]);
 				if (bucketIndex == nBuckets)bucketIndex -= 1;
 				buckets[bucketIndex].indices.push_back(i);
-				buckets[bucketIndex].bound = buckets[bucketIndex].bound.unionWith(shapes[i]->bound());
+				buckets[bucketIndex].bound = buckets[bucketIndex].bound.UnionWith(shapes[i]->bound());
 			}
 			Float cost[nBuckets - 1];
 			for (int i = 0; i < nBuckets - 1; i++) {
 				AABB bLeft, bRight;
 				int nLeft = 0, nRight = 0;
 				for (int j = 0; j <= i; j++) {
-					bLeft = bLeft.unionWith(buckets[j].bound);
+					bLeft = bLeft.UnionWith(buckets[j].bound);
 					nLeft += buckets[j].indices.size();
 				}
 				for (int j = i + 1; j < nBuckets; j++) {
-					bRight = bRight.unionWith(buckets[j].bound);
+					bRight = bRight.UnionWith(buckets[j].bound);
 					nRight += buckets[j].indices.size();
 				}
-				cost[i] = 0.125 + (nLeft*bLeft.surfaceArea() +
-					bRight.surfaceArea()*nRight) / bound.surfaceArea();
+				cost[i] = 0.125 + (nLeft*bLeft.SurfaceArea() +
+					bRight.SurfaceArea()*nRight) / bound.SurfaceArea();
 			}
 			auto efficientIter = std::min_element(cost, cost + nBuckets - 1);
 			int efficentIndex = std::distance(cost, efficientIter);
@@ -167,7 +167,7 @@ namespace ysl {
 				//if the count of left nodes is greater than the max count of a leaf node can hold
 				//or the cost of spliting the current node is less than creating a leaf node's with current nodes
 				auto lambda = [&](const std::shared_ptr<Shape> s) {
-					int b = nBuckets * ((s->bound().center()[splitAxis] - bound.m_min[splitAxis]) / boundDiag[splitAxis]);
+					int b = nBuckets * ((s->bound().Center()[splitAxis] - bound.m_min[splitAxis]) / boundDiag[splitAxis]);
 					if (b == nBuckets)b -= 1;
 					//equal is necessary. or the partition will be one-side and it never ends
 					return b <= efficentIndex;

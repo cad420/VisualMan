@@ -11,7 +11,6 @@
 namespace ysl {
 
 	class Interaction;
-
 	class Shape
 	{
 		std::shared_ptr<Material> m_material;

@@ -102,6 +102,12 @@ public:
 		ExternalDataFormat extFmt, 
 		ExternalDataType extType,int xOffset, int x, int yOffset,int y, int zOffset,int z, const void * data);
 	TextureTarget Target()const;
+
+	void GetTexture(int level,
+	                int xOffset, int yOffset, int zOffset,
+	                std::size_t width, std::size_t height, std::size_t depth,
+	                ExternalDataFormat fmt, ExternalDataType type, std::size_t bufSize,
+	                void* pixels);
 	void BindToDataImage(int imageUnit,int level,bool layered,int layer,Access access,InternalFormat fmt);
 	void SaveAsImage(const std::string & fileName);
 	unsigned int NativeTextureId()const;

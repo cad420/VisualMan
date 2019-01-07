@@ -11,6 +11,7 @@
 
 #include "../mathematics/geometry.h"
 #include <mutex>
+#include <map>
 //#include "../mathematics/arithmetic.h"
 
 
@@ -54,7 +55,7 @@ class LargeVolumeCache:public LVDReader
 
 	using Cache = ysl::Block3DArray<unsigned char, nLogBlockSize>;
 	struct LRUListCell;
-	using LRUHash = std::unordered_map<int,std::list<LRUListCell>::iterator>;
+	using LRUHash = std::map<int,std::list<LRUListCell>::iterator>;
 	struct LRUListCell
 	{
 		int blockCacheIndex;
