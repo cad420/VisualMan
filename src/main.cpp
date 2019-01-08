@@ -56,7 +56,6 @@ static float g_proxyGeometryVertices[] = {
 	xCoord - 0.5, yCoord - 0.5, zCoord - 0.5,
 };
 
-
 /*
  * The reason why make the members public and supports corresponding
  * access methods as the same time is that these class should be redesigned later conform to OO
@@ -98,11 +97,9 @@ namespace
 
 	const std::size_t missedBlockCapacity = 5000 * sizeof(unsigned int);
 
-
 	std::shared_ptr<OpenGLTexture> g_texTransferFunction;
 
 	std::shared_ptr<OpenGLFramebufferObject> g_framebuffer;
-
 
 	std::shared_ptr<OpenGLTexture> g_texEntryPos;
 
@@ -111,7 +108,6 @@ namespace
 	std::shared_ptr<OpenGLTexture> g_texDepth;
 
 	std::shared_ptr<OpenGLTexture> g_texIntermediateResult;
-
 
 	std::shared_ptr<OpenGLBuffer> g_proxyEBO;
 
@@ -126,6 +122,7 @@ namespace
 	std::shared_ptr<OpenGLTexture> g_texPageTable;
 
 	std::shared_ptr<OpenGLTexture> g_texCache;
+
 	std::list<std::pair<PageTableEntryAbstractIndex, CacheBlockAbstractIndex>> g_lruList;
 
 	std::shared_ptr<OpenGLBuffer> g_blockPingBuf;
@@ -176,9 +173,7 @@ namespace
 
 }
 
-
 void checkFrambufferStatus();
-
 
 bool compareTexture(const unsigned char* buf1, const unsigned char* buf2, std::size_t bytes)
 {
@@ -192,7 +187,6 @@ bool compareTexture(const unsigned char* buf1, const unsigned char* buf2, std::s
 	}
 	return true;
 }
-
 
 void renderingWindowResize(ResizeEvent *event)
 {
@@ -219,9 +213,6 @@ void renderingWindowResize(ResizeEvent *event)
 	g_rayCastingVBO->Bind();
 	g_rayCastingVBO->AllocateFor(windowSize, sizeof(windowSize));
 };
-
-
-
 
 void mousePressedEvent(MouseEvent * event)
 {
@@ -385,52 +376,55 @@ bool CaptureAndHandleCacheMiss()
 
 	
 
-	//std::shared_ptr<OpenGLBuffer> pbo[2] = { g_blockPingBuf,g_blockPongBuf };
-	//auto curPBO = 0;
-	//auto i = 0;
-	//const auto & idx = g_hits[i];
-	//const auto dd = g_largeVolumeData->ReadBlockDataFromCache(idx);
+	std::shared_ptr<OpenGLBuffer> pbo[2] = { g_blockPingBuf,g_blockPongBuf };
+	auto curPBO = 0;
+	auto i = 0;
+	const auto & idx = g_hits[i];
+	const auto dd = g_largeVolumeData->ReadBlockDataFromCache(idx);
 
-	//pbo[1 - curPBO]->Bind();
-	//auto pp = pbo[1 - curPBO]->Map(OpenGLBuffer::WriteOnly);
-	//memcpy(pp, dd, blockBytes);
-	//pbo[1 - curPBO]->Unmap();		// copy data to pbo
-	//pbo[1 - curPBO]->Bind();
-	//
-	//g_texCache->Bind();
-	//for (;i < missedBlocks-1;)
-	//{
-	//	pbo[1 - curPBO]->Bind();
-	//	g_texCache->SetSubData(OpenGLTexture::RED,
-	//		OpenGLTexture::UInt8,
-	//		g_posInCache[3 * i], blockSize,
-	//		g_posInCache[3 * i + 1], blockSize,
-	//		g_posInCache[3 * i + 2], blockSize,
-	//		nullptr);
-	//	pbo[1 - curPBO]->Unbind();
-	//	i++;
-	//	const auto & index = g_hits[i];
-
-	//	const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
-
-	//	pbo[curPBO]->Bind();
-	//	auto p = pbo[curPBO]->Map(OpenGLBuffer::WriteOnly);
-
-	//	memcpy(p, d, blockBytes);
-
-	//	pbo[curPBO]->Unmap();		// copy data to pbo
-	//	curPBO = 1 - curPBO;
-	//}
-	//pbo[1 - curPBO]->Bind();
-	//g_texCache->SetSubData(OpenGLTexture::RED,
-	//	OpenGLTexture::UInt8,
-	//	g_posInCache[3 * i], blockSize,
-	//	g_posInCache[3 * i + 1], blockSize,
-	//	g_posInCache[3 * i + 2], blockSize,
-	//	nullptr);
-	//pbo[1 - curPBO]->Unbind();
-
+	pbo[1 - curPBO]->Bind();
+	auto pp = pbo[1 - curPBO]->Map(OpenGLBuffer::WriteOnly);
+	memcpy(pp, dd, blockBytes);
+	pbo[1 - curPBO]->Unmap();		// copy data to pbo
+	pbo[1 - curPBO]->Bind();
 	
+	g_texCache->Bind();
+
+	g_timer.begin();
+	for (;i < missedBlocks-1;)
+	{
+		pbo[1 - curPBO]->Bind();
+		g_texCache->SetSubData(OpenGLTexture::RED,
+			OpenGLTexture::UInt8,
+			g_posInCache[3 * i], blockSize,
+			g_posInCache[3 * i + 1], blockSize,
+			g_posInCache[3 * i + 2], blockSize,
+			nullptr);
+		pbo[1 - curPBO]->Unbind();
+		i++;
+		const auto & index = g_hits[i];
+
+		const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
+
+		pbo[curPBO]->Bind();
+		auto p = pbo[curPBO]->Map(OpenGLBuffer::WriteOnly);
+
+		memcpy(p, d, blockBytes);
+
+		pbo[curPBO]->Unmap();		// copy data to pbo
+		curPBO = 1 - curPBO;
+	}
+	pbo[1 - curPBO]->Bind();
+	g_texCache->SetSubData(OpenGLTexture::RED,
+		OpenGLTexture::UInt8,
+		g_posInCache[3 * i], blockSize,
+		g_posInCache[3 * i + 1], blockSize,
+		g_posInCache[3 * i + 2], blockSize,
+		nullptr);
+	pbo[1 - curPBO]->Unbind();
+
+	g_timer.end();
+	ysl::Log("%d %d %d\n", missedBlocks, g_timer.duration(), g_timer.duration() / missedBlocks);
 
 	//////////////////
 
@@ -491,30 +485,30 @@ bool CaptureAndHandleCacheMiss()
 
 	///////
 
-	g_texCache->Bind();
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pingPBO);
-	g_timer.begin();
-	//GL_ERROR_REPORT;
-	for(int i = 0;i<missedBlocks;i++)
-	{
-		const auto & index = g_hits[i];
-		//const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
-		memcpy(g_pboPtr[0], g_data, blockBytes);
+	//g_texCache->Bind();
+	//glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pingPBO);
+	//g_timer.begin();
+	////GL_ERROR_REPORT;
+	//for(int i = 0;i<missedBlocks;i++)
+	//{
+	//	const auto & index = g_hits[i];
+	//	//const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
+	//	memcpy(g_pboPtr[0], g_data, blockBytes);
 
-		g_texCache->SetSubData(OpenGLTexture::RED,
-			OpenGLTexture::UInt8,
-			g_posInCache[3 * i], blockSize,
-			g_posInCache[3 * i + 1], blockSize,
-			g_posInCache[3 * i + 2], blockSize,
-			nullptr);
+	//	g_texCache->SetSubData(OpenGLTexture::RED,
+	//		OpenGLTexture::UInt8,
+	//		g_posInCache[3 * i], blockSize,
+	//		g_posInCache[3 * i + 1], blockSize,
+	//		g_posInCache[3 * i + 2], blockSize,
+	//		nullptr);
 
-		GLsync s = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-		glClientWaitSync(s, 0, 1000000);
-		glDeleteSync(s);
+	//	GLsync s = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+	//	glClientWaitSync(s, 0, 1000000);
+	//	glDeleteSync(s);
 
-	}
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-	g_texCache->Unbind();
+	//}
+	//glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	//g_texCache->Unbind();
 
 	//ysl::Log("%d %d %d\n", missedBlocks, g_timer.duration(), g_timer.duration() / missedBlocks);
 	//ysl::Log("blockCount:%d\nreadDataTime:%d\ncopyDataTime:%d\nDMATime:%d\ntotalTime:%d\nbindTime:%d\n", missedBlocks,readDataTime,copyDataTime,dmaTime,totalTime,bindTime);
@@ -608,12 +602,9 @@ void initializeGPUTexture()
 void initializeResource()
 {
 
-
 	initializeShaders();
 
 	initializeProxyGeometry();
-
-
 
 	g_largeVolumeData.reset(new VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(g_lvdFileName));
 
@@ -935,6 +926,7 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 #if __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -945,8 +937,6 @@ int main(int argc, char** argv)
 
 	glfwMakeContextCurrent(window.get());
 	glfwSwapInterval(1); // Enable vsync
-
-
 
 	gl3wInit();
 

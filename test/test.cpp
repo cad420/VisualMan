@@ -143,9 +143,6 @@ int main(int argc, char *argv[])
 	//converter.save(fileName);
 	//LVDTester();
 
-
-
-
 	system("pause");
 	return 0;
 

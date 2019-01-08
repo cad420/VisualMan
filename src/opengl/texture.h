@@ -13,7 +13,6 @@
 class OpenGLTexture
 {
 public:
-
 	enum TextureUnit
 	{
 		TextureUnit0 = GL_TEXTURE0,

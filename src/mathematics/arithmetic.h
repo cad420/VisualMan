@@ -121,6 +121,18 @@ namespace ysl
 		return v;
 	}
 
+	inline
+	RGBASpectrum
+	clamp(const RGBASpectrum & v,const RGBASpectrum & low,const RGBASpectrum & high)
+	{
+		RGBASpectrum s;
+		s.c[0] = clamp(v.c[0], low.c[0], high.c[0]);
+		s.c[1] = clamp(v.c[1], low.c[1], high.c[1]);
+		s.c[2] = clamp(v.c[2], low.c[2], high.c[2]);
+		s.c[3] = clamp(v.c[3], low.c[3], high.c[3]);
+		return s;
+	}
+
 
 
 

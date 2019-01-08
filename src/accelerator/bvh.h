@@ -1,7 +1,7 @@
 #ifndef BVH_H
 #define BVH_H
 
-#include "../core/geometry.h"
+#include "../mathematics/geometry.h"
 #include "../core/shape.h"
 
 #include <mutex>

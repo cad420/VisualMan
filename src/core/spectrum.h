@@ -40,13 +40,15 @@ namespace ysl
 			return *this;
 		}
 
-		CoefficientSpectrum& operator-=(const CoefficientSpectrum & spectrum) {
+		CoefficientSpectrum& operator-=(const CoefficientSpectrum & spectrum)
+		{
 			for (auto i = 0; i < nSamples; i++)
 				c[i] -= spectrum.c[i];
 			return *this;
 		}
 
-		CoefficientSpectrum& operator*=(const CoefficientSpectrum & spectrum) {
+		CoefficientSpectrum& operator*=(const CoefficientSpectrum & spectrum) 
+		{
 			for (auto i = 0; i < nSamples; i++)
 				c[i] *= spectrum.c[i];
 			return *this;
@@ -58,7 +60,8 @@ namespace ysl
 			return *this;
 		}
 
-		CoefficientSpectrum& operator/=(const CoefficientSpectrum & spectrum) {
+		CoefficientSpectrum& operator/=(const CoefficientSpectrum & spectrum) 
+		{
 
 			assert(!spectrum.HasNaNs());
 			for (auto i = 0; i < nSamples; i++)
@@ -66,16 +69,16 @@ namespace ysl
 			return *this;
 		}
 
-		CoefficientSpectrum& operator/=(Float s) {
-
-			assert(!spectrum.HasNaNs());
+		CoefficientSpectrum& operator/=(Float s) 
+		{
 			Float inv = 1 / s;
 			for (auto i = 0; i < nSamples; i++)
 				c[i] *= inv;
 			return *this;
 		}
 
-		bool IsBlack()const {
+		bool IsBlack()const 
+		{
 			for (auto i = 0; i < nSamples; i++)
 				if (c[i] != 0.f)
 					return false;
@@ -116,6 +119,13 @@ namespace ysl
 	operator/(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
 	{
 		return CoefficientSpectrum<nSamples>(s1) /= s2;			// More Effective C++: Item 22
+	}
+
+	template<int nSamples>
+	CoefficientSpectrum<nSamples>
+		operator/(const CoefficientSpectrum<nSamples> & s1, Float s)
+	{
+		return CoefficientSpectrum<nSamples>(s1) /= s;			// More Effective C++: Item 22
 	}
 
 	template<int nSamples>

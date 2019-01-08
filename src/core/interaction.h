@@ -43,16 +43,9 @@ namespace ysl {
 
 		const Shape * object()const { return m_pShape; }
 
-		Ray spawnRay(const Vector3f & dir)const 
-		{
-			return Ray(dir.Normalized(), m_p + 0.0001*(m_norm*Vector3f::Dot(dir, m_norm)).Normalized());
-		}
+		Ray spawnRay(const Vector3f& dir) const;
 
-		Ray spawnRayTo(const Interaction & ref)const 
-		{
-			Vector3f dir = (ref.m_p - m_p).Normalized();
-			return Ray(dir, m_p + 0.0001*(m_norm*Vector3f::Dot(dir, m_norm)).Normalized());
-		}
+		Ray spawnRayTo(const Interaction& ref) const;
 
 		Float u()const { return m_u; }
 		Float v()const { return m_v; }
