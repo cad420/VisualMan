@@ -1,6 +1,8 @@
 #include "appearance.h"
 #include "sphere.h"
 
+#include "../mathematics/arithmetic.h"
+
 namespace ysl {
 	Vector3f BSDF::worldToLocal(const Vector3f & v) const
 	{
@@ -10,9 +12,9 @@ namespace ysl {
 	Vector3f BSDF::localToWorld(const Vector3f & v) const
 	{
 		return Vector3f{
-			m_s.x()*v.x() + m_n.x()*v.y() + m_t.x()*v.z(),
-			m_s.y()*v.x() + m_n.y()*v.y() + m_t.y()*v.z(),
-			m_s.z()*v.x() + m_n.z()*v.y() + m_t.z()*v.z()
+			m_s.x*v.x + m_n.x*v.y + m_t.x*v.z,
+			m_s.y*v.x + m_n.y*v.y + m_t.y*v.z,
+			m_s.z*v.x + m_n.z*v.y + m_t.z*v.z
 		};
 	}
 

@@ -2,17 +2,17 @@
 
 namespace ysl
 {
-	Vector3f refraction(const Vector3f& normal, const Vector3f& incidence, Float ratioIOR)
+	Vector3f refraction(const Vector3f & normal, const Vector3f& incidence, Float ratioIOR)
 	{
 		const auto norm = normal.Normalized();
 		const auto inci = incidence.Normalized();
 		Float cosI = Vector3f::Dot(norm, inci);
 		Float sinI = std::sqrt(1 - cosI * cosI);
 
-
 		Float cos2T = 1.0 - (1 - cosI * cosI) * (ratioIOR * ratioIOR);
 		if (cos2T < 0)return Vector3f();
 		Vector3f T = ratioIOR * inci - (ratioIOR * cosI + std::sqrt(cos2T)) * norm;
+
 		//if (cos2T > 0)return T;
 		//return Vector3f();
 		return T;

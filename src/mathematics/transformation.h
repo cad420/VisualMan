@@ -3,6 +3,8 @@
 #include <iostream>
 
 #include "geometry.h"
+#include "../core/ray.h"
+#include "../core/bound.h"
 
 
 namespace  ysl

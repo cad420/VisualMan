@@ -1,8 +1,8 @@
 #ifndef BVH_H
 #define BVH_H
 
-#include "../mathematics/geometry.h"
 #include "../core/shape.h"
+#include "../core/bound.h"
 
 #include <mutex>
 #include <vector>

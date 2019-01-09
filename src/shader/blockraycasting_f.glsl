@@ -27,7 +27,7 @@ layout(binding = 0, rgba32i) uniform iimage3D pageDirTexutre;
 layout(binding = 1, rgba32i) uniform iimage3D pageTableTexture;
 layout(binding = 2, rgba32f) uniform image2DRect entryPos;
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
-layout(binding = 4, offset = 4) uniform atomic_uint atomic_need_to_draw_count;
+//layout(binding = 4, offset = 4) uniform atomic_uint atomic_need_to_draw_count;
 
 
 // keywords buffer shows the read-write feature of the buffer.
@@ -38,9 +38,11 @@ layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
 vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
 	vec4 scalar;
+
 	// address translation
 	ivec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
-	ivec3 voxelCoord=ivec3(samplePos * volumeDataSizeNoRepeat);
+	ivec3 voxelCoord=ivec3(samplePos * (volumeDataSizeNoRepeat));
+	int dataSize = volumeDataSizeNoRepeat.x;
 	ivec3 blockOffset = voxelCoord % blockDataSizeNoRepeat;
 	if(pageTableEntry.w == 2)		// Unmapped flag
 	{
@@ -58,7 +60,7 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	}
 	else
 	{
-		vec3 samplePoint = pageTableEntry.xyz + blockOffset + repeatOffset;
+		vec3 samplePoint = pageTableEntry.xyz + blockOffset + vec3(2.0,2.0,2.0) ;//+ repeatOffset;
 		samplePoint = samplePoint/textureSize(cacheVolume,0);
 		scalar = texture(cacheVolume,samplePoint);
 		mapped = true;
@@ -107,7 +109,7 @@ void main()
 	vec3 start2end = rayEnd - rayStart;
 	vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-	if (start2end.x == 0.0 && start2end.y == 0.0 && start2end.z == 0.0) 
+	if (start2end.x ==0.0 && start2end.y ==0.0 && start2end.z == 0.0) 
 	{
 		fragColor = bg; // Background Colors
 		discard;

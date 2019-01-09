@@ -37,7 +37,7 @@ namespace ysl
 			const Vector3f & n,
 			const Vector3f & t,
 			const Vector3f & s,
-			BSDFType type) :m_kd(kd), m_ka(ka), m_ks(ks), m_ni(ni), m_tf(tf), m_ns(ns), m_e(e), m_n(n.normalized()), m_t(t.normalized()), m_s(s.normalized()), m_type(type) {
+			BSDFType type) :m_kd(kd), m_ka(ka), m_ks(ks), m_ni(ni), m_tf(tf), m_ns(ns), m_e(e), m_n(n.Normalized()), m_t(t.Normalized()), m_s(s.Normalized()), m_type(type) {
 			createCoordinateSystem(m_n, m_t, m_s);
 		}
 		//RGBASpectrum f(const Vector3f & wo, const Vector3f & wi)const { return m_color; }

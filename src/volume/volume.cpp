@@ -82,7 +82,9 @@ const unsigned char* LargeVolumeCache::ReadBlockDataFromCache(int blockId)
 		}
 
 		lastCell.hashIter = newItr.first;		// Mapping new 
-		ReadBlock((char*)m_volumeCache->BlockData(lastCell.blockCacheIndex), blockId);
+		auto d = (char*)m_volumeCache->BlockData(lastCell.blockCacheIndex);
+		assert(d);
+		ReadBlock(d, blockId);
 		//SHOW_LIST_STATE
 		//std::cout << "**" << std::endl;
 		return m_volumeCache->BlockData(lastCell.blockCacheIndex);

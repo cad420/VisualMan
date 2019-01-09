@@ -210,7 +210,15 @@ public:
 
 	bool save(const std::string & fileName)
 	{
-		const std::string outFileName{ fileName.substr(0,fileName.find_last_of(".")) + ".lvd" };
+		std::stringstream ss1;
+		ss1 << m_repeat;
+		std::string rep,bSize;
+		ss1 >> rep;
+		std::stringstream ss2;
+		ss2 << (1<<nLogBlockSize);
+		ss2 >> bSize;
+
+		const std::string outFileName{ fileName.substr(0,fileName.find_last_of("."))+"_"+rep+"_"+bSize + ".lvd" };
 		std::cout << "Writing as:" << outFileName << std::endl;
 		std::ofstream lvdFile(outFileName, std::fstream::binary);
 		if (!lvdFile.is_open())
@@ -299,7 +307,7 @@ class LVDReader
 
 	enum { LVDFileMagicNumber = 277536 };
 
-	enum { LogBlockSize5 = 5, LogBlockSize6 = 6 };
+	enum { LogBlockSize5 = 5, LogBlockSize6 = 6,LogBlockSize7 = 7 };
 
 	enum { LVDHeaderSize = 24 };
 

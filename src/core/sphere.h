@@ -4,6 +4,7 @@
 #include "shape.h"
 
 #include "../mathematics/basetype.h"
+#include "bound.h"
 
 namespace ysl
 {

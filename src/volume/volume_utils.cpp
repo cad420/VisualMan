@@ -92,7 +92,7 @@ LVDReader::LVDReader(const std::string& fileName): validFlag(true)
 	fileHandle.read((char*)&m_originalHeight, sizeof(int));
 	fileHandle.read((char*)&m_originalDepth, sizeof(int));
 
-	if (logBlockSize != LogBlockSize5 && logBlockSize != LogBlockSize6)
+	if (logBlockSize != LogBlockSize5 && logBlockSize != LogBlockSize6 && logBlockSize != LogBlockSize7)
 	{
 		std::cout << "Unsupported block size\n";
 		validFlag = false;

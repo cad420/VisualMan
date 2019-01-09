@@ -1,9 +1,9 @@
 #ifndef INTERACTION_H
 #define INTERACTION_H
 #include <memory>
-#include <cstdlib>
 
 #include "../mathematics/geometry.h"
+#include "ray.h"
 
 
 namespace ysl {

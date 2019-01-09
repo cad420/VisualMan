@@ -12,4 +12,6 @@ namespace ysl
 	RGBASpectrum trace(const Scene & scene,
 		const Ray & ray,
 		int depth, bool di, bool gi, int intensity);
+
+
 }

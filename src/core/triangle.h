@@ -5,7 +5,9 @@
 #include "../mathematics/transformation.h"
 #include <vector>
 #include <unordered_map>
-#include "../../lib/3rdparty/tiny_obj_loader.h"
+
+#include "../core/material.h"
+#include "../utility/materialreader.h"
 
 namespace ysl
 {
@@ -95,7 +97,7 @@ namespace ysl
 				- m_sharedTriangles->m_vertices[m_vertexIndices[0]];
 			Vector3f v2 = m_sharedTriangles->m_vertices[m_vertexIndices[2]]
 				- m_sharedTriangles->m_vertices[m_vertexIndices[0]];
-			return 0.5*Vector3f::dotProduct(v1, v2);
+			return 0.5*Vector3f::Dot(v1, v2);
 
 		}
 		Interaction sample(const Point2f &u) const override {
@@ -132,15 +134,20 @@ namespace ysl
 
 
 		static std::vector<std::shared_ptr<Shape>>
-			createTriangleMesh(const Point3f * vertices, const Point3f * normals, int nVertex,
-				const int * vertexIndices, int nIndex, std::unordered_map<int, std::string> & mtlName, tinyobj::MaterialReader & mtlReader,
+			createTriangleMesh(const Point3f * vertices, const Vector3f * normals, int nVertex,
+				const int * vertexIndices, int nIndex, std::unordered_map<int, std::string> & mtlName, MaterialReader & mtlReader,
 				std::vector<std::shared_ptr<Shape>>* lightShapes,
 				const Transform & trans)
 		{
 			assert(nIndex % 3 == 0);
 			if (lightShapes != nullptr)
 				lightShapes->clear();
-			std::shared_ptr<TriangleMesh> mesh(new TriangleMesh(vertices, normals, nVertex, vertexIndices, nIndex, trans));
+			std::shared_ptr<TriangleMesh> mesh(new TriangleMesh(vertices, 
+				normals,
+				nVertex,
+				vertexIndices,
+				nIndex, 
+				trans));
 			std::vector<std::shared_ptr<Shape>> tris;
 			for (int i = 0; i < nIndex / 3; i++)
 			{
@@ -161,27 +168,27 @@ namespace ysl
 					type = MaterialType::Metal;
 				}
 
-				Color kd = mtlReader[name]["Kd"];
-				Color ks = mtlReader[name]["Ks"];
-				Color ka = mtlReader[name]["Ka"];
-				Color tf = mtlReader[name]["Tf"];
-				Color niV = mtlReader[name]["Ni"];
-				Color nsV = mtlReader[name]["Ns"];
-				Color ke = mtlReader[name]["Ke"];
-				if (kd.isNull()) {
-					kd = Color(0, 0, 0);
+				RGBASpectrum kd = mtlReader[name]["Kd"];
+				RGBASpectrum ks = mtlReader[name]["Ks"];
+				RGBASpectrum ka = mtlReader[name]["Ka"];
+				RGBASpectrum tf = mtlReader[name]["Tf"];
+				RGBASpectrum niV = mtlReader[name]["Ni"];
+				RGBASpectrum nsV = mtlReader[name]["Ns"];
+				RGBASpectrum ke = mtlReader[name]["Ke"];
+				if (kd.IsNull()) {
+					kd = RGBASpectrum(0.0);
 				}
-				if (ks.isNull()) {
-					ks = Color(0, 0, 0);
+				if (ks.IsNull()) {
+					ks = RGBASpectrum(0.0f);
 				}
-				if (ka.isNull()) {
-					ka = Color(0, 0, 0);
+				if (ka.IsNull()) {
+					ka = RGBASpectrum(0.f);
 				}
-				if (tf.isNull()) {
-					tf = Color(0, 0, 0);
+				if (tf.IsNull()) {
+					tf = RGBASpectrum(0.f);
 				}
-				if (ke.isNull()) {
-					ke = Color(0, 0, 0);
+				if (ke.IsNull()) {
+					ke = RGBASpectrum(0.f);
 				}
 				else {
 					//light source
@@ -189,14 +196,15 @@ namespace ysl
 						lightShapes->push_back(tris.back());
 				}
 				Float ni;
-				if (niV.isNull()) {
+				if (niV.IsNull()) 
+				{
 					ni = 0;
 				}
 				else {
 					ni = niV[0];
 				}
 				Float ns;
-				if (nsV.isNull()) {
+				if (nsV.IsNull()) {
 					ns = 0;
 				}
 				else {

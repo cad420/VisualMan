@@ -1,8 +1,9 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "shape.h"
 #include <vector>
+#include "shape.h"
+#include "bound.h"
 
 namespace ysl {
 #include <memory>
@@ -12,6 +13,7 @@ namespace ysl {
 		AABB worldBound;
 		std::shared_ptr<Shape> primitive;
 		std::vector<std::shared_ptr<AreaLight>> m_lights;
+
 	public:
 		Scene(std::shared_ptr<Shape> shape, const std::vector<std::shared_ptr<AreaLight>> & lights) :primitive(shape), m_lights(lights) {}
 

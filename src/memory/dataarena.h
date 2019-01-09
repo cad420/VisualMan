@@ -7,14 +7,17 @@
 #include <list>
 #include <vector>
 
+
+
 constexpr std::size_t CashLine = 64;
+
 
 void *AllocAligned(std::size_t size, int align);
 
 void  FreeAligned(void * ptr);
 
 template<typename T>
-T * AllocAligned(int n)
+T * AllocAligned(std::size_t n)
 {
 	return (T*)(AllocAligned(sizeof(T) * n, 64));
 }

@@ -4,7 +4,6 @@
 namespace ysl
 {
 
-
 	Matrix3x3::Matrix3x3()
 	{
 		m[0][0] = m[1][1] = m[2][3] = 1.0f;

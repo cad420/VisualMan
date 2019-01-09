@@ -81,7 +81,8 @@ namespace
 	//std::unique_ptr<char[]> g_rawData;
 	std::vector<ysl::RGBASpectrum> m_tfData{ 256 };
 
-	std::string g_lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
+	std::string g_lvdFileName = "D:\\scidata\\abc\\sb__120_120_120_2_64.lvd";
+	//std::string g_lvdFileName = "C:\\data\\s1_120_120_120.lvd";
 
 	ysl::Vector3f g_lightDirection;
 
@@ -134,7 +135,7 @@ namespace
 
 	std::vector<GlobalBlockAbstractIndex> g_hits;
 	std::vector<int> g_posInCache;
-	ysl::Size3 g_gpuCacheBlockSize{4,4,4};
+	ysl::Size3 g_gpuCacheBlockSize{1,1,1};
 
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
@@ -356,9 +357,6 @@ bool CaptureAndHandleCacheMiss()
 		g_posInCache.push_back(yInCache);
 		g_posInCache.push_back(zInCache);
 
-
-
-
 	}
 	// Update load missed block  data to GPU
 
@@ -403,14 +401,10 @@ bool CaptureAndHandleCacheMiss()
 		pbo[1 - curPBO]->Unbind();
 		i++;
 		const auto & index = g_hits[i];
-
 		const auto d = g_largeVolumeData->ReadBlockDataFromCache(index);
-
 		pbo[curPBO]->Bind();
 		auto p = pbo[curPBO]->Map(OpenGLBuffer::WriteOnly);
-
 		memcpy(p, d, blockBytes);
-
 		pbo[curPBO]->Unmap();		// copy data to pbo
 		curPBO = 1 - curPBO;
 	}
@@ -512,6 +506,7 @@ bool CaptureAndHandleCacheMiss()
 
 	//ysl::Log("%d %d %d\n", missedBlocks, g_timer.duration(), g_timer.duration() / missedBlocks);
 	//ysl::Log("blockCount:%d\nreadDataTime:%d\ncopyDataTime:%d\nDMATime:%d\ntotalTime:%d\nbindTime:%d\n", missedBlocks,readDataTime,copyDataTime,dmaTime,totalTime,bindTime);
+
 	// update page table
 	g_texPageTable->Bind();
 	g_texPageTable->SetData(OpenGLTexture::RGBA32UI,
@@ -669,8 +664,10 @@ void initializeResource()
 
 	// allocate for volume data block cache
 
+
+
 	initGPUCacheLRUPolicyList();
-	g_texCache = OpenGLTexture::CreateTexture3D(OpenGLTexture::R16F,
+	g_texCache = OpenGLTexture::CreateTexture3D(OpenGLTexture::R8,		// R16F
 		OpenGLTexture::Linear,
 		OpenGLTexture::Linear,
 		OpenGLTexture::ClampToEdge,
@@ -835,46 +832,39 @@ void renderLoop()
 
 	// init gpu hash table and missed cache block id
 	//GLsync s;
+
+	g_rayCastingShaderProgram.bind();
+	g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ pageTableX,pageTableY,pageTableZ });
+	g_rayCastingShaderProgram.setUniformValue("blockDataSizeNoRepeat", ysl::Vector3i{ blockDataSize - 2 * repeat,blockDataSize - 2 * repeat,blockDataSize - 2 * repeat });
+	g_rayCastingShaderProgram.setUniformValue("volumeDataSizeNoRepeat", ysl::Vector3i{ originalDataWidth,originalDataDepth,originalDataDepth });
+	g_rayCastingShaderProgram.setUniformValue("pageTableBlockEntrySize", ysl::Vector3i{ pageTableBlockEntry ,pageTableBlockEntry ,pageTableBlockEntry });
+	g_rayCastingShaderProgram.setUniformValue("repeatOffset", ysl::Vector3i{ repeat,repeat,repeat });
+	g_rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *g_texCache);
+
+	g_rayCastingShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
+	g_rayCastingShaderProgram.setUniformValue("orthoMatrix", g_orthoMatrix.Matrix());
+	g_rayCastingShaderProgram.setUniformSampler("texStartPos", OpenGLTexture::TextureUnit0, *g_texEntryPos);
+	g_rayCastingShaderProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, *g_texExitPos);
+	g_rayCastingShaderProgram.setUniformSampler("texTransfunc", OpenGLTexture::TextureUnit2, *g_texTransferFunction);
+	g_rayCastingShaderProgram.setUniformSampler("texIntermediateResult", OpenGLTexture::TextureUnit4, *g_texIntermediateResult);
+	g_rayCastingShaderProgram.setUniformValue("step", step);
+	g_rayCastingShaderProgram.setUniformValue("ka", ka);
+	g_rayCastingShaderProgram.setUniformValue("ks", ks);
+	g_rayCastingShaderProgram.setUniformValue("kd", kd);
+	g_rayCastingShaderProgram.setUniformValue("shininess", shininess);
+	g_rayCastingShaderProgram.setUniformValue("lightdir", g_lightDirection);
+	//auto halfWay = g_lightDirection - g_camera.front();
+//if (halfWay.Length() > 1e-10) halfWay.Normalize();
+//g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
+	g_rayCastingVAO.bind();
 	int maxLoopCount = 0;
+
 	do
 	{
 		initBlockExistsHash();
 		initMissedBlockVector();
-		g_rayCastingShaderProgram.bind();
-		g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ pageTableX,pageTableY,pageTableZ });
-		g_rayCastingShaderProgram.setUniformValue("blockDataSizeNoRepeat", ysl::Vector3i{ blockDataSize - 2 * repeat,blockDataSize - 2 * repeat,blockDataSize - 2 * repeat });
-		g_rayCastingShaderProgram.setUniformValue("volumeDataSizeNoRepeat", ysl::Vector3i{ originalDataWidth,originalDataDepth,originalDataDepth });
-		g_rayCastingShaderProgram.setUniformValue("pageTableBlockEntrySize", ysl::Vector3i{ pageTableBlockEntry ,pageTableBlockEntry ,pageTableBlockEntry });
-		g_rayCastingShaderProgram.setUniformValue("repeatOffset", ysl::Vector3i{ repeat,repeat,repeat });
-		g_rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *g_texCache);
-
-		g_rayCastingShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
-		g_rayCastingShaderProgram.setUniformValue("orthoMatrix", g_orthoMatrix.Matrix());
-		g_rayCastingShaderProgram.setUniformSampler("texStartPos", OpenGLTexture::TextureUnit0, *g_texEntryPos);
-		g_rayCastingShaderProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, *g_texExitPos);
-		g_rayCastingShaderProgram.setUniformSampler("texTransfunc", OpenGLTexture::TextureUnit2, *g_texTransferFunction);
-		g_rayCastingShaderProgram.setUniformSampler("texIntermediateResult", OpenGLTexture::TextureUnit4, *g_texIntermediateResult);
-		g_rayCastingShaderProgram.setUniformValue("step", step);
-		g_rayCastingShaderProgram.setUniformValue("ka", ka);
-		g_rayCastingShaderProgram.setUniformValue("ks", ks);
-		g_rayCastingShaderProgram.setUniformValue("kd", kd);
-		g_rayCastingShaderProgram.setUniformValue("shininess", shininess);
-		g_rayCastingShaderProgram.setUniformValue("lightdir", g_lightDirection);
-		auto halfWay = g_lightDirection - g_camera.front();
-		if (halfWay.Length() > 1e-10) halfWay.Normalize();
-		g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
-		g_rayCastingVAO.bind();
-
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		/*	std::stringstream ss;
-			ss << maxLoopCount;
-			std::string str;
-			ss >> str;
-			g_texIntermediateResult->SaveAsImage("C:\\Users\\ysl\\Desktop\\debugimage\\result"+str+".jpg");
-			g_texEntryPos->SaveAsImage("C:\\Users\\ysl\\Desktop\\debugimage\\entry" + str + ".jpg");*/
 		maxLoopCount++;
-
 	} while (CaptureAndHandleCacheMiss());
 
 	//ysl::Log("Render pass per frame:%d.\n", maxLoopCount);
@@ -946,6 +936,8 @@ int main(int argc, char** argv)
 		system("pause");
 		return 0;
 	}
+
+	int x = -1;
 
 	// Setup Dear ImGui binding
 	IMGUI_CHECKVERSION();

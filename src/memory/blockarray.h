@@ -103,6 +103,7 @@ namespace ysl
 		{
 			const auto nAlloc = RoundUp(m_nx) * RoundUp(m_ny) * RoundUp(m_nz);
 			m_data = AllocAligned<T>(nAlloc);
+
 			if (m_data == nullptr)
 			{
 				m_valid = false;

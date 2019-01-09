@@ -23,8 +23,6 @@ add_subdirectory(${GLFW_DIR})
 add_definitions(-DGLFW_INCLUDE_NONE
                 -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
 
-
-
 set(_GLFW_INCLUDE_DIR "${GLFW_DIR}/include")								 #glfw headers
 set(_GL3W_INCLUDE_DIR "lib/gl3w")											 #gl3w headers
 include_directories(${_GLFW_INCLUDE_DIR} ${_GL3W_INCLUDE_DIR})			 
@@ -103,7 +101,13 @@ message(STATUS "Test source list: ${TEST_SRC_LIST}")
 
 file(GLOB TEST_HEADERS "test/*.h")
 
-add_executable("mytest" ${TEST_SRC_LIST} ${CORE_SRC_LIST} ${MEM_SRC_LIST} ${VOLUME_SRC_LIST} ${UTILS_SRC_LIST})
+add_executable("mytest" 
+${TEST_SRC_LIST} 
+${CORE_SRC_LIST} 
+${MEM_SRC_LIST} 
+${VOLUME_SRC_LIST} 
+${UTILS_SRC_LIST}
+${MATH_SRC_LIST})
 
 #---------------------------------------------------
 # MRE Module
@@ -118,7 +122,7 @@ ${VOLUME_SRC_LIST}
 ${MEM_SRC_LIST} 
 ${CAM_SRC_LIST} 
 ${MATH_SRC_LIST}
-${OPENGL_SRC_LIST} ${UTILS_SRC_LIST})
+${OPENGL_SRC_LIST} ${UTILS_SRC_LIST} ${CORE_SRC_LIST})
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
 set_target_properties(${PROJECT_NAME} PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})

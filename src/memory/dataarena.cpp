@@ -6,19 +6,19 @@
 
 void* AllocAligned(size_t size, int align)
 {
-#if defined (_WIN32)
-	return _aligned_malloc(size, align);
+//#if defined (_WIN32)
+	//return _aligned_malloc(size, align);
 	//return malloc(size);
-#else
+//#else
     return malloc(size);
-#endif
+//#endif
 }
 
 void FreeAligned(void * ptr)
 {
-#if defined(_WIN32)
-	_aligned_free(ptr);
-#else
+//#if defined(_WIN32)
+	//_aligned_free(ptr);
+//#else
 	free(ptr);
-#endif
+//#endif
 }

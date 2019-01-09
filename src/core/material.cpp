@@ -1,6 +1,7 @@
 
 #include "material.h"
 #include "bvh.h"
+#include <appearance.h>
 
 
 namespace ysl

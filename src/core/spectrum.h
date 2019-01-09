@@ -25,6 +25,14 @@ namespace ysl
 				c[i] = v[i];
 		}
 
+		bool IsNull()const 
+		{
+			for (auto i = 0; i < nSamples; i++)
+				if (c[i] != 0.0f)
+					return false;
+			return true;
+		}
+
 		bool HasNaNs()const 
 		{
 			for(auto i = 0 ; i < nSamples ; i++) 
@@ -62,7 +70,6 @@ namespace ysl
 
 		CoefficientSpectrum& operator/=(const CoefficientSpectrum & spectrum) 
 		{
-
 			assert(!spectrum.HasNaNs());
 			for (auto i = 0; i < nSamples; i++)
 				c[i] /= spectrum.c[i];
@@ -75,6 +82,18 @@ namespace ysl
 			for (auto i = 0; i < nSamples; i++)
 				c[i] *= inv;
 			return *this;
+		}
+
+		Float operator[](int i)const
+		{
+			assert(i >= 0 && i < nSamples);
+			return c[i];
+		}
+
+		Float & operator[](int i)
+		{
+			assert(i >= 0 && i < nSamples);
+			return c[i];
 		}
 
 		bool IsBlack()const 

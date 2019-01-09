@@ -5,6 +5,7 @@
 #include "geometry.h"
 
 #include "numeric.h"
+#include "../core/spectrum.h"
 
 /*
 	* Sample Functions
@@ -110,7 +111,6 @@ namespace ysl
 		return (inci - 2 * norm*(s));
 	}
 
-	inline
 	Vector3f refraction(const Vector3f& normal, const Vector3f& incidence, Float ratioIOR);
 
 	inline 

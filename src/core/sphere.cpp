@@ -6,9 +6,9 @@ namespace ysl
 	{
 		//const Vector3f & D = ray.direction();
 		//const Vector3f & CO = ray.original() - m_center;
-		//Float a = Vector3f::dotProduct(D, D);
-		//Float b = 2 * Vector3f::dotProduct(D, CO);
-		//Float c = Vector3f::dotProduct(CO, CO) - m_radius * m_radius;
+		//Float a = Vector3f::Dot(D, D);
+		//Float b = 2 * Vector3f::Dot(D, CO);
+		//Float c = Vector3f::Dot(CO, CO) - m_radius * m_radius;
 		//Float t1, t2;
 		//Float eps = 0.00001;
 		//if (quadraticEquation(a, b, c, t1, t2) == false)return false;
@@ -21,11 +21,11 @@ namespace ysl
 		//if (t)*t = t1;
 		//return true;
 
-		Vector3f rd = ray.direction().normalized();
+		Vector3f rd = ray.direction().Normalized();
 		Vector3f op = m_center - ray.original();
 		Float res, eps = 1e-4;
-		Float b = Vector3f::dotProduct(op, rd);
-		Float det = b * b - Vector3f::dotProduct(op, op) + m_radius * m_radius;
+		Float b = Vector3f::Dot(op, rd);
+		Float det = b * b - Vector3f::Dot(op, op) + m_radius * m_radius;
 		if (det < 0)
 			return false;
 		else
