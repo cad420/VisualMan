@@ -8,7 +8,6 @@
 #include <fstream>
 #include <iostream>
 #include <functional>
-#include <consoleapi2.h>
 
 class LVDFileTraits
 {
