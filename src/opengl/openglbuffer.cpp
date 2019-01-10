@@ -39,7 +39,7 @@ std::size_t OpenGLBuffer::Size() const
 
 void OpenGLBuffer::AllocateFor(const void* data, std::size_t size)
 {
-	if(type == Immutable && !dataSize && size != dataSize)
+	if(type == Immutable && (!size && size != dataSize))
 	{
 		ysl::Warning("Buffer is immutable, size is different from previous one");
 		return;

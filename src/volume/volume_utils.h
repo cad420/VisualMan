@@ -7,6 +7,8 @@
 #include <memory>
 #include <fstream>
 #include <iostream>
+#include <functional>
+#include <consoleapi2.h>
 
 class LVDFileTraits
 {
@@ -354,48 +356,68 @@ std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> LVDReader::ReadAll()
 
 namespace ysl
 {
-	class TransferFunction
+	class MappingKey
 	{
-		class MappingKey
-		{
-			Float m_intensity;
-			RGBASpectrum m_leftColor;
-			RGBASpectrum m_rightColor;
-		public:
-			MappingKey(Float intensity, const RGBASpectrum & lc, const RGBASpectrum & rc) :m_intensity(intensity), m_leftColor(lc), m_rightColor(rc) {}
-			Float Intensity()const { return m_intensity; }
-			RGBASpectrum LeftColor()const { return m_leftColor; }
-			RGBASpectrum RightColor()const { return m_rightColor; }
-			void SetIntensity(Float intensity) { m_intensity = intensity; }
-			void SetLeftColor(const RGBASpectrum & c) { m_leftColor = c; }
-			void SetRightColor(const RGBASpectrum & c) { m_rightColor = c; }
-		};
-
-		bool m_valid;
-		std::vector<MappingKey> m_tfKeys;
-		Float m_leftThreshold;
-		Float m_rightThreshold;
-
+		Float m_intensity;
+		RGBASpectrum m_leftColor;
+		RGBASpectrum m_rightColor;
 	public:
-		TransferFunction() :m_valid(false) {}
-		explicit TransferFunction(const std::string & fileName) :m_valid(false)
+		MappingKey(Float intensity, const RGBASpectrum & lc, const RGBASpectrum & rc) :m_intensity(intensity), m_leftColor(lc), m_rightColor(rc) {}
+		Float Intensity()const { return m_intensity; }
+		RGBASpectrum LeftColor()const { return m_leftColor; }
+		RGBASpectrum RightColor()const { return m_rightColor; }
+		void SetIntensity(Float intensity) { m_intensity = intensity; }
+		void SetLeftColor(const RGBASpectrum & c) { m_leftColor = c; }
+		void SetRightColor(const RGBASpectrum & c) { m_rightColor = c; }
+		void SetLeftAlpha(Float a) { m_leftColor.c[3] = a; }
+		void SetRightAlpha(Float a) { m_rightColor.c[3] = a; }
+
+	};
+
+	class ColorInterpulator
+	{
+	public:
+		ColorInterpulator() :m_valid(false) {}
+		explicit ColorInterpulator(const std::string & fileName) :m_valid(false)
 		{
 			read(fileName);
 		}
 
 		void read(const std::string& fileName);
-
 		bool valid()const
 		{
 			return m_valid;
 		}
-
-		void FetchData(RGBASpectrum* transferFunction, int dimension);
-
-		void FetchData(Float * transferFunction, int dimension)
+		void FetchData(RGBASpectrum* transferFunction, int dimension)const;
+		void FetchData(Float * transferFunction, int dimension)const
 		{
 			FetchData(reinterpret_cast<RGBASpectrum*>(transferFunction), dimension);
 		}
+	private:
+		bool m_valid;
+	protected:
+		std::vector<MappingKey> keys;
+		Float leftThreshold;
+		Float rightThreshold;
+	};
+
+
+	class TransferFunction:public ColorInterpulator
+	{
+	public:
+		using Callback = std::function<void(TransferFunction* tf)>;
+		TransferFunction(const std::string & fileName);
+		~TransferFunction();
+		void AddMappingKey(const MappingKey & key);
+		void UpdateMappingKey(const Point2f & at, const Point2f & to,const Vector2f & scale = {1.0f,1.0f});
+		void UpdateMappingKey(const Point2f & at, const MappingKey & key,const Vector2f & scale = {1.0f,1.0f});
+		void AddUpdateCallBack(const Callback & func);
+	private:
+		std::vector<Callback> callbacks;
+		std::function<bool(const MappingKey & m1, const MappingKey & m2)> compareFunc;
+		void Notify();
+
+		static Point2f TransToPos(const MappingKey & key);
 	};
 }
 

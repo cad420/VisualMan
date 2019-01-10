@@ -1,7 +1,6 @@
 
 #include "volume_utils.h"
 
-#include <exception>
 
 RawReader::RawReader(const std::string &fileName, const ysl::Size3 &dimensions, size_t voxelSize)
 	: fileName(fileName), dimensions(dimensions), voxelSize(voxelSize),
@@ -123,7 +122,7 @@ void LVDReader::ReadBlock(char * dest, int blockId)
 namespace  ysl
 {
 
-	void TransferFunction::read(const std::string& fileName)
+	void ColorInterpulator::read(const std::string& fileName)
 	{
 		FILE* fp = fopen(fileName.c_str(), "r");
 		if (!fp)
@@ -132,9 +131,9 @@ namespace  ysl
 			return;
 		}
 		int keyNum;
-		fscanf(fp, "%d %f %f\n", &keyNum, &m_leftThreshold, &m_rightThreshold);
+		fscanf(fp, "%d %f %f\n", &keyNum, &leftThreshold, &rightThreshold);
 
-		m_tfKeys.reserve(keyNum);
+		keys.reserve(keyNum);
 
 		float intensity;
 		int rl, gl, bl, al, rr, gr, br, ar;
@@ -151,33 +150,33 @@ namespace  ysl
 			rgba2[1] = br / 255.0f;
 			rgba2[2] = gr / 255.0f;
 			rgba2[3] = ar / 255.0f;
-			m_tfKeys.emplace_back(intensity, ysl::RGBASpectrum{ rgba1 }, ysl::RGBASpectrum{ rgba2 });
+			keys.emplace_back(intensity, ysl::RGBASpectrum{ rgba1 }, ysl::RGBASpectrum{ rgba2 });
 		}
 		m_valid = true;
 		fclose(fp);
 	}
 
-	void TransferFunction::FetchData(RGBASpectrum* transferFunction, int dimension)
+	void ColorInterpulator::FetchData(RGBASpectrum* transferFunction, int dimension)const
 	{
-		const auto frontEnd = static_cast<int>(std::floor(m_leftThreshold * dimension + 0.5));
-		const auto backStart = static_cast<int>(std::floor(m_rightThreshold * dimension + 0.5));
+		const auto frontEnd = static_cast<int>(std::floor(leftThreshold * dimension + 0.5));
+		const auto backStart = static_cast<int>(std::floor(rightThreshold * dimension + 0.5));
 		//all values before front_end and after back_start are set to zero
 		//all other values remain the same
 		for (int x = 0; x < frontEnd; ++x)
 			transferFunction[x] = RGBASpectrum{0.f};
 
-		auto keyIterator = m_tfKeys.begin();
+		auto keyIterator = keys.begin();
 		RGBASpectrum color;
 		for (auto x = frontEnd; x < backStart; ++x)
 		{
 			const auto value = static_cast<float>(x) / (dimension - 1);
-			while ((keyIterator != m_tfKeys.end()) && (value > (*keyIterator).Intensity()))
+			while ((keyIterator != keys.end()) && (value > (*keyIterator).Intensity()))
 				++keyIterator;
-			if (keyIterator == m_tfKeys.begin())
+			if (keyIterator == keys.begin())
 			{
-				color = m_tfKeys[0].LeftColor();
+				color = keys[0].LeftColor();
 			}
-			else if (keyIterator == m_tfKeys.end())
+			else if (keyIterator == keys.end())
 			{
 				color = (*(keyIterator - 1)).RightColor();
 			}
@@ -197,5 +196,93 @@ namespace  ysl
 		}
 		for (int x = backStart; x < dimension; ++x)
 			transferFunction[x] = RGBASpectrum{0.f};
+	}
+
+	TransferFunction::TransferFunction(const std::string& fileName):ColorInterpulator(fileName)
+	{
+		compareFunc = [](const MappingKey& m1,const MappingKey & m2)->bool {return m1.Intensity() < m2.Intensity();};
+	}
+
+	TransferFunction::~TransferFunction()
+	{
+
+	}
+
+	void TransferFunction::AddMappingKey(const MappingKey& key)
+	{
+		keys.push_back(key);
+		std::sort(keys.begin(), keys.end(), compareFunc);
+		Notify();
+	}
+
+	void TransferFunction::UpdateMappingKey(const Point2f& at, const Point2f & to,const Vector2f & scale)
+	{
+		assert(at.x >= 0 && at.x <= 1.0 && at.y >= 0 && at.y <= 0);
+		assert(to.x >= 0 && to.x <= 1.0 && to.y >= 0 && to.y <= 0);
+
+		auto index = -1;
+		for(auto i = 0 ; i < keys.size();i++)
+		{
+			const auto k = keys[i];
+			const auto p = TransToPos(k);
+			const Point2f coords = {p.x*scale.x,p.y*scale.y};
+			if((coords - at).LengthSquared() <= 0.001)
+			{
+				index = i;
+				break;
+			}
+		}
+		if(index == -1)
+		{
+			///TODO:: Adding a new mapping key if there is no key at the click pos
+			return;
+		}
+
+		
+		const auto newAlpha = to.y / scale.y;
+		const auto newIntensity = to.x / scale.y;
+		keys[index].SetRightAlpha(newAlpha);
+		keys[index].SetLeftAlpha(newAlpha);
+		keys[index].SetIntensity(newIntensity);
+		const auto & key = keys[index];
+
+		for(auto i = 0 ; i < index;i++)
+		{
+			auto & k = keys[i];
+			if(k.Intensity() > key.Intensity())
+				k.SetIntensity(key.Intensity());
+		}
+
+		for(auto i = index+1;i < keys.size();i++)
+		{
+			auto & k = keys[i];
+			if(k.Intensity() < key.Intensity())
+				k.SetIntensity(key.Intensity());
+		}
+
+		Notify();
+	}
+
+	void TransferFunction::UpdateMappingKey(const Point2f& at, const MappingKey& key,const Vector2f & scale)
+	{
+		assert(at.x >= 0 && at.x <= 1.0 && at.y >= 0 && at.y <= 0);
+
+		Notify();
+	}
+
+	void TransferFunction::AddUpdateCallBack(const Callback& func)
+	{
+		callbacks.push_back(func);
+	}
+
+	void TransferFunction::Notify()
+	{
+		for (const auto &c : callbacks)
+			c(this);
+	}
+
+	Point2f TransferFunction::TransToPos(const MappingKey& key)
+	{
+		return {key.Intensity(),key.LeftColor()[4]};		//(x, y) = (intensity, alpha)
 	}
 }

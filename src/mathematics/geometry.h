@@ -222,18 +222,21 @@ namespace ysl
 		//	return Vector2<U>(x, y);
 		//}
 
-		Point2<T> operator+(const Vector2<T> & v)
+		constexpr Point2<T> operator+(const Vector2<T> & v)const
 		{
 			return Point2<T>(x + v.x, y + v.y);
 		}
-		Point2<T> operator+(const Point2<T> & p)
+
+		constexpr Point2<T> operator+(const Point2<T> & p)const
 		{
 			return Point2<T>(x + p.x, y + p.y);
 		}
-		Point2<T> operator+=(const Point2<T> & p)
+
+		constexpr Point2<T> operator+=(const Point2<T> & p)const
 		{
 			return Point2<T>(x + p.x, y + p.y);
 		}
+
 		Point2<T> & operator+=(const Vector2<T> & v)
 		{
 			x += v.x;
@@ -241,16 +244,17 @@ namespace ysl
 			return *this;
 		}
 
-		Point2<T> operator-(const Vector2<T> & v)
+		Point2<T> operator-(const Vector2<T> & v)const
 		{
 			assert(!v.HasNaN());
 			return Point2<T>(x - v.x, y - v.y);
 		}
-		Vector2<T> operator-(const Point2<T> & p)
+		Vector2<T> operator-(const Point2<T> & p)const
 		{
 			assert(!p.HasNaN());
 			return Vector2<T>(x - p.x, y - p.y);
 		}
+
 		Point2<T> operator-()
 		{
 			return Point2<T>(-x, -y);

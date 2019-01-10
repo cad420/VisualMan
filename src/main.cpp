@@ -3,7 +3,6 @@
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 // (GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan graphics context creation, etc.)
 // (GL3W is a helper library to access OpenGL functions since there is no standard header to access modern OpenGL functions easily. Alternatives are GLEW, Glad, etc.)
-
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw.h"
 #include "../imgui/imgui_impl_opengl3.h"
@@ -17,7 +16,6 @@
 #include <thread>
 
 #include "gui/TinyConsole.h"
-#include "gui/widget.h"
 #include "gui/eventhandler.h"
 #include "utility/cmdline.h"
 #include "volume/volume_utils.h"
@@ -79,9 +77,10 @@ namespace
 	ysl::Point2i g_lastMousePos;
 
 	//std::unique_ptr<char[]> g_rawData;
-	std::vector<ysl::RGBASpectrum> m_tfData{ 256 };
+	ysl::ColorInterpulator g_tfObject;
+	std::vector<ysl::RGBASpectrum> g_tfData{ 256 };
 
-	std::string g_lvdFileName = "D:\\scidata\\abc\\sb__120_120_120_2_64.lvd";
+	std::string g_lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
 	//std::string g_lvdFileName = "C:\\data\\s1_120_120_120.lvd";
 
 	ysl::Vector3f g_lightDirection;
@@ -135,42 +134,52 @@ namespace
 
 	std::vector<GlobalBlockAbstractIndex> g_hits;
 	std::vector<int> g_posInCache;
-	ysl::Size3 g_gpuCacheBlockSize{1,1,1};
+	ysl::Size3 g_gpuCacheBlockSize{4,4,4};
 
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
+	int * g_cacheHashPtr;
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedTable;
+	int * g_cacheMissTablePtr;
 
 	std::shared_ptr<OpenGLBuffer> g_atomicCounter;
+	int * g_atomicCounterPtr;
 
-	char * g_data;
+	//char * g_data;
+
 
 
 	std::unique_ptr<VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>> g_largeVolumeData;
 
-	int pageDirX;
-	int pageDirY;
-	int pageDirZ;
+	int g_pageDirX;
+	int g_pageDirY;
+	int g_pageDirZ;
 
-	int pageTableX;
-	int pageTableY;
-	int pageTableZ;
+	int g_pageTableX;
+	int g_pageTableY;
+	int g_pageTableZ;
 
-	int cacheWidth;
-	int cacheHeight;
-	int cacheDepth;
-	int repeat;
-	int blockDataSize;
-	int originalDataWidth;
-	int originalDataHeight;
-	int originalDataDepth;
+	int g_cacheWidth;
+	int g_cacheHeight;
+	int g_cacheDepth;
 
-	int xBlockCount;
-	int yBlockCount;
-	int zBlockCount;
+	int g_repeat;
+	int g_blockDataSize;
+	int g_originalDataWidth;
+	int g_originalDataHeight;
+	int g_originalDataDepth;
 
-	int initialWidth = 800, initialHeight = 600;
+	int g_xBlockCount;
+	int g_yBlockCount;
+	int g_zBlockCount;
+
+	int g_initialWidth = 800, g_initialHeight = 600;
+
+	int g_blockUploadMicroSecondsPerFrame;
+	int g_uploadBlockCountPerFrame;
+	int g_missingCacheCountPerFrame;
+	int g_renderPassPerFrame;
 
 }
 
@@ -268,6 +277,8 @@ void initMissedBlockVector()
 	const auto ptr = g_bufMissedTable->Map(OpenGLBuffer::WriteOnly);
 	memset(ptr, 0, g_bufMissedTable->Size());
 	g_bufMissedTable->Unmap();
+
+
 	g_atomicCounter->BindBufferBase(3);
 	unsigned int zero = 0;
 	g_atomicCounter->AllocateFor(&zero, sizeof(unsigned int));
@@ -285,7 +296,7 @@ void initGPUCacheLRUPolicyList()
 				g_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1, -1, -1), CacheBlockAbstractIndex(x*size, y*size, z*size)));
 			}
 
-	g_texPageTable->SetData(OpenGLTexture::RGBA32UI, OpenGLTexture::RGBAInteger, OpenGLTexture::UInt32, pageTableX, pageTableY, pageTableZ, g_largeVolumeData->PageTable->Data());
+	g_texPageTable->SetData(OpenGLTexture::RGBA32UI, OpenGLTexture::RGBAInteger, OpenGLTexture::UInt32, g_pageTableX, g_pageTableY, g_pageTableZ, g_largeVolumeData->PageTable->Data());
 }
 
 /**
@@ -313,18 +324,13 @@ bool CaptureAndHandleCacheMiss()
 	for (auto i = 0; i < missedBlocks; i++)
 	{
 		const auto blockId = ptr[i];
-		g_hits.emplace_back(blockId, xBlockCount, yBlockCount, zBlockCount);
+		g_hits.emplace_back(blockId, g_xBlockCount, g_yBlockCount, g_zBlockCount);
 	}
 	g_bufMissedTable->Unmap();
 
 
 	auto & pageTable = *g_largeVolumeData->PageTable;
 	auto & LRUList = g_lruList;
-
-	
-	//static int hitCount = 0;
-
-	;
 
 	// Update LRU List 
 	for (int i = 0; i < missedBlocks; i++)
@@ -415,10 +421,15 @@ bool CaptureAndHandleCacheMiss()
 		g_posInCache[3 * i + 1], blockSize,
 		g_posInCache[3 * i + 2], blockSize,
 		nullptr);
-	pbo[1 - curPBO]->Unbind();
 
+	pbo[1 - curPBO]->Unbind();
 	g_timer.end();
-	ysl::Log("%d %d %d\n", missedBlocks, g_timer.duration(), g_timer.duration() / missedBlocks);
+
+	g_missingCacheCountPerFrame += missedBlocks;
+	g_uploadBlockCountPerFrame += missedBlocks;
+	g_blockUploadMicroSecondsPerFrame += g_timer.duration();
+
+	//ysl::Log("%d %d %d\n", missedBlocks, g_timer.duration(), g_timer.duration() / missedBlocks);
 
 	//////////////////
 
@@ -512,9 +523,9 @@ bool CaptureAndHandleCacheMiss()
 	g_texPageTable->SetData(OpenGLTexture::RGBA32UI,
 		OpenGLTexture::RGBAInteger,
 		OpenGLTexture::UInt32,
-		pageTableX,
-		pageTableY,
-		pageTableZ,
+		g_pageTableX,
+		g_pageTableY,
+		g_pageTableZ,
 		pageTable.Data());
 	g_texPageTable->Unbind();
 
@@ -603,48 +614,48 @@ void initializeResource()
 
 	g_largeVolumeData.reset(new VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(g_lvdFileName));
 
-	pageDirX = g_largeVolumeData->PageDir->Size().x;
-	pageDirY = g_largeVolumeData->PageDir->Size().y;
-	pageDirZ = g_largeVolumeData->PageDir->Size().z;
+	g_pageDirX = g_largeVolumeData->PageDir->Size().x;
+	g_pageDirY = g_largeVolumeData->PageDir->Size().y;
+	g_pageDirZ = g_largeVolumeData->PageDir->Size().z;
 
-	pageTableX = g_largeVolumeData->PageTable->Size().x;
-	pageTableY = g_largeVolumeData->PageTable->Size().y;
-	pageTableZ = g_largeVolumeData->PageTable->Size().z;
+	g_pageTableX = g_largeVolumeData->PageTable->Size().x;
+	g_pageTableY = g_largeVolumeData->PageTable->Size().y;
+	g_pageTableZ = g_largeVolumeData->PageTable->Size().z;
 
-	cacheWidth = g_largeVolumeData->CacheSize().x;
-	cacheHeight = g_largeVolumeData->CacheSize().y;
-	cacheDepth = g_largeVolumeData->CacheSize().z;
+	g_cacheWidth = g_largeVolumeData->CacheSize().x;
+	g_cacheHeight = g_largeVolumeData->CacheSize().y;
+	g_cacheDepth = g_largeVolumeData->CacheSize().z;
 
 	int blockSize = g_largeVolumeData->BlockSize();
 	ysl::Size3 gpuBlockCacheSize = g_gpuCacheBlockSize * blockSize;  // number of block at every dim
 
 
 
-	repeat = g_largeVolumeData->BoundaryRepeat();
-	blockDataSize = g_largeVolumeData->BlockSize();
-	originalDataWidth = g_largeVolumeData->OriginalDataSize().x;
-	originalDataHeight = g_largeVolumeData->OriginalDataSize().y;
-	originalDataDepth = g_largeVolumeData->OriginalDataSize().z;
-	xBlockCount = g_largeVolumeData->SizeByBlock().x;
-	yBlockCount = g_largeVolumeData->SizeByBlock().y;
-	zBlockCount = g_largeVolumeData->SizeByBlock().z;
+	g_repeat = g_largeVolumeData->BoundaryRepeat();
+	g_blockDataSize = g_largeVolumeData->BlockSize();
+	g_originalDataWidth = g_largeVolumeData->OriginalDataSize().x;
+	g_originalDataHeight = g_largeVolumeData->OriginalDataSize().y;
+	g_originalDataDepth = g_largeVolumeData->OriginalDataSize().z;
+	g_xBlockCount = g_largeVolumeData->SizeByBlock().x;
+	g_yBlockCount = g_largeVolumeData->SizeByBlock().y;
+	g_zBlockCount = g_largeVolumeData->SizeByBlock().z;
 
-	const std::size_t totalBlockCountBytes = std::size_t(xBlockCount) * std::size_t(yBlockCount)*std::size_t(zBlockCount) * sizeof(int);
+	const std::size_t totalBlockCountBytes = std::size_t(g_xBlockCount) * std::size_t(g_yBlockCount)*std::size_t(g_zBlockCount) * sizeof(int);
 
-	std::cout << "pageDirX:" << pageDirX << std::endl;
-	std::cout << "pageDirY:" << pageDirY << std::endl;
-	std::cout << "pageDirZ:" << pageDirZ << std::endl;
-	std::cout << "pageTableX:" << pageTableX << std::endl;
-	std::cout << "pageTableY:" << pageTableY << std::endl;
-	std::cout << "pageTableZ:" << pageTableZ << std::endl;
-	std::cout << "cacheWidth:" << cacheWidth << std::endl;
-	std::cout << "cacheHeight:" << cacheHeight << std::endl;
-	std::cout << "cacheDepth:" << cacheDepth << std::endl;
-	std::cout << "repeat:" << repeat << std::endl;
+	std::cout << "pageDirX:" << g_pageDirX << std::endl;
+	std::cout << "pageDirY:" << g_pageDirY << std::endl;
+	std::cout << "pageDirZ:" << g_pageDirZ << std::endl;
+	std::cout << "pageTableX:" << g_pageTableX << std::endl;
+	std::cout << "pageTableY:" << g_pageTableY << std::endl;
+	std::cout << "pageTableZ:" << g_pageTableZ << std::endl;
+	std::cout << "cacheWidth:" << g_cacheWidth << std::endl;
+	std::cout << "cacheHeight:" << g_cacheHeight << std::endl;
+	std::cout << "cacheDepth:" << g_cacheDepth << std::endl;
+	std::cout << "repeat:" << g_repeat << std::endl;
 	//std::cout << "data size:" << g_largeVolumeData->Width() << std::endl;
-	std::cout << "original data x:" << originalDataWidth << std::endl;
-	std::cout << "original data y:" << originalDataHeight << std::endl;
-	std::cout << "original data z:" << originalDataDepth << std::endl;
+	std::cout << "original data x:" << g_originalDataWidth << std::endl;
+	std::cout << "original data y:" << g_originalDataHeight << std::endl;
+	std::cout << "original data z:" << g_originalDataDepth << std::endl;
 	std::cout << "BlockSize:" << g_largeVolumeData->BlockSize() << std::endl;
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);		// This is important
@@ -657,7 +668,7 @@ void initializeResource()
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::RGBAInteger,
-		OpenGLTexture::UInt32, pageTableX, pageTableY, pageTableZ, g_largeVolumeData->PageTable->Data());
+		OpenGLTexture::UInt32, g_pageTableX, g_pageTableY, g_pageTableZ, g_largeVolumeData->PageTable->Data());
 	// Bind to iimage3D
 	g_texPageTable->Bind();
 	g_texPageTable->BindToDataImage(1, 0, false, 0, OpenGLTexture::Read, OpenGLTexture::RGBA32UI);
@@ -679,21 +690,24 @@ void initializeResource()
 		gpuBlockCacheSize.y,
 		gpuBlockCacheSize.z, nullptr);
 	g_blockPingBuf = std::make_shared<OpenGLBuffer>(OpenGLBuffer::PixelUnpackBuffer, OpenGLBuffer::StreamDraw);
-	g_blockPingBuf->AllocateFor(nullptr, blockDataSize*blockDataSize*blockDataSize * sizeof(char));
+	g_blockPingBuf->AllocateFor(nullptr, g_blockDataSize*g_blockDataSize*g_blockDataSize * sizeof(char));
 	g_blockPingBuf->Unbind();
 	g_blockPongBuf = std::make_shared<OpenGLBuffer>(OpenGLBuffer::PixelUnpackBuffer, OpenGLBuffer::StreamDraw);
-	g_blockPongBuf->AllocateFor(nullptr, blockDataSize*blockDataSize*blockDataSize * sizeof(char));
+	g_blockPongBuf->AllocateFor(nullptr, g_blockDataSize*g_blockDataSize*g_blockDataSize * sizeof(char));
 	g_blockPongBuf->Unbind();
 	GL_ERROR_REPORT;
 
-	g_bufMissedHash = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::DynamicDraw);
+	g_bufMissedHash = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::StreamDraw);
 	g_bufMissedHash->AllocateFor(nullptr, totalBlockCountBytes);
+	GL_ERROR_REPORT;
 	g_bufMissedHash->BindBufferBase(0);
+	//g_cacheHashPtr = (int*)g_bufMissedHash->Map(OpenGLBuffer::WriteOnly);
 
-
-	g_bufMissedTable = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::DynamicDraw);
+	g_bufMissedTable = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::StreamDraw);
 	g_bufMissedTable->AllocateFor(nullptr, missedBlockCapacity);
+	GL_ERROR_REPORT;
 	g_bufMissedTable->BindBufferBase(1);
+	//g_cacheMissTablePtr = (int*)g_bufMissedTable->Map(OpenGLBuffer::WriteOnly);
 
 	g_atomicCounter = std::make_shared<OpenGLBuffer>(OpenGLBuffer::AtomicCounterBuffer,
 		OpenGLBuffer::DynamicCopy);
@@ -706,12 +720,12 @@ void initializeResource()
 	// shader program
 	g_rayCastingShaderProgram.bind();
 	//g_rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit4, *g_texCache);
-	g_rayCastingShaderProgram.setUniformValue("totalPageDirSize", ysl::Vector3i{ pageDirX,pageDirY,pageDirZ });
-	g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ pageTableX,pageTableY,pageTableZ });
-	g_rayCastingShaderProgram.setUniformValue("blockDataSize", ysl::Vector3i{ blockDataSize - 2 * repeat,blockDataSize - 2 * repeat,blockDataSize - 2 * repeat });
-	g_rayCastingShaderProgram.setUniformValue("volumeDataSize", ysl::Vector3i{ originalDataWidth,originalDataDepth,originalDataDepth });
+	g_rayCastingShaderProgram.setUniformValue("totalPageDirSize", ysl::Vector3i{ g_pageDirX,g_pageDirY,g_pageDirZ });
+	g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ g_pageTableX,g_pageTableY,g_pageTableZ });
+	g_rayCastingShaderProgram.setUniformValue("blockDataSize", ysl::Vector3i{ g_blockDataSize - 2 * g_repeat,g_blockDataSize - 2 * g_repeat,g_blockDataSize - 2 * g_repeat });
+	g_rayCastingShaderProgram.setUniformValue("volumeDataSize", ysl::Vector3i{ g_originalDataWidth,g_originalDataDepth,g_originalDataDepth });
 	g_rayCastingShaderProgram.setUniformValue("pageTableBlockEntrySize", ysl::Vector3i{ pageTableBlockEntry ,pageTableBlockEntry ,pageTableBlockEntry });
-	g_rayCastingShaderProgram.setUniformValue("repeatSize", ysl::Vector3i{ repeat,repeat,repeat });
+	g_rayCastingShaderProgram.setUniformValue("repeatSize", ysl::Vector3i{ g_repeat,g_repeat,g_repeat });
 	g_rayCastingShaderProgram.unbind();
 
 	g_texTransferFunction = OpenGLTexture::CreateTexture1D(OpenGLTexture::RGBA32F,
@@ -724,8 +738,8 @@ void initializeResource()
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::RGBA,
 		OpenGLTexture::Float32,
-		initialWidth,
-		initialHeight,
+		g_initialWidth,
+		g_initialHeight,
 		nullptr);
 	g_texEntryPos->BindToDataImage(2, 0, false, 0, OpenGLTexture::ReadAndWrite, OpenGLTexture::RGBA32F);
 
@@ -738,8 +752,8 @@ void initializeResource()
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::RGBA,
 		OpenGLTexture::Float32,
-		initialWidth,
-		initialHeight,
+		g_initialWidth,
+		g_initialHeight,
 		nullptr);
 
 	g_texIntermediateResult = OpenGLTexture::CreateTexture2DRect(OpenGLTexture::RGBA32F,
@@ -749,8 +763,8 @@ void initializeResource()
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::RGBA,
 		OpenGLTexture::Float32,
-		initialWidth,
-		initialHeight,
+		g_initialWidth,
+		g_initialHeight,
 		nullptr);
 
 
@@ -761,8 +775,8 @@ void initializeResource()
 		OpenGLTexture::ClampToEdge,
 		OpenGLTexture::ExternalDepthComponent,
 		OpenGLTexture::Float32,
-		initialWidth,
-		initialHeight,
+		g_initialWidth,
+		g_initialHeight,
 		nullptr);
 
 	
@@ -779,10 +793,9 @@ void initializeResource()
 	initBlockExistsHash();
 	initMissedBlockVector();
 	{
-		ysl::TransferFunction m_tfObject;
-		m_tfObject.read("d:\\scidata\\std_tf1d.TF1D");
-		m_tfObject.FetchData(m_tfData.data(), 256);
-		g_texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256, 0, 0, m_tfData.data());
+		g_tfObject.read("d:\\scidata\\std_tf1d.TF1D");
+		g_tfObject.FetchData(g_tfData.data(), 256);
+		g_texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256, 0, 0, g_tfData.data());
 	}
 
 }
@@ -834,11 +847,11 @@ void renderLoop()
 	//GLsync s;
 
 	g_rayCastingShaderProgram.bind();
-	g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ pageTableX,pageTableY,pageTableZ });
-	g_rayCastingShaderProgram.setUniformValue("blockDataSizeNoRepeat", ysl::Vector3i{ blockDataSize - 2 * repeat,blockDataSize - 2 * repeat,blockDataSize - 2 * repeat });
-	g_rayCastingShaderProgram.setUniformValue("volumeDataSizeNoRepeat", ysl::Vector3i{ originalDataWidth,originalDataDepth,originalDataDepth });
+	g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ g_pageTableX,g_pageTableY,g_pageTableZ });
+	g_rayCastingShaderProgram.setUniformValue("blockDataSizeNoRepeat", ysl::Vector3i{ g_blockDataSize - 2 * g_repeat,g_blockDataSize - 2 * g_repeat,g_blockDataSize - 2 * g_repeat });
+	g_rayCastingShaderProgram.setUniformValue("volumeDataSizeNoRepeat", ysl::Vector3i{ g_originalDataWidth,g_originalDataDepth,g_originalDataDepth });
 	g_rayCastingShaderProgram.setUniformValue("pageTableBlockEntrySize", ysl::Vector3i{ pageTableBlockEntry ,pageTableBlockEntry ,pageTableBlockEntry });
-	g_rayCastingShaderProgram.setUniformValue("repeatOffset", ysl::Vector3i{ repeat,repeat,repeat });
+	g_rayCastingShaderProgram.setUniformValue("repeatOffset", ysl::Vector3i{ g_repeat,g_repeat,g_repeat });
 	g_rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *g_texCache);
 
 	g_rayCastingShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
@@ -857,14 +870,16 @@ void renderLoop()
 //if (halfWay.Length() > 1e-10) halfWay.Normalize();
 //g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
 	g_rayCastingVAO.bind();
-	int maxLoopCount = 0;
-
+	g_renderPassPerFrame = 0;
+	g_missingCacheCountPerFrame = 0;
+	g_uploadBlockCountPerFrame = 0;
+	g_blockUploadMicroSecondsPerFrame = 0;
 	do
 	{
 		initBlockExistsHash();
 		initMissedBlockVector();
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		maxLoopCount++;
+		g_renderPassPerFrame++;
 	} while (CaptureAndHandleCacheMiss());
 
 	//ysl::Log("Render pass per frame:%d.\n", maxLoopCount);
@@ -922,7 +937,7 @@ int main(int argc, char** argv)
 #endif
 
 	std::shared_ptr<GLFWwindow> window{
-		glfwCreateWindow(initialWidth, initialHeight, "Mixed Render Engine", NULL, NULL),
+		glfwCreateWindow(g_initialWidth, g_initialHeight, "Mixed Render Engine", NULL, NULL),
 		[](GLFWwindow*window) {glfwDestroyWindow(window); } };
 
 	glfwMakeContextCurrent(window.get());
@@ -982,7 +997,7 @@ int main(int argc, char** argv)
 
 			std::cout << "fileName:" << fileName;
 
-			ysl::TransferFunction m_tfObject;
+			ysl::ColorInterpulator m_tfObject;
 			m_tfObject.read(fileName);
 			if (!m_tfObject.valid())
 			{
@@ -990,8 +1005,8 @@ int main(int argc, char** argv)
 				return;
 			}
 
-			m_tfObject.FetchData(m_tfData.data(), 256);
-			g_texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256, 0, 0, m_tfData.data());
+			m_tfObject.FetchData(g_tfData.data(), 256);
+			g_texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256, 0, 0, g_tfData.data());
 		});
 	auto showGLInformation = false;
 	app.ConfigCommand("glinfo", [&showGLInformation](const char * cmd)
@@ -1021,9 +1036,10 @@ int main(int argc, char** argv)
 	g_pboPtr[1] = (char*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, blockBytes, flgs);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-	g_data = new char[blockBytes];
-
 	GL_ERROR_REPORT;
+
+
+
 
 	// Main loop
 	while (!glfwWindowShouldClose(window.get()))
@@ -1041,23 +1057,41 @@ int main(int argc, char** argv)
 		ImGui::NewFrame();
 		app.Draw("Welcome Mixed Render Engine", nullptr);
 		//ImGui::End();
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 		static bool lock = true;
+
 		ImGui::Begin("Control Panel");
+		ImGui::Text("Page Table Size:[%d, %d, %d]",g_pageTableX,g_pageTableY,g_pageTableZ);
+		ImGui::Text("Cache Block Count In CPU:[%d, %d, %d]",g_cacheWidth,g_cacheHeight,g_cacheDepth);
+		ImGui::Text("Cache Block Count In GPU:[%d, %d, %d]",g_gpuCacheBlockSize.x,g_gpuCacheBlockSize.y,g_gpuCacheBlockSize.z);
+		ImGui::Text("Cache Block Size:[%d]", g_largeVolumeData->BlockSize());
+		ImGui::Text("Block Border:%d", g_repeat);
+		ImGui::Text("Upload Block Count Per Frame:%d",g_uploadBlockCountPerFrame);
+		ImGui::Text("Missing Cache Block Count Per Frame:%d",g_missingCacheCountPerFrame);
+		ImGui::Text("Rendering pass count per frame:%d",g_renderPassPerFrame);
+		const auto Gbs = double(blockBytes * g_uploadBlockCountPerFrame) / (1 << 30);
+		const auto s = double(g_blockUploadMicroSecondsPerFrame) / 1000000;
+		ImGui::Text("BandWidth:%f Gb/s",Gbs/s);
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
 		ImGui::SliderFloat("step", &step, 0.001, 1.0);
 		ImGui::SliderFloat("ka", &ka, 0.0f, 1.0f);
 		ImGui::SliderFloat("kd", &kd, 0.0f, 1.0f);
 		ImGui::SliderFloat("ks", &ks, 0.0f, 1.0f);
 		ImGui::SliderFloat("shininess", &shininess, 0.0f, 50.f);
+
+
+		// Draw Transfer function widgets
+		ImDrawList * drawList = ImGui::GetWindowDrawList();
+		ImVec2 canvasPos(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y);
+		ImVec2 canvasSize(ImGui::GetContentRegionAvail().x, (std::min)(ImGui::GetContentRegionAvail().y, 255.0f));
+		ImVec2 canvasBottomRight(canvasPos.x + canvasSize.x, canvasPos.y + canvasSize.y);
+		drawList->AddRect(canvasPos,canvasBottomRight,IM_COL32_WHITE);
 		if (ImGui::Button("lock"))
 		{
 			lock = !lock;
 		}
 		ImGui::End();
-
-
-		if (showGLInformation)
-			ShowGLInformation(&showGLInformation);
 
 		// Event handle
 		if (ImGui::IsMousePosValid())

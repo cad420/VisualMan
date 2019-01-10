@@ -2,12 +2,8 @@
 #define VOLUME_H_
 #include <string>
 #include "../memory/blockarray.h"
-
 #include <list>
-#include <unordered_map>
-
 #include "volume_utils.h"
-#include "lineararray.h"
 
 #include "../mathematics/geometry.h"
 #include <mutex>

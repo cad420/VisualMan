@@ -6,4 +6,8 @@ void ShowGLInformation(bool * open);
 
 void ControlPanel(bool * open);
 
+
+
+
+
 #endif
