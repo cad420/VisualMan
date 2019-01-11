@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <functional>
+#include "appearance.h"
 
 class LVDFileTraits
 {
@@ -205,6 +206,10 @@ public:
 					g_zOffset = -m_repeat + zb * step;
 					const int blockIndex = xb + yb * m_blockDimension.x + zb * m_blockDimension.x*m_blockDimension.y;
 					getData(m_lvdBuf.get() + blockIndex * size_t(blockSize)*blockSize*blockSize, m_rawBuf.get(), blockSize, blockSize, blockSize, xb, yb, zb);
+					if(blockIndex % 100 ==0)
+					{
+						ysl::Log("%lf Completion\n", blockIndex % 100);
+					}
 				}
 		return true;
 	}
@@ -357,20 +362,30 @@ namespace ysl
 {
 	class MappingKey
 	{
-		Float m_intensity;
-		RGBASpectrum m_leftColor;
-		RGBASpectrum m_rightColor;
 	public:
-		MappingKey(Float intensity, const RGBASpectrum & lc, const RGBASpectrum & rc) :m_intensity(intensity), m_leftColor(lc), m_rightColor(rc) {}
-		Float Intensity()const { return m_intensity; }
-		RGBASpectrum LeftColor()const { return m_leftColor; }
-		RGBASpectrum RightColor()const { return m_rightColor; }
-		void SetIntensity(Float intensity) { m_intensity = intensity; }
-		void SetLeftColor(const RGBASpectrum & c) { m_leftColor = c; }
-		void SetRightColor(const RGBASpectrum & c) { m_rightColor = c; }
-		void SetLeftAlpha(Float a) { m_leftColor.c[3] = a; }
-		void SetRightAlpha(Float a) { m_rightColor.c[3] = a; }
+		Float intensity;
+		RGBASpectrum leftColor;
+		RGBASpectrum rightColor;
+		MappingKey(Float intensity, const RGBASpectrum & lc, const RGBASpectrum & rc) :intensity(intensity), leftColor(lc), rightColor(rc) {}
+		Float Intensity()const { return intensity; }
+		RGBASpectrum LeftColor()const { return leftColor; }
+		RGBASpectrum RightColor()const { return rightColor; }
+		void SetIntensity(Float intensity) { intensity = intensity; }
+		void SetLeftColor(const RGBASpectrum & c)
+		{
+			const auto a = leftColor.c[3];
+			leftColor = c;
+			leftColor.c[3] = a;
 
+		}
+		void SetRightColor(const RGBASpectrum & c)
+		{
+			const auto a = leftColor.c[3];
+			rightColor = c;
+			leftColor.c[3] = a;
+		}
+		void SetLeftAlpha(Float a) { leftColor.c[3] = a; }
+		void SetRightAlpha(Float a) { rightColor.c[3] = a; }
 	};
 
 	class ColorInterpulator
@@ -392,6 +407,25 @@ namespace ysl
 		{
 			FetchData(reinterpret_cast<RGBASpectrum*>(transferFunction), dimension);
 		}
+		int KeysCount()const
+		{
+			return keys.size();
+		}
+		//const MappingKey & Key()const
+		//{
+		//	
+		//}
+
+		const MappingKey & operator[](int i)const
+		{
+			return keys[i];
+		}
+
+		MappingKey & operator[](int i)
+		{
+			return keys[i];
+		}
+
 	private:
 		bool m_valid;
 	protected:
@@ -405,19 +439,23 @@ namespace ysl
 	{
 	public:
 		using Callback = std::function<void(TransferFunction* tf)>;
+		TransferFunction() = default;
 		TransferFunction(const std::string & fileName);
 		~TransferFunction();
 		void AddMappingKey(const MappingKey & key);
 		void UpdateMappingKey(const Point2f & at, const Point2f & to,const Vector2f & scale = {1.0f,1.0f});
 		void UpdateMappingKey(const Point2f & at, const MappingKey & key,const Vector2f & scale = {1.0f,1.0f});
 		void AddUpdateCallBack(const Callback & func);
+		Point2f KeyPosition(int i, Float sx, Float sy)const;
+		int HitAt(const Point2f & at, const Vector2f & scale);
+		void UpdateMappingKey(int index, const RGBASpectrum& color);
 	private:
 		std::vector<Callback> callbacks;
 		std::function<bool(const MappingKey & m1, const MappingKey & m2)> compareFunc;
 		void Notify();
-
 		static Point2f TransToPos(const MappingKey & key);
 	};
+
 }
 
 

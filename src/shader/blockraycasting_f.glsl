@@ -39,6 +39,11 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
 	vec4 scalar;
 
+	if(samplePos.x >= 1.0 || samplePos.y >= 1.0 || samplePos.z >= 1.0){
+		mapped = true;
+		return vec4(0.0,0.0,0.0,0.0);
+
+	}
 	// address translation
 	ivec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
 	ivec3 voxelCoord=ivec3(samplePos * (volumeDataSizeNoRepeat));
