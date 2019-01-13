@@ -51,8 +51,6 @@ class RawToLVDConverter
 
 	void getData(RawType * dest, const RawType * src, size_t width, size_t height, size_t depth, size_t xb, size_t yb, size_t zb)const
 	{
-
-
 		//#pragma omp parallel for
 
 		// write temp file
@@ -63,7 +61,6 @@ class RawToLVDConverter
 		std::unique_ptr<RawType[]> buf(new RawType[bytes]);
 #endif
 
-
 		for (int z = 0; z < depth; z++)
 			for (int y = 0; y < height; y++)
 				for (int x = 0; x < width; x++)
@@ -71,11 +68,9 @@ class RawToLVDConverter
 					const int gx = x + g_xOffset, gy = y + g_yOffset, gz = z + g_zOffset;
 					const size_t blockIndex = x + y * g_xBlockSize + z * g_xBlockSize*g_yBlockSize;
 
-
 					int blockedGlobalX = x + xb * g_xBlockSize;
 					int blockedGlobalY = y + yb * g_yBlockSize;
 					int blockedGlobalZ = z + zb * g_zBlockSize;
-
 
 					if (gx >= 0 && gx < g_xSize && gy >= 0 && gy < g_ySize && gz >= 0 && gz < g_zSize)
 					{
@@ -85,7 +80,6 @@ class RawToLVDConverter
 #ifdef WRITE_SINGLE_BLOCK
 						buf[blockIndex] = *(src + linearIndex);
 #endif
-
 						//(*m_blockedData)(blockedGlobalX, blockedGlobalY, blockedGlobalZ) = *(src + linearIndex);
 					}
 					else
@@ -94,8 +88,9 @@ class RawToLVDConverter
 						buf[blockIndex] = g_emptyValue;
 #endif
 						//(*m_blockedData)(blockedGlobalX, blockedGlobalY, blockedGlobalZ) = g_emptyValue;
+						//assert((gx>=-2 && gx<0) || (gx >= 60 && gx<62) || (gy >= -2 && gy < 0) || (gy >= 60 && gy < 62) || (gz >= -2 && gz < 0) || (gz >= 60 && gz < 62));
 						///TODO::
-						*(dest + blockIndex) = g_emptyValue;
+						*(dest + blockIndex) = 0;
 					}
 				}
 #ifdef  WRITE_SINGLE_BLOCK
@@ -196,7 +191,7 @@ public:
 	bool convert()
 	{
 		g_emptyValue = 0;
-		const auto step = blockSize - 2 * m_repeat;
+		const auto step = blockSize -2 * m_repeat;
 		for (int zb = 0; zb < m_blockDimension.z; zb++)
 			for (int yb = 0; yb < m_blockDimension.y; yb++)
 				for (int xb = 0; xb < m_blockDimension.x; xb++)

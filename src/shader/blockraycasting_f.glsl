@@ -27,8 +27,6 @@ layout(binding = 0, rgba32i) uniform iimage3D pageDirTexutre;
 layout(binding = 1, rgba32i) uniform iimage3D pageTableTexture;
 layout(binding = 2, rgba32f) uniform image2DRect entryPos;
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
-//layout(binding = 4, offset = 4) uniform atomic_uint atomic_need_to_draw_count;
-
 
 // keywords buffer shows the read-write feature of the buffer.
 layout(std430, binding = 0) buffer HashTable {int blockId[];}hashTable;
@@ -38,20 +36,14 @@ layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
 vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
 	vec4 scalar;
-
-	if(samplePos.x >= 1.0 || samplePos.y >= 1.0 || samplePos.z >= 1.0){
-		mapped = true;
-		return vec4(0.0,0.0,0.0,0.0);
-
-	}
 	// address translation
 	ivec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
-	ivec3 voxelCoord=ivec3(samplePos * (volumeDataSizeNoRepeat));
-	int dataSize = volumeDataSizeNoRepeat.x;
-	ivec3 blockOffset = voxelCoord % blockDataSizeNoRepeat;
+	vec3 voxelCoord=vec3(samplePos * (volumeDataSizeNoRepeat));
+	//int dataSize = volumeDataSizeNoRepeat.x;
+	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
 	if(pageTableEntry.w == 2)		// Unmapped flag
 	{
-		ivec3 blockCoord = voxelCoord/blockDataSizeNoRepeat;
+		ivec3 blockCoord = ivec3(voxelCoord/blockDataSizeNoRepeat);
 		int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
 				+blockCoord.y * totalPageTableSize.x 
 				+blockCoord.x;
@@ -65,7 +57,7 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	}
 	else
 	{
-		vec3 samplePoint = pageTableEntry.xyz + blockOffset + vec3(2.0,2.0,2.0) ;//+ repeatOffset;
+		vec3 samplePoint = pageTableEntry.xyz + blockOffset + (repeatOffset);
 		samplePoint = samplePoint/textureSize(cacheVolume,0);
 		scalar = texture(cacheVolume,samplePoint);
 		mapped = true;
@@ -109,8 +101,11 @@ void main()
 {
 
 	//vec3 rayStart = texture2DRect(texStartPos, textureRectCoord).xyz;
-	vec3 rayStart = imageLoad(entryPos,ivec2(textureRectCoord)).xyz;
-	vec3 rayEnd = texture2DRect(texEndPos, textureRectCoord).xyz;
+	vec3 rayStart = imageLoad(entryPos,ivec2(gl_FragCoord)).xyz;
+	vec3 rayEnd = texture2DRect(texEndPos,ivec2(gl_FragCoord)).xyz;
+
+	//int steps = int(imageLoad(entryPos,ivec2(gl_FragCoord)).w);
+
 	vec3 start2end = rayEnd - rayStart;
 	vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -120,15 +115,19 @@ void main()
 		discard;
 	}
 
-	vec4 color = texture2DRect(texIntermediateResult,textureRectCoord);
+	vec4 color = texture2DRect(texIntermediateResult,ivec2(gl_FragCoord));
 	//vec4 color = vec4(0,0,0,0);
 	//fragColor = color;
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
 	vec3 samplePoint;
+	//int count = 0;
 	for (int i = 0; i < steps; ++i) {
-		samplePoint = rayStart + direction * step * (float(i) + 0.5);
+		samplePoint = rayStart + direction * step * (float(i) +0.5);
+
+		//if(samplePoint.x <=0.01 || samplePoint.y <= 0.01 || samplePoint.z <= 0.01 || samplePoint.x >=0.99 || samplePoint.y >= 0.99 || samplePoint.z >= 0.99)
+		//	continue;
 		//sample a scalar at samplePoint
 		bool mapped;
 		vec4 scalar = virtualVolumeSample(samplePoint,mapped);
@@ -136,11 +135,12 @@ void main()
 		{
 			// If this block is unmaped,
 			// store the intermediate rendering result and the entry position
-			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
+			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0));
 			fragColor = color;
 			discard;
-			//discard;
+			//return;
 		}
+		//count++;
 		//vec4 scalar = texture(texVolume, samplePoint);
 		vec4 sampledColor = texture(texTransfunc, scalar.r);
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);

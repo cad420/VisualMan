@@ -81,11 +81,11 @@ namespace
 	std::vector<ysl::RGBASpectrum> g_tfData{ 256 };
 
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
-	std::string g_lvdFileName = "C:\\data\\s1_2048_2048_2048_0_128.lvd";
-
+	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__120_120_120_2_64.lvd";
+	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__60_60_60_2_64.lvd";
+	std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_64.lvd";
 
 	ysl::Vector3f g_lightDirection;
-
 	float step = 0.001;
 	float ka = 1.0;
 	float ks = 1.0;
@@ -137,7 +137,7 @@ namespace
 
 	std::vector<int> g_posInCache;
 
-	ysl::Size3 g_gpuCacheBlockSize{12,12,12};
+	ysl::Size3 g_gpuCacheBlockSize{4,4,4};
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
 	int * g_cacheHashPtr;
@@ -149,8 +149,6 @@ namespace
 	int * g_atomicCounterPtr;
 
 	//char * g_data;
-
-
 
 	std::unique_ptr<VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>> g_largeVolumeData;
 

@@ -132,14 +132,14 @@ int main(int argc, char *argv[])
 
 	int x, y, z, xc, yc, zc;
 	std::cin >> x >> y >> z;
-	ABCFlowGen(x,y,z);
-	//SimpleBlockGen(x,y,z,2,2,2);
+	//ABCFlowGen(x,y,z);
+	SimpleBlockGen(x,y,z,2,2,2);
 	std::string fileName;
 	std::cin >> fileName;
 	//int x, y, z, repeat;
 	int repeat;
 	std::cin >> x >> y >> z >> repeat;
-	RawToLVDConverter<7> converter(fileName,x,y,z,repeat);
+	RawToLVDConverter<6> converter(fileName,x,y,z,repeat);
 	converter.convert();
 	converter.save(fileName);
 	//LVDTester();
