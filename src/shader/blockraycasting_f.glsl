@@ -12,7 +12,8 @@ uniform float ks;
 uniform vec3 lightdir;
 uniform vec3 halfway;
 in vec2 textureRectCoord;
-out vec4 fragColor;
+
+out vec4 fragColor;			// MRT 0
 
 uniform sampler3D cacheVolume;						// volume block cache
 uniform ivec3 totalPageDirSize;						// page dir texture size
@@ -23,9 +24,10 @@ uniform ivec3 blockDataSizeNoRepeat;				// block data size (no repeat)
 uniform ivec3 repeatOffset;							// repeat boarder size
 
 
-layout(binding = 0, rgba32i) uniform iimage3D pageDirTexutre;
-layout(binding = 1, rgba32i) uniform iimage3D pageTableTexture;
-layout(binding = 2, rgba32f) uniform image2DRect entryPos;
+layout(binding = 0, rgba32i) uniform volatile iimage3D pageDirTexutre;
+layout(binding = 1, rgba32i) uniform volatile iimage3D pageTableTexture;
+layout(binding = 2, rgba32f) uniform volatile image2DRect entryPos;
+layout(binding = 4,rgba32f) uniform volatile image2DRect interResult;
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
 
 // keywords buffer shows the read-write feature of the buffer.
@@ -77,22 +79,17 @@ vec3 PhongShadingEx(vec3 samplePos, vec3 diffuseColor)
 	N.x = (virtualVolumeSample(samplePos+vec3(step,0,0) ,placeHolder).w - virtualVolumeSample(samplePos+vec3(-step,0,0),placeHolder ).w) - 1.0;
 	N.y = (virtualVolumeSample(samplePos+vec3(0,step,0) ,placeHolder).w - virtualVolumeSample(samplePos+vec3(0,-step,0) ,placeHolder).w) - 1.0;
 	N.z = (virtualVolumeSample(samplePos+vec3(0,0,step) ,placeHolder).w - virtualVolumeSample(samplePos+vec3(0,0,-step) ,placeHolder).w) - 1.0;
-
 	N = N * 2.0 - 1.0;
 	N = -normalize(N);
-
 	vec3 L = lightdir;
 	vec3 H = halfway;
-
 	//specularcolor
 	//vec3 H = normalize(V+L);
 	float NdotH = pow(max(dot(N, H), 0.0), shininess);
 	float NdotL = max(dot(N, L), 0.0);
-
 	vec3 ambient = ka * diffuseColor.rgb;
 	vec3 specular = ks * NdotH * vec3(1.0, 1.0, 1.0);
 	vec3 diffuse = kd * NdotL * diffuseColor.rgb;
-
 	shadedValue = specular + diffuse + ambient;
 	return shadedValue;
 }
@@ -103,9 +100,7 @@ void main()
 	//vec3 rayStart = texture2DRect(texStartPos, textureRectCoord).xyz;
 	vec3 rayStart = imageLoad(entryPos,ivec2(gl_FragCoord)).xyz;
 	vec3 rayEnd = texture2DRect(texEndPos,ivec2(gl_FragCoord)).xyz;
-
 	//int steps = int(imageLoad(entryPos,ivec2(gl_FragCoord)).w);
-
 	vec3 start2end = rayEnd - rayStart;
 	vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -114,20 +109,25 @@ void main()
 		fragColor = bg; // Background Colors
 		discard;
 	}
-
-	vec4 color = texture2DRect(texIntermediateResult,ivec2(gl_FragCoord));
+	//vec4 color = texture2DRect(texIntermediateResult,ivec2(gl_FragCoord));
+	vec4 color = imageLoad(interResult,ivec2(gl_FragCoord));
 	//vec4 color = vec4(0,0,0,0);
 	//fragColor = color;
+	int count = 0;
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
-	vec3 samplePoint;
-	//int count = 0;
-	for (int i = 0; i < steps; ++i) {
-		samplePoint = rayStart + direction * step * (float(i) +0.5);
-
-		//if(samplePoint.x <=0.01 || samplePoint.y <= 0.01 || samplePoint.z <= 0.01 || samplePoint.x >=0.99 || samplePoint.y >= 0.99 || samplePoint.z >= 0.99)
-		//	continue;
+	vec3 samplePoint = rayStart;
+	for (int i = 0; i < steps; ++i) 
+	{
+		samplePoint = rayStart + direction * step * (float(i) + 0.5);
+		if(samplePoint.x <= 0.01 ||
+		samplePoint.y <= 0.01 ||
+		samplePoint.z <= 0.01 || 
+		samplePoint.x >= 0.99 ||
+		samplePoint.y >= 0.99 || 
+		samplePoint.z >= 0.99)
+		continue;
 		//sample a scalar at samplePoint
 		bool mapped;
 		vec4 scalar = virtualVolumeSample(samplePoint,mapped);
@@ -135,13 +135,13 @@ void main()
 		{
 			// If this block is unmaped,
 			// store the intermediate rendering result and the entry position
-			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0));
-			fragColor = color;
+			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
+			// Render to intermediate result texture
+			//fragColor = color;
+			imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
 			discard;
-			//return;
 		}
 		//count++;
-		//vec4 scalar = texture(texVolume, samplePoint);
 		vec4 sampledColor = texture(texTransfunc, scalar.r);
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)

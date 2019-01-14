@@ -197,6 +197,12 @@ namespace ysl
 		setUniformSampler(location, texUnit, texture.Target(), texture.NativeTextureId());
 	}
 
+	void ShaderProgram::bindFragDataLocation(int location, int colorNumber, const char* name)
+	{
+		glBindFragDataLocation(m_program, colorNumber, name);
+		GL_ERROR_REPORT;
+	}
+
 	void ShaderProgram::setUniformValue(int location, bool value)
 	{
 		glUniform1i(location, int(value));

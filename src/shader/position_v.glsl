@@ -6,7 +6,8 @@ out vec4 texCoord;
 uniform mat4 projMatrix;
 uniform mat4 worldMatrix;
 uniform mat4 viewMatrix;
-void main() {
+void main() 
+{
 	texCoord = vec4(tex, 1.0);
 	gl_Position = projMatrix * viewMatrix * worldMatrix * vertex;
 }

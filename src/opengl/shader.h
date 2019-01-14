@@ -37,12 +37,13 @@ namespace ysl
 		void setUniformValue(int location, const ysl::RGBSpectrum & rgb);
 		void setUniformValue(int location, const ysl::Vector3f & fvec3);
 		void setUniformValue(int location, const ysl::Point3f & fpos3);
-
 		void setUniformValue(int location, const ysl::Vector3i & ivec3);
 		void setUniformValue(int location, const ysl::Vector2f & fvec2);
 		void setUniformValue(int location, const ysl::Vector2i & ivec2);
 		void setUniformSampler(int location, OpenGLTexture::TextureUnit texUnit, OpenGLTexture::TextureTarget target, unsigned int textureId);
 		void setUniformSampler(int location, OpenGLTexture::TextureUnit texUnit,const OpenGLTexture & texture);
+		void bindFragDataLocation(int location, int colorNumber, const char * name);
+
 
 		void setUniformValue(const char * name, bool value);
 		void setUniformValue(const char * name, int value);
@@ -71,6 +72,7 @@ namespace ysl
 		void setUniformValue(const std::string & name, const ysl::Vector2i & ivec2);
 		void setUniformSampler(const std::string & name, OpenGLTexture::TextureUnit texUnit, OpenGLTexture::TextureTarget target, unsigned int textureId);
 		void setUniformSampler(const std::string & name, OpenGLTexture::TextureUnit texUnit,const OpenGLTexture & texture);
+
 
 
 	private:

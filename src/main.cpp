@@ -80,10 +80,12 @@ namespace
 	ysl::TransferFunction g_tfObject;
 	std::vector<ysl::RGBASpectrum> g_tfData{ 256 };
 
-	//std::string g_lvdFileName = "D:\\scidata\\abc\\s1_512_512_512.lvd";
+	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__128_128_128_2_64.lvd";
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__120_120_120_2_64.lvd";
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__60_60_60_2_64.lvd";
-	std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_64.lvd";
+	//std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_64.lvd";
+	std::string g_lvdFileName = "C:\\data\\s1_3968_3968_3968_2_128.lvd";
+
 
 	ysl::Vector3f g_lightDirection;
 	float step = 0.001;
@@ -137,7 +139,7 @@ namespace
 
 	std::vector<int> g_posInCache;
 
-	ysl::Size3 g_gpuCacheBlockSize{4,4,4};
+	ysl::Size3 g_gpuCacheBlockSize{12,12,12};
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
 	int * g_cacheHashPtr;
@@ -187,13 +189,13 @@ void checkFrambufferStatus();
 
 bool compareTexture(const unsigned char* buf1, const unsigned char* buf2, std::size_t bytes)
 {
-	for(auto i = 0ULL ; i < bytes;i++)
+	for (auto i = 0ULL; i < bytes; i++)
 	{
 		if (*(buf1 + i) != *(buf2 + i))
 		{
 			return false;
 		}
-			
+
 	}
 	return true;
 }
@@ -265,7 +267,6 @@ void keyboardPressEvent(KeyboardEvent)
 
 void initBlockExistsHash()
 {
-
 	const auto ptr = g_bufMissedHash->Map(OpenGLBuffer::WriteOnly);
 	memset(ptr, 0, g_bufMissedHash->Size());
 	g_bufMissedHash->Unmap();
@@ -277,8 +278,6 @@ void initMissedBlockVector()
 	const auto ptr = g_bufMissedTable->Map(OpenGLBuffer::WriteOnly);
 	memset(ptr, 0, g_bufMissedTable->Size());
 	g_bufMissedTable->Unmap();
-
-
 	g_atomicCounter->BindBufferBase(3);
 	unsigned int zero = 0;
 	g_atomicCounter->AllocateFor(&zero, sizeof(unsigned int));
@@ -370,15 +369,15 @@ bool CaptureAndHandleCacheMiss()
 
 	// initialize second pbo 
 	// Ping-Pong PBO Transfer
-	
-	long long accessPageTableTime = 0, 
-	readDataTime = 0, 
-	copyDataTime = 0, 
-	dmaTime = 0,
-	totalTime = 0,
-	bindTime = 0 ;
 
-	
+	long long accessPageTableTime = 0,
+		readDataTime = 0,
+		copyDataTime = 0,
+		dmaTime = 0,
+		totalTime = 0,
+		bindTime = 0;
+
+
 
 	std::shared_ptr<OpenGLBuffer> pbo[2] = { g_blockPingBuf,g_blockPongBuf };
 	auto curPBO = 0;
@@ -391,11 +390,11 @@ bool CaptureAndHandleCacheMiss()
 	memcpy(pp, dd, blockBytes);
 	pbo[1 - curPBO]->Unmap();		// copy data to pbo
 	pbo[1 - curPBO]->Bind();
-	
+
 	g_texCache->Bind();
 
 	g_timer.begin();
-	for (;i < missedBlocks-1;)
+	for (; i < missedBlocks - 1;)
 	{
 		pbo[1 - curPBO]->Bind();
 		g_texCache->SetSubData(OpenGLTexture::RED,
@@ -766,7 +765,7 @@ void initializeResource()
 		g_initialWidth,
 		g_initialHeight,
 		nullptr);
-
+	g_texIntermediateResult->BindToDataImage(4, 0, false, 0, OpenGLTexture::ReadAndWrite, OpenGLTexture::RGBA32F);
 
 	g_texDepth = OpenGLTexture::CreateTexture2DRect(OpenGLTexture::InternalDepthComponent,
 		OpenGLTexture::Linear,
@@ -778,8 +777,6 @@ void initializeResource()
 		g_initialWidth,
 		g_initialHeight,
 		nullptr);
-
-	
 
 	g_framebuffer = std::shared_ptr<OpenGLFramebufferObject>(new OpenGLFramebufferObject);
 	g_framebuffer->Bind();
@@ -797,10 +794,7 @@ void initializeResource()
 		g_tfObject.FetchData(g_tfData.data(), 256);
 		g_texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256, 0, 0, g_tfData.data());
 	}
-
 }
-
-
 
 void renderLoop()
 {
@@ -809,27 +803,17 @@ void renderLoop()
 	// clear intermediate result
 	g_framebuffer->Bind();
 	g_proxyVAO.bind();
-	g_clearIntermediateProgram.bind();
-	g_clearIntermediateProgram.setUniformValue("projMatrix", g_projMatrix.Matrix());
-	g_clearIntermediateProgram.setUniformValue("worldMatrix", ysl::Transform{}.Matrix());
-	g_clearIntermediateProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
-	glDrawBuffer(GL_COLOR_ATTACHMENT2);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-	GL_ERROR_REPORT;
 	// Cull face
 	g_positionShaderProgram.bind();
 	g_positionShaderProgram.setUniformValue("projMatrix", g_projMatrix.Matrix());
 	g_positionShaderProgram.setUniformValue("worldMatrix", ysl::Transform{}.Matrix());
 	g_positionShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
-	GL_ERROR_REPORT;
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);					// Draw into attachment 0
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	GL_ERROR_REPORT;
 	// Draw frontGL_ERROR_REPORT;
 	glDepthFunc(GL_LESS);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-	GL_ERROR_REPORT;
 
 	// Draw Back
 	glDrawBuffer(GL_COLOR_ATTACHMENT1);					// Draw into attachment 1
@@ -837,14 +821,25 @@ void renderLoop()
 	glDepthFunc(GL_GREATER);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	glDepthFunc(GL_LESS);
+
+	// Clear
+	g_clearIntermediateProgram.bind();
+	g_clearIntermediateProgram.setUniformValue("projMatrix", g_projMatrix.Matrix());
+	g_clearIntermediateProgram.setUniformValue("worldMatrix", ysl::Transform{}.Matrix());
+	g_clearIntermediateProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
+	//g_clearIntermediateProgram.setUniformSampler("texStartPos", OpenGLTexture::TextureUnit0, *g_texEntryPos);
+	//g_clearIntermediateProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, *g_texExitPos);
+
+	glDrawBuffer(GL_COLOR_ATTACHMENT2);
+	//g_framebuffer->Unbind();
+
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
 	// loop begin
-	glDrawBuffer(GL_COLOR_ATTACHMENT2);		// Draw intermediate result into attachment 2
 	glDepthFunc(GL_LESS);
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
-
-	// init gpu hash table and missed cache block id
-	//GLsync s;
 
 	g_rayCastingShaderProgram.bind();
 	g_rayCastingShaderProgram.setUniformValue("totalPageTableSize", ysl::Vector3i{ g_pageTableX,g_pageTableY,g_pageTableZ });
@@ -853,7 +848,6 @@ void renderLoop()
 	g_rayCastingShaderProgram.setUniformValue("pageTableBlockEntrySize", ysl::Vector3i{ pageTableBlockEntry ,pageTableBlockEntry ,pageTableBlockEntry });
 	g_rayCastingShaderProgram.setUniformValue("repeatOffset", ysl::Vector3i{ g_repeat,g_repeat,g_repeat });
 	g_rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *g_texCache);
-
 	g_rayCastingShaderProgram.setUniformValue("viewMatrix", g_camera.view().Matrix());
 	g_rayCastingShaderProgram.setUniformValue("orthoMatrix", g_orthoMatrix.Matrix());
 	g_rayCastingShaderProgram.setUniformSampler("texStartPos", OpenGLTexture::TextureUnit0, *g_texEntryPos);
@@ -866,9 +860,10 @@ void renderLoop()
 	g_rayCastingShaderProgram.setUniformValue("kd", kd);
 	g_rayCastingShaderProgram.setUniformValue("shininess", shininess);
 	g_rayCastingShaderProgram.setUniformValue("lightdir", g_lightDirection);
+
 	//auto halfWay = g_lightDirection - g_camera.front();
-//if (halfWay.Length() > 1e-10) halfWay.Normalize();
-//g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
+	//if (halfWay.Length() > 1e-10) halfWay.Normalize();
+	//g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
 	g_rayCastingVAO.bind();
 	g_renderPassPerFrame = 0;
 	g_missingCacheCountPerFrame = 0;
@@ -876,6 +871,7 @@ void renderLoop()
 	g_blockUploadMicroSecondsPerFrame = 0;
 	do
 	{
+		glFinish();
 		initBlockExistsHash();
 		initMissedBlockVector();
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -1018,21 +1014,21 @@ int main(int argc, char** argv)
 
 	initializeResource();
 
-	int blockBytes = g_largeVolumeData->BlockSize() *  g_largeVolumeData->BlockSize() *  g_largeVolumeData->BlockSize()*sizeof(char);
+	int blockBytes = g_largeVolumeData->BlockSize() *  g_largeVolumeData->BlockSize() *  g_largeVolumeData->BlockSize() * sizeof(char);
 
-	GLbitfield flgs = GL_MAP_PERSISTENT_BIT |GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT;
-	
+	GLbitfield flgs = GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT;
+
 	glGenBuffers(1, &g_pingPBO);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pingPBO);
-	glBufferStorage(GL_PIXEL_UNPACK_BUFFER, blockBytes, nullptr,flgs);
-	g_pboPtr[0] = (char*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER,0,blockBytes,flgs);
+	glBufferStorage(GL_PIXEL_UNPACK_BUFFER, blockBytes, nullptr, flgs);
+	g_pboPtr[0] = (char*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, blockBytes, flgs);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 	GL_ERROR_REPORT;
 
 
 	glGenBuffers(1, &g_pongPBO);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pongPBO);
-	glBufferStorage(GL_PIXEL_UNPACK_BUFFER, blockBytes, nullptr,flgs);
+	glBufferStorage(GL_PIXEL_UNPACK_BUFFER, blockBytes, nullptr, flgs);
 	g_pboPtr[1] = (char*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, blockBytes, flgs);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
@@ -1046,7 +1042,7 @@ int main(int argc, char** argv)
 	ysl::TransferFunction::Callback cb = [](ysl::TransferFunction * tf)
 	{
 		tf->FetchData(g_tfData.data(), 256);
-		g_texTransferFunction->SetData(OpenGLTexture::RGBA32F, 
+		g_texTransferFunction->SetData(OpenGLTexture::RGBA32F,
 			OpenGLTexture::RGBA,
 			OpenGLTexture::Float32,
 			256, 0, 0, g_tfData.data());
@@ -1073,17 +1069,17 @@ int main(int argc, char** argv)
 		static bool lock = true;
 
 		ImGui::Begin("Control Panel");
-		ImGui::Text("Page Table Size:[%d, %d, %d]",g_pageTableX,g_pageTableY,g_pageTableZ);
-		ImGui::Text("Cache Block Count In CPU:[%d, %d, %d]",g_cacheWidth,g_cacheHeight,g_cacheDepth);
-		ImGui::Text("Cache Block Count In GPU:[%d, %d, %d]",g_gpuCacheBlockSize.x,g_gpuCacheBlockSize.y,g_gpuCacheBlockSize.z);
+		ImGui::Text("Page Table Size:[%d, %d, %d]", g_pageTableX, g_pageTableY, g_pageTableZ);
+		ImGui::Text("Cache Block Count In CPU:[%d, %d, %d]", g_cacheWidth, g_cacheHeight, g_cacheDepth);
+		ImGui::Text("Cache Block Count In GPU:[%d, %d, %d]", g_gpuCacheBlockSize.x, g_gpuCacheBlockSize.y, g_gpuCacheBlockSize.z);
 		ImGui::Text("Cache Block Size:[%d]", g_largeVolumeData->BlockSize());
 		ImGui::Text("Block Border:%d", g_repeat);
-		ImGui::Text("Upload Block Count Per Frame:%d",g_uploadBlockCountPerFrame);
-		ImGui::Text("Missing Cache Block Count Per Frame:%d",g_missingCacheCountPerFrame);
-		ImGui::Text("Rendering pass count per frame:%d",g_renderPassPerFrame);
+		ImGui::Text("Upload Block Count Per Frame:%d", g_uploadBlockCountPerFrame);
+		ImGui::Text("Missing Cache Block Count Per Frame:%d", g_missingCacheCountPerFrame);
+		ImGui::Text("Rendering pass count per frame:%d", g_renderPassPerFrame);
 		const auto Gbs = double(blockBytes * g_uploadBlockCountPerFrame) / (1 << 30);
 		const auto s = double(g_blockUploadMicroSecondsPerFrame) / 1000000;
-		ImGui::Text("BandWidth:%f Gb/s",Gbs/s);
+		ImGui::Text("BandWidth:%f Gb/s", Gbs / s);
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 		ImGui::SliderFloat("step", &step, 0.001, 1.0);
@@ -1099,7 +1095,7 @@ int main(int argc, char** argv)
 		ImVec2 canvasPos(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y);
 		ImVec2 canvasSize(ImGui::GetContentRegionAvail().x, (std::min)(ImGui::GetContentRegionAvail().y, 255.0f));
 		ImVec2 canvasBottomRight(canvasPos.x + canvasSize.x, canvasPos.y + canvasSize.y);
-		drawList->AddRect(canvasPos,canvasBottomRight,IM_COL32_WHITE);
+		drawList->AddRect(canvasPos, canvasBottomRight, IM_COL32_WHITE);
 
 		ImGui::InvisibleButton("canvas", canvasSize);
 		auto & io = ImGui::GetIO();
@@ -1107,61 +1103,61 @@ int main(int argc, char** argv)
 		static int selectedKeyIndex = -1;
 
 		// Handle click and drag event
-		if(ImGui::IsItemHovered())
+		if (ImGui::IsItemHovered())
 		{
 			auto xpos = ImGui::GetIO().MousePos.x, ypos = ImGui::GetIO().MousePos.y;
-			if(ImGui::GetIO().MouseClicked[0])
+			if (ImGui::GetIO().MouseClicked[0])
 			{
 				lastXPos = io.MousePos.x - canvasPos.x;
 				lastYPos = -io.MousePos.y + canvasPos.y + canvasSize.y;
 
 				std::cout << lastXPos << " " << lastYPos << std::endl;
 			}
-			if(ImGui::GetIO().MouseDown[0])		//
+			if (ImGui::GetIO().MouseDown[0])		//
 			{
-				g_tfObject.UpdateMappingKey({ lastXPos,lastYPos }, 
+				g_tfObject.UpdateMappingKey({ lastXPos,lastYPos },
 					{ io.MousePos.x - canvasPos.x,-io.MousePos.y + canvasPos.y + canvasSize.y },
 					{ canvasSize.x,canvasSize.y });
 
 				lastXPos = io.MousePos.x - canvasPos.x;
 				lastYPos = -io.MousePos.y + canvasPos.y + canvasSize.y;
 			}
-			if(ImGui::GetIO().MouseDoubleClicked[0])		// left button double click
+			if (ImGui::GetIO().MouseDoubleClicked[0])		// left button double click
 			{
 				const auto x = io.MousePos.x - canvasPos.x;
 				const auto y = -io.MousePos.y + canvasPos.y + canvasSize.y;
 				selectedKeyIndex = g_tfObject.HitAt({ x,y }, { canvasSize.x,canvasSize.y });
-				if(selectedKeyIndex != -1)
-				spec = g_tfObject[selectedKeyIndex].leftColor;
+				if (selectedKeyIndex != -1)
+					spec = g_tfObject[selectedKeyIndex].leftColor;
 			}
-			
+
 		}
 		// Draw The transfer function 
 		const auto keyCount = g_tfObject.KeysCount();
-		if(keyCount != 0)
+		if (keyCount != 0)
 		{
 			ysl::Float sx = canvasSize.x, sy = canvasSize.y;
-			auto p = g_tfObject.KeyPosition(0,sx,sy);
-			ImVec2 first{p.x,p.y};
-			p = g_tfObject.KeyPosition(keyCount-1,sx,sy);
-			ImVec2 last {p.x,p.y};
+			auto p = g_tfObject.KeyPosition(0, sx, sy);
+			ImVec2 first{ p.x,p.y };
+			p = g_tfObject.KeyPosition(keyCount - 1, sx, sy);
+			ImVec2 last{ p.x,p.y };
 
 			ysl::Float x = canvasPos.x, y = canvasPos.y;
 			// Draw the left-most horizontal line
-			drawList->AddLine({ x,y+sy-first.y }, {first.x+x,sy-first.y+y}, IM_COL32_WHITE, 2);
+			drawList->AddLine({ x,y + sy - first.y }, { first.x + x,sy - first.y + y }, IM_COL32_WHITE, 2);
 
 			for (auto i = 0; i < keyCount - 1; i++)
 			{
-				auto pos1 = g_tfObject.KeyPosition(i,sx,sy);
+				auto pos1 = g_tfObject.KeyPosition(i, sx, sy);
 				auto pos2 = g_tfObject.KeyPosition(i + 1, sx, sy);
 				const auto c1 = g_tfObject[i].leftColor;
-				const auto c2 = g_tfObject[i+1].leftColor;
-				drawList->AddCircleFilled({ x + pos1.x,y+ sy-pos1.y }, 5.f, IM_COL32(c1[0]*255,c1[1]*255,c1[2]*255,c1[3]*255));
-				drawList->AddCircleFilled({ x+ pos2.x,y + sy-pos2.y }, 5.f, IM_COL32(c2[0] * 255, c2[1] * 255, c2[2] * 255, c2[3] * 255));
-				drawList->AddLine({x+ pos1.x ,y+sy-pos1.y }, { x+pos2.x,y+sy-pos2.y }, IM_COL32_WHITE, 2);
+				const auto c2 = g_tfObject[i + 1].leftColor;
+				drawList->AddCircleFilled({ x + pos1.x,y + sy - pos1.y }, 5.f, IM_COL32(c1[0] * 255, c1[1] * 255, c1[2] * 255, c1[3] * 255));
+				drawList->AddCircleFilled({ x + pos2.x,y + sy - pos2.y }, 5.f, IM_COL32(c2[0] * 255, c2[1] * 255, c2[2] * 255, c2[3] * 255));
+				drawList->AddLine({ x + pos1.x ,y + sy - pos1.y }, { x + pos2.x,y + sy - pos2.y }, IM_COL32_WHITE, 2);
 			}
 			//Draw The right-most horizontal line
-			drawList->AddLine({last.x+x,sy-last.y+y}, { x + canvasSize.x,y + sy-last.y }, IM_COL32_WHITE, 2);
+			drawList->AddLine({ last.x + x,sy - last.y + y }, { x + canvasSize.x,y + sy - last.y }, IM_COL32_WHITE, 2);
 		}
 		/*TransferFunction Widget End*/
 		ImGui::SetCursorScreenPos(ImVec2(canvasPos.x, canvasPos.y + canvasSize.y + 10));
@@ -1169,11 +1165,11 @@ int main(int argc, char** argv)
 
 		if (selectedKeyIndex != -1)
 		{
-			if(ImGui::ColorEdit4("Edit Color", (reinterpret_cast<float*>(&spec)), ImGuiColorEditFlags_Float));
+			if (ImGui::ColorEdit4("Edit Color", (reinterpret_cast<float*>(&spec)), ImGuiColorEditFlags_Float));
 			g_tfObject.UpdateMappingKey(selectedKeyIndex, spec);
 		}
 
-		
+
 		if (ImGui::Button("lock"))
 		{
 			lock = !lock;

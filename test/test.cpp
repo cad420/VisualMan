@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 	RawToLVDConverter<6> converter(fileName,x,y,z,repeat);
 	converter.convert();
 	converter.save(fileName);
-	//LVDTester();
+	LVDTester();
 
 	//system("pause");
 	return 0;
