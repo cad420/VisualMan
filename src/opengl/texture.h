@@ -88,9 +88,9 @@ public:
 		WrapMode sWrapMode = WrapMode::ClampToEdge,
 		WrapMode tWrapMode = WrapMode::ClampToEdge);
 
-	DISABLE_COPY(OpenGLTexture)
+	DISABLE_COPY(OpenGLTexture);
 
-	DISABLE_MOVE(OpenGLTexture)
+	DISABLE_MOVE(OpenGLTexture);
 
 	void Bind();
 	void Unbind();

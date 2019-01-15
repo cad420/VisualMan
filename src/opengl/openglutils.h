@@ -2,6 +2,7 @@
 #define _OPENGLUTILS_H_
 
 #include "../utility/error.h"
+#include "GL/gl3w.h"
 //#include "../../lib/gl3w/GL/glcorearb.h"
 
 inline

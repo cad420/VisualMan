@@ -9,6 +9,10 @@
 #include "error.h"
 #include "timer.h"
 
+#include "../lib/3rdparty/rapidjson/document.h"
+#include "../src/application/application.h"
+#include "../src/application/openglapplication.h"
+
 
 int LVDTester()
 {
@@ -127,24 +131,34 @@ int LVDTester()
 	return 0;
 }
 
+
+int jsonTest()
+{
+	return 0;
+}
+
+
+
 int main(int argc, char *argv[])
 {
 
-	int x, y, z, xc, yc, zc;
-	std::cin >> x >> y >> z;
-	//ABCFlowGen(x,y,z);
-	SimpleBlockGen(x,y,z,2,2,2);
-	std::string fileName;
-	std::cin >> fileName;
-	//int x, y, z, repeat;
-	int repeat;
-	std::cin >> x >> y >> z >> repeat;
-	RawToLVDConverter<6> converter(fileName,x,y,z,repeat);
-	converter.convert();
-	converter.save(fileName);
-	LVDTester();
+	//int x, y, z, xc, yc, zc;
+	//std::cin >> x >> y >> z;
+	////ABCFlowGen(x,y,z);
+	//SimpleBlockGen(x,y,z,2,2,2);
+	//std::string fileName;
+	//std::cin >> fileName;
+	////int x, y, z, repeat;
+	//int repeat;
+	//std::cin >> x >> y >> z >> repeat;
+	//RawToLVDConverter<6> converter(fileName,x,y,z,repeat);
+	//converter.convert();
+	//converter.save(fileName);
+	//LVDTester();
 
-	//system("pause");
+
+
+	
 	return 0;
 
 }

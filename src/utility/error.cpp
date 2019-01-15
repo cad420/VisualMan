@@ -33,6 +33,7 @@ namespace ysl
 		va_start(args, fmt);
 		_internal_msg_process_(fmt, args, "Error");
 		va_end(args);
+		exit(1);
 	}
 
 	void Warning(const char* fmt, ...)

@@ -32,7 +32,7 @@ include_directories(${_GLFW_INCLUDE_DIR} ${_GL3W_INCLUDE_DIR})
 #---------------------------------------------------
 find_package(OpenGL REQUIRED)
 if(OPENGL_FOUND)
-	message(STATUS "Opengl Found:" ${OPENGL_INCLUDE_DIR} ${OPENGL_LIBRARIES})
+	message(STATUS "OpenGL Found:" ${OPENGL_INCLUDE_DIR} ${OPENGL_LIBRARIES})
 	include_directories(${OPENGL_INCLUDE_DIR})			#optional
 endif(OPENGL_FOUND)
 
@@ -92,18 +92,17 @@ aux_source_directory("src/render" RENDER_SRC_LIST)
 aux_source_directory("src/gui" MYGUI_SRC_LIST)
 aux_source_directory("src/cameras" CAM_SRC_LIST)
 aux_source_directory("src/opengl" OPENGL_SRC_LIST)
-
-message(STATUS "opengl ${OPENGL_SRC_LIST}")
+aux_source_directory("src/gui" MYGUI_SRC_LIST)
 
 
 set(GL3W_LIST "lib/gl3w/GL/gl3w.c")
-
 
 
 #---------------------------------------------------
 # Test Module
 #---------------------------------------------------
 
+# Gernerator Example
 aux_source_directory("test" TEST_SRC_LIST)
 include_directories("test")
 message(STATUS "Test source list: ${TEST_SRC_LIST}")
@@ -118,12 +117,33 @@ ${VOLUME_SRC_LIST}
 ${UTILS_SRC_LIST}
 ${MATH_SRC_LIST})
 
+# Application Test
+
+aux_source_directory("src/application" APP_SRC_LIST)
+
+add_executable("ApplicationTest" 
+"test/application_test.cpp"
+${CORE_SRC_LIST}
+${UTILS_SRC_LIST}
+${MYGUI_SRC_LIST} 
+${GUI_SRC_LIST}
+${VOLUME_SRC_LIST} 
+${MEM_SRC_LIST} 
+${MATH_SRC_LIST}
+${GL3W_LIST}
+${OPENGL_SRC_LIST}
+${APP_SRC_LIST})
+target_link_libraries(ApplicationTest glfw ${OPENGL_LIBRARIES})
+
+
 #---------------------------------------------------
 # MRE Module
 #---------------------------------------------------
 
 
-add_executable(${PROJECT_NAME} ${SRC_LIST} 
+add_executable(
+${PROJECT_NAME} 
+${SRC_LIST} 
 ${GL3W_LIST} 
 ${GUI_SRC_LIST} 
 ${MYGUI_SRC_LIST} 
@@ -131,7 +151,9 @@ ${VOLUME_SRC_LIST}
 ${MEM_SRC_LIST} 
 ${CAM_SRC_LIST} 
 ${MATH_SRC_LIST}
-${OPENGL_SRC_LIST} ${UTILS_SRC_LIST} ${CORE_SRC_LIST})
+${OPENGL_SRC_LIST} 
+${UTILS_SRC_LIST} 
+${CORE_SRC_LIST})
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
 set_target_properties(${PROJECT_NAME} PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})

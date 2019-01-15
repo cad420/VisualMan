@@ -60,14 +60,14 @@ namespace ysl
 						li = li * cosTheta / vis.distanceSquare()*intensity;
 						//qDebug() <<" "<<"Light1:"<< li;
 						if (m != nullptr) {
-							RGBASpectrum ks = m->m_ks;
-							RGBASpectrum ka = m->m_ka;
-							Float ns = m->m_ns;
-							RGBASpectrum kd = m->m_kd;
-							Vector3f v = -ray.direction().Normalized();
-							Vector3f n = isect.normal().Normalized();
-							Vector3f l = wi.Normalized();
-							Vector3f h = (v + l).Normalized();
+							auto ks = m->m_ks;
+							auto ka = m->m_ka;
+							const auto ns = m->m_ns;
+							auto kd = m->m_kd;
+							auto v = -ray.direction().Normalized();
+							auto n = isect.normal().Normalized();
+							auto l = wi.Normalized();
+							auto h = (v + l).Normalized();
 							switch (m->m_type)
 							{
 							case MaterialType::Mirror:

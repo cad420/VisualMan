@@ -1,6 +1,0 @@
-
-#ifndef _TRANSFERFUNCTION_H_
-#define _TRANSFERFUNCTION_H_
-
-
-#endif

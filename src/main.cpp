@@ -30,6 +30,7 @@
 #include "GL/glcorearb.h"
 #include "framebuffer.h"
 #include "timer.h"
+#include "gui/transferfunctionwidget.h"
 
 
 //const static int g_proxyGeometryVertexIndices[] = { 1, 3, 7, 5, 0, 4, 6, 2, 2, 6, 7, 3, 0, 1, 5, 4, 4, 5, 7, 6, 0, 2, 3, 1 };
@@ -83,8 +84,8 @@ namespace
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__128_128_128_2_64.lvd";
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__120_120_120_2_64.lvd";
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__60_60_60_2_64.lvd";
-	//std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_64.lvd";
-	std::string g_lvdFileName = "C:\\data\\s1_3968_3968_3968_2_128.lvd";
+	std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_64.lvd";
+	//std::string g_lvdFileName = "C:\\data\\s1_3968_3968_3968_2_128.lvd";
 
 
 	ysl::Vector3f g_lightDirection;
@@ -139,7 +140,7 @@ namespace
 
 	std::vector<int> g_posInCache;
 
-	ysl::Size3 g_gpuCacheBlockSize{12,12,12};
+	ysl::Size3 g_gpuCacheBlockSize{4,4,4};
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
 	int * g_cacheHashPtr;
@@ -195,7 +196,6 @@ bool compareTexture(const unsigned char* buf1, const unsigned char* buf2, std::s
 		{
 			return false;
 		}
-
 	}
 	return true;
 }
@@ -932,11 +932,11 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-	std::shared_ptr<GLFWwindow> window{
-		glfwCreateWindow(g_initialWidth, g_initialHeight, "Mixed Render Engine", NULL, NULL),
-		[](GLFWwindow*window) {glfwDestroyWindow(window); } };
+	GLFWwindow * window =
+		glfwCreateWindow(g_initialWidth, g_initialHeight, "Mixed Render Engine", NULL, NULL);
+		
 
-	glfwMakeContextCurrent(window.get());
+	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1); // Enable vsync
 
 	gl3wInit();
@@ -948,18 +948,14 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
-	int x = -1;
-
 	// Setup Dear ImGui binding
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO & io = ImGui::GetIO();
-	(void)io;
 
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
-	ImGui_ImplGlfw_InitForOpenGL(window.get(), true);
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
 	// Setup style
@@ -971,15 +967,11 @@ int main(int argc, char** argv)
 	bool show_another_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	//bool show_my_first_imgui_window = true;
-
-
-	// 'Global' state
-
 	///![1] console 
 	TinyConsole app;
 	// Config Commands
 
-
+	ysl::imgui::TransferFunctionWidget TFWidget("D:\\scidata\\std_tf1d.TF1D");
 	app.ConfigCommand("load_data", [](const char * cmd)
 		{
 		});
@@ -1035,8 +1027,8 @@ int main(int argc, char** argv)
 	GL_ERROR_REPORT;
 
 
-	float lastXPos, lastYPos;
-	ysl::RGBASpectrum spec;
+	//float lastXPos, lastYPos;
+	//ysl::RGBASpectrum spec;
 	// Transfer Function Initialization
 
 	ysl::TransferFunction::Callback cb = [](ysl::TransferFunction * tf)
@@ -1049,8 +1041,12 @@ int main(int argc, char** argv)
 	};
 	g_tfObject.AddUpdateCallBack(cb);
 
+	TFWidget.AddUpdateCallBack(cb);
+
+	auto & io = ImGui::GetIO();
+
 	// Main loop
-	while (!glfwWindowShouldClose(window.get()))
+	while (!glfwWindowShouldClose(window))
 	{
 		// Poll and handle events (inputs, window resize, etc.)
 		// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -1063,6 +1059,7 @@ int main(int argc, char** argv)
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
 		//app.Draw("Welcome Mixed Render Engine", nullptr);
 		//ImGui::End();
 		//ImGui::ShowDemoWindow();
@@ -1091,90 +1088,92 @@ int main(int argc, char** argv)
 		/* TransferFunction Widget Begin*/
 
 		// Draw Transfer function widgets
-		ImDrawList * drawList = ImGui::GetWindowDrawList();
-		ImVec2 canvasPos(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y);
-		ImVec2 canvasSize(ImGui::GetContentRegionAvail().x, (std::min)(ImGui::GetContentRegionAvail().y, 255.0f));
-		ImVec2 canvasBottomRight(canvasPos.x + canvasSize.x, canvasPos.y + canvasSize.y);
-		drawList->AddRect(canvasPos, canvasBottomRight, IM_COL32_WHITE);
+		//ImDrawList * drawList = ImGui::GetWindowDrawList();
+		//ImVec2 canvasPos(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y);
+		//ImVec2 canvasSize(ImGui::GetContentRegionAvail().x, (std::min)(ImGui::GetContentRegionAvail().y, 255.0f));
+		//ImVec2 canvasBottomRight(canvasPos.x + canvasSize.x, canvasPos.y + canvasSize.y);
+		//drawList->AddRect(canvasPos, canvasBottomRight, IM_COL32_WHITE);
 
-		ImGui::InvisibleButton("canvas", canvasSize);
-		auto & io = ImGui::GetIO();
+		//ImGui::InvisibleButton("canvas", canvasSize);
+		//auto & io = ImGui::GetIO();
 
-		static int selectedKeyIndex = -1;
+		//static int selectedKeyIndex = -1;
 
-		// Handle click and drag event
-		if (ImGui::IsItemHovered())
-		{
-			auto xpos = ImGui::GetIO().MousePos.x, ypos = ImGui::GetIO().MousePos.y;
-			if (ImGui::GetIO().MouseClicked[0])
-			{
-				lastXPos = io.MousePos.x - canvasPos.x;
-				lastYPos = -io.MousePos.y + canvasPos.y + canvasSize.y;
+		//// Handle click and drag event
+		//if (ImGui::IsItemHovered())
+		//{
+		//	auto xpos = ImGui::GetIO().MousePos.x, ypos = ImGui::GetIO().MousePos.y;
+		//	if (ImGui::GetIO().MouseClicked[0])
+		//	{
+		//		lastXPos = io.MousePos.x - canvasPos.x;
+		//		lastYPos = -io.MousePos.y + canvasPos.y + canvasSize.y;
 
-				std::cout << lastXPos << " " << lastYPos << std::endl;
-			}
-			if (ImGui::GetIO().MouseDown[0])		//
-			{
-				g_tfObject.UpdateMappingKey({ lastXPos,lastYPos },
-					{ io.MousePos.x - canvasPos.x,-io.MousePos.y + canvasPos.y + canvasSize.y },
-					{ canvasSize.x,canvasSize.y });
+		//		std::cout << lastXPos << " " << lastYPos << std::endl;
+		//	}
+		//	if (ImGui::GetIO().MouseDown[0])		//
+		//	{
+		//		g_tfObject.UpdateMappingKey({ lastXPos,lastYPos },
+		//			{ io.MousePos.x - canvasPos.x,-io.MousePos.y + canvasPos.y + canvasSize.y },
+		//			{ canvasSize.x,canvasSize.y });
 
-				lastXPos = io.MousePos.x - canvasPos.x;
-				lastYPos = -io.MousePos.y + canvasPos.y + canvasSize.y;
-			}
-			if (ImGui::GetIO().MouseDoubleClicked[0])		// left button double click
-			{
-				const auto x = io.MousePos.x - canvasPos.x;
-				const auto y = -io.MousePos.y + canvasPos.y + canvasSize.y;
-				selectedKeyIndex = g_tfObject.HitAt({ x,y }, { canvasSize.x,canvasSize.y });
-				if (selectedKeyIndex != -1)
-					spec = g_tfObject[selectedKeyIndex].leftColor;
-			}
+		//		lastXPos = io.MousePos.x - canvasPos.x;
+		//		lastYPos = -io.MousePos.y + canvasPos.y + canvasSize.y;
+		//	}
+		//	if (ImGui::GetIO().MouseDoubleClicked[0])		// left button double click
+		//	{
+		//		const auto x = io.MousePos.x - canvasPos.x;
+		//		const auto y = -io.MousePos.y + canvasPos.y + canvasSize.y;
+		//		selectedKeyIndex = g_tfObject.HitAt({ x,y }, { canvasSize.x,canvasSize.y });
+		//		if (selectedKeyIndex != -1)
+		//			spec = g_tfObject[selectedKeyIndex].leftColor;
+		//	}
 
-		}
-		// Draw The transfer function 
-		const auto keyCount = g_tfObject.KeysCount();
-		if (keyCount != 0)
-		{
-			ysl::Float sx = canvasSize.x, sy = canvasSize.y;
-			auto p = g_tfObject.KeyPosition(0, sx, sy);
-			ImVec2 first{ p.x,p.y };
-			p = g_tfObject.KeyPosition(keyCount - 1, sx, sy);
-			ImVec2 last{ p.x,p.y };
+		//}
+		//// Draw The transfer function 
+		//const auto keyCount = g_tfObject.KeysCount();
+		//if (keyCount != 0)
+		//{
+		//	ysl::Float sx = canvasSize.x, sy = canvasSize.y;
+		//	auto p = g_tfObject.KeyPosition(0, sx, sy);
+		//	ImVec2 first{ p.x,p.y };
+		//	p = g_tfObject.KeyPosition(keyCount - 1, sx, sy);
+		//	ImVec2 last{ p.x,p.y };
 
-			ysl::Float x = canvasPos.x, y = canvasPos.y;
-			// Draw the left-most horizontal line
-			drawList->AddLine({ x,y + sy - first.y }, { first.x + x,sy - first.y + y }, IM_COL32_WHITE, 2);
+		//	ysl::Float x = canvasPos.x, y = canvasPos.y;
+		//	// Draw the left-most horizontal line
+		//	drawList->AddLine({ x,y + sy - first.y }, { first.x + x,sy - first.y + y }, IM_COL32_WHITE, 2);
 
-			for (auto i = 0; i < keyCount - 1; i++)
-			{
-				auto pos1 = g_tfObject.KeyPosition(i, sx, sy);
-				auto pos2 = g_tfObject.KeyPosition(i + 1, sx, sy);
-				const auto c1 = g_tfObject[i].leftColor;
-				const auto c2 = g_tfObject[i + 1].leftColor;
-				drawList->AddCircleFilled({ x + pos1.x,y + sy - pos1.y }, 5.f, IM_COL32(c1[0] * 255, c1[1] * 255, c1[2] * 255, c1[3] * 255));
-				drawList->AddCircleFilled({ x + pos2.x,y + sy - pos2.y }, 5.f, IM_COL32(c2[0] * 255, c2[1] * 255, c2[2] * 255, c2[3] * 255));
-				drawList->AddLine({ x + pos1.x ,y + sy - pos1.y }, { x + pos2.x,y + sy - pos2.y }, IM_COL32_WHITE, 2);
-			}
-			//Draw The right-most horizontal line
-			drawList->AddLine({ last.x + x,sy - last.y + y }, { x + canvasSize.x,y + sy - last.y }, IM_COL32_WHITE, 2);
-		}
-		/*TransferFunction Widget End*/
-		ImGui::SetCursorScreenPos(ImVec2(canvasPos.x, canvasPos.y + canvasSize.y + 10));
-
-
-		if (selectedKeyIndex != -1)
-		{
-			if (ImGui::ColorEdit4("Edit Color", (reinterpret_cast<float*>(&spec)), ImGuiColorEditFlags_Float));
-			g_tfObject.UpdateMappingKey(selectedKeyIndex, spec);
-		}
+		//	for (auto i = 0; i < keyCount - 1; i++)
+		//	{
+		//		auto pos1 = g_tfObject.KeyPosition(i, sx, sy);
+		//		auto pos2 = g_tfObject.KeyPosition(i + 1, sx, sy);
+		//		const auto c1 = g_tfObject[i].leftColor;
+		//		const auto c2 = g_tfObject[i + 1].leftColor;
+		//		drawList->AddCircleFilled({ x + pos1.x,y + sy - pos1.y }, 5.f, IM_COL32(c1[0] * 255, c1[1] * 255, c1[2] * 255, c1[3] * 255));
+		//		drawList->AddCircleFilled({ x + pos2.x,y + sy - pos2.y }, 5.f, IM_COL32(c2[0] * 255, c2[1] * 255, c2[2] * 255, c2[3] * 255));
+		//		drawList->AddLine({ x + pos1.x ,y + sy - pos1.y }, { x + pos2.x,y + sy - pos2.y }, IM_COL32_WHITE, 2);
+		//	}
+		//	//Draw The right-most horizontal line
+		//	drawList->AddLine({ last.x + x,sy - last.y + y }, { x + canvasSize.x,y + sy - last.y }, IM_COL32_WHITE, 2);
+		//}
+		///*TransferFunction Widget End*/
+		//ImGui::SetCursorScreenPos(ImVec2(canvasPos.x, canvasPos.y + canvasSize.y + 10));
 
 
-		if (ImGui::Button("lock"))
-		{
-			lock = !lock;
-		}
-		ImGui::End();
+		//if (selectedKeyIndex != -1)
+		//{
+		//	if (ImGui::ColorEdit4("Edit Color", (reinterpret_cast<float*>(&spec)), ImGuiColorEditFlags_Float));
+		//	g_tfObject.UpdateMappingKey(selectedKeyIndex, spec);
+		//}
+
+
+		//if (ImGui::Button("lock"))
+		//{
+		//	lock = !lock;
+		//}
+		//ImGui::End();
+
+		TFWidget.Draw();
 
 		// Event handle
 		if (ImGui::IsMousePosValid())
@@ -1256,8 +1255,8 @@ int main(int argc, char** argv)
 
 		ImGui::Render();
 		int display_w, display_h;
-		glfwMakeContextCurrent(window.get());
-		glfwGetFramebufferSize(window.get(), &display_w, &display_h);
+		glfwMakeContextCurrent(window);
+		glfwGetFramebufferSize(window, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -1266,8 +1265,9 @@ int main(int argc, char** argv)
 		renderLoop();
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		glfwMakeContextCurrent(window.get());
-		glfwSwapBuffers(window.get());
+
+		glfwMakeContextCurrent(window);
+		glfwSwapBuffers(window);
 	}
 
 
@@ -1278,12 +1278,8 @@ int main(int argc, char** argv)
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
-	//glfwDestroyWindow(window);
-
-
+	glfwDestroyWindow(window);
 	glfwTerminate();
-
-	system("pause");
 
 	return 0;
 }

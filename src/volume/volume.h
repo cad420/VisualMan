@@ -33,7 +33,7 @@ struct GlobalBlockAbstractIndex
 
 class LargeVolumeCache:public LVDReader
 {
-	static constexpr int nLogBlockSize = 7;		//
+	static constexpr int nLogBlockSize = 6;		//
 
 	static constexpr ysl::Size3 cacheBlockSize{1<<nLogBlockSize,1<<nLogBlockSize,1<<nLogBlockSize};
 	static constexpr ysl::Size3 cacheDim{32,32,32};

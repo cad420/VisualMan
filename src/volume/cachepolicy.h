@@ -4,8 +4,8 @@
 #include <list>
 #include <unordered_map>
 
-#define DISABLE_COPY(Class) \
-	Class(const Class &)
+//#define DISABLE_COPY(Class) \
+//	Class(const Class &)
 
 //class CachePolicy
 //{
