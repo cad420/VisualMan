@@ -4,6 +4,8 @@
 #include "../utility/error.h"
 #include "../lib/gl3w/GL/gl3w.h"
 
+#include "eventhandler.h"
+
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -14,11 +16,74 @@ namespace ysl
 {
 	namespace app
 	{
-		OpenGLApplication::OpenGLApplication(int argc, char** argv, int w, int h) :
+
+		void MouseEventCheck(MouseEvent * e,const char * name)
+		{
+			std::string button;
+			if (e->m_buttons & MouseEvent::LeftButton)
+				button += "LeftButton ";
+			if (e->m_buttons & MouseEvent::RightButton)
+				button += "RightButton ";
+			Log("%s [%d, %d]: Button:%s\n",name, e->m_pos.x, e->m_pos.y, button.c_str());
+		}
+
+		void glfwCursorPosCallback(GLFWwindow* window, double xpos, double ypos)
+		{
+			const auto app = App(GLFWApplication);
+
+			assert(app->window == window);
+			MouseEvent e({int(xpos),int(ypos)}, 0);
+			if (app->mouseLeftButtonPressed)
+				e.m_buttons |= MouseEvent::LeftButton;
+			if (app->mouseRightButtonPressed)
+				e.m_buttons |= MouseEvent::RightButton;
+			if (e.m_buttons)
+				app->MouseMoveEvent(&e);
+		}
+
+		void glfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+		{
+			const auto app = App(GLFWApplication);
+			assert(app->window == window);
+			double xpos, ypos;
+			glfwGetCursorPos(window, &xpos, &ypos);
+			MouseEvent e{ { int(xpos),int(ypos) }, 0 };
+			if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+			{
+				app->mouseRightButtonPressed = true;
+				e.m_buttons |= MouseEvent::RightButton;
+			}
+			if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+			{
+				app->mouseRightButtonPressed = false;
+				e.m_buttons |= MouseEvent::RightButton;
+			}
+			if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+			{
+				app->mouseLeftButtonPressed = true;
+				e.m_buttons |= MouseEvent::LeftButton;
+			}
+			if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+			{
+				app->mouseLeftButtonPressed = false;
+				e.m_buttons |= MouseEvent::LeftButton;
+			}
+			if(e.buttons())
+			{
+				if (action == GLFW_PRESS)
+					app->MousePressEvent(&e);
+				else if (action == GLFW_RELEASE)
+					app->MouseReleaseEvent(&e);
+			}
+
+		}
+		GLFWApplication::GLFWApplication(int argc, char** argv, int w, int h) :
 			Application(argc, argv),
 			width(w),
 			height(h),
-			window(nullptr)
+			window(nullptr),
+			mouseRightButtonPressed(false),
+			mouseLeftButtonPressed(false)
 		{
 			clearColor[0] = 0.45f;
 			clearColor[1] = 0.55f;
@@ -26,11 +91,12 @@ namespace ysl
 			clearColor[3] = 1.00f;
 		}
 
-		void OpenGLApplication::SetClearColor(float *color[4])
+		void GLFWApplication::SetClearColor(float *color[4])
 		{
 			memcpy(clearColor, color, sizeof(color));
 		}
-		int OpenGLApplication::Exec()
+
+		int GLFWApplication::Exec()
 		{
 
 			InitOpenGLContext();
@@ -38,17 +104,16 @@ namespace ysl
 			InitializeOpenGLResources();
 			while (!glfwWindowShouldClose(window))
 			{
-				glfwPollEvents();
+				
 				int display_w, display_h;
 				glfwMakeContextCurrent(window);
 				glfwGetFramebufferSize(window, &display_w, &display_h);
 				glViewport(0, 0, display_w, display_h);
 				glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
 				glClear(GL_COLOR_BUFFER_BIT);
-
-
-
 				RenderLoop();
+
+				glfwPollEvents();
 				glfwSwapBuffers(window);
 			}
 
@@ -56,7 +121,7 @@ namespace ysl
 			return 0;
 		}
 
-		void OpenGLApplication::InitOpenGLContext()
+		void GLFWApplication::InitOpenGLContext()
 		{
 			glfwSetErrorCallback(glfw_error_callback);
 			if (!glfwInit())
@@ -78,27 +143,32 @@ namespace ysl
 			{
 				Error("OpenGL 4.4 or higher is needed.");
 			}
+			// Add Input callback
+			//auto f = std::bind(glfwCursorPosCallback,this);
+			glfwSetCursorPosCallback(window,glfwCursorPosCallback);
+			glfwSetMouseButtonCallback(window, glfwMouseButtonCallback);
+
 		}
-		void OpenGLApplication::DestroyOpenGLContext()
+		void GLFWApplication::DestroyOpenGLContext()
 		{
 			glfwDestroyWindow(window);
 			glfwTerminate();
 		}
 
-		//void OpenGLApplication::MousePressEvent(MouseEvent* e)
-		//{
+		void GLFWApplication::MousePressEvent(MouseEvent* e)
+		{
+			MouseEventCheck(e, "MousePressEvent");
+		}
 
-		//}
+		void GLFWApplication::MouseReleaseEvent(MouseEvent* e)
+		{
+			MouseEventCheck(e, "MouseReleaseEvent");
+		}
 
-		//void OpenGLApplication::MouseReleaseEvent(MouseEvent* e)
-		//{
-
-		//}
-
-		//void OpenGLApplication::MouseMoveEvent(MouseEvent* e)
-		//{
-
-		//}
+		void GLFWApplication::MouseMoveEvent(MouseEvent* e)
+		{
+			MouseEventCheck(e, "MouseMoveEvent");
+		}
 	}
 	
 }

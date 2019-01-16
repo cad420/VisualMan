@@ -6,34 +6,48 @@
 #include <memory>
 #include "../opengl/framebuffer.h"
 
+//#ifdef App
+//#undef App
+//#endif
+//
+//#define App (static_cast<GLFWApplication*>(Application::Instance()))
+
 namespace ysl
 {
 	namespace app
 	{
-		class OpenGLApplication :public Application
+		class GLFWApplication :public Application
 		{
+
 		public:
-			OpenGLApplication(int argc, char ** argv, int w, int h);
-			DISABLE_COPY(OpenGLApplication);
-			DISABLE_MOVE(OpenGLApplication);
+			DISABLE_COPY(GLFWApplication);
+			DISABLE_MOVE(GLFWApplication);
+
+			GLFWApplication(int argc, char ** argv, int w, int h);
 			void SetClearColor(float * color[4]);
-			~OpenGLApplication() = default;
+			~GLFWApplication() = default;
 			int Exec() override;
 		protected:
-
 			virtual void RenderLoop() = 0;
 			virtual void InitializeOpenGLResources() = 0;
+
 			void InitOpenGLContext();
 			void DestroyOpenGLContext();
 
-			//virtual void MousePressEvent(MouseEvent* e) override;
-			//virtual void MouseReleaseEvent(MouseEvent* e) override;
-			//virtual void MouseMoveEvent(MouseEvent* e) override;
+			void MousePressEvent(MouseEvent* e) override;
+			void MouseReleaseEvent(MouseEvent* e) override;
+			void MouseMoveEvent(MouseEvent* e) override;
 
 			GLFWwindow * window;
 			int width;
 			int height;
+			bool mouseRightButtonPressed;
+			bool mouseLeftButtonPressed;
 			float clearColor[4];
+
+		private:
+			friend void glfwCursorPosCallback(GLFWwindow* window, double xpos, double ypos);
+			friend void glfwMouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 		};
 	}
 

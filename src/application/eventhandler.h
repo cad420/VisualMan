@@ -21,6 +21,7 @@ public:
 	int buttons()const { return m_buttons; }
 };
 
+
 class KeyboardEvent :public Event
 {
 public:
@@ -29,6 +30,8 @@ public:
 	int key()const { return m_key; }
 };
 
+
+
 class ResizeEvent :public Event
 {
 public:
@@ -36,5 +39,6 @@ public:
 	ResizeEvent(const ysl::Vector2i & size) :m_size(size) {}
 	const ysl::Vector2i & size()const { return m_size; }
 };
+
 
 #endif

@@ -16,7 +16,7 @@
 #include <thread>
 
 #include "gui/TinyConsole.h"
-#include "gui/eventhandler.h"
+
 #include "utility/cmdline.h"
 #include "volume/volume_utils.h"
 #include "volume/volume.h"
@@ -31,6 +31,7 @@
 #include "framebuffer.h"
 #include "timer.h"
 #include "gui/transferfunctionwidget.h"
+#include "application/eventhandler.h"
 
 
 //const static int g_proxyGeometryVertexIndices[] = { 1, 3, 7, 5, 0, 4, 6, 2, 2, 6, 7, 3, 0, 1, 5, 4, 4, 5, 7, 6, 0, 2, 3, 1 };
@@ -955,7 +956,8 @@ int main(int argc, char** argv)
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplGlfw_InitForOpenGL(window, false);
+
 	ImGui_ImplOpenGL3_Init();
 
 	// Setup style
@@ -1063,7 +1065,7 @@ int main(int argc, char** argv)
 		//app.Draw("Welcome Mixed Render Engine", nullptr);
 		//ImGui::End();
 		//ImGui::ShowDemoWindow();
-		static bool lock = true;
+		//static bool lock = true;
 
 		ImGui::Begin("Control Panel");
 		ImGui::Text("Page Table Size:[%d, %d, %d]", g_pageTableX, g_pageTableY, g_pageTableZ);
@@ -1203,7 +1205,7 @@ int main(int argc, char** argv)
 		MouseEvent moveEvent({ 0,0 }, 0);
 		for (auto i = 0; i < IM_ARRAYSIZE(io.MouseDown); ++i)
 		{
-			if (io.MouseDownDuration[i] > 0.0f && !ImGui::IsMouseHoveringAnyWindow() && !lock)
+			if (io.MouseDownDuration[i] > 0.0f && !ImGui::IsMouseHoveringAnyWindow())
 			{
 				if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
 				{

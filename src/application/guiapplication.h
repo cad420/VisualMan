@@ -11,19 +11,18 @@ namespace ysl
 {
 	namespace app
 	{
-		class GuiApplication : public OpenGLApplication
+		class ImGuiApplication : public GLFWApplication
 		{
 		public:
-			GuiApplication(int argc, char ** argv, int w, int h);
-			DISABLE_COPY(GuiApplication);
-			DISABLE_MOVE(GuiApplication);
+			ImGuiApplication(int argc, char ** argv, int w, int h);
+			DISABLE_COPY(ImGuiApplication);
+			DISABLE_MOVE(ImGuiApplication);
 			void AddWidget(const std::shared_ptr<imgui::ImGuiInterface> & widget);
 			int Exec() override;
-			~GuiApplication() = default;
+			~ImGuiApplication() = default;
 		private:
 			std::vector<std::shared_ptr<imgui::ImGuiInterface>> widgets;
 		};
-
 	}
 }
 

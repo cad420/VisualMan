@@ -23,7 +23,6 @@ namespace ysl
 		std::string msg;
 		msg += type;
 		msg = formatToString(format, args);
-
 		fprintf(stderr, "%s\n", msg.c_str());
 	}
 
@@ -33,7 +32,7 @@ namespace ysl
 		va_start(args, fmt);
 		_internal_msg_process_(fmt, args, "Error");
 		va_end(args);
-		exit(1);
+		abort();
 	}
 
 	void Warning(const char* fmt, ...)

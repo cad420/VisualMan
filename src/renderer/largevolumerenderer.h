@@ -18,7 +18,7 @@ namespace ysl
 {
 	namespace app
 	{
-		class LargeVolumeRenderApplication:public GuiApplication
+		class LargeVolumeRenderApplication:public ImGuiApplication
 		{
 		public:
 			LargeVolumeRenderApplication(int argc, char ** argv, int w, int h);

@@ -18,10 +18,12 @@ namespace ysl
 			if (!app)
 				app = this;
 			else
+			{
 				Error("Application has been created\n");
+			}
 		}
 
-		Application * Application::App()
+		Application * Application::Instance()
 		{
 			return app;
 		}

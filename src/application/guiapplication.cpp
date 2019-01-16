@@ -5,36 +5,35 @@
 #include "../../imgui/imgui_impl_glfw.h"
 #include "../../imgui/imgui_impl_opengl3.h"
 #include "GL/gl3w.h"
+#include "error.h"
 
 namespace ysl
 {
 	namespace app
 	{
-		GuiApplication::GuiApplication(int argc, char** argv, int w, int h) :
-			OpenGLApplication(argc, argv, w, h)
+		ImGuiApplication::ImGuiApplication(int argc, char** argv, int w, int h) :
+			GLFWApplication(argc, argv, w, h)
 		{
 
 		}
 
-		void GuiApplication::AddWidget(const std::shared_ptr<imgui::ImGuiInterface>& widget)
+		void ImGuiApplication::AddWidget(const std::shared_ptr<imgui::ImGuiInterface>& widget)
 		{
 			widgets.push_back(widget);
 		}
 
-		int GuiApplication::Exec()
+		int ImGuiApplication::Exec()
 		{
 			InitOpenGLContext();
 
-			glfwMakeContextCurrent(window);
-
 			IMGUI_CHECKVERSION();
 			ImGui::CreateContext();
-
-			ImGui_ImplGlfw_InitForOpenGL(window, true);
+			ImGui_ImplGlfw_InitForOpenGL(window, false);  // Use our default GLFW callbacks
 			ImGui_ImplOpenGL3_Init();
-
 			// Setup style
-			ImGui::StyleColorsDark();
+			//ImGui::StyleColorsDark();
+			//ImGui::StyleColorsLight();
+			ImGui::StyleColorsClassic();
 			InitializeOpenGLResources();
 			while (!glfwWindowShouldClose(window))
 			{
@@ -62,5 +61,6 @@ namespace ysl
 			DestroyOpenGLContext();
 			return 0;
 		}
+
 	}
 }
