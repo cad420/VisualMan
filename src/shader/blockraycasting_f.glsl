@@ -102,7 +102,8 @@ void main()
 	vec3 rayEnd = texture2DRect(texEndPos,ivec2(gl_FragCoord)).xyz;
 	//int steps = int(imageLoad(entryPos,ivec2(gl_FragCoord)).w);
 	vec3 start2end = rayEnd - rayStart;
-	vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
+	//vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
+	vec4 bg = vec4(1.f, 1.f, 1.f, 1.00f);
 
 	if (start2end.x ==0.0 && start2end.y ==0.0 && start2end.z == 0.0) 
 	{

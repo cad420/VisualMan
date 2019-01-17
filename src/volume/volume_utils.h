@@ -90,7 +90,7 @@ class RawToLVDConverter
 						//(*m_blockedData)(blockedGlobalX, blockedGlobalY, blockedGlobalZ) = g_emptyValue;
 						//assert((gx>=-2 && gx<0) || (gx >= 60 && gx<62) || (gy >= -2 && gy < 0) || (gy >= 60 && gy < 62) || (gz >= -2 && gz < 0) || (gz >= 60 && gz < 62));
 						///TODO::
-						*(dest + blockIndex) = 0;
+						*(dest + blockIndex) = g_emptyValue;
 					}
 				}
 #ifdef  WRITE_SINGLE_BLOCK
@@ -203,7 +203,7 @@ public:
 					getData(m_lvdBuf.get() + blockIndex * size_t(blockSize)*blockSize*blockSize, m_rawBuf.get(), blockSize, blockSize, blockSize, xb, yb, zb);
 					if(blockIndex % 100 ==0)
 					{
-						ysl::Log("%lf Completion\n", blockIndex % 100);
+						ysl::Log("%d block Completion\n", blockIndex);
 					}
 				}
 		return true;

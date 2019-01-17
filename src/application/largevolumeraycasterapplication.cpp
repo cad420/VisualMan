@@ -37,10 +37,8 @@ namespace ysl
 		{
 			camera = FocusCamera{ Point3f{0.f,0.f,5.f} };
 			tfData.resize(256);
-
-			gpuCacheBlockSize = Size3{ 4,4,4 };
+			gpuCacheBlockSize = Size3{8,8,8};
 			g_initialWidth = 800, g_initialHeight = 600;
-
 			step = 0.001;
 			ka = 1.0;
 			ks = 1.0;
@@ -116,23 +114,6 @@ namespace ysl
 
 			g_blockBytes = BlockSize()*BlockSize()*BlockSize() * sizeof(char);
 
-			/*GLbitfield flgs = GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT;
-
-			glGenBuffers(1, &g_pingPBO);
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pingPBO);
-			glBufferStorage(GL_PIXEL_UNPACK_BUFFER, g_blockBytes, nullptr, flgs);
-			g_pboPtr[0] = (char*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, g_blockBytes, flgs);
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-			GL_ERROR_REPORT;
-
-
-			glGenBuffers(1, &g_pongPBO);
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, g_pongPBO);
-			glBufferStorage(GL_PIXEL_UNPACK_BUFFER, g_blockBytes, nullptr, flgs);
-			g_pboPtr[1] = (char*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, g_blockBytes, flgs);
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);*/
-
-			//GL_ERROR_REPORT;
 
 			TransferFunction::Callback cb = [this](TransferFunction * tf)
 			{

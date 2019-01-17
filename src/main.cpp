@@ -84,9 +84,11 @@ namespace
 
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__128_128_128_2_64.lvd";
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__120_120_120_2_64.lvd";
-	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__60_60_60_2_64.lvd";
-	std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_64.lvd";
-	//std::string g_lvdFileName = "C:\\data\\s1_3968_3968_3968_2_128.lvd";
+	//std::string g_lvdFileName = "D:\\scidata\\abc\\s1_480_480_480_2_64.lvd";
+	//std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_64.lvd";
+	//std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_128.lvd";
+	//std::string g_lvdFileName = "C:\\data\\s1_1984_1984_1984_2_128.lvd";
+	std::string g_lvdFileName = "C:\\data\\s1_3968_3968_3968_2_128.lvd";
 
 
 	ysl::Vector3f g_lightDirection;
@@ -141,7 +143,7 @@ namespace
 
 	std::vector<int> g_posInCache;
 
-	ysl::Size3 g_gpuCacheBlockSize{4,4,4};
+	ysl::Size3 g_gpuCacheBlockSize{11,11,11};
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
 	int * g_cacheHashPtr;
@@ -178,7 +180,7 @@ namespace
 	int g_yBlockCount;
 	int g_zBlockCount;
 
-	int g_initialWidth = 800, g_initialHeight = 600;
+	int g_initialWidth = 1280, g_initialHeight = 960;
 
 	int g_blockUploadMicroSecondsPerFrame;
 	int g_uploadBlockCountPerFrame;
@@ -921,7 +923,7 @@ static void glfw_error_callback(int error, const char* description)
 //
 //
 
-int main1(int argc, char** argv)
+int main(int argc, char** argv)
 {
 	// Setup window
 	glfwSetErrorCallback(glfw_error_callback);
@@ -963,13 +965,15 @@ int main1(int argc, char** argv)
 	ImGui_ImplOpenGL3_Init();
 
 	// Setup style
-	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsDark();
+	ImGui::StyleColorsClassic();
 	//ImGui::StyleColorsClassic();
 
 
 	bool show_demo_window = true;
 	bool show_another_window = false;
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	//ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	ImVec4 clear_color = ImVec4(1.f, 1.f, 1.f, 1.00f);
 	//bool show_my_first_imgui_window = true;
 	///![1] console 
 	TinyConsole app;
@@ -1176,7 +1180,7 @@ int main1(int argc, char** argv)
 		//	lock = !lock;
 		//}
 		ImGui::End();
-
+		app.Draw("Console", nullptr);
 		TFWidget.Draw();
 
 		// Event handle
@@ -1287,9 +1291,8 @@ int main1(int argc, char** argv)
 	return 0;
 }
 
-
-int main(int argc,char ** argv)
-{
-	return ysl::app::LargeVolumeRayCaster(argc, argv, 800, 600, "C:\\data\\s1_480_480_480_2_64.lvd").Exec();
-}
-
+//
+//int main(int argc, char ** argv)
+//{
+//	return ysl::app::LargeVolumeRayCaster(argc, argv, 800, 600, "C:\\data\\s1_480_480_480_2_64.lvd").Exec();
+//}

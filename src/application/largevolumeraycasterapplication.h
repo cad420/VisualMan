@@ -69,11 +69,11 @@ namespace ysl
 			std::vector<ysl::RGBASpectrum> tfData;
 			ysl::Vector3f lightDirection;
 
-			float step = 0.001;
-			float ka = 1.0;
-			float ks = 1.0;
-			float kd = 1.0;
-			float shininess = 50.0f;
+			float step;
+			float ka;
+			float ks;
+			float kd;
+			float shininess;
 
 			static constexpr int pageTableBlockEntry = 16;
 			Timer g_timer;
@@ -88,6 +88,7 @@ namespace ysl
 			std::shared_ptr<OpenGLTexture> texExitPos;
 			std::shared_ptr<OpenGLTexture> texDepth;
 			std::shared_ptr<OpenGLTexture> texIntermediateResult;
+
 			std::shared_ptr<OpenGLBuffer> proxyEBO;
 			std::shared_ptr<OpenGLBuffer> proxyVBO;
 			OpenGLVertexArrayObject proxyVAO;
@@ -98,23 +99,14 @@ namespace ysl
 			std::list<std::pair<PageTableEntryAbstractIndex, CacheBlockAbstractIndex>> g_lruList;
 			std::shared_ptr<OpenGLBuffer> blockPingBuf;
 			std::shared_ptr<OpenGLBuffer> blockPongBuf;
-			unsigned int g_pingPBO;
-			unsigned int g_pongPBO;
-			char * g_pboPtr[2];
 			std::vector<GlobalBlockAbstractIndex> hits;
-			std::vector<int> posInCache;
-			ysl::Size3 gpuCacheBlockSize{ 4,4,4 };
-			std::shared_ptr<OpenGLBuffer> bufMissedHash;
-			int * cacheHashPtr;
-			std::shared_ptr<OpenGLBuffer> bufMissedTable;
-			int * cacheMissTablePtr;
-			std::shared_ptr<OpenGLBuffer> atomicCounter;
-			int * atomicCounterPtr;
-			//char * g_data;
 
-			//int g_pageDirX;
-			//int g_pageDirY;
-			//int g_pageDirZ;
+			std::vector<int> posInCache;
+			ysl::Size3 gpuCacheBlockSize;
+			std::shared_ptr<OpenGLBuffer> bufMissedHash;
+			std::shared_ptr<OpenGLBuffer> bufMissedTable;
+			std::shared_ptr<OpenGLBuffer> atomicCounter;
+
 
 			int g_pageTableX;
 			int g_pageTableY;
@@ -134,7 +126,7 @@ namespace ysl
 			int g_yBlockCount;
 			int g_zBlockCount;
 
-			int g_initialWidth = 800, g_initialHeight = 600;
+			int g_initialWidth ,g_initialHeight;
 
 			int g_blockUploadMicroSecondsPerFrame;
 			int g_uploadBlockCountPerFrame;

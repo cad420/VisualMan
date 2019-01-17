@@ -64,23 +64,20 @@ void TinyConsole::Draw(const char* title, bool* p_open)
 		ImGui::EndPopup();
 	}
 
-	ImGui::TextWrapped(
-		"This example implements a console with basic coloring, completion and history. A more elaborate implementation may want to store entries along with extra data such as timestamp, emitter, etc.");
-	ImGui::TextWrapped("Enter 'HELP' for help, press TAB to use text completion.");
 
 	// TODO: display items starting from the bottom
 
-	if (ImGui::SmallButton("Add Dummy Text"))
-	{
-		AddLog("%d some text", Items.Size);
-		AddLog("some more text");
-		AddLog("display very important message here!");
-	}
-	ImGui::SameLine();
-	if (ImGui::SmallButton("Add Dummy Error"))
-	{
-		AddLog("[error] something went wrong");
-	}
+	//if (ImGui::SmallButton("Add Dummy Text"))
+	//{
+	//	AddLog("%d some text", Items.Size);
+	//	AddLog("some more text");
+	//	AddLog("display very important message here!");
+	//}
+	//ImGui::SameLine();
+	//if (ImGui::SmallButton("Add Dummy Error"))
+	//{
+	//	AddLog("[error] something went wrong");
+	//}
 	ImGui::SameLine();
 	if (ImGui::SmallButton("Clear"))
 	{

@@ -110,12 +110,14 @@ message(STATUS "Test source list: ${TEST_SRC_LIST}")
 file(GLOB TEST_HEADERS "test/*.h")
 
 add_executable("mytest" 
-${TEST_SRC_LIST} 
+"test/test.cpp"
+"test/abcflowgen.cpp"
 ${CORE_SRC_LIST} 
 ${MEM_SRC_LIST} 
 ${VOLUME_SRC_LIST} 
 ${UTILS_SRC_LIST}
-${MATH_SRC_LIST})
+${MATH_SRC_LIST}
+)
 
 # Application Test
 

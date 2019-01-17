@@ -85,7 +85,7 @@ int ABCFlowGen(std::size_t x, std::size_t y, std::size_t z)
 				const auto index = x + y * sideX + z * sideX*sideY;
 				const double X = x * 2 * ysl::Pi / sideX, Y = y * 2 * ysl::Pi / sideY, Z = z * 2 * ysl::Pi / sideZ;
 				const auto value = std::sqrt(6 + 2 * A *std::sin(Z)*std::cos(Y) + 2 * B * std::sin(Y)*std::cos(X) + 2 * std::sqrt(6)*sin(X)*std::cos(Z));
-				buffer1[index] = (value - minValue) / (maxValue - minValue) * 256;
+				buffer1[index] = ((value - minValue) / (maxValue - minValue) * 255+0.5);
 			}
 		}
 		std::cout << z << " of " << sideZ << " in total.\n";
@@ -156,13 +156,12 @@ int SimpleBlockGen(std::size_t x, std::size_t y, std::size_t z, int xColor, int 
 				const auto colorId = xc + yc * xColor + zc * xColor*yColor;
 				const auto index = x + y * sideX + z * sideX*sideY;
 				//const double X = x * 2 * ysl::Pi / sideX, Y = y * 2 * ysl::Pi / sideY, Z = z * 2 * ysl::Pi / sideZ;
-				buffer1[index] = (double(colorId) - double(minValue)) / (double(maxValue) - double(minValue)) * 256.0;
+				buffer1[index] = (double(colorId) - double(minValue)) / (double(maxValue) - double(minValue)) * 255.0;
 			}
 		}
 
 		std::cout << z << " of " << sideZ << " in total.\n";
 	}
-
 
 	std::ofstream outFile("D:\\scidata\\abc\\sb_" + ss.str() + ".raw", std::ostream::binary);
 	if (outFile.is_open() == false)
@@ -173,7 +172,5 @@ int SimpleBlockGen(std::size_t x, std::size_t y, std::size_t z, int xColor, int 
 
 	outFile.write(buffer1, sideZ*sideY*sideX * sizeof(char));
 	free(buffer1);
-
-
 	return 0;
 }
