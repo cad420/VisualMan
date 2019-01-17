@@ -42,8 +42,8 @@ namespace ysl
 				ImGui_ImplGlfw_NewFrame();
 				ImGui::NewFrame();
 
-				for (auto & w : widgets)
-					w->Draw();
+				DrawImGui();
+
 				ImGui::EndFrame();
 				// Rendering
 				ImGui::Render();
@@ -62,5 +62,9 @@ namespace ysl
 			return 0;
 		}
 
+		void ImGuiApplication::DrawImGui()
+		{
+
+		}
 	}
 }

@@ -24,8 +24,4 @@ namespace ysl
 	void Log(const char * fmt, ...);
 }
 
-
-
-
-
 #endif

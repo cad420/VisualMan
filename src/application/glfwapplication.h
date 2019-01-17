@@ -22,21 +22,20 @@ namespace ysl
 		public:
 			DISABLE_COPY(GLFWApplication);
 			DISABLE_MOVE(GLFWApplication);
-
+			~GLFWApplication();
 			GLFWApplication(int argc, char ** argv, int w, int h);
+
 			void SetClearColor(float * color[4]);
-			~GLFWApplication() = default;
 			int Exec() override;
 		protected:
 			virtual void RenderLoop() = 0;
 			virtual void InitializeOpenGLResources() = 0;
-
 			void InitOpenGLContext();
 			void DestroyOpenGLContext();
-
 			void MousePressEvent(MouseEvent* e) override;
 			void MouseReleaseEvent(MouseEvent* e) override;
 			void MouseMoveEvent(MouseEvent* e) override;
+			void WindowResizeEvent(ResizeEvent* event) override;
 
 			GLFWwindow * window;
 			int width;
@@ -48,7 +47,9 @@ namespace ysl
 		private:
 			friend void glfwCursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 			friend void glfwMouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
+			friend void glfwWindowSizeCallback(GLFWwindow * window, int width, int height);
 		};
+
 	}
 
 }

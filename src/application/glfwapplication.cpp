@@ -1,21 +1,21 @@
 
 
-#include "openglapplication.h"
+#include "glfwapplication.h"
 #include "../utility/error.h"
-#include "../lib/gl3w/GL/gl3w.h"
+#include "../../lib/gl3w/GL/gl3w.h"
 
-#include "eventhandler.h"
+#include "event.h"
 
-
-static void glfw_error_callback(int error, const char* description)
-{
-	fprintf(stderr, "Glfw Error %d: %s\n", error, description);
-}
 
 namespace ysl
 {
 	namespace app
 	{
+
+		static void glfw_error_callback(int error, const char* description)
+		{
+			fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+		}
 
 		void MouseEventCheck(MouseEvent * e,const char * name)
 		{
@@ -77,6 +77,20 @@ namespace ysl
 			}
 
 		}
+
+		void glfwWindowSizeCallback(GLFWwindow* window, int width, int height)
+		{
+			ResizeEvent e{ {width,height} };
+			const auto app = App(GLFWApplication);
+			assert(app->window == window);
+			app->WindowResizeEvent(&e);
+		}
+
+		GLFWApplication::~GLFWApplication()
+		{
+			DestroyOpenGLContext();
+		}
+
 		GLFWApplication::GLFWApplication(int argc, char** argv, int w, int h) :
 			Application(argc, argv),
 			width(w),
@@ -102,9 +116,12 @@ namespace ysl
 			InitOpenGLContext();
 			glfwMakeContextCurrent(window);
 			InitializeOpenGLResources();
+
+			// Send Resize window Event
+			WindowResizeEvent(&ResizeEvent{{width,height}});
+
 			while (!glfwWindowShouldClose(window))
 			{
-				
 				int display_w, display_h;
 				glfwMakeContextCurrent(window);
 				glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -112,12 +129,10 @@ namespace ysl
 				glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
 				glClear(GL_COLOR_BUFFER_BIT);
 				RenderLoop();
-
 				glfwPollEvents();
 				glfwSwapBuffers(window);
 			}
-
-			DestroyOpenGLContext();
+		
 			return 0;
 		}
 
@@ -143,8 +158,9 @@ namespace ysl
 			{
 				Error("OpenGL 4.4 or higher is needed.");
 			}
+
 			// Add Input callback
-			//auto f = std::bind(glfwCursorPosCallback,this);
+			glfwSetWindowSizeCallback(window, glfwWindowSizeCallback);
 			glfwSetCursorPosCallback(window,glfwCursorPosCallback);
 			glfwSetMouseButtonCallback(window, glfwMouseButtonCallback);
 
@@ -157,18 +173,24 @@ namespace ysl
 
 		void GLFWApplication::MousePressEvent(MouseEvent* e)
 		{
-			MouseEventCheck(e, "MousePressEvent");
+			(void)e;
 		}
 
 		void GLFWApplication::MouseReleaseEvent(MouseEvent* e)
 		{
-			MouseEventCheck(e, "MouseReleaseEvent");
+			(void)e;
 		}
 
 		void GLFWApplication::MouseMoveEvent(MouseEvent* e)
 		{
-			MouseEventCheck(e, "MouseMoveEvent");
+			(void)e;
 		}
+
+		void GLFWApplication::WindowResizeEvent(ResizeEvent * event)
+		{
+			(void)event;
+		}
+
 	}
 	
 }

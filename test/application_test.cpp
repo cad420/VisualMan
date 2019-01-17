@@ -1,8 +1,10 @@
 
 
-#include "../src/application/openglapplication.h"
+#include "../src/application/glfwapplication.h"
 #include "../src/application/guiapplication.h"
 #include "../src/gui/transferfunctionwidget.h"
+
+#include "../src/application/largevolumeraycasterapplication.h"
 
 
 class TestGLFWApp :public ysl::app::GLFWApplication
@@ -38,6 +40,7 @@ public:
 protected:
 	void InitializeOpenGLResources() override;
 	void RenderLoop() override;
+	void WindowResizeEvent(ResizeEvent* event) override;
 };
 
 TestGuiApp::TestGuiApp(int argc, char* argv[], int w, int h):
@@ -57,71 +60,15 @@ void TestGuiApp::RenderLoop()
 	//ysl::Log("TestGuiApp::RenderLoop()");
 }
 
-
-class Base
+void TestGuiApp::WindowResizeEvent(ResizeEvent* event)
 {
-public:
-	Base()
-	{
-		app = this;
-	}
-	virtual void Fun() = 0;
-	virtual ~Base() = default;
-	static Base * app;
-};
-
-Base * Base::app = nullptr;
-
-class DeriveA :public Base
-{
-public:
-	DeriveA() = default;
-	void Fun() override
-	{
-		std::cout << "DeriveA " << this << std::endl;
-
-	}
-	~DeriveA()=default;
-};
-
-class DeriveB :public DeriveA
-{
-public:
-	DeriveB() = default;
-	void Fun()override
-	{
-		std::cout << "DeriveB " << this << std::endl;
-
-	}
-	~DeriveB() = default;
-};
+	std::cout << event->size() << std::endl;
+}
 
 
 int main(int argc,char ** argv)
 {
-	//return TestGLFWApp(argc, argv, 800, 600).Exec();
+	//return ysl::app::LargeVolumeRayCaster(argc, argv, 800, 600, "C:\\data\\s1_480_480_480_2_64.lvd").Exec();
 	return TestGuiApp(argc, argv, 800, 600).Exec();
-
-	//Base * a = new DeriveB;
-	//a->Fun();
-	//
-
-	//std::cout << "a: " << a << std::endl;
-	//std::cout << "Base Pointer: " << static_cast<Base*>(a) << std::endl;
-	//std::cout << "DeriveA Pointer: " << static_cast<DeriveA*>(a) << std::endl;
-	//std::cout << "DeriveB Pointer: " << static_cast<DeriveB*>(a) << std::endl;
-
-
-	//auto d1 = dynamic_cast<DeriveA*>(Base::app);
-	//auto d2 = dynamic_cast<DeriveB*>(Base::app);
-
-	//std::cout << "App pointer:" << Base::app << std::endl;
-	//std::cout << "DeriveA Pointer from app: " << d1 << std::endl;
-	//std::cout << "DeriveB Pointer from app: " << d2 << std::endl;
-
-	//d1->Fun();
-	//d2->Fun();
-	//system("pause");
-	//return 0;
 }
 

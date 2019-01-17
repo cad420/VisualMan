@@ -31,7 +31,9 @@
 #include "framebuffer.h"
 #include "timer.h"
 #include "gui/transferfunctionwidget.h"
-#include "application/eventhandler.h"
+#include "application/event.h"
+#include "application/largevolumeraycasterapplication.h"
+//#include "application/application.h"
 
 
 //const static int g_proxyGeometryVertexIndices[] = { 1, 3, 7, 5, 0, 4, 6, 2, 2, 6, 7, 3, 0, 1, 5, 4, 4, 5, 7, 6, 0, 2, 3, 1 };
@@ -60,8 +62,6 @@ static float g_proxyGeometryVertices[] = {
  * The reason why make the members public and supports corresponding
  * access methods as the same time is that these class should be redesigned later conform to OO
  */
-
-
 
  /**************************************************/
 
@@ -150,10 +150,10 @@ namespace
 	int * g_cacheMissTablePtr;
 
 	std::shared_ptr<OpenGLBuffer> g_atomicCounter;
+
 	int * g_atomicCounterPtr;
 
 	//char * g_data;
-
 	std::unique_ptr<VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>> g_largeVolumeData;
 
 	int g_pageDirX;
@@ -918,8 +918,10 @@ static void glfw_error_callback(int error, const char* description)
 {
 	fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
+//
+//
 
-int main(int argc, char** argv)
+int main1(int argc, char** argv)
 {
 	// Setup window
 	glfwSetErrorCallback(glfw_error_callback);
@@ -944,7 +946,7 @@ int main(int argc, char** argv)
 
 	if (!gl3wIsSupported(4, 4))
 	{
-		std::cout << "OpenGL 4.6 or later must be needed\n";
+		std::cout << "OpenGL 4.4 or later must be needed\n";
 		system("pause");
 		return 0;
 	}
@@ -956,7 +958,7 @@ int main(int argc, char** argv)
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
-	ImGui_ImplGlfw_InitForOpenGL(window, false);
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
 
 	ImGui_ImplOpenGL3_Init();
 
@@ -1173,7 +1175,7 @@ int main(int argc, char** argv)
 		//{
 		//	lock = !lock;
 		//}
-		//ImGui::End();
+		ImGui::End();
 
 		TFWidget.Draw();
 
@@ -1223,7 +1225,6 @@ int main(int argc, char** argv)
 		{
 			mouseMoveEvent(&moveEvent);
 		}
-
 
 		// Release Event
 
@@ -1285,3 +1286,10 @@ int main(int argc, char** argv)
 
 	return 0;
 }
+
+
+int main(int argc,char ** argv)
+{
+	return ysl::app::LargeVolumeRayCaster(argc, argv, 800, 600, "C:\\data\\s1_480_480_480_2_64.lvd").Exec();
+}
+

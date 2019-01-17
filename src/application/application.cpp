@@ -23,6 +23,11 @@ namespace ysl
 			}
 		}
 
+		Application::~Application()
+		{
+			app = nullptr;
+		}
+
 		Application * Application::Instance()
 		{
 			return app;
