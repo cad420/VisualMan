@@ -14,9 +14,7 @@
 //#include "../mathematics/geometry.h"
 
 #include <thread>
-
 #include "gui/TinyConsole.h"
-
 #include "utility/cmdline.h"
 #include "volume/volume_utils.h"
 #include "volume/volume.h"
@@ -33,6 +31,8 @@
 #include "gui/transferfunctionwidget.h"
 #include "application/event.h"
 #include "application/largevolumeraycasterapplication.h"
+#include "renderer/isosurfacerenderer.h"
+
 //#include "application/application.h"
 
 
@@ -85,10 +85,12 @@ namespace
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__128_128_128_2_64.lvd";
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\sb__120_120_120_2_64.lvd";
 	//std::string g_lvdFileName = "D:\\scidata\\abc\\s1_480_480_480_2_64.lvd";
-	//std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_64.lvd";
+	std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_64.lvd";
 	//std::string g_lvdFileName = "C:\\data\\s1_480_480_480_2_128.lvd";
 	//std::string g_lvdFileName = "C:\\data\\s1_1984_1984_1984_2_128.lvd";
-	std::string g_lvdFileName = "C:\\data\\s1_3968_3968_3968_2_128.lvd";
+	//std::string g_lvdFileName = "C:\\data\\s1_3968_3968_3968_2_128.lvd";
+	//std::string g_lvdFileName = "C:\\data\\flower_uint_0_128.lvd";
+
 
 
 	ysl::Vector3f g_lightDirection;
@@ -143,7 +145,7 @@ namespace
 
 	std::vector<int> g_posInCache;
 
-	ysl::Size3 g_gpuCacheBlockSize{11,11,11};
+	ysl::Size3 g_gpuCacheBlockSize{4,4,4};
 
 	std::shared_ptr<OpenGLBuffer> g_bufMissedHash;
 	int * g_cacheHashPtr;
@@ -316,7 +318,6 @@ bool CaptureAndHandleCacheMiss()
 	const std::size_t blockSize = g_largeVolumeData->BlockSize();
 	const auto missedBlocks = (std::min)(count, (int)cacheBlockThreshold);
 
-
 	g_hits.clear();
 	g_posInCache.clear();
 	g_hits.reserve(missedBlocks);
@@ -379,8 +380,6 @@ bool CaptureAndHandleCacheMiss()
 		dmaTime = 0,
 		totalTime = 0,
 		bindTime = 0;
-
-
 
 	std::shared_ptr<OpenGLBuffer> pbo[2] = { g_blockPingBuf,g_blockPongBuf };
 	auto curPBO = 0;
@@ -572,11 +571,16 @@ void initializeProxyGeometry() {
 	g_proxyVBO->Bind();
 	g_proxyVBO->AllocateFor(g_proxyGeometryVertices, sizeof(g_proxyGeometryVertices));
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(sizeof(g_proxyGeometryVertices) / 2));
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(sizeof(g_proxyGeometryVertices) / 2));
+
+	g_proxyVBO->VertexAttribPointer(0, 3, OpenGLBuffer::Float, false, sizeof(float) * 3, reinterpret_cast<void*>(sizeof(g_proxyGeometryVertices) / 2));
 	GL_ERROR_REPORT;
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+	g_proxyVBO->VertexAttribPointer(1, 3, OpenGLBuffer::Float,false, 3 * sizeof(float), reinterpret_cast<void*>(0));
+
 	GL_ERROR_REPORT;
 
 	g_proxyEBO = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ElementArrayBuffer);
@@ -594,10 +598,13 @@ void initializeProxyGeometry() {
 	g_rayCastingVBO->Bind();
 	g_rayCastingVBO->AllocateFor(nullptr, 6 * sizeof(ysl::Point2f));
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
+	g_rayCastingVBO->VertexAttribPointer(0, 2, OpenGLBuffer::Float, false, 2 * sizeof(float), reinterpret_cast<void*>(0));
+
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
+	g_rayCastingVBO->VertexAttribPointer(1, 2, OpenGLBuffer::Float, false, 2 * sizeof(float), reinterpret_cast<void*>(0));
 
 	g_rayCastingVAO.unbind();
 }
@@ -793,7 +800,7 @@ void initializeResource()
 	initBlockExistsHash();
 	initMissedBlockVector();
 	{
-		g_tfObject.read("d:\\scidata\\std_tf1d.TF1D");
+		g_tfObject.read("d:\\scidata\\tf1.tfi");
 		g_tfObject.FetchData(g_tfData.data(), 256);
 		g_texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256, 0, 0, g_tfData.data());
 	}
@@ -923,7 +930,7 @@ static void glfw_error_callback(int error, const char* description)
 //
 //
 
-int main(int argc, char** argv)
+int main1(int argc, char** argv)
 {
 	// Setup window
 	glfwSetErrorCallback(glfw_error_callback);
@@ -979,7 +986,7 @@ int main(int argc, char** argv)
 	TinyConsole app;
 	// Config Commands
 
-	ysl::imgui::TransferFunctionWidget TFWidget("D:\\scidata\\std_tf1d.TF1D");
+	ysl::imgui::TransferFunctionWidget TFWidget("d:\\scidata\\tf1.tfi");
 	app.ConfigCommand("load_data", [](const char * cmd)
 		{
 		});
@@ -1291,8 +1298,12 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-//
-//int main(int argc, char ** argv)
-//{
-//	return ysl::app::LargeVolumeRayCaster(argc, argv, 800, 600, "C:\\data\\s1_480_480_480_2_64.lvd").Exec();
-//}
+
+int main(int argc, char ** argv)
+{
+	//return ysl::app::LargeVolumeRayCaster(argc, argv,
+		//800, 600, "C:\\data\\s1_480_480_480_2_64.lvd").Exec();
+
+	return ysl::app::OITMeshRenderer(argc, argv, 800, 600).Exec();
+
+}

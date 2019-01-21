@@ -88,11 +88,12 @@ aux_source_directory("src/core" CORE_SRC_LIST)
 aux_source_directory("src/mathematics" MATH_SRC_LIST)
 aux_source_directory("src/shape" SHAPE_SRC_LIST)
 aux_source_directory("src/utility" UTILS_SRC_LIST)
-aux_source_directory("src/render" RENDER_SRC_LIST)
+aux_source_directory("src/renderer" RENDER_SRC_LIST)
 aux_source_directory("src/gui" MYGUI_SRC_LIST)
 aux_source_directory("src/cameras" CAM_SRC_LIST)
 aux_source_directory("src/opengl" OPENGL_SRC_LIST)
 aux_source_directory("src/gui" MYGUI_SRC_LIST)
+aux_source_directory("lib/3rdparty" 3RDPARTY_SRC_LIST)
 
 
 set(GL3W_LIST "lib/gl3w/GL/gl3w.c")
@@ -112,6 +113,7 @@ file(GLOB TEST_HEADERS "test/*.h")
 add_executable("mytest" 
 "test/test.cpp"
 "test/abcflowgen.cpp"
+${3RDPARTY_SRC_LIST}
 ${CORE_SRC_LIST} 
 ${MEM_SRC_LIST} 
 ${VOLUME_SRC_LIST} 
@@ -147,6 +149,7 @@ target_link_libraries(ApplicationTest glfw ${OPENGL_LIBRARIES})
 
 add_executable(
 ${PROJECT_NAME} 
+${RENDER_SRC_LIST}
 ${SRC_LIST} 
 ${GL3W_LIST} 
 ${GUI_SRC_LIST} 
@@ -155,7 +158,7 @@ ${VOLUME_SRC_LIST}
 ${MEM_SRC_LIST} 
 ${CAM_SRC_LIST} 
 ${MATH_SRC_LIST}
-${OPENGL_SRC_LIST} 
+${OPENGL_SRC_LIST}
 ${UTILS_SRC_LIST} 
 ${CORE_SRC_LIST}
 ${APP_SRC_LIST})

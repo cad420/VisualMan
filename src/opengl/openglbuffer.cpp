@@ -48,12 +48,37 @@ void OpenGLBuffer::AllocateFor(const void* data, std::size_t size)
 	Write(data);
 }
 
+void OpenGLBuffer::SetSubData(const void* data, std::size_t size, std::size_t offsetBytes)
+{
+	glNamedBufferSubData(bufferId, offsetBytes, size, data);
+	//glBufferSubData(target, offsetBytes, size, data);
+	//glBufferSubData()
+	GL_ERROR_REPORT
+}
+
+void OpenGLBuffer::VertexAttribPointer(int index, std::size_t size, DataType type, bool normalized, std::size_t stride,
+	void* pointer)
+{
+	glEnableVertexAttribArray(index);
+	glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+	GL_ERROR_REPORT;
+}
+
+
 void OpenGLBuffer::Write(const void* data)
 {
 	if(type == Mutable)
-		glBufferData(target, dataSize, data, usage);
+	{
+		glNamedBufferData(bufferId, dataSize, data, usage);
+		//glBufferData(target, dataSize, data, usage);
+	}
+		
 	else if(type == Immutable)
-		glBufferStorage(target, dataSize, data,GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT);
+	{
+		glNamedBufferStorage(bufferId, dataSize, data, GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT);
+		//glBufferStorage(target, dataSize, data,GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT);
+		
+	}
 	//std::cout << dataSize;
 }
 

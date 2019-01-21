@@ -45,11 +45,13 @@ public:
 	enum InternalFormat
 	{
 		R8 = GL_R8,
+		R32UI = GL_R32UI,
 		R16F = GL_R16F,
 		RGB8 = GL_RGB8,
 		RGBA32F = GL_RGBA32F,
 		RGBA32UI = GL_RGBA32UI,
 		InternalDepthComponent = GL_DEPTH_COMPONENT
+		
 	};
 
 	enum  ExternalDataFormat

@@ -156,6 +156,7 @@ namespace ysl
 			ImGui::SliderFloat("shininess", &shininess, 0.0f, 50.f);
 			ImGui::End();
 
+
 		}
 
 		void LargeVolumeRayCaster::RenderLoop()

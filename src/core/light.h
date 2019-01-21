@@ -19,8 +19,17 @@ namespace ysl
 		VisibilityTester(const Interaction & p0, const Interaction & p1) :m_p0(p0), m_p1(p1) {}
 		const Interaction & from()const { return m_p0; }
 		const Interaction & to()const { return m_p1; }
-		Float distanceSquare()const;
-		bool occlude(const Scene & scene)const;
+		Float distanceSquare()const
+		{
+			assert(false);
+			return 0.0;
+		}
+
+		bool occlude(const Scene& scene) const
+		{
+			assert(false);
+			return false;
+		}
 	};
 
 
