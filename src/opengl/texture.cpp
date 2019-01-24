@@ -21,8 +21,11 @@ OpenGLTexture::OpenGLTexture(TextureTarget target_,
 		ysl::Error("No OpenGL Context.");
 	glGenTextures(1, &textureId);
 	glBindTexture(target, textureId);
-	SetFilterMode(min, mag);
-	SetWrapMode(rWrapMode, sWrapMode, tWrapMode);
+	if(target_ != TextureBuffer)
+	{
+		SetFilterMode(min, mag);
+		SetWrapMode(rWrapMode, sWrapMode, tWrapMode);
+	}
 }
 
 void OpenGLTexture::Bind()
@@ -55,7 +58,7 @@ void OpenGLTexture::SetData(InternalFormat internalFmt,
 	ExternalDataType extType, int x,int y,int z,void * data)
 {
 	Bind();
-	if (target == Texture1D)
+	if (target == Texture1D )
 		glTexImage1D(target, 0, internalFmt, x, 0, extFmt, extType, data);
 	if (target == Texture2D || target == Texture2DRect)
 		glTexImage2D(target, 0, internalFmt, x, y, 0, extFmt, extType, data);
@@ -69,7 +72,7 @@ void OpenGLTexture::SetSubData(
 	int yOffset,int y, int zOffset, int z,const void* data)
 {
 	Bind();
-	if (target == Texture1D)
+	if (target == Texture1D )
 		glTexSubImage1D(target, 0, xOffset, x,  extFmt, extType, data);
 	if (target == Texture2D || target == Texture2DRect)
 		glTexSubImage2D(target, 0, xOffset,yOffset, x, y,  extFmt, extType, data);
@@ -104,6 +107,16 @@ void OpenGLTexture::BindToDataImage(int imageUnit, int level, bool layered, int 
 {
 	Bind();
 	glBindImageTexture(imageUnit, textureId, level, layered, layer, access, fmt);
+}
+
+void OpenGLTexture::BindTextureBuffer(std::shared_ptr<OpenGLBuffer> buffer, OpenGLTexture::InternalFormat format)
+{
+	if(buffer->Target() == OpenGLBuffer::TextureBuffer)
+	{
+		Bind();
+		glTexBuffer(GL_TEXTURE_BUFFER, format,buffer->bufferId);
+		GL_ERROR_REPORT;
+	}
 }
 
 void OpenGLTexture::SaveAsImage(const std::string& fileName)

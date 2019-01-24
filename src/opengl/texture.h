@@ -9,6 +9,9 @@
 //#include "openglutils.h"
 
 #include "../utility/utils.h"
+#include "openglbuffer.h"
+
+class OpenGLBuffer;
 
 class OpenGLTexture
 {
@@ -28,7 +31,8 @@ public:
 		Texture1D = GL_TEXTURE_1D,
 		Texture2D = GL_TEXTURE_2D,
 		Texture3D = GL_TEXTURE_3D,
-		Texture2DRect = GL_TEXTURE_RECTANGLE
+		Texture2DRect = GL_TEXTURE_RECTANGLE,
+		TextureBuffer = GL_TEXTURE_BUFFER,
 	};
 	enum WrapMode
 	{
@@ -91,7 +95,6 @@ public:
 		WrapMode tWrapMode = WrapMode::ClampToEdge);
 
 	DISABLE_COPY(OpenGLTexture);
-
 	DISABLE_MOVE(OpenGLTexture);
 
 	void Bind();
@@ -110,6 +113,7 @@ public:
 	                ExternalDataFormat fmt, ExternalDataType type, std::size_t bufSize,
 	                void* pixels);
 	void BindToDataImage(int imageUnit,int level,bool layered,int layer,Access access,InternalFormat fmt);
+	void BindTextureBuffer(std::shared_ptr<OpenGLBuffer> buffer, OpenGLTexture::InternalFormat format);
 	void SaveAsImage(const std::string & fileName);
 	unsigned int NativeTextureId()const;
 	~OpenGLTexture();
@@ -136,7 +140,6 @@ public:
 		FilterMode min, FilterMode mag, WrapMode rWrapMode, WrapMode sWrapMode,WrapMode tWrapMode,
 		ExternalDataFormat extFmt,
 		ExternalDataType type,int width,int height,int depth,void * data);
-
 private:
 	unsigned int textureId;
 	std::shared_ptr<OpenGLCurrentContext> currentContext;

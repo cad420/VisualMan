@@ -35,6 +35,8 @@ namespace ysl
 		void setUniformValue(int location, const ysl::Matrix4x4 & mat4x4);
 		void setUniformValue(int location, const ysl::Matrix3x3 & mat3x3);
 		void setUniformValue(int location, const ysl::RGBSpectrum & rgb);
+		void setUniformValue(int location, const ysl::RGBASpectrum & rgba);
+
 		void setUniformValue(int location, const ysl::Vector3f & fvec3);
 		void setUniformValue(int location, const ysl::Point3f & fpos3);
 		void setUniformValue(int location, const ysl::Vector3i & ivec3);
@@ -51,6 +53,7 @@ namespace ysl
 		void setUniformValue(const char * name, const ysl::Matrix4x4 & mat);
 		void setUniformValue(const char * name, const ysl::Matrix3x3 & mat);
 		void setUniformValue(const char * name, const ysl::RGBSpectrum & rbg);
+		void setUniformValue(const char * name, const ysl::RGBASpectrum & rgba);
 		void setUniformValue(const char * name, const ysl::Vector3f & fvec3);
 		void setUniformValue(const char * name, const ysl::Point3f & fpos3);
 		void setUniformValue(const char * name, const ysl::Vector3i & ivec3);
@@ -65,6 +68,7 @@ namespace ysl
 		void setUniformValue(const std::string & name, const ysl::Matrix4x4 & mat);
 		void setUniformValue(const std::string & name, const ysl::Matrix3x3 & mat);
 		void setUniformValue(const std::string & name, const ysl::RGBSpectrum & rbg);
+		void setUniformValue(const std::string & name, const ysl::RGBASpectrum & rgba);
 		void setUniformValue(const std::string & name, const ysl::Vector3f & fvec3);
 		void setUniformValue(const std::string & name, const ysl::Point3f & fpos3);
 		void setUniformValue(const std::string & name, const ysl::Vector3i & ivec3);

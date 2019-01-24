@@ -154,6 +154,12 @@ namespace ysl
 		GL_ERROR_REPORT;
 	}
 
+	void ShaderProgram::setUniformValue(int location, const ysl::RGBASpectrum& rgba)
+	{
+		glUniform4fv(location, 1, rgba.c);
+		GL_ERROR_REPORT;
+	}
+
 	void ShaderProgram::setUniformValue(int location, const ysl::Vector3f& fvec3)
 	{
 		glUniform3fv(location, 1, &fvec3.x);
@@ -237,6 +243,11 @@ namespace ysl
 		setUniformValue(uniformLocation(name), rbg);
 	}
 
+	void ShaderProgram::setUniformValue(const char* name, const ysl::RGBASpectrum& rgba)
+	{
+		setUniformValue(uniformLocation(name), rgba);
+	}
+
 	void ShaderProgram::setUniformValue(const char* name, const ysl::Vector3f& fvec3)
 	{
 		setUniformValue(uniformLocation(name), fvec3);
@@ -302,6 +313,11 @@ namespace ysl
 	void ShaderProgram::setUniformValue(const std::string& name, const ysl::RGBSpectrum& rbg)
 	{
 		setUniformValue(name.c_str(), rbg);
+	}
+
+	void ShaderProgram::setUniformValue(const std::string& name, const ysl::RGBASpectrum& rgba)
+	{
+		setUniformValue(name.c_str(), rgba);
 	}
 
 	void ShaderProgram::setUniformValue(const std::string& name, const ysl::Vector3f& fvec3)

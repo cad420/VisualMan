@@ -105,11 +105,11 @@ void main()
 	//vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
 	vec4 bg = vec4(1.f, 1.f, 1.f, 1.00f);
 
-	if (start2end.x ==0.0 && start2end.y ==0.0 && start2end.z == 0.0) 
-	{
-		fragColor = bg; // Background Colors
-		discard;
-	}
+//	if (start2end.x ==0.0 && start2end.y ==0.0 && start2end.z == 0.0) 
+//	{
+//		fragColor = bg; // Background Colors
+//		discard;
+//	}
 	//vec4 color = texture2DRect(texIntermediateResult,ivec2(gl_FragCoord));
 	vec4 color = imageLoad(interResult,ivec2(gl_FragCoord));
 	//vec4 color = vec4(0,0,0,0);

@@ -18,7 +18,8 @@ public:
 		ElementArrayBuffer = GL_ELEMENT_ARRAY_BUFFER,
 		ShaderStorageBuffer = GL_SHADER_STORAGE_BUFFER,
 		AtomicCounterBuffer = GL_ATOMIC_COUNTER_BUFFER,
-		PixelUnpackBuffer = GL_PIXEL_UNPACK_BUFFER
+		PixelUnpackBuffer = GL_PIXEL_UNPACK_BUFFER,
+		TextureBuffer = GL_TEXTURE_BUFFER
 	};
 	// Only support these now.
 	enum  BufferUsage
@@ -63,7 +64,6 @@ public:
 	void SetSubData(const void * data, std::size_t size, std::size_t offsetBytes);
 	void VertexAttribPointer(int index,std::size_t size,DataType type,bool normalized,std::size_t stride,void * pointer);
 
-
 	//void setUsage(BufferUsage usage);
 	void Write(const void* data);
 	void Unbind();
@@ -82,6 +82,9 @@ private:
 	std::size_t dataSize;
 
 	std::shared_ptr<OpenGLCurrentContext> currentContext;
+
+
+	friend class OpenGLTexture;
 
 	//GLenum glEnumTarget() const;
 	//GLenum glBufferUsage() const;

@@ -20,49 +20,55 @@ namespace ysl
 			void InitializeOpenGLResources() override;
 			void RenderLoop() override;
 
+			void MousePressEvent(MouseEvent* event) override;
+			void MouseMoveEvent(MouseEvent* event) override;
+			void WindowResizeEvent(ResizeEvent* event) override;
+			//void MouseReleaseEvent(MouseEvent* event) override;
+		private:
+
 			void CreateImageListTexture(int width, int height);
-			//void CreatePBO(int width,int height);
-			void CreateFramebuffer();
+			void CreateScreenQuads();
+			void CreateFragmentBufferList(int width, int height);
+			void CreateHeadPointerImageInitializer(int width, int height);
 			void CreateAtomicCounter();
-			void CreateFragmentList();
 			void InitShader();
 			void SetShaderUniform();
 			void CreateMesh(const std::string & fileName);
 
-			void MousePressEvent(MouseEvent* event) override;
-			void MouseMoveEvent(MouseEvent* event) override;
+			void ResizeHeadPointerImage(int width, int height);
+			void UpdateMatrix(int width, int height);
+			void ResizeScreenQuads(int width, int height);
+			void ResizeFragmentBufferList(int width, int height);
+			void ResizeInitializer(int width, int height);
 
-			void WindowResizeEvent(ResizeEvent* event) override;
-			//void MouseReleaseEvent(MouseEvent* event) override;
-
-		private:
-
-			void UpdateImageListTexture(int width, int height);
 			void ClearAtomicCounter();
-			void ClearImageListTexture();
+			void ClearHeadPointerImage();
+
+			//void ClearImageListTexture();
 
 			int width;
 			int height;
-
 			FocusCamera camera;
-			ShaderProgram vertShader;
-			ShaderProgram fragShader;
-
 			ShaderProgram testShader;
+			ShaderProgram oitListShader;
+			ShaderProgram oitRenderShader;
 
 			ShaderProgram oitFragShader;
 			ShaderProgram quadShader;
 
 			Transform model;
 			Transform proj;
+			Transform ortho;
 
 			Point2i lastMousePos;
 
 			std::shared_ptr<OpenGLTexture> imageList;
 			std::shared_ptr<OpenGLTexture> depthTexture;
-			//std::shared_ptr<OpenGLBuffer> pbo;
+			std::shared_ptr<OpenGLBuffer> initializer;
 			std::shared_ptr<OpenGLBuffer> atomicCounter;
-			std::shared_ptr<OpenGLBuffer> fragmentBufferList;
+
+			std::shared_ptr<OpenGLBuffer> fragmentBufferListBuffer;
+			std::shared_ptr<OpenGLTexture> fragmentBufferListTexture;
 
 			std::shared_ptr<OpenGLFramebufferObject> framebuffer;
 
@@ -74,6 +80,16 @@ namespace ysl
 				RGBASpectrum color;
 				int indexCount;
 			};
+
+
+			struct ScreenQuads 
+			{
+				OpenGLVertexArrayObject vao;
+				std::shared_ptr<OpenGLBuffer> vbo;
+			} screenQuads;
+
+
+
 			std::vector<Mesh> meshes;
 
 		};

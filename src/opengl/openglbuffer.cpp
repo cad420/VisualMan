@@ -64,6 +64,14 @@ void OpenGLBuffer::VertexAttribPointer(int index, std::size_t size, DataType typ
 	GL_ERROR_REPORT;
 }
 
+//{
+//	if(target == TextureBuffer)
+//	{
+//		Bind();
+//		glTexBuffer(target, internalFormat, bufferId);
+//	}
+//}
+
 
 void OpenGLBuffer::Write(const void* data)
 {

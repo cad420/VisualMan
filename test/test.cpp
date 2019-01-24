@@ -160,11 +160,13 @@ int main(int argc, char *argv[])
 	//LVDTester();
 
 
-	ysl::ObjReader reader;
-	reader.Load("C:\\Users\\ysl\\Desktop\\dragon.obj");
+	//ysl::ObjReader reader;
+	//reader.Load("C:\\Users\\ysl\\Desktop\\dragon.obj");
 
-	std::cout << reader.getFaceIndices().size() << std::endl;
-	system("pause");
+	//std::cout << reader.getFaceIndices().size() << std::endl;
+	//system("pause");
+
+
 
 	return 0;
 

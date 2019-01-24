@@ -605,7 +605,6 @@ namespace ysl
 			InitializeShaders();
 			InitializeProxyGeometry();
 
-
 			g_pageTableX = PageTable->Size().x;
 			g_pageTableY = PageTable->Size().y;
 			g_pageTableZ = PageTable->Size().z;

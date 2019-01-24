@@ -2,7 +2,8 @@
 #version 430 core
 
 layout(binding = 1, r32ui) uniform uimage2DRect headPointerImage;
-layout(binding = 0, rgba32ui) uniform uimageBuffer listBuffers;
+layout(binding = 2, rgba32ui) uniform uimageBuffer listBuffers;
+
 layout(location = 0)out vec4 fragColor;
 
 
