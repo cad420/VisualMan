@@ -8,6 +8,8 @@
 #include "../core/interaction.h"
 #include "../mathematics/arithmetic.h"
 
+
+
 namespace ysl {
 
 	class Interaction;

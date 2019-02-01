@@ -2,6 +2,7 @@
 #define SPECTRUM_H_
 #include <cassert>
 #include <fstream>
+#include <cmath>
 #include "../mathematics/basetype.h"
 
 
