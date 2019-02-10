@@ -7,12 +7,32 @@
 #include <algorithm>
 
 #include "basetype.h"
-#include "numeric.h"
+//#include "numeric.h"
 
 
 namespace ysl
 {
 
+	template<typename T>
+	bool
+	IsNaN(const T & t)
+	{
+		return std::isnan(t);
+	}
+
+	template<> inline
+	bool
+	IsNaN(const int & t)
+	{
+		return false;
+	}
+
+	template<> inline
+	bool
+	IsNaN(const std::size_t & t)
+	{
+		return false;
+	}
 
 	template <class T> class Vector2;
 	template <class T> class Vector3;
@@ -153,7 +173,7 @@ namespace ysl
 		}
 
 		Float
-			Length()const
+		Length()const
 		{
 			return std::sqrt(LengthSquared());
 		}
@@ -164,7 +184,7 @@ namespace ysl
 			return *this / len;
 		}
 
-		void normalize()
+		void Normalize()
 		{
 			const Float len = LengthSquared();
 			*this /= len;
@@ -313,6 +333,12 @@ namespace ysl
 		{
 			return !(*this == p);
 		}
+
+		explicit operator Vector2<T>()const
+		{
+			return Vector2<T>{x,y};
+		}
+
 
 		T * Data()
 		{

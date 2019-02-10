@@ -106,7 +106,7 @@ namespace  ysl
 		template<typename T> Vector3<T> operator*(const Vector3<T> & v)const;
 
 		Ray operator*(const Ray & ray)const;
-		AABB operator*(const AABB & aabb)const;
+		Bound3f operator*(const Bound3f & aabb)const;
 
 		friend std::ostream &operator<<(std::ostream &os, const Transform & t)
 		{

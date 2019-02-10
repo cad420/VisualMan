@@ -18,14 +18,14 @@ namespace ysl {
 			int m_nShape;
 			int m_shapeOffset;
 			int m_splitAxis;
-			AABB m_bound;
+			Bound3f m_bound;
 			std::unique_ptr<BVHNode> m_left;
 			std::unique_ptr<BVHNode> m_right;
 			BVHNode() {}
 			BVHNode(std::unique_ptr<BVHNode> &&left, std::unique_ptr<BVHNode> &&right, int shapeOffset,
 				int splitAxis,
 				int nshape,
-				const AABB & b = AABB()) :
+				const Bound3f & b = Bound3f()) :
 				m_left(std::move(left)),
 				m_right(std::move(right)),
 				m_nShape(nshape),
@@ -63,8 +63,8 @@ namespace ysl {
 			}
 			return false;
 		}
-		AABB bound()const override {
-			return AABB();
+		Bound3f bound()const override {
+			return Bound3f();
 		}
 		Float area()const override {
 			return Float(0);

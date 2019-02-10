@@ -1,25 +1,27 @@
 #include "bound.h"
 #include "ray.h"
 
+#include "numeric.h"
+
 namespace ysl
 {
-	AABB::AABB() : m_min(MAX_Float_VALUE, MAX_Float_VALUE, MAX_Float_VALUE),
+	Bound3f::Bound3f() : m_min(MAX_Float_VALUE, MAX_Float_VALUE, MAX_Float_VALUE),
 		m_max(LOWEST_Float_VALUE, LOWEST_Float_VALUE, LOWEST_Float_VALUE)
 	{
 		//construct a empty bounding box
 	}
 
-	AABB::AABB(const Point3f& p0, const Point3f& p1) noexcept :
+	Bound3f::Bound3f(const Point3f& p0, const Point3f& p1) noexcept :
 		m_min((std::min)(p0.x, p1.x), (std::min)(p0.y, p1.y), (std::min)(p0.z, p1.z)),
 		m_max((std::max)(p0.x, p1.x), (std::max)(p0.y, p1.y), (std::max)(p0.z, p1.z))
 	{
 	}
 
-	AABB::AABB(const Point3f& p) : m_min(p), m_max(p)
+	Bound3f::Bound3f(const Point3f& p) : m_min(p), m_max(p)
 	{
 	}
 
-	bool AABB::Intersect(const Ray & ray, ysl::Float * hit0 /*= nullptr*/, ysl::Float * hit1 /*= nullptr*/) const noexcept
+	bool Bound3f::Intersect(const Ray & ray, ysl::Float * hit0 /*= nullptr*/, ysl::Float * hit1 /*= nullptr*/) const noexcept
 	{
 		auto t1 = ray.m_tMax;
 		auto t0 = 0.0;
@@ -39,20 +41,20 @@ namespace ysl
 	}
 
 	Point3f
-		AABB::Center() const
+		Bound3f::Center() const
 	{
 		return (m_min + m_max) / 2.0;
 	}
 
 	Vector3f
-		AABB::Diagonal() const
+		Bound3f::Diagonal() const
 	{
 		return m_max - m_min;
 	}
 
 
 	Float
-		AABB::SurfaceArea() const
+		Bound3f::SurfaceArea() const
 	{
 		const auto d = Diagonal();
 		if (d[0] < 0 || d[1] < 0 || d[2] < 0)return Float(0);
@@ -61,16 +63,16 @@ namespace ysl
 	}
 
 	bool
-		AABB::IsIntersectWith(const AABB & b)const
+		Bound3f::IsIntersectWith(const Bound3f & b)const
 	{
 		return (m_max.x >= b.m_min.x && b.m_max.x >= m_min.x) &&
 			(m_max.y >= b.m_min.y && b.m_max.y >= m_min.y) &&
 			(m_max.z >= b.m_min.z && b.m_max.z >= m_min.z);
 	}
 
-	AABB
-		AABB::UnionWith(const Point3f & p)const {
-		AABB a;
+	Bound3f
+		Bound3f::UnionWith(const Point3f & p)const {
+		Bound3f a;
 		a.m_min = Point3f(
 			(std::min)(m_min.x, p.x),
 			(std::min)(m_min.y, p.y),
@@ -84,10 +86,10 @@ namespace ysl
 		return a;
 	}
 
-	AABB
-		AABB::UnionWith(const AABB & b) const
+	Bound3f
+		Bound3f::UnionWith(const Bound3f & b) const
 	{
-		AABB a;
+		Bound3f a;
 		a.m_min = Point3f{
 			(std::min)(m_min.x, b.m_min.x),
 			(std::min)(m_min.y, b.m_min.y),
@@ -101,10 +103,10 @@ namespace ysl
 		return a;
 	}
 
-	AABB
-		AABB::IntersectWidth(const AABB & b) const
+	Bound3f
+		Bound3f::IntersectWidth(const Bound3f & b) const
 	{
-		return AABB{ Point3f{(std::max)(m_min.x, b.m_min.x),
+		return Bound3f{ Point3f{(std::max)(m_min.x, b.m_min.x),
 			(std::max)(m_min.y, b.m_min.y),
 			(std::max)(m_min.z, b.m_min.z)},
 			Point3f{(std::min)(m_max.x, b.m_max.x),

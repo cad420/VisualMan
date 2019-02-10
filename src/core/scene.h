@@ -10,7 +10,7 @@ namespace ysl {
 	class AreaLight;
 	class Scene
 	{
-		AABB worldBound;
+		Bound3f worldBound;
 		std::shared_ptr<Shape> primitive;
 		std::vector<std::shared_ptr<AreaLight>> m_lights;
 

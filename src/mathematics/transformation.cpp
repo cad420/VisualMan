@@ -1,5 +1,7 @@
 #include "transformation.h"
+#include "numeric.h"
 #include <cstring>
+
 
 namespace ysl
 {
@@ -360,11 +362,11 @@ namespace ysl
 		return { (*this)*ray.direction() ,(*this)*ray.original() };
 	}
 
-	AABB
-		Transform::operator*(const AABB & aabb) const
+	Bound3f
+		Transform::operator*(const Bound3f & aabb) const
 	{
 		assert(false);
-		return AABB{};
+		return Bound3f{};
 	}
 
 	Transform

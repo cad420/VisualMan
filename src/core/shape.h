@@ -7,6 +7,8 @@
 #include "../mathematics/geometry.h"
 #include "../core/interaction.h"
 #include "../mathematics/arithmetic.h"
+#include "material.h"
+#include "bound.h"
 
 
 
@@ -18,7 +20,7 @@ namespace ysl {
 		std::shared_ptr<Material> m_material;
 	public:
 		Shape(std::shared_ptr<Material> m) :m_material(m) {}
-		virtual AABB bound()const = 0;
+		virtual Bound3f bound()const = 0;
 		virtual Float area()const = 0;
 		virtual bool intersect(const Ray & ray, Float * t, Interaction * iterac)const = 0;
 		void setMaterial(std::shared_ptr<Material> m) { m_material = m; }

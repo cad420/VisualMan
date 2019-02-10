@@ -85,9 +85,9 @@ namespace ysl
 			m_sharedTriangles = mesh;
 			m_vertexIndices = &(mesh->m_vertexIndices[indexOffset * 3]);
 		}
-		AABB bound()const override
+		Bound3f bound()const override
 		{
-			return AABB(m_sharedTriangles->m_vertices[m_vertexIndices[0]],
+			return Bound3f(m_sharedTriangles->m_vertices[m_vertexIndices[0]],
 				m_sharedTriangles->m_vertices[m_vertexIndices[1]]).UnionWith(
 					m_sharedTriangles->m_vertices[m_vertexIndices[2]]);
 		}

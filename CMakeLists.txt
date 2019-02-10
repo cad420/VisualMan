@@ -119,7 +119,7 @@ ${MEM_SRC_LIST}
 ${VOLUME_SRC_LIST} 
 ${UTILS_SRC_LIST}
 ${MATH_SRC_LIST}
-)
+		src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h)
 
 # Application Test
 
@@ -138,7 +138,7 @@ ${GL3W_LIST}
 ${OPENGL_SRC_LIST}
 ${APP_SRC_LIST}
 ${CAM_SRC_LIST} 
-${RENDER_SRC_LIST})
+${RENDER_SRC_LIST} src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h)
 target_link_libraries(ApplicationTest glfw ${OPENGL_LIBRARIES})
 
 
@@ -161,7 +161,7 @@ ${MATH_SRC_LIST}
 ${OPENGL_SRC_LIST}
 ${UTILS_SRC_LIST} 
 ${CORE_SRC_LIST}
-${APP_SRC_LIST})
+${APP_SRC_LIST} src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h)
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
 set_target_properties(${PROJECT_NAME} PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})

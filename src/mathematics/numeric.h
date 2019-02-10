@@ -2,10 +2,11 @@
 #define SAMPLER_H_
 //#include "core.h"
 #include <cmath>
+#include <cstdint>
 
 #include "basetype.h"
-#include <cstdint>
 #include "spectrum.h"
+#include "geometry.h"
 
 /*
 *
@@ -49,26 +50,7 @@ namespace ysl {
 	}
 
 
-	template<typename T> 
-		bool
-		IsNaN(const T & t)
-	{
-		return std::isnan(t);
-	}
 
-	template<> inline
-		bool
-		IsNaN(const int & t)
-	{
-		return false;
-	}
-
-	template<> inline
-		bool
-		IsNaN(const std::size_t & t)
-	{
-		return false;
-	}
 
 	inline
 		constexpr std::uint64_t
@@ -85,8 +67,8 @@ namespace ysl {
 //	}
 
 	inline
-		int
-		NextPowerOfTwo(std::uint64_t v)
+	int
+	NextPowerOfTwo(std::uint64_t v)
 	{
 		v--;
 		v |= v >> 1;
@@ -100,8 +82,8 @@ namespace ysl {
 	}
 
 	inline
-		int
-		NextPowerOfTwo(std::uint32_t v)
+	int
+	NextPowerOfTwo(std::uint32_t v)
 	{
 		v--;
 		v |= v >> 1;
@@ -127,11 +109,42 @@ namespace ysl {
 		return (1 - t)*v1 + t * v2;
 	}
 
+	inline
+	Point3f
+	Lerp(Float t,const Point3f & p1,const Point3f & p2)
+	{
+		return p1*(1-t) + p2*t;
+	}
+
+	inline
+	Point3f
+	Lerp(Float t,const Point3i & p1,const Point3i & p2)
+	{
+		const auto p = p1*(1-t) + p2*t;
+		return Point3f{p.x,p.y,p.z};
+	}
+
+	inline
+	Vector3f
+	Lerp(Float t,const Vector3f & p1,const Vector3f & p2)
+	{
+		const auto p = p1*(1-t) + p2*t;
+		return Vector3f{p.x,p.y,p.z};
+	}
+
+	inline
+	Point3f
+	Lerp(Float t,const Vector3i & p1,const Vector3i & p2)
+	{
+		const auto p = p1*(1-t) + p2*t;
+		return Point3f{p.x,p.y,p.z};
+	}
+
 	inline 
 	RGBSpectrum 
 	Lerp(Float t,const RGBSpectrum & s1,const RGBSpectrum & s2)
 	{
-		return (1 - t)*s1 + t * s2;
+		return s1*(1-t) + s2*t;
 	}
 
 	inline
@@ -141,19 +154,60 @@ namespace ysl {
 		return (1 - t)*s1 + t * s2;
 	}
 
-
 	inline
-		Float
-		DegreesToRadians(Float degrees)
+	Float
+	DegreesToRadians(Float degrees)
 	{
 		return degrees * Float(Pi / 180);
 	}
 
 	inline
-		Float
-		RadiansToDegrees(Float radians)
+	Float
+	RadiansToDegrees(Float radians)
 	{
 		return radians * Float(180 / Pi);
+	}
+
+	inline
+	std::size_t
+	Linear(const Point3i &p, const Size2 &dimension)
+	{
+		return p.x + dimension.x*(p.y + p.z*dimension.y);
+	}
+
+	//inline std::size_t
+	//Linear(const Vector3i &v, const Size2 &dimension)
+	//{
+	//	return Linear(Point3i{v.x,v.y,v.z},dimension);
+	//}
+
+	inline
+	std::size_t
+	Linear(const Point2i &p, std::size_t width)
+	{
+		return p.x + p.y * width;
+	}
+
+//	inline
+//	std::size_t
+//	Linear(const Vector2i &v, std::size_t width)
+//	{
+//		return Linear(Point2i{v.x,v.y},width);
+//	}
+
+	inline
+	ysl::Point3i
+	Dim(std::size_t linear,const ysl::Size2 & dim)
+	{
+		const auto plane = dim.x*dim.y;
+		return {linear % dim.x,(linear%plane)/dim.y,linear/plane};
+	}
+
+	inline
+	ysl::Point2i
+	Dim(std::size_t linear,std::size_t dim)
+	{
+		return {linear%dim,linear/dim};
 	}
 
 

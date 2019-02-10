@@ -4,8 +4,11 @@
 #include "../memory/blockarray.h"
 #include "../mathematics/geometry.h"
 #include "../core/spectrum.h"
+#include "../utility/error.h"
+#include "../mathematics/numeric.h"
 #include <memory>
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <functional>
 #include "appearance.h"

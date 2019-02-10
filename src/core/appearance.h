@@ -3,6 +3,7 @@
 #define _APPEARANCE_H_
 #include "../mathematics/basetype.h"
 #include "../mathematics/geometry.h"
+#include "../core/spectrum.h"
 
 namespace ysl
 {
