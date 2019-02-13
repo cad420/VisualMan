@@ -8,11 +8,35 @@
 namespace ysl
 {
 	enum BSDFType {
+
 		BSDF_DIFFUSE = 1 << 0,
 		BSDF_SPECULAR = 1 << 1,
 		BSDF_REFRACTION = 1 << 2,
 		BSDF_ALL = BSDF_DIFFUSE | BSDF_SPECULAR | BSDF_REFRACTION
 	};
+
+	enum BxDFType
+	{
+		ENUM_BSDF_REFLECTION = 1<<0,
+		ENUM_BSDF_TRANSMISSION = 1<<1,
+		ENUM_BSDF_DIFFUSE = 1<<2,
+		ENUM_BSDF_GLOSSY = 1<<3,
+		ENUM_BSDF_SPECULAR = 1<<4,
+		ENUM_BSDF_ALL = ENUM_BSDF_TRANSMISSION | ENUM_BSDF_TRANSMISSION | ENUM_BSDF_DIFFUSE | ENUM_BSDF_GLOSSY | ENUM_BSDF_SPECULAR;
+	};
+
+	class BxDF
+	{
+		const BxDFType flags;
+	public:
+		BxDF(BxDFType type):flags(type){};
+		bool MatchesFlags(BxDFType type) { return (flags & type) == type;}
+		virtual RGBASpectrum f(const ysl::Vector3f & wi,const ysl::Vector3f & wo)const = 0;
+		virtual RGBASpectrum Sample_f(const Vector3f & wo,Vector3f * wi,const Point2f & sample,Float * pdf,BxDFType * type = nullptr)const = 0;
+	};
+
+
+
 
 	class BSDF
 	{

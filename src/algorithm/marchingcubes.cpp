@@ -134,13 +134,13 @@ void MarchingCubes::Preprocess() {
 }
 
 
-ysl::Vector3f
-MarchingCubes::interpulation(int x1, int y1, int z1, int x2, int y2, int z2, int value1, int value2, int iso) {
+//ysl::Vector3f
+//MarchingCubes::interpulation(int x1, int y1, int z1, int x2, int y2, int z2, int value1, int value2, int iso) {
 
-    return ysl::Vector3f(dataXSpace*(static_cast<float>(iso - value1)*(x2 - x1) / static_cast<float>(value1 - value2) + x1),
-                     dataYSpace*(static_cast<float>(iso - value1)*(y2 - y1) / float(value1 - value2) + y1),
-                     dataZSpace*(static_cast<float>(iso - value1)*(z2 - z1) / float(value1 - value2) + z1));
-}
+//    return ysl::Vector3f(dataXSpace*(static_cast<float>(iso - value1)*(x2 - x1) / static_cast<float>(value1 - value2) + x1),
+//                     dataYSpace*(static_cast<float>(iso - value1)*(y2 - y1) / float(value1 - value2) + y1),
+//                     dataZSpace*(static_cast<float>(iso - value1)*(z2 - z1) / float(value1 - value2) + z1));
+//}
 
 MarchingCubes::OctreeNode *MarchingCubes::BuildOctree(const ysl::Size3 &size, const char *d,
                                                       const ysl::Bound3i &octreeBound,

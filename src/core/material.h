@@ -36,6 +36,9 @@ namespace ysl
 		void computeScatteringFunction(Interaction * isect);
 	};
 
+
+
+
 }
 
 #endif
