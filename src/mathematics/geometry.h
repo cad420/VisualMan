@@ -566,11 +566,13 @@ namespace ysl
 		}
 		//template<typename U> explicit Point3D(const Point3D<U> & p) :x(T(p.x)), y(T(p.y)), z(T(p.z)) {}
 
+
 		template<typename U>
 		explicit operator Vector3<U>()const
 		{
 			return Vector3<U>(x, y, z);
 		}
+
 
 
 		constexpr Point3<T> operator+(const Point3<T> & p)const

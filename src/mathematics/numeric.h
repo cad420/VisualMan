@@ -133,11 +133,11 @@ namespace ysl {
 	}
 
 	inline
-	Point3f
+	Vector3f
 	Lerp(Float t,const Vector3i & p1,const Vector3i & p2)
 	{
 		const auto p = p1*(1-t) + p2*t;
-		return Point3f{p.x,p.y,p.z};
+		return Vector3f{p.x,p.y,p.z};
 	}
 
 	inline 

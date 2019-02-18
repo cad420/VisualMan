@@ -328,12 +328,16 @@ private:
 
 public:
     MarchingCubes(const char * d,ysl::Size3 size);
-    MarchingCubes(const MarchingCubes &)= delete;
-    MarchingCubes(MarchingCubes &&) = delete;
-    MarchingCubes &operator=(const MarchingCubes &)= delete;
-    MarchingCubes & operator=(MarchingCubes &&)= delete;
-    std::pair<std::vector<ysl::Vector3f>, std::vector<ysl::Vector3f>> GenerateMesh(int value);
 
+    MarchingCubes(const MarchingCubes &)= delete;
+
+    MarchingCubes(MarchingCubes &&) = delete;
+
+    MarchingCubes &operator=(const MarchingCubes &)= delete;
+
+    MarchingCubes & operator=(MarchingCubes &&)= delete;
+
+	std::pair<std::vector<ysl::Point3f>, std::vector<ysl::Vector3f>> GenerateMesh(int value);
 private:
     //ysl::Vector3f interpulation(int x1,int y1,int z1,int x2,int y2,int z2,int value1,int value2,int iso);
     void Preprocess();
