@@ -18,50 +18,60 @@ namespace ysl
 			OITMeshRenderer(int argc, char ** argv,int w,int h);
 		protected:
 			void InitializeOpenGLResources() override;
+
 			void RenderLoop() override;
 
 			void MousePressEvent(MouseEvent* event) override;
+
 			void MouseMoveEvent(MouseEvent* event) override;
+
 			void WindowResizeEvent(ResizeEvent* event) override;
 			//void MouseReleaseEvent(MouseEvent* event) override;
 		private:
 
 			void CreateImageListTexture(int width, int height);
+
 			void CreateScreenQuads();
+
 			void CreateFragmentBufferList(int width, int height);
+
 			void CreateHeadPointerImageInitializer(int width, int height);
+
 			void CreateAtomicCounter();
+
 			void InitShader();
+
 			void SetShaderUniform();
+
 			void CreateMesh(const std::string & fileName);
 
 			void ResizeHeadPointerImage(int width, int height);
+
 			void UpdateMatrix(int width, int height);
+
 			void ResizeScreenQuads(int width, int height);
+
 			void ResizeFragmentBufferList(int width, int height);
+
 			void ResizeInitializer(int width, int height);
 
 			void ClearAtomicCounter();
+
 			void ClearHeadPointerImage();
 
 			//void ClearImageListTexture();
-
-			int width;
-			int height;
+			int windowWidth;
+			int windowHeight;
 			FocusCamera camera;
 			ShaderProgram testShader;
 			ShaderProgram oitListShader;
 			ShaderProgram oitRenderShader;
-
 			ShaderProgram oitFragShader;
 			ShaderProgram quadShader;
-
 			Transform model;
 			Transform proj;
 			Transform ortho;
-
 			Point2i lastMousePos;
-
 			std::shared_ptr<OpenGLTexture> imageList;
 			std::shared_ptr<OpenGLTexture> depthTexture;
 			std::shared_ptr<OpenGLBuffer> initializer;
@@ -81,17 +91,12 @@ namespace ysl
 				int indexCount;
 			};
 
-
 			struct ScreenQuads 
 			{
 				OpenGLVertexArrayObject vao;
 				std::shared_ptr<OpenGLBuffer> vbo;
 			} screenQuads;
-
-
-
 			std::vector<Mesh> meshes;
-
 		};
 	}
 }

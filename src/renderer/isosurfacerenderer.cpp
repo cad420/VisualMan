@@ -11,7 +11,7 @@ namespace ysl
 	namespace app
 	{
 		OITMeshRenderer::OITMeshRenderer(int argc, char** argv,int w,int h):ImGuiApplication(argc,argv,w,h),
-			camera({0.0,0.0,5}),width(w),height(h)
+			camera({0.0,0.0,5}),windowWidth(w),windowHeight(h)
 		{
 
 		}
@@ -20,13 +20,13 @@ namespace ysl
 		{
 			InitShader();
 			CreateMesh(R"(C:\Users\ysl\Desktop\dragon_1.obj)");
-			UpdateMatrix(width, height);
+			UpdateMatrix(windowWidth, windowHeight);
 
 			CreateScreenQuads();
 			GL_ERROR_REPORT;
-			CreateFragmentBufferList(width,width);
+			CreateFragmentBufferList(windowWidth,windowWidth);
 			GL_ERROR_REPORT;
-			CreateHeadPointerImageInitializer(width, height);
+			CreateHeadPointerImageInitializer(windowWidth, windowHeight);
 			GL_ERROR_REPORT;
 			CreateAtomicCounter();
 			GL_ERROR_REPORT;
@@ -121,11 +121,11 @@ namespace ysl
 			float screenSize[] = 
 			{
 				0,0,
-				width,0,
-				0,height,
-				0,height,
-				width,0,
-				width,height
+				windowWidth,0,
+				0,windowHeight,
+				0,windowHeight,
+				windowWidth,0,
+				windowWidth,windowHeight
 			};
 
 			screenQuads.vbo->AllocateFor(screenSize, sizeof(screenSize));
@@ -271,17 +271,15 @@ namespace ysl
 
 		void OITMeshRenderer::WindowResizeEvent(ResizeEvent* event)
 		{
-			width = event->size().x;
-			height = event->size().y;
+			windowWidth = event->size().x;
+			windowHeight = event->size().y;
 			//
-			const auto aspect = static_cast<float>(width) / static_cast<float>(height);
-
-			UpdateMatrix(width,height);
-			ResizeScreenQuads(width, height);
-			ResizeInitializer(width, height);
-			ResizeHeadPointerImage(width,height);
-			ResizeFragmentBufferList(width, height);
-
+			const auto aspect = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
+			UpdateMatrix(windowWidth,windowHeight);
+			ResizeScreenQuads(windowWidth, windowHeight);
+			ResizeInitializer(windowWidth, windowHeight);
+			ResizeHeadPointerImage(windowWidth,windowHeight);
+			ResizeFragmentBufferList(windowWidth, windowHeight);
 		}
 
 		void OITMeshRenderer::ResizeHeadPointerImage(int width, int height)
@@ -330,6 +328,9 @@ namespace ysl
 			fragmentBufferListBuffer->Unbind();
 		}
 
+        //
+		// 
+		//
 		void OITMeshRenderer::ResizeInitializer(int width, int height)
 		{
 			assert(initializer);
@@ -359,7 +360,7 @@ namespace ysl
 			imageList->Bind();
 			imageList->SetSubData(OpenGLTexture::RGBA, 
 				OpenGLTexture::UInt32, 
-				width, 0, height, 0,
+				windowWidth, 0, windowHeight, 0,
 				0, 0,
 				nullptr);
 			/// TODO:: Add a Fence ?
