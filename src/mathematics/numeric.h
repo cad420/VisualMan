@@ -104,7 +104,7 @@ namespace ysl {
 
 	inline
 	Float
-		Lerp(Float t, Float v1, Float v2)
+	Lerp(Float t, Float v1, Float v2)
 	{
 		return (1 - t)*v1 + t * v2;
 	}
@@ -121,7 +121,7 @@ namespace ysl {
 	Lerp(Float t,const Point3i & p1,const Point3i & p2)
 	{
 		const auto p = p1*(1-t) + p2*t;
-		return Point3f{p.x,p.y,p.z};
+		return Point3f(p.x,p.y,p.z);
 	}
 
 	inline
@@ -129,7 +129,7 @@ namespace ysl {
 	Lerp(Float t,const Vector3f & p1,const Vector3f & p2)
 	{
 		const auto p = p1*(1-t) + p2*t;
-		return Vector3f{p.x,p.y,p.z};
+		return Vector3f(p.x,p.y,p.z);
 	}
 
 	inline
@@ -137,7 +137,7 @@ namespace ysl {
 	Lerp(Float t,const Vector3i & p1,const Vector3i & p2)
 	{
 		const auto p = p1*(1-t) + p2*t;
-		return Vector3f{p.x,p.y,p.z};
+		return Vector3f(p.x,p.y,p.z);
 	}
 
 	inline 
@@ -200,14 +200,14 @@ namespace ysl {
 	Dim(std::size_t linear,const ysl::Size2 & dim)
 	{
 		const auto plane = dim.x*dim.y;
-		return {linear % dim.x,(linear%plane)/dim.y,linear/plane};
+		return Point3i(linear % dim.x,(linear%plane)/dim.y,linear/plane);
 	}
 
 	inline
 	ysl::Point2i
 	Dim(std::size_t linear,std::size_t dim)
 	{
-		return {linear%dim,linear/dim};
+		return ysl::Point2i(linear%dim,linear/dim);
 	}
 
 

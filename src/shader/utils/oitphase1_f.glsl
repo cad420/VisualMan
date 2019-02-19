@@ -5,7 +5,10 @@
 
 layout(binding = 0 ,offset = 0) uniform atomic_uint indexCounter;
 layout(binding = 1, r32ui) uniform uimage2DRect headPointerImage;
-layout(binding = 2, rgba32ui) uniform uimageBuffer listBuffers;
+
+//layout(binding = 2, rgba32ui) uniform uimageBuffer listBuffers;
+
+layout(std430, binding =3) buffer ListBuffer{uvec4 buf[];}listBuffers;
 
 // Phong Shading
 in vec3 frag_normal;
@@ -21,8 +24,8 @@ out vec4 frag_color;
 vec4 PhongShading()
 {
     vec3 frag_norm = normalize(frag_normal);
-
 	
+
    // the light normalized vector points to light
     vec3 light_norm = normalize(light_pos-frag_pos);
 
@@ -64,6 +67,7 @@ void main(void){
 	item.z = floatBitsToUint(gl_FragCoord.z);
 	item.w = 0;
 
-	imageStore(listBuffers,int(newHead),item);
-
+	//imageStore(listBuffers,int(newHead),item);
+	listBuffers.buf[newHead] = item;
+	//frag_color = vec4(1.0);
 }

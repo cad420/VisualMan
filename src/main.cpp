@@ -1301,7 +1301,7 @@ int main1(int argc, char** argv)
 
 int main(int argc, char ** argv)
 {
-	return ysl::app::LargeVolumeRayCaster(argc, argv,
-		800, 600, "C:\\data\\s1_480_480_480_2_64.lvd").Exec();
-	//return ysl::app::OITMeshRenderer(argc, argv, 800, 600).Exec();
+	//return ysl::app::LargeVolumeRayCaster(argc, argv,
+	//	800, 600, "C:\\data\\s1_480_480_480_2_64.lvd").Exec();
+	return ysl::app::OITMeshRenderer(argc, argv, 800, 600).Exec();
 }

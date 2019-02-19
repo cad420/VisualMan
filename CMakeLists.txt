@@ -5,6 +5,8 @@ cmake_minimum_required (VERSION 3.3)
 
 project ("MRE")
 
+# Handling function-like macros min() and max() defined in windows.h in MSVC
+add_definitions(-DNOMINMAX)
 
 #---------------------------------------------------
 # Build Type

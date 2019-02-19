@@ -29,21 +29,33 @@ namespace ysl
 			//void MouseReleaseEvent(MouseEvent* event) override;
 		private:
 
-			void CreateImageListTexture(int width, int height);
-
 			void CreateScreenQuads();
+			void CreateMesh(const std::string & fileName);
+
+			void CreateImageListTexture(int width, int height);
+			std::shared_ptr<OpenGLTexture> fragmentBufferListTexture;
+			
 
 			void CreateFragmentBufferList(int width, int height);
+			std::shared_ptr<OpenGLBuffer> fragmentBufferListBuffer;
 
 			void CreateHeadPointerImageInitializer(int width, int height);
+			std::shared_ptr<OpenGLBuffer> initializer;	// a PBO 
+
 
 			void CreateAtomicCounter();
+			void ClearAtomicCounter();
+			std::shared_ptr<OpenGLBuffer> atomicCounter;
+
 
 			void InitShader();
-
 			void SetShaderUniform();
+			ShaderProgram testShader;
+			ShaderProgram oitListShader;
+			ShaderProgram oitRenderShader;
+			ShaderProgram oitFragShader;
+			ShaderProgram quadShader;
 
-			void CreateMesh(const std::string & fileName);
 
 			void ResizeHeadPointerImage(int width, int height);
 
@@ -55,30 +67,19 @@ namespace ysl
 
 			void ResizeInitializer(int width, int height);
 
-			void ClearAtomicCounter();
-
 			void ClearHeadPointerImage();
 
 			//void ClearImageListTexture();
 			int windowWidth;
 			int windowHeight;
 			FocusCamera camera;
-			ShaderProgram testShader;
-			ShaderProgram oitListShader;
-			ShaderProgram oitRenderShader;
-			ShaderProgram oitFragShader;
-			ShaderProgram quadShader;
 			Transform model;
 			Transform proj;
 			Transform ortho;
 			Point2i lastMousePos;
 			std::shared_ptr<OpenGLTexture> imageList;
 			std::shared_ptr<OpenGLTexture> depthTexture;
-			std::shared_ptr<OpenGLBuffer> initializer;
-			std::shared_ptr<OpenGLBuffer> atomicCounter;
 
-			std::shared_ptr<OpenGLBuffer> fragmentBufferListBuffer;
-			std::shared_ptr<OpenGLTexture> fragmentBufferListTexture;
 
 			std::shared_ptr<OpenGLFramebufferObject> framebuffer;
 

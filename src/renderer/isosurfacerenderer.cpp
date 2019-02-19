@@ -73,8 +73,6 @@ namespace ysl
 				oitListShader.setUniformValue("object_color", RGBASpectrum{ 0.3 });
 				oitListShader.setUniformValue("view_pos", camera.position());
 
-
-
 				for (auto & m : meshes)
 				{
 					m.vao->bind();
@@ -104,8 +102,9 @@ namespace ysl
 				OpenGLTexture::WrapMode::ClampToEdge,
 				OpenGLTexture::WrapMode::ClampToEdge,
 				OpenGLTexture::RED, OpenGLTexture::UInt32, width, height, nullptr);
-
+			GL_ERROR_REPORT;
 			imageList->BindToDataImage(1, 0, false, 0, OpenGLTexture::ReadAndWrite, OpenGLTexture::R32UI);
+
 
 		}
 
@@ -141,11 +140,18 @@ namespace ysl
 
 		void OITMeshRenderer::CreateFragmentBufferList(int width, int height)
 		{
-			fragmentBufferListBuffer = std::make_shared<OpenGLBuffer>(OpenGLBuffer::BufferTarget::TextureBuffer, OpenGLBuffer::DynamicCopy);
-			fragmentBufferListTexture = std::make_shared<OpenGLTexture>(OpenGLTexture::TextureTarget::TextureBuffer);;
+			//fragmentBufferListBuffer = std::make_shared<OpenGLBuffer>(OpenGLBuffer::BufferTarget::TextureBuffer, OpenGLBuffer::DynamicCopy);
 			const auto size = std::size_t(width)*height * 3 * 4 * sizeof(unsigned int);
-			//fragmentBufferList = OpenGLTexture::CreateTextureBuffer(OpenGLTexture::R32UI, OpenGLTexture::Linear, OpenGLTexture::Linear, OpenGLTexture::ClampToEdge, OpenGLTexture::RED, OpenGLTexture::UInt32, size, nullptr);
+			fragmentBufferListBuffer = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer, OpenGLBuffer::BufferUsage::DynamicCopy);
 			GL_ERROR_REPORT;
+			fragmentBufferListBuffer->AllocateFor(nullptr, size * 3);
+			GL_ERROR_REPORT;
+			fragmentBufferListBuffer->BindBufferBase(3);
+			GL_ERROR_REPORT;
+
+			fragmentBufferListTexture = std::make_shared<OpenGLTexture>(OpenGLTexture::TextureTarget::TextureBuffer);
+			//fragmentBufferList = OpenGLTexture::CreateTextureBuffer(OpenGLTexture::R32UI, OpenGLTexture::Linear, OpenGLTexture::Linear, OpenGLTexture::ClampToEdge, OpenGLTexture::RED, OpenGLTexture::UInt32, size, nullptr);
+			
 			//fragmentBufferList->BindToDataImage(2, 0, false, 0, OpenGLTexture::ReadAndWrite, OpenGLTexture::R32UI);
 
 			
@@ -199,12 +205,14 @@ namespace ysl
 		void OITMeshRenderer::CreateMesh(const std::string& fileName)
 		{
 			ObjReader reader;
+
 			reader.Load(fileName);
 
 			if (!reader.IsLoaded())
 				ysl::Warning("%s cannot be loaded\n", fileName.c_str());
 
 			Mesh aMesh;
+
 			aMesh.vao = std::make_shared<OpenGLVertexArrayObject>();
 			aMesh.vao->create();
 			aMesh.vao->bind();

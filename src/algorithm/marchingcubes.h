@@ -9,7 +9,8 @@
 #include <trianglemesh.h>
 #include <vector>
 
-#include "../core/bound.h"
+//#include "../core/bound.h"
+
 
 class MarchingCubes
 {

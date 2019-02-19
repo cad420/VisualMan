@@ -5,13 +5,15 @@
 #include "marchingcubes.h"
 #include "../mathematics/geometry.h"
 #include "../mathematics/numeric.h"
+#include "../core/bound.h"
 
 #include <algorithm>
 
 
-ysl::TriangleMesh MarchingCubes(const char *data, char isovalue) {
-
-}
+//ysl::TriangleMesh MarchingCubes(const char *data, char isovalue) 
+//{
+//
+//}
 
 MarchingCubes::MarchingCubes(const char *d, ysl::Size3 size) :
 	data(d),
@@ -57,8 +59,8 @@ std::pair<std::vector<ysl::Point3f>, std::vector<ysl::Vector3f>> MarchingCubes::
 						int v2value = data[ysl::Linear({ v2x, v2y, v2z }, { dataSize.x,dataSize.y })];
 
 						triangles.push_back(ysl::Lerp((float)(value - v1value) / (float)(v2value - v1value),
-							ysl::Point3f{ v1x,v1y,v1z },
-							ysl::Point3f{ v2x,v2y,v2z }));
+							ysl::Point3f( v1x,v1y,v1z ),
+							ysl::Point3f( v2x,v2y,v2z )));
 						//triangles.push_back(interpulation(v1x, v1y, v1z, v2x, v2y, v2z, v1value, v2value, value));
 						normals.push_back(ysl::Vector3f((gradient[ysl::Linear({ v1x,v1y,v1z }, { dataSize.x,dataSize.y })] + gradient[v2x, v2y, v2z]) / 2));
 						//normals.push_back(gradient[toIndex(v1x,v1y,v1z)] +static_cast<float>(value-v1value)*(gradient[toIndex(v2x,v2y,v2z)]-gradient[toIndex(v1x,v1y,v1z)])/(v2value-v1value));

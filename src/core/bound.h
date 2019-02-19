@@ -2,8 +2,8 @@
 #ifndef _BOUND_H_
 #define _BOUND_H_
 
-#include "../mathematics/geometry.h"
 
+#include "../mathematics/geometry.h"
 
 
 namespace ysl
@@ -15,20 +15,22 @@ namespace ysl
 	public:
 		Point3i min;
 		Point3i max;
-		Bound3i();
+		Bound3i() = default;
 
-		Bound3i(const Point3i & p0, const Point3i & p1)noexcept:min(p0),max(p1){
+		Bound3i(const Point3i & p0, const Point3i & p1)noexcept:min(p0),max(p1)
+		{
 		}
 
-		explicit Bound3i(const Point3i& p):min(p),max(p){
-
+		explicit Bound3i(const Point3i& p):min(p),max(p)
+		{
 		}
 
 		const Point3i & operator[](int i)const
 		{
 			assert(i >= 0 && i < 2);
-			if (i == 0)return min;
-			if (i == 1)return max;
+			//if (i == 0)return min;
+			//if (i == 1)return max;
+			return *(&min + i);
 		}
 
 		Point3i & operator[](int i)
@@ -61,18 +63,17 @@ namespace ysl
 			return max.z- min.z;
 		}
 
-		Float SurfaceArea()const{
+		Float SurfaceArea()const
+		{
 			const auto d = Diagonal();
 			if (d[0] < 0 || d[1] < 0 || d[2] < 0)return Float(0);
 			const auto area = (d[0] * d[1] + d[1] * d[2] + d[2] * d[0]) * 2;
 			return area;
 		}
 
-
 		/*
 		*Check whether a point is in the bound
 		*/
-
 		bool Inside(const Point3f & p) const
 		{
 			return (p.x >= min.x && p.y <= max.x &&
@@ -86,10 +87,7 @@ namespace ysl
 					p.y >= min.y && p.y < max.y &&
 					p.z >= min.z && p.z < max.z);
 		}
-
-
 	};
-
 
 
 	class Bound3f
@@ -106,8 +104,9 @@ namespace ysl
 		const Point3f & operator[](int i)const
 		{
 			assert(i >= 0 && i < 2);
-			if (i == 0)return m_min;
-			if (i == 1)return m_max;
+			//if (i == 0)return m_min;
+			//if (i == 1)return m_max;
+			return *(&m_min + i);
 		}
 
 		Point3f & operator[](int i)
