@@ -290,6 +290,7 @@ namespace ysl
 			ResizeFragmentBufferList(windowWidth, windowHeight);
 		}
 
+
 		void OITMeshRenderer::ResizeHeadPointerImage(int width, int height)
 		{
 			assert(imageList);

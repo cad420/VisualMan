@@ -26,7 +26,8 @@ MarchingCubes::MarchingCubes(const char *d, ysl::Size3 size) :
 	Preprocess();
 }
 
-std::pair<std::vector<ysl::Point3f>, std::vector<ysl::Vector3f>> MarchingCubes::GenerateMesh(int value) {
+std::pair<std::vector<ysl::Point3f>, std::vector<ysl::Vector3f>> MarchingCubes::GenerateMesh(int value) 
+{
 	std::vector<ysl::Point3f> triangles;
 	std::vector<ysl::Vector3f> normals;
 
