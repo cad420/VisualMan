@@ -1,7 +1,7 @@
 #version 430 core
 
 
-//layout(early_fragment_tests) in;
+layout(early_fragment_tests) in;
 
 layout(binding = 0 ,offset = 0) uniform atomic_uint indexCounter;
 layout(binding = 1, r32ui) uniform uimage2DRect headPointerImage;
@@ -23,8 +23,15 @@ out vec4 frag_color;
 
 vec4 PhongShading()
 {
-    vec3 frag_norm = normalize(frag_normal);
-	
+
+    vec3 frag_norm;
+	if(gl_FrontFacing == true)
+	{
+		frag_norm = normalize(frag_normal);
+	}else
+	{
+		frag_norm = -normalize(frag_normal);
+	}
 
    // the light normalized vector points to light
     vec3 light_norm = normalize(light_pos-frag_pos);

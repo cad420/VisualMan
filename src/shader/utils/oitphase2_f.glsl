@@ -8,7 +8,7 @@ layout(std430, binding =3) buffer ListBuffer{uvec4 buf[];}listBuffers;
 layout(location = 0)out vec4 fragColor;
 
 
-#define MAX_FRAGMENTS 15
+#define MAX_FRAGMENTS 20
 uvec4 fragments[MAX_FRAGMENTS];
 
 
@@ -50,17 +50,23 @@ void sortFragmentList(int fragCount){
 	}
 }
 
-vec4 blend(vec4 currentColor,vec4 newColor){
+vec4 blend_one_minus_src(vec4 currentColor,vec4 newColor)
+{
 	return mix(currentColor,newColor,newColor.a);
 }
 
+vec4 blend_one(vec4 currentColor,vec4 newColor)
+{
+	return currentColor + newColor;
+}
+
 vec4 calculateFinalColor(int fragCount){
-	vec4 finalColor = vec4(0.0);
+	vec4 finalColor = vec4(1.0);
 
-	for(int i = 0 ; i < fragCount;i++){
+	for(int i = 0 ; i < fragCount;i++)
+	{
 		vec4 fColor = unpackUnorm4x8(fragments[i].y);
-
-		finalColor = blend(finalColor,fColor);
+		finalColor = blend_one_minus_src(finalColor,fColor);
 	}
 
 	return finalColor;
