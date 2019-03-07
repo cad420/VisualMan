@@ -1,7 +1,6 @@
 
 #include "volume_utils.h"
 
-
 RawReader::RawReader(const std::string &fileName, const ysl::Size3 &dimensions, size_t voxelSize)
 	: fileName(fileName), dimensions(dimensions), voxelSize(voxelSize),
 	file(fopen(fileName.c_str(), "rb")), offset(0)

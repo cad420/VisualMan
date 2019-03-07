@@ -15,14 +15,14 @@ namespace ysl {
 
 	//constexpr Float Pi = 3.14159265358979323846;
 
-	constexpr Float LOWEST_Float_VALUE = (std::numeric_limits<Float>::lowest)();
+	//constexpr Float LOWEST_Float_VALUE = (std::numeric_limits<Float>::lowest)();
 
-	constexpr Float MAX_Float_VALUE = (std::numeric_limits<Float>::max)();		// For fucking min/max macro defined in windows.h
+	//constexpr Float MAX_Float_VALUE = (std::numeric_limits<Float>::max)();		// For fucking min/max macro defined in windows.h
 
 
 	template<typename T, typename U, typename V> inline
-		T
-		Clamp(const T & value, const U & low, const V & high)
+	T
+	Clamp(const T & value, const U & low, const V & high)
 	{
 		if (value < low)return low;
 		if (value > high)return high;
@@ -49,12 +49,9 @@ namespace ysl {
 		return std::fmod(static_cast<double>(a), static_cast<double>(b));
 	}
 
-
-
-
 	inline
 		constexpr std::uint64_t
-		RoundUpDivide( std::uint64_t no, std::uint64_t den)
+		RoundUpDivide(std::uint64_t no, std::uint64_t den)
 	{
 		return (no + den - 1) / den;
 	}
@@ -67,8 +64,8 @@ namespace ysl {
 //	}
 
 	inline
-	int
-	NextPowerOfTwo(std::uint64_t v)
+		int
+		NextPowerOfTwo(std::uint64_t v)
 	{
 		v--;
 		v |= v >> 1;
@@ -82,8 +79,8 @@ namespace ysl {
 	}
 
 	inline
-	int
-	NextPowerOfTwo(std::uint32_t v)
+		int
+		NextPowerOfTwo(std::uint32_t v)
 	{
 		v--;
 		v |= v >> 1;
@@ -97,73 +94,73 @@ namespace ysl {
 
 	template<typename T>
 	bool
-	IsPowerOfTwo(T n)
+		IsPowerOfTwo(T n)
 	{
 		return(n&(n - 1)) == 0;
 	}
 
 	inline
-	Float
-	Lerp(Float t, Float v1, Float v2)
+		Float
+		Lerp(Float t, Float v1, Float v2)
 	{
 		return (1 - t)*v1 + t * v2;
 	}
 
 	inline
 	Point3f
-	Lerp(Float t,const Point3f & p1,const Point3f & p2)
+	Lerp(Float t, const Point3f & p1, const Point3f & p2)
 	{
-		return p1*(1-t) + p2*t;
+		return p1 * (1 - t) + p2 * t;
 	}
 
 	inline
 	Point3f
-	Lerp(Float t,const Point3i & p1,const Point3i & p2)
+	Lerp(Float t, const Point3i & p1, const Point3i & p2)
 	{
-		const auto p = p1*(1-t) + p2*t;
-		return Point3f(p.x,p.y,p.z);
+		const auto p = p1 * (1 - t) + p2 * t;
+		return Point3f(p.x, p.y, p.z);
 	}
 
 	inline
 	Vector3f
-	Lerp(Float t,const Vector3f & p1,const Vector3f & p2)
+	Lerp(Float t, const Vector3f & p1, const Vector3f & p2)
 	{
-		const auto p = p1*(1-t) + p2*t;
-		return Vector3f(p.x,p.y,p.z);
+		const auto p = p1 * (1 - t) + p2 * t;
+		return Vector3f(p.x, p.y, p.z);
 	}
 
 	inline
 	Vector3f
-	Lerp(Float t,const Vector3i & p1,const Vector3i & p2)
+	Lerp(Float t, const Vector3i & p1, const Vector3i & p2)
 	{
-		const auto p = p1*(1-t) + p2*t;
-		return Vector3f(p.x,p.y,p.z);
-	}
-
-	inline 
-	RGBSpectrum 
-	Lerp(Float t,const RGBSpectrum & s1,const RGBSpectrum & s2)
-	{
-		return s1*(1-t) + s2*t;
+		const auto p = p1 * (1 - t) + p2 * t;
+		return Vector3f(p.x, p.y, p.z);
 	}
 
 	inline
-	RGBASpectrum
-	Lerp(Float t,const RGBASpectrum & s1,const RGBASpectrum & s2)
+		RGBSpectrum
+		Lerp(Float t, const RGBSpectrum & s1, const RGBSpectrum & s2)
+	{
+		return s1 * (1 - t) + s2 * t;
+	}
+
+	inline
+		RGBASpectrum
+		Lerp(Float t, const RGBASpectrum & s1, const RGBASpectrum & s2)
 	{
 		return (1 - t)*s1 + t * s2;
 	}
 
 	inline
-	Float
-	DegreesToRadians(Float degrees)
+		Float
+		DegreesToRadians(Float degrees)
 	{
 		return degrees * Float(Pi / 180);
 	}
 
 	inline
-	Float
-	RadiansToDegrees(Float radians)
+		Float
+		RadiansToDegrees(Float radians)
 	{
 		return radians * Float(180 / Pi);
 	}
@@ -188,26 +185,26 @@ namespace ysl {
 		return p.x + p.y * width;
 	}
 
-//	inline
-//	std::size_t
-//	Linear(const Vector2i &v, std::size_t width)
-//	{
-//		return Linear(Point2i{v.x,v.y},width);
-//	}
+	//	inline
+	//	std::size_t
+	//	Linear(const Vector2i &v, std::size_t width)
+	//	{
+	//		return Linear(Point2i{v.x,v.y},width);
+	//	}
 
 	inline
-	ysl::Point3i
-	Dim(std::size_t linear,const ysl::Size2 & dim)
+		ysl::Point3i
+		Dim(std::size_t linear, const ysl::Size2 & dim)
 	{
 		const auto plane = dim.x*dim.y;
-		return Point3i(linear % dim.x,(linear%plane)/dim.y,linear/plane);
+		return Point3i(linear % dim.x, (linear%plane) / dim.y, linear / plane);
 	}
 
 	inline
-	ysl::Point2i
-	Dim(std::size_t linear,std::size_t dim)
+		ysl::Point2i
+		Dim(std::size_t linear, std::size_t dim)
 	{
-		return ysl::Point2i(linear%dim,linear/dim);
+		return ysl::Point2i(linear%dim, linear / dim);
 	}
 
 

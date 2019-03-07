@@ -23,7 +23,7 @@ namespace ysl {
 			const AABB & bLeft = root->m_left->m_bound;
 			const AABB & bRight = root->m_right->m_bound;
 			bool interLeft, interRight;
-			if (ray.m_negDirection[splitAxis] == false)
+			if (ray.negDirection[splitAxis] == false)
 			{
 				if (bLeft.m_min[splitAxis] <= bRight.m_min[splitAxis])
 				{

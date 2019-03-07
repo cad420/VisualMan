@@ -33,6 +33,8 @@
 #include "application/largevolumeraycasterapplication.h"
 #include "renderer/isosurfacerenderer.h"
 
+
+
 //#include "application/application.h"
 
 
@@ -133,13 +135,11 @@ namespace
 	std::shared_ptr<OpenGLTexture> g_texCache;
 
 	std::list<std::pair<PageTableEntryAbstractIndex, CacheBlockAbstractIndex>> g_lruList;
-
 	std::shared_ptr<OpenGLBuffer> g_blockPingBuf;
 	std::shared_ptr<OpenGLBuffer> g_blockPongBuf;
 	unsigned int g_pingPBO;
 	unsigned int g_pongPBO;
 	char * g_pboPtr[2];
-
 
 	std::vector<GlobalBlockAbstractIndex> g_hits;
 
@@ -209,11 +209,11 @@ void renderingWindowResize(ResizeEvent *event)
 {
 	const auto x = event->size().x;
 	const auto y = event->size().y;
-	g_orthoMatrix.SetOrtho(0, x, 0, y, -10, 100);
+	g_orthoMatrix.SetGLOrtho(0, x, 0, y, -10, 100);
 
 	//
 	const auto aspect = static_cast<float>(x) / static_cast<float>(y);
-	g_projMatrix.SetPerspective(45.0f, aspect, 0.01, 100);
+	g_projMatrix.SetGLPerspective(45.0f, aspect, 0.01, 100);
 
 	// Update frambuffer size
 	g_texEntryPos->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, x, y, 0, nullptr);
@@ -930,7 +930,7 @@ static void glfw_error_callback(int error, const char* description)
 //
 //
 
-int main1(int argc, char** argv)
+int main2(int argc, char** argv)
 {
 	// Setup window
 	glfwSetErrorCallback(glfw_error_callback);
@@ -1301,7 +1301,7 @@ int main1(int argc, char** argv)
 
 int main(int argc, char ** argv)
 {
-	//return ysl::app::LargeVolumeRayCaster(argc, argv,
-	//	800, 600, "C:\\data\\s1_480_480_480_2_64.lvd").Exec();
-	return ysl::app::OITMeshRenderer(argc, argv, 800, 600).Exec();
+	return ysl::app::LargeVolumeRayCaster(argc, argv,
+		800, 600, "C:\\data\\s1_3968_3968_3968_2_128.lvd").Exec();
+	//return ysl::app::OITMeshRenderer(argc, argv, 800, 600).Exec();
 }

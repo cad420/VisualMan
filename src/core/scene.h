@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "shape.h"
-#include "bound.h"
+#include "geometry.h"
 
 namespace ysl {
 #include <memory>
@@ -25,6 +25,5 @@ namespace ysl {
 		void SetObject(std::shared_ptr<Shape> shape) {primitive = shape;}
 	};
 }
-
 
 #endif // SCENE_H

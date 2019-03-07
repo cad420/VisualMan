@@ -38,25 +38,31 @@ namespace ysl
 			while (!glfwWindowShouldClose(window))
 			{
 				glfwPollEvents();
-				ImGui_ImplOpenGL3_NewFrame();
-				ImGui_ImplGlfw_NewFrame();
-				ImGui::NewFrame();
+				if(mouseLeftButtonPressed || mouseRightButtonPressed)
+				{
+					ImGui_ImplOpenGL3_NewFrame();
+					ImGui_ImplGlfw_NewFrame();
+					ImGui::NewFrame();
 
-				DrawImGui();
+					DrawImGui();
 
-				ImGui::EndFrame();
-				// Rendering
-				ImGui::Render();
+					ImGui::EndFrame();
+					// Rendering
+					ImGui::Render();
 
-				int display_w, display_h;
-				glfwMakeContextCurrent(window);
-				glfwGetFramebufferSize(window, &display_w, &display_h);
-				glViewport(0, 0, display_w, display_h);
-				glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
-				glClear(GL_COLOR_BUFFER_BIT);
-				RenderLoop();
-				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-				glfwSwapBuffers(window);
+					int display_w, display_h;
+					glfwMakeContextCurrent(window);
+					glfwGetFramebufferSize(window, &display_w, &display_h);
+
+					glViewport(0, 0, display_w, display_h);
+					glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+					glClear(GL_COLOR_BUFFER_BIT);
+					RenderLoop();
+
+					ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+					glfwSwapBuffers(window);
+				}
+			
 			}
 			DestroyOpenGLContext();
 			return 0;

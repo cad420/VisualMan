@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "../mathematics/geometry.h"
-#include "ray.h"
+
 
 
 namespace ysl {

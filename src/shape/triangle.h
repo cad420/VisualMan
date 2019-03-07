@@ -5,76 +5,96 @@
 #include "../mathematics/transformation.h"
 #include <vector>
 #include <unordered_map>
-
 #include "../core/material.h"
 #include "../utility/materialreader.h"
 
 namespace ysl
 {
-	class TriangleMesh {
+	class TriangleMesh
+	{
 		std::unique_ptr<Point3f[]> m_vertices;
-		int m_nVertex;
-		std::unique_ptr<int[]> m_vertexIndices;
-		int m_nIndex;
 		std::unique_ptr<Vector3f[]> m_normals;
-	public:
-		TriangleMesh(const Point3f * vertices,
-			const Vector3f * normals,
+		std::unique_ptr<Point2f[]> m_textures;
+		std::vector<int> m_vertexIndices;
+		const int m_nTriangles;
+		const int m_nVertex;
+		ysl::Bound3f m_bound;
 
+	public:
+		TriangleMesh(const Transform & objectToWorld,
+			const Point3f * vertices,
+			const Vector3f * normals,
+			const Point2f * textures,
 			int nVertex,
 			const int * vertexIndices,
-			int nIndex,
-			const Transform & trans)noexcept :
-			m_nVertex(nIndex),
-			m_nIndex(nIndex)
+			int nTriangles)noexcept :
+			m_nVertex(nVertex),
+			m_nTriangles(nTriangles),
+			m_vertexIndices(vertexIndices, vertexIndices + 3 * nTriangles)
 		{
-			m_vertices.reset(new Point3f[nIndex]);
-			m_vertexIndices.reset(new int[nIndex]);
-			m_normals.reset(new Vector3f[nIndex]);
-			for (int i = 0; i < nIndex; i++)
+			m_vertices.reset(new ysl::Point3f[nVertex]);
+			for (int i = 0; i < nVertex; i++)
 			{
-				m_vertices[i] = trans * vertices[vertexIndices[i]];
+				m_vertices[i] = objectToWorld * vertices[i];
+				//objectToWorld += m_vertices[i];
 			}
-			for (int i = 0; i < nIndex; i++)
-			{
-				m_vertexIndices[i] = vertexIndices[i];
+			//m_centroid /= nVertex;
+
+			int normalBytes = 0;
+			int textureBytes = 0;
+			if (normals != nullptr) {
+				//const auto nm = trans.normalMatrix();
+				const auto nm = objectToWorld.Matrix().NormalMatrix();
+				normalBytes = m_nVertex * sizeof(ysl::Vector3f);
+				m_normals.reset(new ysl::Vector3f[nVertex]);
+				for (int i = 0; i < nVertex; i++) {
+					//m_normals[i] = trans * normals[i];
+					const auto x = normals[i].x, y = normals[i].y, z = normals[i].z;
+					m_normals[i] = ysl::Vector3f{ x*nm.m[0][0] + y * nm.m[0][1] + z * nm.m[0][2],x*nm.m[1][0] + y * nm.m[1][1] + z * nm.m[1][2],x*nm.m[2][0] + y * nm.m[2][1] + z * nm.m[2][2] }.Normalized();
+				}
 			}
-			//create normals vertices
-			for (int i = 0; i < nIndex; i++) {
-				m_normals[i] = normals[vertexIndices[i]];
+			if (textures != nullptr) {
+				textureBytes = m_nVertex * sizeof(ysl::Point2f);
+				m_textures.reset(new ysl::Point2f[nVertex]);
+				std::memcpy(m_textures.get(), textures, nVertex * sizeof(ysl::Point2f));
 			}
+
+
 		}
-		const Point3f * getVerticesArray()const
+		const Point3f * Vertices()const
 		{
 			return m_vertices.get();
 		}
-		int getVertexCount()const
+		int VertexCount()const
 		{
 			return m_nVertex;
 		}
-		const int * getIndicesArray()const
+		const int * Indices()const
 		{
-			return m_vertexIndices.get();
+			return m_vertexIndices.data();
 		}
-		int getIndexCount()const
+		int TriangleCount()const
 		{
-			return m_nIndex;
+			return m_nTriangles;
 		}
-		const Vector3f *getNormalsArray()const 
+		const Vector3f *Normals()const
 		{
 			return m_normals.get();
 		}
-		void transform(const Transform & trans)
+
+		const Point2f *Textures()const
 		{
-			for (int i = 0; i < m_nIndex; i++)
-			{
-				m_vertices[i] = trans * m_vertices[i];
-			}
+			return m_textures.get();
 		}
+		//void transform(const Transform & trans)
+		//{
+		//	for (int i = 0; i < m_nTriangles; i++)
+		//	{
+		//		m_vertices[i] = trans * m_vertices[i];
+		//	}
+		//}
 		friend class Triangle;
 	};
-
-
 
 	class Triangle :public Shape {
 		std::shared_ptr<TriangleMesh> m_sharedTriangles;
@@ -93,14 +113,15 @@ namespace ysl
 		}
 		Float area()const override
 		{
-			Vector3f v1 = m_sharedTriangles->m_vertices[m_vertexIndices[1]]
+			const auto v1 = m_sharedTriangles->m_vertices[m_vertexIndices[1]]
 				- m_sharedTriangles->m_vertices[m_vertexIndices[0]];
-			Vector3f v2 = m_sharedTriangles->m_vertices[m_vertexIndices[2]]
+			const auto v2 = m_sharedTriangles->m_vertices[m_vertexIndices[2]]
 				- m_sharedTriangles->m_vertices[m_vertexIndices[0]];
 			return 0.5*Vector3f::Dot(v1, v2);
-
 		}
-		Interaction sample(const Point2f &u) const override {
+
+		Interaction sample(const Point2f & u) const override 
+		{
 			Point2f s = uniformSampleTriangle(u);
 			Point3f p0 = m_sharedTriangles->m_vertices[m_vertexIndices[0]];
 			Point3f p1 = m_sharedTriangles->m_vertices[m_vertexIndices[1]];
@@ -124,9 +145,7 @@ namespace ysl
 			isect.m_pShape = this;
 			//point
 			isect.m_p = sp;
-
 			//error bound
-
 			return isect;
 		}
 
@@ -134,7 +153,7 @@ namespace ysl
 
 
 		static std::vector<std::shared_ptr<Shape>>
-			createTriangleMesh(const Point3f * vertices, const Vector3f * normals, int nVertex,
+			createTriangleMesh(const Point3f * vertices, const Vector3f * normals,const Point2f * textures, int nVertex,
 				const int * vertexIndices, int nIndex, std::unordered_map<int, std::string> & mtlName, MaterialReader & mtlReader,
 				std::vector<std::shared_ptr<Shape>>* lightShapes,
 				const Transform & trans)
@@ -142,12 +161,13 @@ namespace ysl
 			assert(nIndex % 3 == 0);
 			if (lightShapes != nullptr)
 				lightShapes->clear();
-			std::shared_ptr<TriangleMesh> mesh(new TriangleMesh(vertices, 
+			std::shared_ptr<TriangleMesh> mesh(new TriangleMesh(trans,vertices,
 				normals,
+				textures,
 				nVertex,
 				vertexIndices,
-				nIndex, 
-				trans));
+				nIndex/3
+				));
 			std::vector<std::shared_ptr<Shape>> tris;
 			for (int i = 0; i < nIndex / 3; i++)
 			{
@@ -212,12 +232,16 @@ namespace ysl
 				}
 
 				///TODO: distiguish different material by MaterialType
+
 				tris.back()->setMaterial(std::make_shared<Material>(kd, ks, ka, ke, tf, ni, ns, type));
 			}
-
 			return tris;
 		}
 	};
+
+
+	std::shared_ptr<TriangleMesh> CreateTriangleMeshFromFile(const ysl::Transform& objectToWorld, const std::string & fileName);
+
 }
 
 #endif /*_TRIANGLE_H_*/

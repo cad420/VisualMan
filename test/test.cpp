@@ -138,36 +138,104 @@ int jsonTest()
 
 
 
+void CountVolume()
+{
 
+
+	std::string fileName;
+	std::cout << "Enter volume file name\n";
+	std::cin >> fileName;
+
+	int leftTh, rightTh;
+	std::cout << "Enter min and max threshold value\n";
+	std::cin >> leftTh >> rightTh;
+
+
+	std::size_t blockSize;
+	std::cout << "Enter block size (e.g. 32,64,128,256,512,..)\n";
+	std::cin >> blockSize;
+
+	std::size_t w, h, d, v;
+	std::cout << "Enter (x,y,z,v)\n";
+	std::cin >> w >> h >> d >> v;
+
+	double ratio;
+
+	std::cout << "Enter ratio:\n";
+	std::cin >> ratio;
+
+	const auto bytes = w * h*d*v;
+
+	std::unique_ptr<unsigned char[]> buf(new unsigned char[bytes]);
+
+	RawReader reader(fileName, { w,h,d }, v);
+
+	reader.readRegion({ 0,0,0 }, { w,h,d }, buf.get());
+
+
+	std::cout << "Reading finished\n";
+
+	std::size_t totalBlocks = 0, validBlock = 0;
+
+#pragma parallel for
+
+	for(int z = 0 ; z<d;z+=blockSize)
+	{
+		for(int y = 0 ;y<h;y+=blockSize)
+		{
+			for(int x = 0;x<w;x+=blockSize)
+			{
+				std::size_t validVoxels = 0;
+				for (int zz = 0; zz < blockSize; zz++)
+				{
+					for (int yy = 0; yy < blockSize; yy++)
+					{
+						for (int xx = 0; xx < blockSize; xx++)
+						{
+							const auto X = x + xx, Y = y + yy, Z = z + zz;
+							const auto linear = ysl::Linear({ x,y,z }, { w,h });
+							if (buf[linear] >= leftTh && buf[linear] <= rightTh)
+							{
+								validVoxels++;
+							}
+						}
+					}
+				}
+				if (validVoxels >= ratio * blockSize*blockSize*blockSize)
+					validBlock++;
+				totalBlocks++;
+
+			}
+		}
+	}
+	std::cout << validBlock << " of " << totalBlocks << ":" << 1.0*validBlock / totalBlocks << std::endl;
+}
 
 
 
 int main(int argc, char *argv[])
 {
 
-	//int x, y, z, xc, yc, zc;
-	////std::cin >> x >> y >> z;
-	////ABCFlowGen(x,y,z);
-	////SimpleBlockGen(x,y,z,2,2,2);
-	//std::string fileName;
-	//std::cin >> fileName;
-	////int x, y, z, repeat;
-	//int repeat;
-	//std::cin >> x >> y >> z >> repeat;
-	//RawToLVDConverter<7> converter(fileName,x,y,z,repeat);
-	//converter.convert();
-	//converter.save(fileName);
+	int x, y, z, xc, yc, zc;
+	//std::cin >> x >> y >> z;
+	//ABCFlowGen(x,y,z);
+	//SimpleBlockGen(x,y,z,2,2,2);
+	std::string fileName;
+	std::cin >> fileName;
+	//int x, y, z, repeat;
+	int repeat;
+	std::cin >> x >> y >> z >> repeat;
+	RawToLVDConverter<6> converter(fileName,x,y,z,repeat);
+	converter.convert();
+	converter.save(fileName);
 	//LVDTester();
-
-
 	//ysl::ObjReader reader;
 	//reader.Load("C:\\Users\\ysl\\Desktop\\dragon.obj");
 
 	//std::cout << reader.getFaceIndices().size() << std::endl;
 	//system("pause");
-
-
-
+	//CountVolume();
+	system("pause");
 	return 0;
 
 }

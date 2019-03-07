@@ -3,8 +3,7 @@
 #include <iostream>
 
 #include "geometry.h"
-#include "../core/ray.h"
-#include "../core/bound.h"
+#include "numeric.h"
 
 
 namespace  ysl
@@ -79,8 +78,8 @@ namespace  ysl
 		const Matrix4x4& Matrix() const;
 		const Matrix4x4& InverseMatrix() const;
 		void SetLookAt(const Point3f & eye, const Point3f & center, const Vector3f & up);
-		void SetOrtho(Float left, Float right, Float bottom, Float top, Float nearPlane, Float farPlane);
-		void SetPerspective(Float vertcialAngle, Float aspectRation, Float nearPlane, Float farPlane);
+		void SetGLOrtho(Float left, Float right, Float bottom, Float top, Float nearPlane, Float farPlane);
+		void SetGLPerspective(Float vertcialAngle, Float aspectRation, Float nearPlane, Float farPlane);
 		void SetFrustum(Float left, Float right, Float bottom, Float top, Float nearPlane, Float farPlane);
 		void SetTranslate(const Vector3f& t);
 		void SetTranslate(Float x, Float y, Float z);
@@ -145,6 +144,120 @@ namespace  ysl
 		const auto rz = m_m.m[2][0] * x + m_m.m[2][1] * y + m_m.m[2][2] * z;
 		return Vector3<T>{rx, ry, rz};
 	}
+
+	inline Transform Scale(Float x,Float y,Float z)
+	{
+		Transform t;
+		t.SetScale(x, y, z);
+		return t;
+	}
+	inline Transform Scale(Float *v)
+	{
+		Transform t;
+		t.SetScale(v);
+		return t;
+	}
+	inline Transform Scale(const Vector3f & s)
+	{
+		Transform t;
+		t.SetScale(s);
+		return t;
+	}
+
+	inline Transform Translate(Float x,Float y,Float z)
+	{
+		Transform t;
+		t.SetTranslate(x, y, z);
+		return t;
+	}
+	inline Transform Translate(Float *v)
+	{
+		Transform t;
+		t.SetTranslate(v);
+		return t;
+	}
+	inline Transform Translate(const Vector3f & v)
+	{
+		Transform t;
+		t.SetTranslate(v);
+		return t;
+	}
+
+
+	inline Transform Rotate(Float x, Float y, Float z, Float degrees)
+	{
+		Transform t;
+		t.SetRotate(x,y,z,degrees);
+		return t;
+	}
+	inline Transform Rotate(Float * v, Float degrees)
+	{
+		Transform t;
+		t.SetRotate(v, degrees);
+		return t;
+	}
+	inline Transform Rotate(const Vector3f & axis, Float degrees)
+	{
+		Transform t;
+		t.SetRotate(axis, degrees);
+		return t;
+	}
+
+	inline Transform RotateX(Float degrees)
+	{
+		Transform t;
+		t.SetRotateX(degrees);
+		return t;
+	}
+	inline Transform RotateY(Float degrees)
+	{
+		Transform t;
+		t.SetRotateY( degrees);
+		return t;
+	}
+	inline Transform RotateZ(Float degrees)
+	{
+		Transform t;
+		t.SetRotateZ(degrees);
+		return t;
+	}
+
+	inline Transform LookAt(const Point3f & eye, const Point3f & center, const Vector3f & up)
+	{
+		Transform t;
+		t.SetLookAt(eye, center, up);
+		return t;
+	}
+	inline Transform Ortho(Float left, Float right, Float bottom, Float top, Float nearPlane, Float farPlane)
+	{
+		Transform t;
+		t.SetGLOrtho(left, right, bottom, top, nearPlane, farPlane);
+		return t;
+	}
+	inline Transform Perspective(Float vertcialAngle, Float aspectRation, Float nearPlane, Float farPlane)
+	{
+		Transform t;
+		t.SetGLPerspective(vertcialAngle, aspectRation, nearPlane, farPlane);
+		return t;
+	}
+
+	inline Transform Orthographic(Float zNear,Float zFar)
+	{
+		return Scale(1,1,1.0/(zFar-zNear)) * Translate(0,0,-zNear);
+	}
+
+	inline Transform Perspective(Float zNear,Float zFar,Float fov)
+	{
+		Matrix4x4 persp(1.0,0,0,0,
+						0,1,0,0,
+						0,0,zFar/(zFar-zNear),-zFar*zNear/(zFar-zNear),
+						0,0,1,0);
+		Float cot = 1 / (std::tan(DegreesToRadians(fov) / 2));
+		return Scale(cot, cot, 1.0)*Transform(persp);
+	}
+
+
+
 }
 
 

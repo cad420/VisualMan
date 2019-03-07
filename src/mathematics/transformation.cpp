@@ -357,9 +357,9 @@ namespace ysl
 	}
 
 	Ray
-		Transform::operator*(const Ray& ray) const
+	Transform::operator*(const Ray& ray) const
 	{
-		return { (*this)*ray.direction() ,(*this)*ray.original() };
+		return { (*this)*ray.Direction() ,(*this)*ray.Original() };
 	}
 
 	Bound3f
@@ -419,7 +419,7 @@ namespace ysl
 	}
 
 	void
-		Transform::SetOrtho(Float left, Float right, Float bottom, Float top, Float nearPlane, Float farPlane)
+		Transform::SetGLOrtho(Float left, Float right, Float bottom, Float top, Float nearPlane, Float farPlane)
 	{
 		const auto width = right - left;
 		const auto height = top - bottom;
@@ -439,7 +439,7 @@ namespace ysl
 	}
 
 	void
-		Transform::SetPerspective(Float vertcialAngle, Float aspectRation, Float nearPlane, Float farPlane)
+		Transform::SetGLPerspective(Float vertcialAngle, Float aspectRation, Float nearPlane, Float farPlane)
 	{
 		const auto top = std::tan(DegreesToRadians(vertcialAngle / 2))*nearPlane;
 		const auto right = top * aspectRation;

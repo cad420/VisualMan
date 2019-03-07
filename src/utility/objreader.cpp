@@ -157,6 +157,11 @@ namespace ysl
 			for(std::size_t f = 0;f<s.mesh.num_face_vertices.size();f++)
 			{
 				const auto fv = s.mesh.num_face_vertices[f];
+
+				///TODO:: The shape of face should be determined here
+				// fv == 3, if it is triangle
+				// fv == 4, if it is rectangle
+
 				for(auto v = 0;v<fv;v++)
 				{
 					index_t idx = s.mesh.indices[indexOffset + v];

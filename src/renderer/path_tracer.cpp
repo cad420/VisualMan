@@ -43,7 +43,9 @@ namespace ysl
 			//direct light illumination
 			for (const auto & light : lights) {
 				Vector3f wi;
+
 				Float pdf;
+
 				VisibilityTester vis;
 
 				for (int i = 0; i < lightSamples; i++) {
@@ -64,7 +66,7 @@ namespace ysl
 							auto ka = m->m_ka;
 							const auto ns = m->m_ns;
 							auto kd = m->m_kd;
-							auto v = -ray.direction().Normalized();
+							auto v = -ray.Direction().Normalized();
 							auto n = isect.normal().Normalized();
 							auto l = wi.Normalized();
 							auto h = (v + l).Normalized();
@@ -103,13 +105,13 @@ namespace ysl
 			switch (m->m_type)
 			{
 			case MaterialType::Mirror:
-				bsdf = isect.bsdf()->sampleF(-ray.direction(), &wi, &pdf, sample, BSDF_SPECULAR);
+				bsdf = isect.bsdf()->sampleF(-ray.Direction(), &wi, &pdf, sample, BSDF_SPECULAR);
 				break;
 			case MaterialType::Metal:
-				bsdf = isect.bsdf()->sampleF(-ray.direction(), &wi, &pdf, sample, BSDF_DIFFUSE);
+				bsdf = isect.bsdf()->sampleF(-ray.Direction(), &wi, &pdf, sample, BSDF_DIFFUSE);
 				break;
 			case MaterialType::Glass:
-				bsdf = isect.bsdf()->sampleF(-ray.direction(), &wi, &pdf, sample, BSDF_REFRACTION);
+				bsdf = isect.bsdf()->sampleF(-ray.Direction(), &wi, &pdf, sample, BSDF_REFRACTION);
 				break;
 			default:
 				assert(false);

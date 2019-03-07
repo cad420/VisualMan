@@ -163,9 +163,8 @@ ${MATH_SRC_LIST}
 ${OPENGL_SRC_LIST}
 ${UTILS_SRC_LIST} 
 ${CORE_SRC_LIST}
+${SHAPE_SRC_LIST}
 ${APP_SRC_LIST} src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h)
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
 set_target_properties(${PROJECT_NAME} PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
-
-

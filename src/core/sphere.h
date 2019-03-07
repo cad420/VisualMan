@@ -4,7 +4,6 @@
 #include "shape.h"
 
 #include "../mathematics/basetype.h"
-#include "bound.h"
 
 namespace ysl
 {
@@ -27,7 +26,6 @@ namespace ysl
 		//Interaction sample(const Interaction & ref, const Point2f & u)const override;
 		Interaction sample(const Point2f & u)const override;
 	};
-
 }
 
 #endif /*_SPHERE_H_*/

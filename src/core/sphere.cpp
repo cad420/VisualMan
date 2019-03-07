@@ -21,8 +21,8 @@ namespace ysl
 		//if (t)*t = t1;
 		//return true;
 
-		Vector3f rd = ray.direction().Normalized();
-		Vector3f op = m_center - ray.original();
+		Vector3f rd = ray.Direction().Normalized();
+		Vector3f op = m_center - ray.Original();
 		Float res, eps = 1e-4;
 		Float b = Vector3f::Dot(op, rd);
 		Float det = b * b - Vector3f::Dot(op, op) + m_radius * m_radius;

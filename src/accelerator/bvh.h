@@ -2,7 +2,6 @@
 #define BVH_H
 
 #include "../core/shape.h"
-#include "../core/bound.h"
 
 #include <mutex>
 #include <vector>

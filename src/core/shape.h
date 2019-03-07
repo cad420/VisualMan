@@ -8,8 +8,6 @@
 #include "../core/interaction.h"
 #include "../mathematics/arithmetic.h"
 #include "material.h"
-#include "bound.h"
-
 
 
 namespace ysl {
@@ -37,7 +35,10 @@ namespace ysl {
 			Float pdf = (ref.m_p - isect.m_p).LengthSquared() / std::abs(Vector3f::Dot(isect.m_norm, -wi)*area());
 			return pdf;
 		}
+		
+		virtual ~Shape(){};
 	};
+
 }
 
 #endif // SHAPE_H

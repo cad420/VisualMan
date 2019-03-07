@@ -37,7 +37,7 @@ namespace ysl
 		{
 			camera = FocusCamera{ Point3f{0.f,0.f,5.f} };
 			tfData.resize(256);
-			gpuCacheBlockSize = Size3{8,8,8};
+			gpuCacheBlockSize = Size3{10,10,10};
 			g_initialWidth = 800, g_initialHeight = 600;
 			step = 0.001;
 			ka = 1.0;
@@ -86,11 +86,11 @@ namespace ysl
 		{
 			const auto x = event->size().x;
 			const auto y = event->size().y;
-			orthoMatrix.SetOrtho(0, x, 0, y, -10, 100);
+			orthoMatrix.SetGLOrtho(0, x, 0, y, -10, 100);
 
 			//
 			const auto aspect = static_cast<float>(x) / static_cast<float>(y);
-			projMatrix.SetPerspective(45.0f, aspect, 0.01, 100);
+			projMatrix.SetGLPerspective(45.0f, aspect, 0.01, 100);
 
 			// Update frambuffer size
 			texEntryPos->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, x, y, 0, nullptr);
@@ -168,17 +168,19 @@ namespace ysl
 			framebuffer->Bind();
 			proxyVAO.bind();
 
+			const auto worldMatrix = Scale(1,1,1);
+
 			// Cull face
 			positionShaderProgram.bind();
 			positionShaderProgram.setUniformValue("projMatrix", projMatrix.Matrix());
-			positionShaderProgram.setUniformValue("worldMatrix", ysl::Transform{}.Matrix());
+			positionShaderProgram.setUniformValue("worldMatrix", worldMatrix.Matrix());
 			positionShaderProgram.setUniformValue("viewMatrix", camera.view().Matrix());
 
 
 			glDrawBuffer(GL_COLOR_ATTACHMENT0);					// Draw into attachment 0
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 			GL_ERROR_REPORT;
-			// Draw frontGL_ERROR_REPORT;
+			// Draw front  GL_ERROR_REPORT;
 			glDepthFunc(GL_LESS);
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
@@ -198,12 +200,13 @@ namespace ysl
 			//g_clearIntermediateProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, *g_texExitPos);
 
 			glDrawBuffer(GL_COLOR_ATTACHMENT2);
-			//g_framebuffer->Unbind();
+			
 
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 			// loop begin
+			framebuffer->Unbind();
 			glDepthFunc(GL_LESS);
 			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
@@ -245,9 +248,11 @@ namespace ysl
 				g_renderPassPerFrame++;
 			} while (CaptureAndHandleCacheMiss());
 
-			//ysl::Log("Render pass per frame:%d.\n", maxLoopCount);
 
-			framebuffer->Unbind();
+
+			// Draw final result quad texture on screen
+
+			//framebuffer->Unbind();
 			glDepthFunc(GL_LESS);
 			quadsShaderProgram.bind();
 			quadsShaderProgram.setUniformValue("viewMatrix", camera.view().Matrix());
@@ -258,6 +263,7 @@ namespace ysl
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glDrawArrays(GL_TRIANGLES, 0, 6);			// Draw into default framebuffer
 			glDisable(GL_DEPTH_TEST);
+			//glDisable(GL_BLEND);
 			quadsShaderProgram.unbind();
 
 		}
@@ -625,6 +631,7 @@ namespace ysl
 			//std::cout << "pageDirX:" << g_pageDirX << std::endl;
 			//std::cout << "pageDirY:" << g_pageDirY << std::endl;
 			//std::cout << "pageDirZ:" << g_pageDirZ << std::endl;
+
 			std::cout << "pageTableX:" << g_pageTableX << std::endl;
 			std::cout << "pageTableY:" << g_pageTableY << std::endl;
 			std::cout << "pageTableZ:" << g_pageTableZ << std::endl;
@@ -662,7 +669,7 @@ namespace ysl
 
 			// Load Transfer Function
 			{
-				tfObject.read("d:\\scidata\\std_tf1d.TF1D");
+				tfObject.read("d:\\scidata\\default.tf1d");
 				tfObject.FetchData(tfData.data(), 256);
 				texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256,
 					0, 0, tfData.data());

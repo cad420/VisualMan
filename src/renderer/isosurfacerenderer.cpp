@@ -305,8 +305,8 @@ namespace ysl
 
 		void OITMeshRenderer::UpdateMatrix(int width, int height)
 		{
-			proj.SetPerspective(45.0f, float(width) / height, 0.01, 100);
-			ortho.SetOrtho(0, width, 0, height, 0.01, 100);
+			proj.SetGLPerspective(45.0f, float(width) / height, 0.01, 100);
+			ortho.SetGLOrtho(0, width, 0, height, 0.01, 100);
 		}
 
 		void OITMeshRenderer::ResizeScreenQuads(int width, int height)

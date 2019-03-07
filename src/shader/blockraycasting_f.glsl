@@ -102,14 +102,16 @@ void main()
 	vec3 rayEnd = texture2DRect(texEndPos,ivec2(gl_FragCoord)).xyz;
 	//int steps = int(imageLoad(entryPos,ivec2(gl_FragCoord)).w);
 	vec3 start2end = rayEnd - rayStart;
-	//vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
-	vec4 bg = vec4(1.f, 1.f, 1.f, 1.00f);
+
+	vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
+	//vec4 bg = vec4(1.f, 1.f, 1.f, 1.00f);
 
 //	if (start2end.x ==0.0 && start2end.y ==0.0 && start2end.z == 0.0) 
 //	{
 //		fragColor = bg; // Background Colors
 //		discard;
 //	}
+
 	//vec4 color = texture2DRect(texIntermediateResult,ivec2(gl_FragCoord));
 	vec4 color = imageLoad(interResult,ivec2(gl_FragCoord));
 	//vec4 color = vec4(0,0,0,0);
@@ -150,8 +152,11 @@ void main()
 	}
 
 	imageStore(entryPos,ivec2(gl_FragCoord),vec4(rayEnd ,0.0));
+	
 
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;
+	imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
 	fragColor = color;
+	//fragColor = vec4(0.3,0.6,0.9,1.0);
 }

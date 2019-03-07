@@ -264,7 +264,7 @@ class RawReader
 	std::string fileName;
 	ysl::Size3 dimensions;
 	size_t voxelSize;
-	FILE *file;
+	FILE * file;
 	int64_t offset;
 
 public:

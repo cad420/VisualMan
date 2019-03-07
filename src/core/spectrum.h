@@ -240,6 +240,8 @@ namespace ysl
 	//	}
 	//};
 
+
+
 	using RGBASpectrum = CoefficientSpectrum<4>;
 	using RGBSpectrum = CoefficientSpectrum<3>;
 	
