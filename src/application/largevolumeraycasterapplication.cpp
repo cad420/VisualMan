@@ -5,6 +5,9 @@
 #include "../opengl/openglutils.h"
 #include "../../lib/gl3w/GL/gl3w.h"
 
+//const std::string tfName = R"(D:\\scidata\\tf1.tf1d)";
+const std::string tfName = R"(D:\\subregion.1dt)";
+
 namespace ysl
 {
 	namespace app
@@ -37,7 +40,7 @@ namespace ysl
 		{
 			camera = FocusCamera{ Point3f{0.f,0.f,5.f} };
 			tfData.resize(256);
-			gpuCacheBlockSize = Size3{10,10,10};
+			gpuCacheBlockSize = Size3{ 12,12,12};
 			g_initialWidth = 800, g_initialHeight = 600;
 			step = 0.001;
 			ka = 1.0;
@@ -125,7 +128,7 @@ namespace ysl
 				GL_ERROR_REPORT;
 			};
 
-			TFWidget = std::make_shared<imgui::TransferFunctionWidget>("D:\\scidata\\std_tf1d.TF1D");
+			TFWidget = std::make_shared<imgui::TransferFunctionWidget>(tfName);
 			TFWidget->AddUpdateCallBack(cb);
 
 			//AddWidget(TFWidget);
@@ -168,7 +171,7 @@ namespace ysl
 			framebuffer->Bind();
 			proxyVAO.bind();
 
-			const auto worldMatrix = Scale(1,1,1);
+			const auto worldMatrix = Scale(0.16,0.16,1);
 
 			// Cull face
 			positionShaderProgram.bind();
@@ -669,12 +672,14 @@ namespace ysl
 
 			// Load Transfer Function
 			{
-				tfObject.read("d:\\scidata\\default.tf1d");
+				tfObject.read(tfName);
+				//tfObject.read("d:\\scidata\\std_tf1d.TF1D");
 				tfObject.FetchData(tfData.data(), 256);
 				texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256,
 					0, 0, tfData.data());
 			}
 		}
+
 
 		void LargeVolumeRayCaster::InitRayCastingTexture()
 		{
