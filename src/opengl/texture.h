@@ -12,7 +12,6 @@
 #include "openglbuffer.h"
 
 class OpenGLBuffer;
-
 class OpenGLTexture
 {
 public:

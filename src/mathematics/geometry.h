@@ -1232,7 +1232,7 @@ namespace ysl
 				p.z >= min.z && p.z <= max.z);
 		}
 
-		bool InsideEx(const Point3f & p) const
+		bool InsideEx(const Point3<T> & p) const
 		{
 			return (p.x >= min.x && p.y < max.x &&
 				p.y >= min.y && p.y < max.y &&

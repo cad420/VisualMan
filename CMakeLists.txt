@@ -45,6 +45,7 @@ message("OPENMP FOUND")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+message(STATUS "asdfsdf" ${OpenMP_EXE_LINKER_FLAGS})
 endif()
 
 
@@ -144,10 +145,29 @@ ${RENDER_SRC_LIST} src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h
 target_link_libraries(ApplicationTest glfw ${OPENGL_LIBRARIES})
 
 
+#aux_source_directory("src/downsample" DOWNSAMPLE_SRC_LIST)
+
+FIND_PACKAGE(VTK)
+if(VTK_FOUND)
+	message(STATUS "VTK Found:" ${VTK_LIBRARIES})
+endif()
+
+
+set(TBB_DIR "D:\\tbb\\tbb2019_20190206oss\\cmake")
+FIND_PACKAGE(TBB)
+if(TBB_FOUND)
+message(STATUS "TBB Found:" ${TBB_IMPORTED_TARGETS})
+endif()
+
+
+
+add_executable("downsample" 
+"downsample/downsample"
+${VOLUME_SRC_LIST} ${MEM_SRC_LIST})
+#target_link_libraries(downsample)
 #---------------------------------------------------
 # MRE Module
 #---------------------------------------------------
-
 
 add_executable(
 ${PROJECT_NAME} 
@@ -166,5 +186,6 @@ ${CORE_SRC_LIST}
 ${SHAPE_SRC_LIST}
 ${APP_SRC_LIST} src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h)
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
+
 set_target_properties(${PROJECT_NAME} PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})

@@ -3,6 +3,8 @@
 
 #include "dataarena.h"
 #include <cstring>
+#include "geometry.h"
+#include "numeric.h"
 
 namespace ysl
 {
@@ -208,6 +210,33 @@ namespace ysl
 			return m_data[index];
 		}
 
+		Float SampleNormalized(const Point3f & p)
+		{
+			const auto pn = Point3f(p.x*m_nx -0.5f,p.y*m_ny -0.5,p.z*m_nz-0.5);
+			return Sample(pn);
+		}
+
+		Float Sample(const Point3f & p)
+		{
+			const auto pi = Point3i(std::floor(p.x),std::floor(p.y),std::floor(p.z));
+			const auto d = p - static_cast<Point3f>(pi);
+			const auto d00 = Lerp(d.x, Sample(pi), Sample(pi + Vector3i(1, 0, 0)));
+			const auto d10 = Lerp(d.x, Sample(pi + Vector3i(0,1,0)), Sample(pi + Vector3i(1, 1, 0)));
+			const auto d01 = Lerp(d.x, Sample(pi + Vector3i(0,0,1)), Sample(pi + Vector3i(1, 0, 1)));
+			const auto d11 = Lerp(d.x, Sample(pi + Vector3i(0,1,1)), Sample(pi + Vector3i(1, 1, 1)));
+			const auto d0 = Lerp(d.y, d00, d10);
+			const auto d1 = Lerp(d.y, d01, d11);
+			return Lerp(d.z, d0, d1);
+		}
+
+		Float Sample(const Point3i & p)
+		{
+			Bound3i bound(Point3i(0, 0, 0), Point3i(m_nx, m_ny, m_nz));
+			if (!bound.InsideEx(p))
+				return 0;
+			return (*this)(p.x,p.y,p.z);
+		}
+
 		T * BlockData(int blockIndex)
 		{
 			return const_cast<T*>(static_cast<const Block3DArray&>(*this).BlockData(blockIndex));
@@ -238,6 +267,7 @@ namespace ysl
 		{
 			std::memcpy(BlockData(xBlock, yBlock, zBlock), blockData, BlockSize()*BlockSize()*BlockSize() * sizeof(T));
 		}
+
 
 		void GetLinearArray(T * arr)
 		{
