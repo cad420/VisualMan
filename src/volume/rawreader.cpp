@@ -19,7 +19,7 @@ namespace ysl
 		//}
 
 #ifdef _WIN32
-		io.reset(new WindowsMappingRawIO(fileName, dimensions, voxelSize));
+		io.reset(new WindowsMappingRawIO(fileName, dimensions, voxelSize,WindowsMappingRawIO::Read,WindowsMappingRawIO::MapAccess::ReadOnly));
 		ptr = reinterpret_cast<unsigned char*>(io->FileMemPointer(0, dimensions.x*dimensions.y*dimensions.z*voxelSize));
 #elif
 		static_assert(false);
@@ -48,7 +48,8 @@ namespace ysl
 		const uint64_t startRead = (start.x + dimensions.x * (start.y + dimensions.y * start.z)) * voxelSize;
 		if (offset != startRead) 
 		{
-			seekAmt += startRead - offset;
+			//seekAmt += startRead - offset;
+			//std::cout << seekAmt<< std::endl;
 
 			//seekAmt = startRead - offset;
 			//if (!file.seekg(seekAmt, std::ios_base::cur))
@@ -74,7 +75,7 @@ namespace ysl
 			//file.read(reinterpret_cast<char*>(buffer), voxelSize* size.x * size.y * size.z);
 			//read = file.gcount()/voxelSize;
 
-			memcpy(reinterpret_cast<char*>(buffer), ptr + seekAmt, voxelSize* size.x * size.y * size.z);
+			memcpy(reinterpret_cast<void*>(buffer), ptr + offset, voxelSize* size.x * size.y * size.z);
 			read = size.x * size.y * size.z;	// voxel count
 
 			offset = startRead + read * voxelSize;
@@ -83,7 +84,7 @@ namespace ysl
 			for (auto z = start.z; z < start.z + size.z; ++z) {
 				const ysl::Size3 startSlice(start.x, start.y, z);
 				const ysl::Size3 sizeSlice(size.x, size.y, 1);
-				read += readRegion(startSlice, sizeSlice, buffer + read * voxelSize);
+				read += readRegion__(startSlice, sizeSlice, buffer + read * voxelSize);
 			}
 		}
 		else {
@@ -91,7 +92,7 @@ namespace ysl
 				for (auto y = start.y; y < start.y + size.y; ++y) {
 					const ysl::Size3 startLine(start.x, y, z);
 					const ysl::Size3 sizeLine(size.x, 1, 1);
-					read += readRegion(startLine, sizeLine, buffer + read * voxelSize);
+					read += readRegion__(startLine, sizeLine, buffer + read * voxelSize);
 				}
 			}
 		}

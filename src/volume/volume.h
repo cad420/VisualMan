@@ -1,15 +1,16 @@
 #ifndef VOLUME_H_
 #define VOLUME_H_
 #include <string>
-#include "../memory/blockarray.h"
 #include <list>
-#include "volume_utils.h"
-
-#include "../mathematics/geometry.h"
 #include <mutex>
 #include <map>
-//#include "../mathematics/arithmetic.h"
 
+
+#include "lvdreader.h"
+#include "volume_utils.h"
+#include "../memory/blockarray.h"
+#include "../mathematics/geometry.h"
+//#include "../mathematics/arithmetic.h"
 
 struct VolumeFormat;
 
@@ -30,7 +31,7 @@ struct GlobalBlockAbstractIndex
 	size_type x, y, z;
 };
 
-class LargeVolumeCache:public LVDReader
+class LargeVolumeCache:public ysl::LVDReader
 {
 	static constexpr int nLogBlockSize = 7;		//
 

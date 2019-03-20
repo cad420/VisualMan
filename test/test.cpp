@@ -3,14 +3,15 @@
 #include "../src/volume/volume_utils.h"
 #include "../src/utility/cmdline.h"
 #include "../src/volume/volume.h"
-#include "abcflowgen.h"
+//#include "abcflowgen.h"
 #include <atomic>
 #include <thread>
 #include "error.h"
-#include "timer.h"
-#include "../lib/3rdparty/rapidjson/document.h"
+//#include "timer.h"
+//#include "../lib/3rdparty/rapidjson/document.h"
 #include "objreader.h"
 #include "../src/volume/rawreader.h"
+#include "../src/volume/lvdconverter.h"
 
 
 int LVDTester()
@@ -20,7 +21,7 @@ int LVDTester()
 	std::string fileName;
 	std::cin >> fileName;
 
-	LVDReader reader(fileName);
+	ysl::LVDReader reader(fileName);
 	if (reader.valid())
 	{
 		std::cout << "lvd file information:" << std::endl;
@@ -229,7 +230,7 @@ int main(int argc, char *argv[])
 
 	int repeat;
 	std::cin >> x >> y >> z >> repeat;
-	RawToLVDConverter<7> converter(fileName,x,y,z,repeat);
+	ysl::RawToLVDConverter<7> converter(fileName,x,y,z,repeat);
 	converter.convert();
 	converter.save(fileName);
 	//ysl::ObjReader reader;
@@ -238,6 +239,7 @@ int main(int argc, char *argv[])
 	//system("pause");
 	//CountVolume();
 	system("pause");
+
 	return 0;
 }
 

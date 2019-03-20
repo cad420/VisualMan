@@ -10,7 +10,7 @@
 
 namespace ysl
 {
-	AbstrRawIO::AbstrRawIO(const std::string& fileName, const ysl::Size3& dimensions, size_t voxelSize) :fileName(fileName), dimensions(dimensions), voxelSize(voxelSize)
+	AbstrRawIO::AbstrRawIO(const std::string& fileName, const ysl::Size3& dimensions, size_t voxelSize,int flags) :fileName(fileName), dimensions(dimensions), voxelSize(voxelSize),flags(flags)
 	{
 
 	}
@@ -19,19 +19,33 @@ namespace ysl
 
 #ifdef _WIN32
 	WindowsMappingRawIO::WindowsMappingRawIO(const std::string& fileName, const ysl::Size3& dimensions,
-		size_t voxelSize) :AbstrRawIO(fileName, dimensions, voxelSize),addr(nullptr)
+		size_t voxelSize,int FileAccessFlags,int MapAccessFlags) :AbstrRawIO(fileName, dimensions, voxelSize,flags),addr(nullptr)
 	{
-		f = CreateFile(TEXT(fileName.c_str()), GENERIC_READ, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		f = CreateFile(TEXT(fileName.c_str()),
+			FileAccessFlags,
+			0,
+			NULL, 
+			OPEN_ALWAYS, 
+			FILE_ATTRIBUTE_NORMAL,
+			NULL);
+
 		if (f == INVALID_HANDLE_VALUE)
 		{
 			printf("Create File failed: %d\n", GetLastError());
 			return;
 		}
-
+		
 		LARGE_INTEGER fileSize;
 		fileSize.QuadPart = dimensions.x*dimensions.y*dimensions.z * voxelSize;
 
-		mapping = CreateFileMapping(f, NULL, PAGE_READONLY, fileSize.HighPart, fileSize.LowPart, NULL);
+		mapping = CreateFileMapping(f,
+			NULL, 
+			MapAccessFlags, 
+			fileSize.HighPart, 
+			fileSize.LowPart, 
+			NULL);
+
 		if (mapping == nullptr)
 		{
 			printf("Create File Mapping failed: %d\n", GetLastError());
@@ -44,7 +58,12 @@ namespace ysl
 		
 		LARGE_INTEGER os;
 		os.QuadPart = offset;
-		addr = MapViewOfFile(mapping, FILE_MAP_READ, os.HighPart, os.LowPart, static_cast<SIZE_T>(size));
+		addr = MapViewOfFile(mapping, 
+			FILE_MAP_READ, 
+			os.HighPart,
+			os.LowPart, 
+			static_cast<SIZE_T>(size));
+
 		if (!addr)
 		{
 			printf("MapViewOfFile failed: %d\n", GetLastError());
