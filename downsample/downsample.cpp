@@ -2,6 +2,7 @@
 #include "../volume/rawreader.h"
 #include "../mathematics/numeric.h"
 #include <string>
+#include "../volume/rawio.h"
 
 namespace ysl
 {
@@ -143,7 +144,7 @@ int main()
 		std::cout << "File mapping failed\n";
 		return 0;
 	}
-	ysl::Sampler3D<unsigned char> sampler((unsigned char*)ptr, { x,y,z });
+	ysl::Sampler3D<unsigned char> sampler(reinterpret_cast<unsigned char*>(ptr), { x,y,z });
 
 	//ysl::RawReader reader(inFileName, {x,y,z},1);
 	//std::cout << "Reading Raw Data\n";

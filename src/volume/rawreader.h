@@ -42,7 +42,7 @@ namespace ysl
 		std::size_t readRegion__(const ysl::Size3 & start, const ysl::Size3 & size, unsigned char * buffer);
 		bool convexRead(const ysl::Size3 & size) {
 
-			// A minimum continuous read unit
+			/// A minimum continuous unit for reading
 
 			// 3 cases for convex reads:
 			// - We're reading a set of slices of the volume

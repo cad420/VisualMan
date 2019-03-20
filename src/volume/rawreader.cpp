@@ -2,6 +2,8 @@
 #include "rawreader.h"
 #include "../mathematics/geometry.h"
 
+#include <cstring> // memcpy
+
 
 
 namespace ysl
@@ -73,7 +75,7 @@ namespace ysl
 			//read = file.gcount()/voxelSize;
 
 			memcpy(reinterpret_cast<char*>(buffer), ptr + seekAmt, voxelSize* size.x * size.y * size.z);
-			read = size.x * size.y * size.z;
+			read = size.x * size.y * size.z;	// voxel count
 
 			offset = startRead + read * voxelSize;
 		}

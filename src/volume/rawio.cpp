@@ -15,9 +15,11 @@ namespace ysl
 
 	}
 
+
+
 #ifdef _WIN32
 	WindowsMappingRawIO::WindowsMappingRawIO(const std::string& fileName, const ysl::Size3& dimensions,
-		size_t voxelSize) :AbstrRawIO(fileName, dimensions, voxelSize)
+		size_t voxelSize) :AbstrRawIO(fileName, dimensions, voxelSize),addr(nullptr)
 	{
 		f = CreateFile(TEXT(fileName.c_str()), GENERIC_READ, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (f == INVALID_HANDLE_VALUE)
