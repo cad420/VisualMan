@@ -8,9 +8,9 @@
 #include <thread>
 #include "error.h"
 #include "timer.h"
-
 #include "../lib/3rdparty/rapidjson/document.h"
 #include "objreader.h"
+#include "../src/volume/rawreader.h"
 
 
 int LVDTester()
@@ -168,7 +168,7 @@ void CountVolume()
 
 	std::unique_ptr<unsigned char[]> buf(new unsigned char[bytes]);
 
-	RawReader reader(fileName, { w,h,d }, v);
+	ysl::RawReader reader(fileName, { w,h,d }, v);
 
 	reader.readRegion({ 0,0,0 }, { w,h,d }, buf.get());
 
@@ -218,26 +218,26 @@ int main(int argc, char *argv[])
 
 
 	int x, y, z, xc, yc, zc;
+
 	//std::cin >> x >> y >> z;
 	//ABCFlowGen(x,y,z);
 	//SimpleBlockGen(x,y,z,2,2,2);
+
 	std::string fileName;
 	std::cin >> fileName;
 	//int x, y, z, repeat;
+
 	int repeat;
 	std::cin >> x >> y >> z >> repeat;
 	RawToLVDConverter<7> converter(fileName,x,y,z,repeat);
 	converter.convert();
 	converter.save(fileName);
-	//LVDTester();
 	//ysl::ObjReader reader;
 	//reader.Load("C:\\Users\\ysl\\Desktop\\dragon.obj");
-
 	//std::cout << reader.getFaceIndices().size() << std::endl;
 	//system("pause");
 	//CountVolume();
 	system("pause");
 	return 0;
-
 }
 

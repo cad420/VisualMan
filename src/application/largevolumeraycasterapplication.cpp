@@ -36,7 +36,7 @@ namespace ysl
 
 		LargeVolumeRayCaster::LargeVolumeRayCaster(int argc, char** argv, int w, int h, const std::string& fileName) :
 			ImGuiApplication(argc, argv, w, h),
-			VolumeVirtualMemoryHierachy<16, 16, 16>(fileName)
+			VolumeVirtualMemoryHierarchy<16, 16, 16>(fileName)
 		{
 			camera = FocusCamera{ Point3f{0.f,0.f,5.f} };
 			tfData.resize(256);
@@ -138,7 +138,7 @@ namespace ysl
 		{
 			TFWidget->Draw();
 
-			ImGui::Begin("Control Panel");
+		/*	ImGui::Begin("Control Panel");
 			ImGui::Text("Page Table Size:[%d, %d, %d]", g_pageTableX, g_pageTableY, g_pageTableZ);
 			ImGui::Text("Cache Block Count In CPU:[%d, %d, %d]", g_cacheWidth, g_cacheHeight, g_cacheDepth);
 			ImGui::Text("Cache Block Count In GPU:[%d, %d, %d]", gpuCacheBlockSize.x, gpuCacheBlockSize.y, gpuCacheBlockSize.z);
@@ -157,7 +157,7 @@ namespace ysl
 			ImGui::SliderFloat("kd", &kd, 0.0f, 1.0f);
 			ImGui::SliderFloat("ks", &ks, 0.0f, 1.0f);
 			ImGui::SliderFloat("shininess", &shininess, 0.0f, 50.f);
-			ImGui::End();
+			ImGui::End();*/
 
 
 		}
@@ -672,8 +672,8 @@ namespace ysl
 
 			// Load Transfer Function
 			{
-				tfObject.read(tfName);
-				//tfObject.read("d:\\scidata\\std_tf1d.TF1D");
+				//tfObject.read(tfName);
+				tfObject.read("d:\\temp.txt");
 				tfObject.FetchData(tfData.data(), 256);
 				texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256,
 					0, 0, tfData.data());

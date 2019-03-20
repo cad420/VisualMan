@@ -38,8 +38,8 @@ namespace ysl
 			while (!glfwWindowShouldClose(window))
 			{
 				glfwPollEvents();
-				if(mouseLeftButtonPressed || mouseRightButtonPressed)
-				{
+				//if(mouseLeftButtonPressed || mouseRightButtonPressed)
+				//{
 					ImGui_ImplOpenGL3_NewFrame();
 					ImGui_ImplGlfw_NewFrame();
 					ImGui::NewFrame();
@@ -61,7 +61,7 @@ namespace ysl
 
 					ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 					glfwSwapBuffers(window);
-				}
+				//}
 			}
 			DestroyOpenGLContext();
 			return 0;

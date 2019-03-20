@@ -5,30 +5,45 @@
 #include <fstream>
 
 
+#include "rawio.h"
+
 namespace ysl
 {
-
 	class RawReader
 	{
 		std::string fileName;
 		ysl::Size3 dimensions;
 		size_t voxelSize;
 		//FILE * file;
-		int64_t offset;
-		std::ifstream file;
+		uint64_t offset;
+		//std::ifstream file;
 
+		std::shared_ptr<AbstrRawIO> io;
+		unsigned char * ptr;
+		uint64_t seekAmt;
+		
 	public:
+
+		using PosType = unsigned long long;
+		using OffsetType = unsigned long long;
+		using SizeType = std::size_t;
+
 		RawReader(const std::string &fileName,
 			const ysl::Size3 &dimensions, size_t voxelSize);
 		~RawReader();
+
 		// Read a region of volume data from the file into the buffer passed.
 		// It's assumed the buffer passed has enough room. Returns the
 		// number voxels read
+
 		size_t readRegion(const ysl::Size3 & start,
 			const ysl::Size3 &size, unsigned char *buffer);
-
 	private:
-		inline bool convexRead(const ysl::Size3 & size) {
+		std::size_t readRegion__(const ysl::Size3 & start, const ysl::Size3 & size, unsigned char * buffer);
+		bool convexRead(const ysl::Size3 & size) {
+
+			// A minimum continuous read unit
+
 			// 3 cases for convex reads:
 			// - We're reading a set of slices of the volume
 			// - We're reading a set of scanlines of a slice
@@ -38,5 +53,6 @@ namespace ysl
 				|| (size.y == 1 && size.z == 1);
 		}
 	};
+
 }
 #endif

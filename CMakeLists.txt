@@ -165,6 +165,8 @@ add_executable("downsample"
 "downsample/downsample"
 ${VOLUME_SRC_LIST} ${MEM_SRC_LIST})
 #target_link_libraries(downsample)
+
+add_executable("printvolume" "test/printvolume.cpp" ${VOLUME_SRC_LIST} ${MEM_SRC_LIST})
 #---------------------------------------------------
 # MRE Module
 #---------------------------------------------------

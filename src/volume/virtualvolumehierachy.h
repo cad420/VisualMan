@@ -49,7 +49,7 @@ template<
 int xPageTableEntry,
 int yPageTableEntry, 
 int zPageTableEntry>
-class VolumeVirtualMemoryHierachy:public LargeVolumeCache
+class VolumeVirtualMemoryHierarchy:public LargeVolumeCache
 {
 public:
 	struct PageDirEntry
@@ -139,7 +139,7 @@ public:
 
 public:
 	using size_type = std::size_t;
-	VolumeVirtualMemoryHierachy(const std::string fileName):LargeVolumeCache(fileName)
+	VolumeVirtualMemoryHierarchy(const std::string fileName):LargeVolumeCache(fileName)
 	{
 		using ysl::RoundUpDivide;
 		using ysl::Linear3DArray;

@@ -3,6 +3,10 @@
 
 namespace ysl
 {
+	Camera::~Camera()
+	{
+	}
+
 	ProjectiveCamera::ProjectiveCamera(const Transform& cameraToWorld,
 		const Transform & cameraToScreen ,
 		const Bound2f& screenBound, 
@@ -24,7 +28,7 @@ namespace ysl
 
 	Float OrthographicCamera::GenerateRay(const CameraSample& sample, Ray* ray) const
 	{
-		const auto pFilm = Point3f(pFilm.x, pFilm.y, 0);
+		const auto pFilm = Point3f(sample.pFilm.x, sample.pFilm.y, 0);
 		const auto pCamera = RasterToCamera * pFilm;
 		*ray = Ray(Vector3f(0, 0, 1), pCamera);
 

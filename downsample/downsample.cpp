@@ -44,11 +44,88 @@ namespace ysl
 	};
 }
 
+
+ysl::Size3 SampleSize(const ysl::Size3 & orignalSize, const ysl::Vector3f & factor)
+{
+	return ysl::Size3(1.0*orignalSize.x / factor.x, 1.0*orignalSize.y / factor.y, 1.0*orignalSize.z / factor.z);
+}
+
+//void OutOfCoreDownsample(const std::string & fileName,
+//	const ysl::Size3 & size,
+//	int voxelSize,
+//	const ysl::Vector3f & factor,
+//	const std::string & outFileName)
+//{
+//	std::shared_ptr<ysl::AbstrRawIO> rm(new ysl::WindowsMappingRawIO(fileName,size,voxelSize));
+//	//std::unique_ptr<unsigned char[]> buf(new unsigned char[*size.x*size.y*voxelSize]);
+//	std::ofstream outFile(outFileName, std::ios_base::binary);
+//
+//	const auto sampleSize = SampleSize(size,factor);
+//	ysl::Vector3f step(1.0*size.x / sampleSize.x, 1.0*size.y / sampleSize.y, 1.0*size.z / sampleSize.z);
+//
+//
+//	const auto sliceStep = 5;
+//
+//	const auto bufSize = sliceStep * sampleSize.x * sampleSize.y * voxelSize;
+//
+//	std::unique_ptr<unsigned char[]> buf(new unsigned char[bufSize]);
+//
+//	const auto ptr = rm->FileMemPointer(0, size.x*size.y*size.z*voxelSize);
+//
+//
+//
+//
+//	for (int zz = 0; zz < sampleSize.z; zz+= sliceStep)
+//	{
+//		std::size_t actualSlice;
+//		if (zz + sliceStep >= sampleSize.z)
+//			actualSlice = sampleSize.z - zz;
+//		else
+//			actualSlice = sliceStep;
+//
+//
+//		int sampleZmin = zz * step.z;
+//		int sampleZmax = std::ceil(zz * step.z) + sliceStep;
+//
+//		for(int z = 0 ;z<actualSlice;z++)
+//		{
+//			
+//
+//
+//			for (int y = 0; y < sampleSize.y; y++)
+//			{
+//				for (int x = 0; x < sampleSize.x; x++)
+//				{
+//					const auto index = sampleSize.x*(zz *sampleSize.y + y) + x;
+//					//downsampleData[index] = sampler.Sample(ysl::Point3f(xx * step.x, yy * step.y, zz * step.z));
+//				}
+//			}
+//
+//
+//		}
+//
+//	}
+//
+//	rm->DestroyFileMemPointer(ptr);
+//
+//
+//}
+
+
+
+
+void InCoreDownsample(const std::string & fileName,const ysl::Size3 & size,int voxelSize)
+{
+	
+}
+
 int main()
 {
+
 	std::size_t x, y, z;
 	int sx, sy, sz;
 	std::string inFileName,outFileName;
+	std::cout << "[filename(str), x(int), y(int), z(int),xfactor(int), yfactor(int),zfactor(int), ouputfilename(str)]\n";
 	std::cin >> inFileName >> x >> y >> z >> sx >> sy >> sz>>outFileName;
 
 	const auto sampleSize = ysl::Size3(1.0*x / sx + 0.5, 1.0*y / sy + 0.5, 1.0*z / sz + 0.5); 
@@ -57,40 +134,52 @@ int main()
 	std::cout << "Downsample Size:" << sampleSize << std::endl;
 	std::cout << "Step:" << step << std::endl;
 
-	std::unique_ptr<unsigned char> buf(new unsigned char[x*y*z]);
-	ysl::Sampler3D<unsigned char> sampler(buf.get(), { x,y,z });
+	//std::unique_ptr<unsigned char> buf(new unsigned char[x*y*z]);
 
-
-	ysl::RawReader reader(inFileName, {x,y,z},1);
-	std::cout << "Reading Raw Data\n";
-	reader.readRegion({ 0,0,0 }, { x,y,z }, buf.get());
-	std::cout << "Reading finished\n";
-
-
-	const auto bytes = sampleSize.x*sampleSize.y*sampleSize.z;
-	std::cout << "Total bytes:" << bytes << std::endl;
-	std::unique_ptr<unsigned char[]> downsampleData(new unsigned char[bytes]);
-
-
-#pragma omp parallel for
-	for(int zz = 0 ;zz<sampleSize.z;zz++)
+	std::shared_ptr<ysl::AbstrRawIO> rm(new ysl::WindowsMappingRawIO(inFileName, ysl::Size3(x,y,z), 1));
+	const auto ptr = rm->FileMemPointer(0, x*y*z);
+	if(!ptr)
 	{
-		for(int yy = 0;yy<sampleSize.y;yy++)
+		std::cout << "File mapping failed\n";
+		return 0;
+	}
+	ysl::Sampler3D<unsigned char> sampler((unsigned char*)ptr, { x,y,z });
+
+	//ysl::RawReader reader(inFileName, {x,y,z},1);
+	//std::cout << "Reading Raw Data\n";
+	//reader.readRegion({ 0,0,0 }, { x,y,z }, buf.get());
+	//std::cout << "Reading finished\n";
+
+	const auto sliceStep = 5;
+	const auto bytes = sampleSize.x*sampleSize.y*sliceStep;
+	std::unique_ptr<unsigned char[]> downsampleData(new unsigned char[bytes]);
+	std::ofstream out(outFileName, std::ios::binary);
+//#pragma omp parallel for
+	for(int zz = 0 ;zz < sampleSize.z;zz+=sliceStep)
+	{
+
+		std::size_t actualSlice;
+
+		if (zz + sliceStep >= sampleSize.z) actualSlice = sampleSize.z - zz;
+		else actualSlice = sliceStep;
+
+		const auto actualBytes = actualSlice * sampleSize.x * sampleSize.y;
+
+		for(int s = 0;s < actualSlice;s++)
 		{
-			for(int xx = 0 ;xx<sampleSize.x;xx++)
+			for (int yy = 0; yy < sampleSize.y; yy++)
 			{
-				const auto index =sampleSize.x*( zz *sampleSize.y + yy  )+ xx;
-				downsampleData[index] = sampler.Sample(ysl::Point3f(xx * step.x,yy*step.y ,zz * step.z));
+				for (int xx = 0; xx < sampleSize.x; xx++)
+				{
+					const auto index = sampleSize.x*((s)*sampleSize.y + yy) + xx;
+					downsampleData[index] = sampler.Sample(ysl::Point3f(xx * step.x, yy * step.y, (zz+s) * step.z));
+				}
 			}
 		}
+
+		out.write(reinterpret_cast<char*>(downsampleData.get()), actualBytes);
+		std::cout << "Writing: " << zz << " to " << zz + actualSlice << " of " << actualBytes << " finished\n";
 	}
-
-	std::cout << "Downsample finished\n";
-
-	std::ofstream out(outFileName, std::ios::binary);
-	out.write((char *)downsampleData.get(), bytes);
-	std::cout << "Writing finished\n";
-
 	system("pause");
 	return 0;
 }

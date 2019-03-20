@@ -144,7 +144,8 @@ public:
 
 
 		const auto blockedSize = blockSize - 2 * m_repeat;
-		m_blockDimension = { int(ysl::RoundUpDivide(xSize, blockedSize)), int(ysl::RoundUpDivide(ySize, blockedSize)) , int(ysl::RoundUpDivide(zSize, blockedSize)) };
+		//m_blockDimension = { int(ysl::RoundUpDivide(xSize, blockedSize)), int(ysl::RoundUpDivide(ySize, blockedSize)) , int(ysl::RoundUpDivide(zSize, blockedSize)) };
+		m_blockDimension = {int(xSize/blockedSize),int(ySize/blockedSize),int(zSize/blockedSize)};
 		std::cout << "Raw data should be divided in:" << m_blockDimension << std::endl;
 
 		//m_newDataDimension = { xBlockedCount * blockSize ,yBlockedCount * blockSize ,zBlockedCount * blockSize };
@@ -191,6 +192,7 @@ public:
 	auto dimensionInData()const { return m_dataSize; }
 	auto dimensionInBlock()const { return m_blockDimension; }
 	void setBoundaryValue(RawType value) { g_emptyValue = value; }
+
 	bool convert()
 	{
 		g_emptyValue = 0;
@@ -211,6 +213,7 @@ public:
 				}
 		return true;
 	}
+
 
 	bool save(const std::string & fileName)
 	{
@@ -234,6 +237,7 @@ public:
 		const auto lvdBytes = size_t(m_dataSize.x)*size_t(m_dataSize.y)*size_t(m_dataSize.z) * sizeof(RawType);
 
 		constexpr auto logBlockSize = nLogBlockSize;
+
 		lvdFile.write((char*)&LVDTraits::MagicNumber, 4);
 		lvdFile.write((char*)&m_dataSize.x, 3 * sizeof(LVDTraits::DimensionSize_t));
 		lvdFile.write((char*)&logBlockSize, sizeof(LVDTraits::LogBlockSize_t));
@@ -241,6 +245,9 @@ public:
 		lvdFile.write((char*)&g_xSize, sizeof(LVDTraits::DimensionSize_t));
 		lvdFile.write((char*)&g_ySize, sizeof(LVDTraits::DimensionSize_t));
 		lvdFile.write((char*)&g_zSize, sizeof(LVDTraits::DimensionSize_t));
+
+		std::cout << m_dataSize << " " << logBlockSize << " " << m_repeat << " " << g_xSize << " " << g_ySize << " " << g_zSize << std::endl;
+
 
 		///TODO::
 		lvdFile.write(m_lvdBuf.get(), lvdBytes);

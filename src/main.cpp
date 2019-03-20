@@ -158,7 +158,7 @@ namespace
 	int * g_atomicCounterPtr;
 
 	//char * g_data;
-	std::unique_ptr<VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>> g_largeVolumeData;
+	std::unique_ptr<VolumeVirtualMemoryHierarchy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>> g_largeVolumeData;
 
 	int g_pageDirX;
 	int g_pageDirY;
@@ -621,7 +621,7 @@ void initializeResource()
 
 	initializeProxyGeometry();
 
-	g_largeVolumeData.reset(new VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(g_lvdFileName));
+	g_largeVolumeData.reset(new VolumeVirtualMemoryHierarchy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>(g_lvdFileName));
 
 	g_pageDirX = g_largeVolumeData->PageDir->Size().x;
 	g_pageDirY = g_largeVolumeData->PageDir->Size().y;
@@ -1303,5 +1303,8 @@ int main(int argc, char ** argv)
 {
 	return ysl::app::LargeVolumeRayCaster(argc, argv,
 		800, 600, "C:\\data\\subregion_9000_10700_2_128.lvd").Exec();
+
+	//return ysl::app::LargeVolumeRayCaster(argc, argv,
+	//	800, 600, "D:\\scidata\\abc\\s1_512_512_512_2_128.lvd").Exec();
 	//return ysl::app::OITMeshRenderer(argc, argv, 800, 600).Exec();
 }

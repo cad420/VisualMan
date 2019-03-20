@@ -20,7 +20,7 @@ namespace ysl
 
 		constexpr int pageTableBlockEntry = 16;
 		class LargeVolumeRayCaster:public ImGuiApplication,
-								   public VolumeVirtualMemoryHierachy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>
+								   public VolumeVirtualMemoryHierarchy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>
 		{
 		public:
 			LargeVolumeRayCaster(int argc, char ** argv, int w, int h,const std::string & fileName);
