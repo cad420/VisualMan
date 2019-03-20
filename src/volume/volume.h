@@ -31,6 +31,10 @@ struct GlobalBlockAbstractIndex
 	size_type x, y, z;
 };
 
+
+
+
+
 class LargeVolumeCache:public ysl::LVDReader
 {
 	static constexpr int nLogBlockSize = 7;		//

@@ -3,6 +3,7 @@
 #define _LVDCONVERTER_H_
 
 #include "../mathematics/geometry.h"
+#include "rawio.h"
 
 
 namespace ysl
@@ -44,6 +45,8 @@ namespace ysl
 		ysl::Vector3i m_blockDimension;
 
 		std::unique_ptr<RawType[]> m_rawBuf;
+		std::shared_ptr<ysl::AbstrRawIO> rawIO;
+		void * ptr;
 		std::unique_ptr<RawType[]> m_lvdBuf;
 
 		const int m_repeat;
@@ -59,11 +62,6 @@ namespace ysl
 		bool convert();
 		bool save(const std::string& fileName);
 	};
-
-
-
-
-
 
 	template <int nLogBlockSize, typename LVDTraits>
 	void RawToLVDConverter<nLogBlockSize, LVDTraits>::getData(RawType* dest, const RawType* src, size_t width,
@@ -167,6 +165,24 @@ namespace ysl
 			std::cout << "empty data.\n";
 			return;
 		}
+
+#ifdef _WIN32
+		//rawIO = std::make_shared<WindowsMappingRawIO>(fileName,
+		//	ysl::Size3{ xSize,ySize,zSize }, 
+		//	sizeof(RawType),
+		//	WindowsMappingRawIO::Read, 
+		//	WindowsMappingRawIO::ReadOnly);
+
+		//ptr = rawIO->FileMemPointer(0, xSize*ySize*zSize*sizeof(RawType));
+
+		//if(!ptr)
+		//{
+		//	throw std::runtime_error("bad mapping");
+		//}
+#elif
+		static_assert(false);
+#endif
+
 		m_rawBuf.reset(new RawType[rawBytes]);
 		if (!m_rawBuf)
 		{
@@ -244,10 +260,10 @@ namespace ysl
 		ss2 << (1 << nLogBlockSize);
 		ss2 >> bSize;
 
-		const std::string outFileName{
-			fileName.substr(0, fileName.find_last_of(".")) + "_" + rep + "_" + bSize + ".lvd"
-		};
+		const std::string outFileName { fileName.substr(0, fileName.find_last_of(".")) + "_" + rep + "_" + bSize + ".lvd"};
 		std::cout << "Writing as:" << outFileName << std::endl;
+
+
 		std::ofstream lvdFile(outFileName, std::fstream::binary);
 		if (!lvdFile.is_open())
 		{
@@ -256,7 +272,6 @@ namespace ysl
 		}
 
 		const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
-
 		constexpr auto logBlockSize = nLogBlockSize;
 
 		lvdFile.write((char*)&LVDTraits::MagicNumber, 4);
@@ -272,7 +287,12 @@ namespace ysl
 
 
 		///TODO::
+
+
 		lvdFile.write(m_lvdBuf.get(), lvdBytes);
+
+
+
 		std::cout << "writing .lvd file finished\n";
 		return true;
 	}

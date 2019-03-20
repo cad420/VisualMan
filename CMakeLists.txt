@@ -147,17 +147,17 @@ target_link_libraries(ApplicationTest glfw ${OPENGL_LIBRARIES})
 
 #aux_source_directory("src/downsample" DOWNSAMPLE_SRC_LIST)
 
-FIND_PACKAGE(VTK)
-if(VTK_FOUND)
-	message(STATUS "VTK Found:" ${VTK_LIBRARIES})
-endif()
+#FIND_PACKAGE(VTK)
+#if(VTK_FOUND)
+#	message(STATUS "VTK Found:" ${VTK_LIBRARIES})
+#endif()
 
 
-set(TBB_DIR "D:\\tbb\\tbb2019_20190206oss\\cmake")
-FIND_PACKAGE(TBB)
-if(TBB_FOUND)
-message(STATUS "TBB Found:" ${TBB_IMPORTED_TARGETS})
-endif()
+#set(TBB_DIR "D:\\tbb\\tbb2019_20190206oss\\cmake")
+#FIND_PACKAGE(TBB)
+#if(TBB_FOUND)
+#message(STATUS "TBB Found:" ${TBB_IMPORTED_TARGETS})
+#endif()
 
 
 
