@@ -3,7 +3,11 @@
 #define _LVDCONVERTER_H_
 
 #include "../mathematics/geometry.h"
+#include "../mathematics/numeric.h"
+
 #include "rawio.h"
+#include <string>
+#include "openglbuffer.h"
 
 
 namespace ysl
@@ -44,10 +48,10 @@ namespace ysl
 		ysl::Vector3i m_dataSize;
 		ysl::Vector3i m_blockDimension;
 
-		std::unique_ptr<RawType[]> m_rawBuf;
+		//std::unique_ptr<RawType[]> m_rawBuf;
 		std::shared_ptr<ysl::AbstrRawIO> rawIO;
 		void * ptr;
-		std::unique_ptr<RawType[]> m_lvdBuf;
+		//std::unique_ptr<RawType[]> m_lvdBuf;
 
 		const int m_repeat;
 
@@ -150,11 +154,12 @@ namespace ysl
 
 
 		const auto blockedSize = blockSize - 2 * m_repeat;
-		//m_blockDimension = { int(ysl::RoundUpDivide(xSize, blockedSize)), int(ysl::RoundUpDivide(ySize, blockedSize)) , int(ysl::RoundUpDivide(zSize, blockedSize)) };
-		m_blockDimension = {int(xSize / blockedSize), int(ySize / blockedSize), int(zSize / blockedSize)};
+		m_blockDimension = { int(ysl::RoundUpDivide(xSize, blockedSize)), int(ysl::RoundUpDivide(ySize, blockedSize)) , int(ysl::RoundUpDivide(zSize, blockedSize)) };
+		//m_blockDimension = {int(xSize / blockedSize), int(ySize / blockedSize), int(zSize / blockedSize)};
 		std::cout << "Raw data should be divided in:" << m_blockDimension << std::endl;
 
 		//m_newDataDimension = { xBlockedCount * blockSize ,yBlockedCount * blockSize ,zBlockedCount * blockSize };
+
 		m_dataSize = m_blockDimension * ysl::Vector3i{blockSize, blockSize, blockSize};
 
 		std::cout << "lvd data dimension: " << m_dataSize << std::endl;
@@ -167,49 +172,41 @@ namespace ysl
 		}
 
 #ifdef _WIN32
-		//rawIO = std::make_shared<WindowsMappingRawIO>(fileName,
-		//	ysl::Size3{ xSize,ySize,zSize }, 
-		//	sizeof(RawType),
-		//	WindowsMappingRawIO::Read, 
-		//	WindowsMappingRawIO::ReadOnly);
+		rawIO = std::make_shared<WindowsMappingRawIO>(fileName,
+			ysl::Size3{ xSize,ySize,zSize }, 
+			sizeof(RawType),
+			WindowsMappingRawIO::Read, 
+			WindowsMappingRawIO::ReadOnly);
 
-		//ptr = rawIO->FileMemPointer(0, xSize*ySize*zSize*sizeof(RawType));
+		ptr = rawIO->FileMemPointer(0, xSize*ySize*zSize*sizeof(RawType));
 
-		//if(!ptr)
-		//{
-		//	throw std::runtime_error("bad mapping");
-		//}
+		if(!ptr)
+		{
+			throw std::runtime_error("bad mapping");
+		}
 #elif
 		static_assert(false);
 #endif
 
-		m_rawBuf.reset(new RawType[rawBytes]);
-		if (!m_rawBuf)
-		{
-			std::cout << " bad alloc." << __LINE__ << std::endl;
-			return;
-		}
-
-		const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
-
-		///TODO::
-		//auto p = new ysl::Block3DArray<RawType, nLogBlockSize>(m_dataSize.x, m_dataSize.y, m_dataSize.z, nullptr);
-		//if (p == nullptr) {
+		//m_rawBuf.reset(new RawType[rawBytes]);
+		//if (!m_rawBuf)
+		//{
 		//	std::cout << " bad alloc." << __LINE__ << std::endl;
 		//	return;
 		//}
-		//m_blockedData.reset(p);
 
-		m_lvdBuf.reset(new RawType[lvdBytes]);
-		if (!m_lvdBuf)
-		{
-			std::cout << " bad alloc." << __LINE__ << std::endl;
-			return;
-		}
+		//const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
 
-		std::cout << "Reading raw file...\n";
-		rawFile.read(m_rawBuf.get(), rawBytes);
-		std::cout << "Reading file completes.\n";
+		//m_lvdBuf.reset(new RawType[lvdBytes]);
+		//if (!m_lvdBuf)
+		//{
+		//	std::cout << " bad alloc." << __LINE__ << std::endl;
+		//	return;
+		//}
+
+		//std::cout << "Reading raw file...\n";
+		//rawFile.read(m_rawBuf.get(), rawBytes);
+		//std::cout << "Reading file completes.\n";
 	}
 
 	template <int nLogBlockSize, typename LVDTraits>
@@ -217,7 +214,6 @@ namespace ysl
 	{
 
 		// Allocate a buffer for block data with padding 
-
 
 		g_emptyValue = 0;
 		const auto step = blockSize - 2 * m_repeat;
@@ -252,35 +248,43 @@ namespace ysl
 	template <int nLogBlockSize, typename LVDTraits>
 	bool RawToLVDConverter<nLogBlockSize, LVDTraits>::save(const std::string& fileName)
 	{
-		std::stringstream ss1;
-		ss1 << m_repeat;
-		std::string rep, bSize;
-		ss1 >> rep;
-		std::stringstream ss2;
-		ss2 << (1 << nLogBlockSize);
-		ss2 >> bSize;
 
+		const auto rep = std::to_string(m_repeat), bSize = std::to_string(1<<nLogBlockSize);
 		const std::string outFileName { fileName.substr(0, fileName.find_last_of(".")) + "_" + rep + "_" + bSize + ".lvd"};
 		std::cout << "Writing as:" << outFileName << std::endl;
 
-
-		std::ofstream lvdFile(outFileName, std::fstream::binary);
-		if (!lvdFile.is_open())
-		{
-			std::cout << ".lvd file can not open\n";
-			return false;
-		}
-
 		const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
+
+		std::shared_ptr<AbstrRawIO> lvdIO;
+		void * outPtr;
+
+#ifdef _WIN32
+		lvdIO = std::make_shared<WindowsMappingRawIO>(outFileName, {}, sizeof(RawType), WindowsMappingRawIO::Write, OpenGLBuffer::WriteOnly);
+		outPtr = lvdIO->FileMemPointer(0, lvdBytes);
+#elif 
+		static_assert(false);
+#endif
+		//std::ofstream lvdFile(outFileName, std::fstream::binary);
+		//if (!lvdFile.is_open())
+		//{
+		//	std::cout << ".lvd file can not open\n";
+		//	return false;
+		//}
+
+		
 		constexpr auto logBlockSize = nLogBlockSize;
 
-		lvdFile.write((char*)&LVDTraits::MagicNumber, 4);
-		lvdFile.write((char*)&m_dataSize.x, 3 * sizeof(LVDTraits::DimensionSize_t));
+
+		// 36 bytes in total
+
+		lvdFile.write((char*)&LVDTraits::MagicNumber, 4);		
+		lvdFile.write((char*)&m_dataSize.x, 3 * sizeof(LVDTraits::DimensionSize_t));		
 		lvdFile.write((char*)&logBlockSize, sizeof(LVDTraits::LogBlockSize_t));
 		lvdFile.write((char*)&m_repeat, sizeof(LVDTraits::BoundarySize_t));
 		lvdFile.write((char*)&g_xSize, sizeof(LVDTraits::DimensionSize_t));
 		lvdFile.write((char*)&g_ySize, sizeof(LVDTraits::DimensionSize_t));
 		lvdFile.write((char*)&g_zSize, sizeof(LVDTraits::DimensionSize_t));
+
 
 		std::cout << m_dataSize << " " << logBlockSize << " " << m_repeat << " " << g_xSize << " " << g_ySize << " " <<
 			g_zSize << std::endl;
