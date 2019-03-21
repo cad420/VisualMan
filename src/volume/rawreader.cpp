@@ -18,9 +18,11 @@ namespace ysl
 		//	throw std::runtime_error("ImportRAW: Unable to open file " + fileName);
 		//}
 
+		const auto rawBytes = dimensions.x * dimensions.y * dimensions.z * voxelSize;
+			
 #ifdef _WIN32
-		io.reset(new WindowsMappingRawIO(fileName, dimensions, voxelSize,WindowsMappingRawIO::Read,WindowsMappingRawIO::MapAccess::ReadOnly));
-		ptr = reinterpret_cast<unsigned char*>(io->FileMemPointer(0, dimensions.x*dimensions.y*dimensions.z*voxelSize));
+		io.reset(new WindowsMappingRawIO(fileName,rawBytes,WindowsMappingRawIO::Read,WindowsMappingRawIO::MapAccess::ReadOnly));
+		ptr = reinterpret_cast<unsigned char*>(io->FileMemPointer(0, rawBytes));
 #elif
 		static_assert(false);
 #endif

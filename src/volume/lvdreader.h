@@ -25,9 +25,7 @@ namespace ysl
 		bool validFlag;
 
 		enum { LVDFileMagicNumber = 277536 };
-
 		enum { LogBlockSize5 = 5, LogBlockSize6 = 6, LogBlockSize7 = 7 };
-
 		enum { LVDHeaderSize = 24 };
 
 	public:

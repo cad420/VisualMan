@@ -227,10 +227,13 @@ int main(int argc, char *argv[])
 	std::string fileName;
 	std::cin >> fileName;
 	//int x, y, z, repeat;
-
 	int repeat;
 	std::cin >> x >> y >> z >> repeat;
-	ysl::RawToLVDConverter<7> converter(fileName,x,y,z,repeat);
+
+	std::string outFileName;
+	std::cin >> outFileName;
+	ysl::RawToLVDConverter<7> converter(fileName,x,y,z,repeat,outFileName);
+
 	converter.convert();
 	converter.save(fileName);
 	//ysl::ObjReader reader;

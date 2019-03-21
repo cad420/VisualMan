@@ -73,7 +73,6 @@ int main(int argc, char* argv[])
 
 	//ysl::WindowsMappingRawIO io(fileName, bufSize, 1);
 
-
 	std::ofstream outFile(outFileName, std::ios::binary);
 	outFile.write((char*)buf.get(), bufSize.x*bufSize.y*bufSize.z);
 	system("pause");

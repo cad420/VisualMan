@@ -1,7 +1,7 @@
 
 #include "rawio.h"
+#include "error.h"
 #include <string>
-#include "../mathematics/geometry.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -10,7 +10,7 @@
 
 namespace ysl
 {
-	AbstrRawIO::AbstrRawIO(const std::string& fileName, const ysl::Size3& dimensions, size_t voxelSize,int flags) :fileName(fileName), dimensions(dimensions), voxelSize(voxelSize),flags(flags)
+	AbstrRawIO::AbstrRawIO(const std::string& fileName, std::size_t fileSize,int flags) :fileName(fileName),fileSize(fileSize),flags(flags)
 	{
 
 	}
@@ -18,9 +18,38 @@ namespace ysl
 	
 
 #ifdef _WIN32
-	WindowsMappingRawIO::WindowsMappingRawIO(const std::string& fileName, const ysl::Size3& dimensions,
-		size_t voxelSize,int FileAccessFlags,int MapAccessFlags) :AbstrRawIO(fileName, dimensions, voxelSize,flags),addr(nullptr)
+	void WindowsMappingRawIO::PrintLastErrorMsg()
 	{
+		DWORD dw = GetLastError();
+		char msg[512];
+		//LPWSTR;
+		FormatMessage(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+			NULL,
+			dw,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			msg,
+			0, NULL);
+		printf("%d %s\n",dw, msg);
+	}
+
+	WindowsMappingRawIO::WindowsMappingRawIO(const std::string& fileName,
+		std::size_t fileSize,
+		int FileAccessFlags,
+		int MapAccessFlags) :
+	AbstrRawIO(fileName,fileSize,flags),
+	addr(nullptr),
+	fileAccess(FileAccessFlags),
+	mapAccess(MapAccessFlags)
+	{
+		// Checking if the file is new created first
+		bool newCreated = false;
+		DWORD dwAttrib = GetFileAttributes(fileName.c_str());
+
+		if (!(dwAttrib != INVALID_FILE_ATTRIBUTES && 0 == (FILE_ATTRIBUTE_DIRECTORY & dwAttrib)))
+		{
+			newCreated = true;
+		}
 
 		f = CreateFile(TEXT(fileName.c_str()),
 			FileAccessFlags,
@@ -32,48 +61,77 @@ namespace ysl
 
 		if (f == INVALID_HANDLE_VALUE)
 		{
-			printf("Create File failed: %d\n", GetLastError());
+			printf("Create file failed:");
+			PrintLastErrorMsg();
 			return;
 		}
-		
-		LARGE_INTEGER fileSize;
-		fileSize.QuadPart = dimensions.x*dimensions.y*dimensions.z * voxelSize;
+
+		/// NOTE: LARGE_INTEGER is a signed 64bit integer, but fileSize is an unsigned 64-bit integer
+		LARGE_INTEGER fs;
+		fs.QuadPart = fileSize;
+
+		if(newCreated) // Specified the file size for file mapping
+		{
+			SetFilePointer(f, fs.LowPart, &fs.HighPart, FILE_BEGIN);
+			if(!SetEndOfFile(f))
+			{
+				printf("Set end of file failed:");
+				PrintLastErrorMsg();
+				return;
+			}
+		}
 
 		mapping = CreateFileMapping(f,
-			NULL, 
+			NULL,
 			MapAccessFlags, 
-			fileSize.HighPart, 
-			fileSize.LowPart, 
+			fs.HighPart, 
+			fs.LowPart, 
 			NULL);
 
 		if (mapping == nullptr)
 		{
-			printf("Create File Mapping failed: %d\n", GetLastError());
+			printf("Create file mapping failed");
+			PrintLastErrorMsg();
 			return;
 		}
+
+
+
 	}
 
-	void* WindowsMappingRawIO::FileMemPointer(unsigned long long offset, std::size_t size)
+	unsigned char* WindowsMappingRawIO::FileMemPointer(unsigned long long offset, std::size_t size)
 	{
-		
+
 		LARGE_INTEGER os;
 		os.QuadPart = offset;
-		addr = MapViewOfFile(mapping, 
-			FILE_MAP_READ, 
+
+		int flags = 0;
+		if (mapAccess == MapAccess::ReadOnly)
+			flags = FILE_MAP_READ;
+		if (mapAccess == MapAccess::ReadWrite)
+			flags = FILE_MAP_READ | FILE_MAP_WRITE;
+
+		auto addr =(unsigned char*) MapViewOfFile(mapping, 
+			flags,
 			os.HighPart,
 			os.LowPart, 
 			static_cast<SIZE_T>(size));
 
+
+
 		if (!addr)
 		{
-			printf("MapViewOfFile failed: %d\n", GetLastError());
+			printf("MapViewOfFile failed:");
+			PrintLastErrorMsg();
 			return nullptr;
 		}
+		mappedPointers.insert(addr);
 		return addr;
 	}
 
-	void WindowsMappingRawIO::DestroyFileMemPointer(void * addr)
+	void WindowsMappingRawIO::DestroyFileMemPointer(unsigned char* addr)
 	{
+		mappedPointers.erase(addr);
 		UnmapViewOfFile((LPVOID)addr);
 	}
 
@@ -82,11 +140,18 @@ namespace ysl
 		return true;
 	}
 
-	WindowsMappingRawIO::~WindowsMappingRawIO()
+	bool WindowsMappingRawIO::Close()
 	{
-		WindowsMappingRawIO::DestroyFileMemPointer(addr);
+		for (auto addr : mappedPointers)
+			WindowsMappingRawIO::DestroyFileMemPointer(addr);
 		CloseHandle(f);
 		CloseHandle(mapping);
+		return true;
+	}
+
+	WindowsMappingRawIO::~WindowsMappingRawIO()
+	{
+		WindowsMappingRawIO::Close();
 	}
 #endif /*_WIN32*/
 }
