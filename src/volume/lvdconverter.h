@@ -147,26 +147,12 @@ namespace ysl
 			return;
 		}
 
-	/*	std::ifstream rawFile(fileName, std::ifstream::binary);
-
-		if (!rawFile.is_open())
-		{
-			std::cout << "can not open raw file.\n";
-			return;
-		}*/
-
-
 		const auto blockedSize = blockSize - 2 * m_repeat;
 		m_blockDimension = { int(ysl::RoundUpDivide(xSize, blockedSize)), int(ysl::RoundUpDivide(ySize, blockedSize)) , int(ysl::RoundUpDivide(zSize, blockedSize)) };
 		//m_blockDimension = {int(xSize / blockedSize), int(ySize / blockedSize), int(zSize / blockedSize)};
 		std::cout << "Raw data should be divided in:" << m_blockDimension << std::endl;
-
-		//m_newDataDimension = { xBlockedCount * blockSize ,yBlockedCount * blockSize ,zBlockedCount * blockSize };
-
 		m_dataSize = m_blockDimension * ysl::Vector3i{blockSize, blockSize, blockSize};
-
 		std::cout << "lvd data dimension: " << m_dataSize << std::endl;
-
 		const auto rawBytes = std::size_t(xSize) * ySize * zSize * sizeof(RawType);
 		if (rawBytes == 0)
 		{
@@ -199,8 +185,6 @@ namespace ysl
 #elif
 		static_assert(false);
 #endif
-
-
 	}
 
 	template <int nLogBlockSize, typename LVDTraits>
@@ -251,23 +235,11 @@ namespace ysl
 	{
 
 		const auto rep = std::to_string(m_repeat), bSize = std::to_string(1<<nLogBlockSize);
-
-		//const std::string outFileName { fileName.substr(0, fileName.find_last_of(".")) + "_" + rep + "_" + bSize + ".lvd"};
-		//std::cout << "Writing as:" << outFileName << std::endl;
-
 		const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
-
-		//std::shared_ptr<AbstrRawIO> lvdIO;
-		//void * outPtr;
-
-		
 		constexpr auto logBlockSize = nLogBlockSize;
 
-
 		// 36 bytes in total
-
 		LVDHeader lvdHeader;
-
 		lvdHeader.magicNum = LVDTraits::MagicNumber;
 		lvdHeader.dataDim[0] = m_dataSize.x;
 		lvdHeader.dataDim[1] = m_dataSize.y;
@@ -277,18 +249,7 @@ namespace ysl
 		lvdHeader.originalDataDim[0] = g_xSize;
 		lvdHeader.originalDataDim[1] = g_ySize;
 		lvdHeader.originalDataDim[2] = g_zSize;
-
 		const auto p = lvdHeader.Encode();
-
-		const auto headerSize = lvdHeader.HeaderSize();
-
-		//lvdFile.write((char*)&LVDTraits::MagicNumber, 4);		
-		//lvdFile.write((char*)&m_dataSize.x, 3 * sizeof(LVDTraits::DimensionSize_t));		
-		//lvdFile.write((char*)&logBlockSize, sizeof(LVDTraits::LogBlockSize_t));
-		//lvdFile.write((char*)&m_repeat, sizeof(LVDTraits::BoundarySize_t));
-		//lvdFile.write((char*)&g_xSize, sizeof(LVDTraits::DimensionSize_t));
-		//lvdFile.write((char*)&g_ySize, sizeof(LVDTraits::DimensionSize_t));
-		//lvdFile.write((char*)&g_zSize, sizeof(LVDTraits::DimensionSize_t));
 
 		std::cout << m_dataSize << " " <<
 			logBlockSize << " " <<
@@ -299,8 +260,6 @@ namespace ysl
 
 		// Write lvd header
 		memcpy(lvdPtr, p, LVD_HEADER_SIZE);
-
-
 
 		std::cout << "writing .lvd file finished\n";
 		return true;
