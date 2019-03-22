@@ -4,7 +4,7 @@
 #include <fstream>
 #include "abcflowgen.h"
 
-#include "../mathematics/numeric.h"
+#include "../../src/mathematics/numeric.h"
 
 int ABCFlowGen(std::size_t x, std::size_t y, std::size_t z)
 {

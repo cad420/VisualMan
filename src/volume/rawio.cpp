@@ -81,6 +81,7 @@ namespace ysl
 			}
 		}
 
+
 		mapping = CreateFileMapping(f,
 			NULL,
 			MapAccessFlags, 
@@ -94,8 +95,6 @@ namespace ysl
 			PrintLastErrorMsg();
 			return;
 		}
-
-
 
 	}
 
@@ -117,14 +116,13 @@ namespace ysl
 			os.LowPart, 
 			static_cast<SIZE_T>(size));
 
-
-
 		if (!addr)
 		{
 			printf("MapViewOfFile failed:");
 			PrintLastErrorMsg();
 			return nullptr;
 		}
+
 		mappedPointers.insert(addr);
 		return addr;
 	}

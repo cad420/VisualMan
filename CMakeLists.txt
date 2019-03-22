@@ -113,16 +113,16 @@ message(STATUS "Test source list: ${TEST_SRC_LIST}")
 
 file(GLOB TEST_HEADERS "test/*.h")
 
-add_executable("mytest" 
-"test/test.cpp"
-"test/abcflowgen.cpp"
-${3RDPARTY_SRC_LIST}
-${CORE_SRC_LIST} 
-${MEM_SRC_LIST} 
-${VOLUME_SRC_LIST} 
-${UTILS_SRC_LIST}
-${MATH_SRC_LIST}
-		src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h)
+#add_executable("mytest" 
+#"test/test.cpp"
+#"test/abcflowgen.cpp"
+#${3RDPARTY_SRC_LIST}
+#${CORE_SRC_LIST} 
+#${MEM_SRC_LIST} 
+#${VOLUME_SRC_LIST} 
+#${UTILS_SRC_LIST}
+#${MATH_SRC_LIST}
+#src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h)
 
 # Application Test
 
@@ -159,10 +159,17 @@ target_link_libraries(ApplicationTest glfw ${OPENGL_LIBRARIES})
 #message(STATUS "TBB Found:" ${TBB_IMPORTED_TARGETS})
 #endif()
 
-
+add_executable("lvdconverter" 
+"tools/lvdconverter/lvdconverter" 
+${CORE_SRC_LIST} 
+${MEM_SRC_LIST} 
+${VOLUME_SRC_LIST} 
+${UTILS_SRC_LIST}
+${MATH_SRC_LIST}
+)
 
 add_executable("downsample" 
-"downsample/downsample"
+"tools/downsample/downsample"
 ${VOLUME_SRC_LIST} ${MEM_SRC_LIST} "src/volume/rawio.cpp")
 #target_link_libraries(downsample)
 
@@ -186,7 +193,7 @@ ${OPENGL_SRC_LIST}
 ${UTILS_SRC_LIST} 
 ${CORE_SRC_LIST}
 ${SHAPE_SRC_LIST}
-${APP_SRC_LIST} src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h)
+${APP_SRC_LIST})
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
