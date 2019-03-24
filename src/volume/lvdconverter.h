@@ -6,8 +6,6 @@
 #include "../mathematics/numeric.h"
 
 #include "rawio.h"
-#include <string>
-#include "openglbuffer.h"
 #include "lvdheader.h"
 
 
@@ -150,8 +148,13 @@ namespace ysl
 		const auto blockedSize = blockSize - 2 * m_repeat;
 		m_blockDimension = { int(ysl::RoundUpDivide(xSize, blockedSize)), int(ysl::RoundUpDivide(ySize, blockedSize)) , int(ysl::RoundUpDivide(zSize, blockedSize)) };
 		//m_blockDimension = {int(xSize / blockedSize), int(ySize / blockedSize), int(zSize / blockedSize)};
-		std::cout << "Raw data should be divided in:" << m_blockDimension << std::endl;
+
+		std::cout << "Information:" << std::endl;
+		std::cout << g_xSize << " " << g_ySize << " " << g_zSize << std::endl;
+		std::cout << "block size:" << blockedSize << std::endl;
 		m_dataSize = m_blockDimension * ysl::Vector3i{blockSize, blockSize, blockSize};
+
+		std::cout << "lvd block dimension:" << m_blockDimension << std::endl;
 		std::cout << "lvd data dimension: " << m_dataSize << std::endl;
 		const auto rawBytes = std::size_t(xSize) * ySize * zSize * sizeof(RawType);
 		if (rawBytes == 0)
@@ -194,7 +197,7 @@ namespace ysl
 
 		if(!lvdPtr)
 		{
-			ysl::Log("Bad lvd data pointer\n");
+			std::cout << "Bad lvd data pointer\n";
 			return false;
 		}
 
@@ -224,7 +227,7 @@ namespace ysl
 
 					if (blockIndex % 100 == 0)
 					{
-						ysl::Log("%d block Completion\n", blockIndex);
+						std::cout << blockIndex << " " << "block completion" << std::endl;
 					}
 				}
 		return true;
@@ -239,6 +242,7 @@ namespace ysl
 		constexpr auto logBlockSize = nLogBlockSize;
 
 		// 36 bytes in total
+
 		LVDHeader lvdHeader;
 		lvdHeader.magicNum = LVDTraits::MagicNumber;
 		lvdHeader.dataDim[0] = m_dataSize.x;
@@ -246,9 +250,11 @@ namespace ysl
 		lvdHeader.dataDim[2] = m_dataSize.z;
 		lvdHeader.padding = m_repeat;
 		lvdHeader.blockLengthInLog = logBlockSize;
-		lvdHeader.originalDataDim[0] = g_xSize;
-		lvdHeader.originalDataDim[1] = g_ySize;
-		lvdHeader.originalDataDim[2] = g_zSize;
+
+		lvdHeader.originalDataDim[0] = m_blockDimension.x * ( (1 << nLogBlockSize) - 2 * m_repeat);
+		lvdHeader.originalDataDim[1] = m_blockDimension.y * ( (1 << nLogBlockSize) - 2 * m_repeat);
+		lvdHeader.originalDataDim[2] = m_blockDimension.z * ((1 << nLogBlockSize) - 2 * m_repeat);
+
 		const auto p = lvdHeader.Encode();
 
 		std::cout << m_dataSize << " " <<
