@@ -21,13 +21,14 @@ namespace ysl
 		RGBASpectrum LeftColor()const { return leftColor; }
 		RGBASpectrum RightColor()const { return rightColor; }
 		void SetIntensity(Float intensity) { intensity = intensity; }
+
 		void SetLeftColor(const RGBASpectrum & c)
 		{
 			const auto a = leftColor.c[3];
 			leftColor = c;
 			leftColor.c[3] = a;
-
 		}
+
 		void SetRightColor(const RGBASpectrum & c)
 		{
 			const auto a = leftColor.c[3];
