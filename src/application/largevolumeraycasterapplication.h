@@ -20,7 +20,10 @@ namespace ysl
 
 		constexpr int pageTableBlockEntry = 16;
 		class LargeVolumeRayCaster:public ImGuiApplication,
-								   public VolumeVirtualMemoryHierarchy<pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry>
+								   public VolumeVirtualMemoryHierarchy<
+									pageTableBlockEntry, 
+									pageTableBlockEntry, 
+									pageTableBlockEntry>
 		{
 		public:
 			LargeVolumeRayCaster(int argc, char ** argv, int w, int h,const std::string & fileName);
@@ -59,6 +62,8 @@ namespace ysl
 			FocusCamera camera;
 			ysl::Transform projMatrix;
 			ysl::Transform orthoMatrix;
+			ysl::Transform modelMatrix;
+
 			ysl::ShaderProgram rayCastingShaderProgram;
 			ysl::ShaderProgram positionShaderProgram;
 			ysl::ShaderProgram quadsShaderProgram;

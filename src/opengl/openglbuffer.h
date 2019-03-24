@@ -58,9 +58,9 @@ public:
 	//void create();
 	BufferTarget Target()const;
 	void Bind();
-	void SetSize(std::size_t size);
+	//void SetSize(std::size_t size);
 	std::size_t Size()const;
-	void AllocateFor(const void* data, std::size_t size);
+	void AllocateFor(const void * data, std::size_t size);
 	void SetSubData(const void * data, std::size_t size, std::size_t offsetBytes);
 	void VertexAttribPointer(int index,std::size_t size,DataType type,bool normalized,std::size_t stride,void * pointer);
 

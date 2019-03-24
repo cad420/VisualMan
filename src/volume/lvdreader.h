@@ -7,19 +7,25 @@
 
 #include <memory>
 #include <fstream>
+#include "lvdheader.h"
+#include "rawio.h"
 
 namespace ysl
 {
 	class LVDReader
 	{
-		std::ifstream fileHandle;
+		//std::ifstream fileHandle;
 		std::string fileName;
+
+		LVDHeader header;
+		//std::shared_ptr<AbstrRawIO> lvdIO;
+		AbstrRawIO* lvdIO;
+		unsigned char * lvdPtr;
 
 		ysl::Size3 vSize;
 		ysl::Size3 bSize;
 		ysl::Size3 oSize;
-		//int vx, vy, vz, bx, by, bz;
-		//int m_originalWidth, m_originalHeight, m_originalDepth;
+
 		int logBlockSize;
 		int repeat;
 		bool validFlag;
@@ -31,7 +37,7 @@ namespace ysl
 	public:
 		explicit LVDReader(const std::string& fileName);
 
-		bool valid()const { return validFlag; }
+		bool Valid()const { return validFlag; }
 
 		ysl::Size3 Size()const { return vSize; }
 
@@ -63,11 +69,11 @@ namespace ysl
 		const auto s = Size();
 		const size_t bytes = s.x*s.y*s.z * sizeof(T);
 		auto ptr = std::make_shared<ysl::Block3DArray<T, nLogBlockSize>>(s.x, s.y, s.z, nullptr);
-		if (ptr)
-		{
-			fileHandle.seekg((size_t)LVDHeaderSize, std::ios::beg);
-			fileHandle.read(ptr->Data(), bytes);
-		}
+		//if (ptr)
+		//{
+		//	fileHandle.seekg((size_t)LVDHeaderSize, std::ios::beg);
+		//	fileHandle.read(ptr->Data(), bytes);
+		//}
 		return ptr;
 	}
 }

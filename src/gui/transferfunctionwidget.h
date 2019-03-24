@@ -7,6 +7,7 @@
 #include "../opengl/texture.h"
 #include "../../imgui/imgui.h"
 #include "../volume/volume_utils.h"
+#include "tfgenerator.h"
 
 namespace ysl
 {

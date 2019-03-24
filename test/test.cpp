@@ -22,7 +22,7 @@ int LVDTester()
 	std::cin >> fileName;
 
 	ysl::LVDReader reader(fileName);
-	if (reader.valid())
+	if (reader.Valid())
 	{
 		std::cout << "lvd file information:" << std::endl;
 		std::cout << "data size:" << reader.Size();
