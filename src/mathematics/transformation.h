@@ -34,6 +34,7 @@ namespace  ysl
 	{
 		typedef	Float(*MatrixDataType)[4];
 		Matrix4x4();
+		Matrix4x4(const Matrix3x3 & mat33);
 		Matrix4x4(Float mat[4][4]);
 		Matrix4x4(Float t00, Float t01, Float t02, Float t03, Float t10, Float t11,
 			Float t12, Float t13, Float t20, Float t21, Float t22, Float t23,
@@ -222,31 +223,41 @@ namespace  ysl
 		return t;
 	}
 
-	inline Transform LookAt(const Point3f & eye, const Point3f & center, const Vector3f & up)
+	inline 
+	Transform 
+	LookAt(const Point3f & eye, const Point3f & center, const Vector3f & up)
 	{
 		Transform t;
 		t.SetLookAt(eye, center, up);
 		return t;
 	}
-	inline Transform Ortho(Float left, Float right, Float bottom, Float top, Float nearPlane, Float farPlane)
+	inline 
+	Transform 
+	Ortho(Float left, Float right, Float bottom, Float top, Float nearPlane, Float farPlane)
 	{
 		Transform t;
 		t.SetGLOrtho(left, right, bottom, top, nearPlane, farPlane);
 		return t;
 	}
-	inline Transform Perspective(Float vertcialAngle, Float aspectRation, Float nearPlane, Float farPlane)
+	inline 
+	Transform 
+	Perspective(Float vertcialAngle, Float aspectRation, Float nearPlane, Float farPlane)
 	{
 		Transform t;
 		t.SetGLPerspective(vertcialAngle, aspectRation, nearPlane, farPlane);
 		return t;
 	}
 
-	inline Transform Orthographic(Float zNear,Float zFar)
+	inline 
+	Transform 
+	Orthographic(Float zNear,Float zFar)
 	{
 		return Scale(1,1,1.0/(zFar-zNear)) * Translate(0,0,-zNear);
 	}
 
-	inline Transform Perspective(Float zNear,Float zFar,Float fov)
+	inline 
+	Transform 
+	Perspective(Float zNear,Float zFar,Float fov)
 	{
 		Matrix4x4 persp(1.0,0,0,0,
 						0,1,0,0,

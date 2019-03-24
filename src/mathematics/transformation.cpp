@@ -1,6 +1,7 @@
 #include "transformation.h"
 #include "numeric.h"
 #include <cstring>
+#include <cassert>
 
 
 namespace ysl
@@ -146,7 +147,31 @@ namespace ysl
 	{
 		m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.f;
 		m[0][1] = m[0][2] = m[0][3] = m[1][0] = m[1][2] = m[1][3] = m[2][0] =
-			m[2][1] = m[2][3] = m[3][0] = m[3][1] = m[3][2] = 0.f;
+		m[2][1] = m[2][3] = m[3][0] = m[3][1] = m[3][2] = 0.f;
+	}
+
+	Matrix4x4::Matrix4x4(const Matrix3x3& mat33)
+	{
+		// Row 1
+		m[0][0] = mat33.m[0][0];
+		m[0][1] = mat33.m[0][1];
+		m[0][2] = mat33.m[0][2];
+		m[0][3] = 0;
+		// Row 2
+		m[1][0] = mat33.m[1][0];
+		m[1][1] = mat33.m[1][1];
+		m[1][2] = mat33.m[1][2];
+		m[1][3] = 0;
+		// Row 3
+		m[2][0] = mat33.m[2][0];
+		m[2][1] = mat33.m[2][1];
+		m[2][2] = mat33.m[2][2];
+		m[2][3] = 0;
+		// Row 4 
+		m[3][0] = 0;
+		m[3][1] = 0;
+		m[3][2] = 0;
+		m[3][3] = 1;
 	}
 
 	Matrix4x4::Matrix4x4(Float mat[4][4])
