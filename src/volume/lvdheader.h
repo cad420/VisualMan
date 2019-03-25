@@ -3,7 +3,7 @@
 #define _LVDHEADER_H_
 #include <cstdint>
 #include "../mathematics/geometry.h"
-
+#include <memory>
 
 
 #define LVD_HEADER_BUF_ORIGIN_OFFSET  0

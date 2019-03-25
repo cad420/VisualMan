@@ -6,12 +6,14 @@
 //#include "abcflowgen.h"
 #include <atomic>
 #include <thread>
-#include "error.h"
 //#include "timer.h"
 //#include "../lib/3rdparty/rapidjson/document.h"
-#include "objreader.h"
 #include "../src/volume/rawreader.h"
 #include "../src/volume/lvdconverter.h"
+
+
+#include <iterator>
+#include <vector>
 
 
 int LVDTester()
@@ -212,36 +214,46 @@ void CountVolume()
 	std::cout << validBlock << " of " << totalBlocks << ":" << 1.0*validBlock / totalBlocks << std::endl;
 }
 
+class A
+{
+public:
+	A(int a,int b,int c)
+	{
+		std::cout << "constructor\n";
+	}
 
+	A(const A & other)
+	{
+		std::cout << "A(const A & other)\n";
+	}
+
+	A& operator=(const A & other)
+	{
+		std::cout << "A& operator=(const A & other)\n";
+		return *this;
+	}
+
+	A(A && other)noexcept
+	{
+		std::cout << "A(A && other)\n";
+	}
+
+	A& operator=(A && other)noexcept
+	{
+		std::cout << "A& operator=(A && other)\n";
+		return *this;
+	}
+};
 
 int main(int argc, char *argv[])
 {
 
-
-	int x, y, z, xc, yc, zc;
-
-	//std::cin >> x >> y >> z;
-	//ABCFlowGen(x,y,z);
-	//SimpleBlockGen(x,y,z,2,2,2);
-
-	std::string fileName;
-	std::cin >> fileName;
-	//int x, y, z, repeat;
-	int repeat;
-	std::cin >> x >> y >> z >> repeat;
-
-	std::string outFileName;
-	std::cin >> outFileName;
-	ysl::RawToLVDConverter<7> converter(fileName,x,y,z,repeat,outFileName);
-
-	converter.convert();
-	converter.save(fileName);
-	//ysl::ObjReader reader;
-	//reader.Load("C:\\Users\\ysl\\Desktop\\dragon.obj");
-	//std::cout << reader.getFaceIndices().size() << std::endl;
-	//system("pause");
-	//CountVolume();
-	system("pause");
+	std::vector<A> avec;
+	A  a(1,2,3);
+	avec.emplace_back(a);
+	avec.push_back(a);
+	avec.emplace_back(std::move(a));
+	avec.emplace_back(1,2,3);
 
 	return 0;
 }

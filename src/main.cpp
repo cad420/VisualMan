@@ -10,6 +10,10 @@
 #include "application/largevolumeraycasterapplication.h"
 #include "renderer/isosurfacerenderer.h"
 
+
+
+
+
 int main(int argc, char ** argv)
 {
 	//return ysl::app::LargeVolumeRayCaster(argc, argv,

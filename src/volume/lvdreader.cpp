@@ -1,5 +1,6 @@
 
 #include "lvdreader.h"
+#include <iostream>
 
 namespace ysl
 {
@@ -98,7 +99,7 @@ namespace ysl
 
 	}
 
-	void LVDReader::ReadBlock(char * dest, int blockId)
+	void LVDReader::ReadBlock(char * dest, int blockId,int lod)
 	{
 		const size_t blockCount = BlockDataCount();
 		const auto d = lvdPtr + LVD_HEADER_SIZE;

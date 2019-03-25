@@ -37,34 +37,37 @@ namespace ysl
 	public:
 		explicit LVDReader(const std::string& fileName);
 
+		LVDReader(const std::vector<std::string> & fileName,const std::vector<int> & lods);
+
+
 		bool Valid()const { return validFlag; }
 
-		ysl::Size3 Size()const { return vSize; }
+		ysl::Size3 Size(int lod = 0) const { return vSize; }
 
-		ysl::Size3 SizeByBlock()const { return bSize; }
+		ysl::Size3 SizeByBlock(int lod = 0)const { return bSize; }
 
-		int BoundaryRepeat()const { return repeat; }
+		int BoundaryRepeat(int lod = 0)const { return repeat; }
 
-		int BlockSizeInLog()const { return logBlockSize; }
+		int BlockSizeInLog(int lod = 0)const { return logBlockSize; }
 
-		int BlockSize()const { return 1 << BlockSizeInLog(); }
+		int BlockSize(int lod = 0)const { return 1 << BlockSizeInLog(); }
 
-		int BlockDataCount()const { return BlockSize()*BlockSize()*BlockSize(); }
+		int BlockDataCount(int lod = 0)const { return BlockSize()*BlockSize()*BlockSize(); }
 
-		int BlockCount()const { return bSize.x*bSize.y*bSize.z; }
+		int BlockCount(int lod = 0)const { return bSize.x*bSize.y*bSize.z; }
 
-		ysl::Size3 OriginalDataSize()const { return oSize; }
+		ysl::Size3 OriginalDataSize(int lod = 0)const { return oSize; }
 
 		template<typename T, int nLogBlockSize>
-		std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> ReadAll();
+		std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> ReadAll(int lod = 0);
 
-		void ReadBlock(char * dest, int blockId);
+		void ReadBlock(char * dest, int blockId,int lod = 0);
 
 	};
 
 
 	template <typename T, int nLogBlockSize>
-	std::shared_ptr<Block3DArray<T, nLogBlockSize>> LVDReader::ReadAll()
+	std::shared_ptr<Block3DArray<T, nLogBlockSize>> LVDReader::ReadAll(int lod)
 	{
 		const auto s = Size();
 		const size_t bytes = s.x*s.y*s.z * sizeof(T);
