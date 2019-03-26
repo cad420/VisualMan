@@ -26,7 +26,15 @@ namespace ysl
 		size_type x, y, z;
 	};
 
-	class LargeVolumeCache : public ysl::LVDReader
+	class BlockData
+	{
+	public:
+		virtual const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock) = 0;
+		virtual const unsigned char * ReadBlockDataFromCPUCache(int blockId) = 0;
+		~BlockData(){}
+	};
+
+	class CPUVolumeDataCache : public ysl::LVDReader
 	{
 		static constexpr int nLogBlockSize = 7;		//
 
@@ -77,19 +85,17 @@ namespace ysl
 		void initLRU();
 
 	public:
-		explicit LargeVolumeCache(const std::string& fileName);
+		explicit CPUVolumeDataCache(const std::string& fileName);
 		bool IsValid()const { return m_valid; }
 		//int blockCount()const { totalCacheBlocks; }
-		constexpr std::size_t CPUCacheBlockCount() const { return totalCacheBlocks; }
-		constexpr ysl::Size3 CPUCacheBlockSize()const { return cacheBlockSize; }
-		constexpr ysl::Size3 CPUCacheDim()const { return cacheDim; }
-		constexpr ysl::Size3 CPUCacheSize()const { return cacheSize; }
+		std::size_t CPUCacheBlockCount() const { return totalCacheBlocks; }
+		ysl::Size3 CPUCacheBlockSize()const { return cacheBlockSize; }
+		ysl::Size3 CPUCacheDim()const { return cacheDim; }
+		ysl::Size3 CPUCacheSize()const { return cacheSize; }
 
-
-
-		const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock) { return ReadBlockDataFromCPUCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
-		const unsigned char * ReadBlockDataFromCPUCache(int blockId);
-		const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index) { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
+		virtual const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock)const { return ReadBlockDataFromCPUCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
+		virtual const unsigned char * ReadBlockDataFromCPUCache(int blockId)const;
+		virtual const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index)const { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
 	};
 
 }

@@ -151,6 +151,8 @@ namespace ysl
 			Linear3DArray(array.size.x, array.size.y,array.size.z, array.m_data, array.own)
 		{
 			array.m_data = nullptr;
+
+			std::cout << "Linear3DArray(Linear3DArray && array)" << std::endl;
 		}
 
 		Linear3DArray & operator=(Linear3DArray && array)noexcept

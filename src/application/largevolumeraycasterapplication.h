@@ -19,11 +19,8 @@ namespace ysl
 	{
 
 		constexpr int pageTableBlockEntry = 16;
-		class LargeVolumeRayCaster:public ImGuiApplication,
-								   public VolumeVirtualMemoryHierarchy<
-									pageTableBlockEntry, 
-									pageTableBlockEntry, 
-									pageTableBlockEntry>
+		class LargeVolumeRayCaster:public ImGuiApplication
+
 		{
 		public:
 			LargeVolumeRayCaster(int argc, char ** argv, int w, int h,const std::string & fileName);
@@ -111,6 +108,9 @@ namespace ysl
 			std::shared_ptr<OpenGLBuffer> bufMissedHash;
 			std::shared_ptr<OpenGLBuffer> bufMissedTable;
 			std::shared_ptr<OpenGLBuffer> atomicCounter;
+
+			CPUVolumeDataCache largeVolumeCache;
+			VirtualMemoryManager pageTableManager;
 
 
 			int g_pageTableX;
