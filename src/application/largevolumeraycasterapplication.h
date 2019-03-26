@@ -101,10 +101,10 @@ namespace ysl
 			OpenGLVertexArrayObject rayCastingVAO;
 			std::shared_ptr<OpenGLTexture> texPageTable;
 			std::shared_ptr<OpenGLTexture> texCache;
-			std::list<std::pair<PageTableEntryAbstractIndex, CacheBlockAbstractIndex>> g_lruList;
+			std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>> g_lruList;
 			std::shared_ptr<OpenGLBuffer> blockPingBuf;
 			std::shared_ptr<OpenGLBuffer> blockPongBuf;
-			std::vector<GlobalBlockAbstractIndex> hits;
+			std::vector<VirtualMemoryBlockIndex> hits;
 
 			std::vector<int> posInCache;
 			ysl::Size3 gpuCacheBlockSize;

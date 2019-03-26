@@ -15,10 +15,11 @@ namespace ysl
 	class LVDReader
 	{
 		//std::ifstream fileHandle;
-		std::string fileName;
 
+		std::string fileName;
 		LVDHeader header;
 		//std::shared_ptr<AbstrRawIO> lvdIO;
+
 		AbstrRawIO* lvdIO;
 		unsigned char * lvdPtr;
 
@@ -27,7 +28,7 @@ namespace ysl
 		ysl::Size3 oSize;
 
 		int logBlockSize;
-		int repeat;
+		int padding;
 		bool validFlag;
 
 		enum { LVDFileMagicNumber = 277536 };
@@ -37,7 +38,7 @@ namespace ysl
 	public:
 		explicit LVDReader(const std::string& fileName);
 
-		LVDReader(const std::vector<std::string> & fileName,const std::vector<int> & lods);
+		LVDReader(const std::vector<std::string> & fileName,const std::vector<int> & lods = std::vector<int>{});
 
 
 		bool Valid()const { return validFlag; }
@@ -46,7 +47,7 @@ namespace ysl
 
 		ysl::Size3 SizeByBlock(int lod = 0)const { return bSize; }
 
-		int BoundaryRepeat(int lod = 0)const { return repeat; }
+		int BoundaryRepeat(int lod = 0)const { return padding; }
 
 		int BlockSizeInLog(int lod = 0)const { return logBlockSize; }
 

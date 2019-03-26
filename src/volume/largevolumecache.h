@@ -10,19 +10,23 @@ namespace ysl
 {
 
 
-	struct GlobalBlockAbstractIndex
+	struct VirtualMemoryBlockIndex
 	{
-		GlobalBlockAbstractIndex(std::size_t linearId, int xb, int yb, int zb)
+		VirtualMemoryBlockIndex(std::size_t linearId, int xb, int yb, int zb)
 		{
 			z = linearId / (xb*yb);
 			y = (linearId - z * xb*yb) / xb;
 			x = linearId - z * xb*yb - y * xb;
 		}
+		VirtualMemoryBlockIndex(int x, int y, int z):x(x),y(y),z(z)
+		{
+		}
+
 		using size_type = int;
 		size_type x, y, z;
 	};
 
-	class LargeVolumeCache :public ysl::LVDReader
+	class LargeVolumeCache : public ysl::LVDReader
 	{
 		static constexpr int nLogBlockSize = 7;		//
 
@@ -40,6 +44,7 @@ namespace ysl
 		static constexpr size_t totalCacheBlocks = cacheDim.x*cacheDim.y*cacheDim.z;
 
 		using Cache = ysl::Block3DArray<unsigned char, nLogBlockSize>;
+
 		struct LRUListCell;
 		using LRUHash = std::map<int, std::list<LRUListCell>::iterator>;
 		struct LRUListCell
@@ -79,9 +84,12 @@ namespace ysl
 		constexpr ysl::Size3 CPUCacheBlockSize()const { return cacheBlockSize; }
 		constexpr ysl::Size3 CPUCacheDim()const { return cacheDim; }
 		constexpr ysl::Size3 CPUCacheSize()const { return cacheSize; }
+
+
+
 		const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock) { return ReadBlockDataFromCPUCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
 		const unsigned char * ReadBlockDataFromCPUCache(int blockId);
-		const unsigned char * ReadBlockDataFromCPUCache(const GlobalBlockAbstractIndex & index) { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
+		const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index) { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
 	};
 
 }

@@ -2,8 +2,10 @@
 #ifndef _LINEARARRAY_H_
 #define _LINEARARRAY_H_
 
-#include "dataarena.h"
+
 #include "../mathematics/geometry.h"
+#include "dataarena.h"
+#include <cstring>
 
 namespace ysl
 {
@@ -11,16 +13,22 @@ namespace ysl
 	class Linear2DArray
 	{
 		using size_type = std::size_t;
+		Size2 size;
 		T * m_data;
-		const size_type m_nx, m_ny;
 		bool m_own;
 	public:
+
+		Linear2DArray():size(0,0),m_data(nullptr),m_own(false)
+		{
+		}
+
 		Linear2DArray(size_type x,
 			size_type y,
 			T * data, 
-			bool own):m_nx(x),m_ny(y),m_data(data),m_own(own)
+			bool own):size(x,y),m_data(data),m_own(own)
 		{
 		}
+
 		Linear2DArray(size_type x,size_type y,const T * data):Linear2DArray(x,y,nullptr,true)
 		{
 			m_data = (T*)AllocAligned<T>(x*y);
@@ -32,28 +40,39 @@ namespace ysl
 			if(data)memcpy(m_data, data, x*y);
 		}
 
-		Linear2DArray(const Linear2DArray &) = delete;
-		Linear2DArray & operator=(const Linear2DArray &) = delete;
+		Linear2DArray(const Size2 & size, const T * data) :Linear2DArray(size.x, size.y, data)
+		{
+		}
+
+		Linear2DArray(const Linear2DArray & array):Linear2DArray(array.size.x, array.size.y, array.m_data, array.m_own)
+		{
+			memcpy(m_data, array.m_data, sizeof(T) * size.x * size.y);
+		}
+		Linear2DArray & operator=(const Linear2DArray & array)
+		{
+			this->size = array.size;
+			this->m_own = m_own;
+			memcpy(m_data, array.m_data, sizeof(T) * size.x * size.y);
+			return *this;
+		}
 
 		Linear2DArray(Linear2DArray && array)noexcept:
-		Linear2DArray(array.m_nx,array.m_ny,array.m_data,array.m_own)
+		Linear2DArray(array.size.x,array.size.y,array.m_data,array.m_own)
 		{
 			array.m_data = nullptr;
 		}
 
 		Linear2DArray & operator=(Linear2DArray && array)noexcept
 		{
-			m_nx = array.m_nx;
-			m_ny = array.m_ny;
+			size = array.size;
 			m_data = array.m_data;
 			m_own = array.m_own;
 			array.m_data = nullptr;
 			return *this;
 		}
 
-		int Width()const { return m_nx; }
-		int Height()const { return m_ny; }
-		std::size_t Count()const { return m_nx*m_nx; }
+		Size2 Size()const { return size; }
+		std::size_t Count()const { return size.x*size.y; }
 
 		T & operator()(int x,int y)
 		{
@@ -62,7 +81,7 @@ namespace ysl
 
 		const T & operator()(int x,int y)const
 		{
-			return m_data[y * m_nx + x];
+			return m_data[y * size.x + x];
 		}
 
 		~Linear2DArray()
@@ -81,56 +100,79 @@ namespace ysl
 	{
 		using size_type = std::size_t;
 		T * m_data;
-		const Size3 size;
-		const size_type m_xy;
+		Size3 size;
+		size_type xyPlaneSize;
 		bool own;
 	public:
+
+		Linear3DArray():size(0,0,0),m_data(nullptr),own(false),xyPlaneSize(0)
+		{
+		}
+
 		Linear3DArray(size_type x,
 			size_type y,
 			size_type z,
 			T * data,
-			bool own) :size(x,y,z),m_data(data),own(own),m_xy(x*y)
-		{
-		}
-		Linear3DArray(const Size3 & sze,
-			T * data):Linear3DArray(sze.x, sze.y ,sze.z, data,true)
+			bool own):size(x,y,z),m_data(data),own(own),xyPlaneSize(x*y)
 		{
 		}
 
 		Linear3DArray(size_type x, size_type y,size_type z ,const T * data) :Linear3DArray(x,y,z, nullptr, true)
 		{
 			const auto t = x*y*z;
-			m_data = (T*)AllocAligned<T>(t);
+			m_data = static_cast<T*>(AllocAligned<T>(t));
 			if (m_data == nullptr)
 			{
 				std::cout << "Bad Alloc\n";
 				return;
 			}
-			if(data)memcpy(m_data, data,t);
+			if(data)
+				memcpy(m_data, data,t);
 		}
-		Linear3DArray(const Linear3DArray &) = delete;
-		Linear3DArray & operator=(const Linear3DArray &) = delete;
+
+		Linear3DArray(const Size3 & sze,
+			T * data) :Linear3DArray(sze.x, sze.y, sze.z, data)
+		{
+		}
+
+		Linear3DArray(const Linear3DArray & array):Linear3DArray(array.size.x, array.size.y, array.size.z, array.m_data, array.own)
+		{
+			memcpy(m_data, array.m_data, sizeof(T) * xyPlaneSize * size.z);
+		}
+		Linear3DArray & operator=(const Linear3DArray &array)
+		{
+			this->size = array.size;
+			this->xyPlaneSize = array.xyPlaneSize;
+			this->own = array.own;
+			memcpy(m_data, array.m_data, sizeof(T) * xyPlaneSize * size.z);
+			return *this;
+		}
 		Linear3DArray(Linear3DArray && array)noexcept :
 			Linear3DArray(array.size.x, array.size.y,array.size.z, array.m_data, array.own)
 		{
 			array.m_data = nullptr;
 		}
+
 		Linear3DArray & operator=(Linear3DArray && array)noexcept
 		{
-			//m_nx = array.m_nx;
-			//m_ny = array.m_ny;
-			//m_nx = array.m_nz;
+
 			size = array.size;
 			m_data = array.m_data;
 			own = array.own;
 			array.m_data = nullptr;
 			return *this;
 		}
-		//int Width()const { return m_nx; }
-		//int Height()const { return m_ny; }
-		//int Depth()const { return m_nz; }
-		Size3 Size()const { return size; }
-		std::size_t Count()const { return size.x*size.y*size.z; }
+
+		Size3 Size()const
+		{
+			return size;
+		}
+
+		std::size_t Count()const
+		{
+			return xyPlaneSize * size.z;
+		}
+
 		T & operator()(int x, int y,int z)
 		{
 			return const_cast<T&>(static_cast<const Linear3DArray &>(*this)(x, y,z));
@@ -138,11 +180,18 @@ namespace ysl
 
 		const T & operator()(int x, int y,int z)const
 		{
-			return m_data[z*m_xy +y * size.x + x];
+			return m_data[z*xyPlaneSize +y * size.x + x];
 		}
 
-		const T * Data()const { return m_data; }
-		T * Data() { return m_data; }
+		const T * Data()const
+		{
+			return m_data;
+		}
+
+		T * Data()
+		{
+			return m_data;
+		}
 
 		~Linear3DArray()
 		{

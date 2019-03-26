@@ -16,9 +16,9 @@ in vec2 textureRectCoord;
 out vec4 fragColor;			// MRT 0
 
 uniform sampler3D cacheVolume;						// volume block cache
-uniform ivec3 totalPageDirSize;						// page dir texture size
+//uniform ivec3 totalPageDirSize;						// page dir texture size
 uniform ivec3 totalPageTableSize;					// page table texture size
-uniform ivec3 pageTableBlockEntrySize;				// page table block entry size
+//uniform ivec3 pageTableBlockEntrySize;				// page table block entry size
 uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (no repeat)
 uniform ivec3 blockDataSizeNoRepeat;				// block data size (no repeat)
 uniform ivec3 repeatOffset;							// repeat boarder size

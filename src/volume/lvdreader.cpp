@@ -54,7 +54,7 @@ namespace ysl
 		int vy = header.dataDim[1];
 		int vz = header.dataDim[2];
 		logBlockSize = header.blockLengthInLog;
-		repeat = header.padding;
+		padding = header.padding;
 
 		const int originalWidth = header.originalDataDim[0];
 		const int originalHeight = header.originalDataDim[1];
@@ -96,6 +96,21 @@ namespace ysl
 #elif 
 		static_assert(false);
 #endif
+
+	}
+
+	LVDReader::LVDReader(const std::vector<std::string>& fileName, const std::vector<int>& lods)
+	{
+		std::vector<int> levelOfDetails;
+		if(lods.size() == 0)
+		{
+			for (int i = 0; i < fileName.size(); i++)
+				levelOfDetails.push_back(i);
+		}
+
+
+
+
 
 	}
 
