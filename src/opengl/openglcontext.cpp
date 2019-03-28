@@ -6,6 +6,19 @@ windowContext(glfwGetCurrentContext())
 {
 }
 
+OpenGLCurrentContext::OpenGLCurrentContext(OpenGLCurrentContext&& ctx) noexcept
+{
+	windowContext = ctx.windowContext;
+	ctx.windowContext = nullptr;
+}
+
+OpenGLCurrentContext& OpenGLCurrentContext::operator=(OpenGLCurrentContext&&ctx) noexcept
+{
+	windowContext = ctx.windowContext;
+	ctx.windowContext = nullptr;
+	return *this;
+}
+
 bool OpenGLCurrentContext::IsValid() const
 {
 	return windowContext;

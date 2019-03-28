@@ -94,7 +94,10 @@ public:
 		WrapMode tWrapMode = WrapMode::ClampToEdge);
 
 	DISABLE_COPY(OpenGLTexture);
-	DISABLE_MOVE(OpenGLTexture);
+
+	OpenGLTexture(OpenGLTexture && tex)noexcept;
+
+	OpenGLTexture& operator=(OpenGLTexture&& tex) noexcept;
 
 	void Bind();
 	void Unbind();

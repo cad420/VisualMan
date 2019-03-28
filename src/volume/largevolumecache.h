@@ -93,9 +93,9 @@ namespace ysl
 		ysl::Size3 CPUCacheDim()const { return cacheDim; }
 		ysl::Size3 CPUCacheSize()const { return cacheSize; }
 
-		virtual const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock)const { return ReadBlockDataFromCPUCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
-		virtual const unsigned char * ReadBlockDataFromCPUCache(int blockId)const;
-		virtual const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index)const { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
+		virtual const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock) { return ReadBlockDataFromCPUCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
+		virtual const unsigned char * ReadBlockDataFromCPUCache(int blockId);
+		virtual const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index) { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
 	};
 
 }

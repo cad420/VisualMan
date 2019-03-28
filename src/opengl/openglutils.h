@@ -80,7 +80,7 @@ GLenum PrintGLErrorMsg(const char * file, int line)
               #stmt, __LINE__, __FILE__,                               \
               static_cast<unsigned>(glerr));                           \
       iCounter++;                                                      \
-      if (iCounter > MAX_GL_ERROR_COUNT) break;                        \
+      if (iCounter > 100) break;                        \
     }                                                                  \
     stmt;                                                              \
     iCounter = 0;                                                      \

@@ -245,9 +245,10 @@ public:
 	}
 };
 
+
+
 int main(int argc, char *argv[])
 {
-
 	std::vector<A> avec;
 	A  a(1,2,3);
 	avec.emplace_back(a);

@@ -28,6 +28,23 @@ OpenGLTexture::OpenGLTexture(TextureTarget target_,
 	}
 }
 
+OpenGLTexture::OpenGLTexture(OpenGLTexture&& tex) noexcept:
+textureId(tex.textureId), 
+currentContext(std::move(tex.currentContext)),
+target(tex.target)
+{
+	tex.textureId = 0;
+}
+
+OpenGLTexture& OpenGLTexture::operator=(OpenGLTexture&& tex)noexcept
+{
+	textureId = tex.textureId;
+	currentContext = std::move(tex.currentContext);
+	target = tex.target;
+	tex.textureId = 0;
+	return *this;
+}
+
 void OpenGLTexture::Bind()
 {
 	glBindTexture(target, textureId);

@@ -4,8 +4,7 @@
 
 namespace ysl
 {
-	GPUCache::GPUCache(const Size3& cacheSize,void * data, CacheExternalDataFormat extFmt, CacheExternalDataFormat extType,
-		CacheInternalDataFormat intFmt):
+	GPUCache::GPUCache(const Size3& cacheSize,void * data):
 	OpenGLTexture(Texture3D
 		,OpenGLTexture::Linear
 		,OpenGLTexture::Linear
@@ -19,10 +18,9 @@ namespace ysl
 		Unbind();
 	}
 
-	void HashBasedGPUCacheMissHandler::InitHashBuffer(int blockCount)
+	void HashBasedGPUCacheFaultHandler::InitHashBuffer(int blockCount)
 	{
-
-		const std::size_t totalBlockCountBytes = blockCount * sizeof(int);
+		const std::size_t totalBlockCountBytes = capacity * sizeof(int);
 		bufMissedHash = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer,
 			OpenGLBuffer::StreamDraw);
 		bufMissedHash->AllocateFor(nullptr, totalBlockCountBytes);
@@ -30,17 +28,17 @@ namespace ysl
 		bufMissedHash->BindBufferBase(0);
 	}
 
-	void HashBasedGPUCacheMissHandler::InitMissTableBuffer()
+	void HashBasedGPUCacheFaultHandler::InitMissTableBuffer()
 	{
-		const auto missedBlockCapacity = 5000 * sizeof(unsigned int);
+		const auto missedBlockCapacity = capacity * sizeof(unsigned int);
 		bufMissedTable = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer,
 			OpenGLBuffer::StreamDraw);
 		bufMissedTable->AllocateFor(nullptr, missedBlockCapacity);
 		GL_ERROR_REPORT;
-		bufMissedTable->BindBufferBase(1)
+		bufMissedTable->BindBufferBase(1);
 	}
 
-	void HashBasedGPUCacheMissHandler::InitGPUAtomicCounter()
+	void HashBasedGPUCacheFaultHandler::InitGPUAtomicCounter()
 	{
 		atomicCounter = std::make_shared<OpenGLBuffer>(OpenGLBuffer::AtomicCounterBuffer,
 			OpenGLBuffer::DynamicCopy);
@@ -50,7 +48,7 @@ namespace ysl
 		GL_ERROR_REPORT;
 	}
 
-	void HashBasedGPUCacheMissHandler::ResetBlockExistsHash()
+	void HashBasedGPUCacheFaultHandler::ResetBlockExistsHash()
 	{
 		GL_ERROR_REPORT;
 		const auto ptr = bufMissedHash->Map(OpenGLBuffer::WriteOnly);
@@ -59,60 +57,70 @@ namespace ysl
 		GL_ERROR_REPORT;
 	}
 
-	void HashBasedGPUCacheMissHandler::ResetMissedBlockVector()
+	void HashBasedGPUCacheFaultHandler::ResetMissedBlockVector()
 	{
 		const auto ptr = bufMissedTable->Map(OpenGLBuffer::WriteOnly);
 		memset(ptr, 0, bufMissedTable->Size());
 		bufMissedTable->Unmap();
+
 		atomicCounter->BindBufferBase(3);
 		unsigned int zero = 0;
 		atomicCounter->AllocateFor(&zero, sizeof(unsigned int));
 		GL_ERROR_REPORT
 	}
 
-	HashBasedGPUCacheMissHandler::HashBasedGPUCacheMissHandler(int blockCount)
+
+
+	HashBasedGPUCacheFaultHandler::HashBasedGPUCacheFaultHandler(int capacity, const Size3& dim):capacity(capacity),dim(dim)
 	{
-		InitHashBuffer(blockCount);
+		InitHashBuffer(capacity);
 		InitMissTableBuffer();
 		InitGPUAtomicCounter();
 	}
 
-	std::vector<VirtualMemoryBlockIndex> HashBasedGPUCacheMissHandler::CaptureCacheMiss()
+	std::vector<VirtualMemoryBlockIndex> HashBasedGPUCacheFaultHandler::CaptureCacheMiss()
 	{
+		//atomicCounter->Bind();
 		const auto counters = static_cast<int*>(atomicCounter->Map(OpenGLBuffer::ReadOnly));
 		const int count = counters[0];
-		if (count == 0)
-			return;
 
-		//const std::size_t cacheBlockThreshold = gpuCacheBlockSize.x * gpuCacheBlockSize.y * gpuCacheBlockSize.z;
+		//atomicCounter->Unmap();
+		//atomicCounter->Unbind();
 
+		std::cout << count << std::endl;
 		std::vector<VirtualMemoryBlockIndex> hits;
-
-		//const std::size_t blockSize = largeVolumeCache.BlockSize();
+		if (count == 0)
+			return hits;
 		const auto missedBlocks = count;
-		//std::cout << count << std::endl;
 		GL_ERROR_REPORT;
-
-		hits.clear();
+		//hits.clear();
 		hits.reserve(missedBlocks);
 
 		const auto ptr = static_cast<int*>(bufMissedTable->Map(OpenGLBuffer::ReadWrite));
+
 		for (auto i = 0; i < missedBlocks; i++)
 		{
 			const auto blockId = ptr[i];
-			hits.emplace_back(blockId, g_xBlockCount, g_yBlockCount, g_zBlockCount);
+			hits.emplace_back(blockId,dim.x, dim.y, dim.z);
 		}
 
 		bufMissedTable->Unmap();
-
+		GL_ERROR_REPORT;
 		return hits;
 
 	}
 
-	void HashBasedGPUCacheMissHandler::Reset()
+	void HashBasedGPUCacheFaultHandler::Reset()
 	{
 		ResetBlockExistsHash();
 		ResetMissedBlockVector();
+
+		//std::cout << "Reset:" << std::endl;
+	}
+
+	HashBasedGPUCacheFaultHandler::~HashBasedGPUCacheFaultHandler()
+	{
+
 	}
 
 	void PingPongTransferManager::InitPingPongSwapPBO()
@@ -129,28 +137,30 @@ namespace ysl
 		pbo[1]->Unbind();
 	}
 
-	PingPongTransferManager::PingPongTransferManager(VirtualMemoryManager * vmm,AbstraGPUCacheMissHandler * gcm):AbstraGPUCacheBlockManager(vmm,gcm)
+	PingPongTransferManager::PingPongTransferManager(VirtualMemoryManager * vmm,AbstrGPUCacheFaultHandler * gcm):AbstrGPUCacheBlockManager(vmm,gcm)
 	{
 		InitPingPongSwapPBO();
 	}
 
-	void PingPongTransferManager::TransferData(GPUCache * dest, 
-		const CPUVolumeDataCache* src)
+	bool PingPongTransferManager::TransferData(GPUCache* dest,
+	                                           CPUVolumeDataCache* src)
 	{
+		assert(gcmHandler);
+		assert(vmManager);
+		const std::size_t blockSize = src->BlockSize();
 		const auto hits = gcmHandler->CaptureCacheMiss();
-
-		const auto posInCache = vmManager->UpdatePageTable(hits);
-
-		const auto blockSize = src->BlockSize();
-		const auto blockBytes = blockSize * blockSize * blockSize * sizeof(char);
-		//std::shared_ptr<OpenGLBuffer> pbo[2] = { blockPingBuf, blockPongBuf };
-
+		gcmHandler->Reset();
 		const auto missedBlocks = hits.size();
+		if (missedBlocks <= 0)
+			return false;
+		const auto posInCache = vmManager->UpdatePageTable(hits);	 // policy
 
+
+		const auto blockBytes = blockSize * blockSize * blockSize * sizeof(char);
+		// Ping-Pong PBO Transfer
 		auto curPBO = 0;
 		auto i = 0;
-		const auto & idx = hits[i];
-
+		const auto& idx = hits[i];
 		const auto dd = src->ReadBlockDataFromCPUCache(idx);
 
 		pbo[1 - curPBO]->Bind();
@@ -178,21 +188,20 @@ namespace ysl
 			memcpy(p, d, blockBytes);
 			pbo[curPBO]->Unmap(); // copy data to pbo
 			curPBO = 1 - curPBO;
-			//std::cout << "Pos in cache:" << posInCache[3 * i] << " " << posInCache[3 * i + 1] << " " << posInCache[3 * i + 2] << std::endl;
 		}
 
 		pbo[1 - curPBO]->Bind();
-
 		dest->SetSubData(OpenGLTexture::RED,
 			OpenGLTexture::UInt8,
 			posInCache[i].x, blockSize,
 			posInCache[i].y, blockSize,
 			posInCache[i].z, blockSize,
 			nullptr);
-
-		//std::cout << "Pos in cache:" << posInCache[3 * i] << " " << posInCache[3 * i + 1] << " " << posInCache[3 * i + 2] << std::endl;
-
 		pbo[1 - curPBO]->Unbind();
+
+
+		return true;
+
 	}
 
 	PingPongTransferManager::~PingPongTransferManager()

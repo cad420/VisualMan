@@ -15,22 +15,24 @@ namespace ysl
 		enum CacheExternalDataFormat { Red = OpenGLTexture::RED };
 		enum CacheExternalDataType { UInt8 = OpenGLTexture::UInt8 };
 		enum CacheInternalDataFormat { Red8 = OpenGLTexture::R8 };
-		GPUCache(const Size3 & cacheSize, void * data, CacheExternalDataFormat extFmt, CacheExternalDataFormat extType, CacheInternalDataFormat intFmt);
+		GPUCache(const Size3 & cacheSize, void * data);
+
+
+
 	};
 
 
-	class AbstraGPUCacheMissHandler
+	class AbstrGPUCacheFaultHandler
 	{
 	public:
-		AbstraGPUCacheMissHandler();
-		virtual std::vector<VirtualMemoryBlockIndex> CaptureCacheMiss() = 0;
+		AbstrGPUCacheFaultHandler() = default;
+		virtual std::vector<VirtualMemoryBlockIndex> CaptureCacheFault() = 0;
 		virtual void Reset() = 0;
-		virtual ~AbstraGPUCacheMissHandler();
+		virtual ~AbstrGPUCacheFaultHandler() = default;
 	};
 
 
-
-	class HashBasedGPUCacheMissHandler:public AbstraGPUCacheMissHandler
+	class HashBasedGPUCacheFaultHandler:public AbstrGPUCacheFaultHandler
 	{
 		std::shared_ptr<OpenGLBuffer> bufMissedHash;
 		std::shared_ptr<OpenGLBuffer> bufMissedTable;
@@ -43,37 +45,39 @@ namespace ysl
 		void ResetBlockExistsHash();
 		void ResetMissedBlockVector();
 
+		const int capacity;
+		const Size3 dim;
+
 	public:
-		HashBasedGPUCacheMissHandler(int blockCount);
-		std::vector<VirtualMemoryBlockIndex> CaptureCacheMiss() override;
+		HashBasedGPUCacheFaultHandler(int capacity,const Size3 & dim);
+		std::vector<VirtualMemoryBlockIndex> CaptureCacheFault() override;
 		void Reset() override;
+		~HashBasedGPUCacheFaultHandler();
+
 	};
 
 
-	class AbstraGPUCacheBlockManager
+	class AbstrGPUCacheBlockManager
 	{
 	protected:
 		VirtualMemoryManager * vmManager;
-		AbstraGPUCacheMissHandler * gcmHandler;
+		AbstrGPUCacheFaultHandler * gcmHandler;
 	public:
-		AbstraGPUCacheBlockManager(VirtualMemoryManager * vmm, AbstraGPUCacheMissHandler * gcm):vmManager(vmm),gcmHandler(gcm){}
-		virtual void TransferData(GPUCache * dest, const CPUVolumeDataCache * src) = 0;
-		virtual ~AbstraGPUCacheBlockManager(){}
+		AbstrGPUCacheBlockManager(VirtualMemoryManager * vmm, AbstrGPUCacheFaultHandler * gcm):vmManager(vmm),gcmHandler(gcm){}
+		virtual bool TransferData(GPUCache* dest, CPUVolumeDataCache* src) = 0;
+		virtual ~AbstrGPUCacheBlockManager(){}
 	};
 
-
-
-
-	class PingPongTransferManager:public AbstraGPUCacheBlockManager
+	class PingPongTransferManager:public AbstrGPUCacheBlockManager
 	{
 		std::shared_ptr<OpenGLBuffer> pbo[2];
 		void InitPingPongSwapPBO();
 	public:
-		PingPongTransferManager(VirtualMemoryManager * vmm, AbstraGPUCacheMissHandler * gcm);
-		void TransferData(GPUCache * dest, const CPUVolumeDataCache * src) override;
+		PingPongTransferManager(VirtualMemoryManager * vmm, AbstrGPUCacheFaultHandler * gcm);
+
+		bool TransferData(GPUCache* dest, CPUVolumeDataCache* src) override;
 		~PingPongTransferManager();
 	};
-
 
 
 }

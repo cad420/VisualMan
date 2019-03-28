@@ -72,6 +72,7 @@ namespace ysl
 		CPUVolumeDataCache * const cacheData;
 		void initPageDir();
 		void initPageTable(const Size3& blockDim);
+
 		 //	const auto blockSize = BlockSize();
 
 		 //	PageTable = Linear3DArray<PageTableEntry>(blockDim, nullptr);
@@ -93,11 +94,6 @@ namespace ysl
 
 	public:
 		using size_type = std::size_t;
-
-	//VirtualMemoryManager(const Size3& physicalMemoryBlock,
-	//	                     const Size3& virtualMemoryBlock,
-	//	                     const Size3& blockSize);
-
 		VirtualMemoryManager(const Size3& physicalMemoryBlock, CPUVolumeDataCache * virtualData): physicalMemoryBlock(physicalMemoryBlock),
 			cacheData(virtualData),
 			virtualMemoryBlock(virtualData->SizeByBlock()),
@@ -106,8 +102,6 @@ namespace ysl
 			initPageTable(virtualMemoryBlock);
 			initLRUList(physicalMemoryBlock, blockSize);
 		}
-
-
 
 		std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices);
 		Linear3DArray<PageTableEntry>& PageTable(int level);
