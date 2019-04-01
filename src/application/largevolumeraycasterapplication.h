@@ -14,6 +14,11 @@
 #include "gpucacheblockmanager.h"
 
 
+
+
+//#define COUNT_VALID_BLOCK
+
+
 namespace ysl
 {
 	namespace app
@@ -34,9 +39,7 @@ namespace ysl
 			void DrawImGui() override;
 			void RenderLoop() override;
 		private:
-
 			void OpenGLConfiguration();
-
 			void InitGPUPageTableBuffer();
 			void InitGPUBlockCacheTexture();		// texCache
 			void InitializeProxyGeometry();
@@ -89,14 +92,22 @@ namespace ysl
 
 
 			// One LOD Data
+			ysl::Size3 gpuCacheBlockSize;				
 			std::shared_ptr<OpenGLTexture> texPageTable;
 			std::shared_ptr<HashBasedGPUCacheFaultHandler> cacheFaultHandler; // Belong to Client-end memory
 			std::shared_ptr<PingPongTransferManager> pingpongTransferManager;
-			std::shared_ptr<GPUCache> texCache;			 // Client-end memory
-			VirtualMemoryManager pageTableManager;		// Client=end memory
+			std::shared_ptr<GPUVolumeDataCache> texCache;			 // Client-end memory
 			CPUVolumeDataCache largeVolumeCache;		// Server-end memory
-			
-			ysl::Size3 gpuCacheBlockSize;
+			VirtualMemoryManager pageTableManager;		// Server-end memory
+
+#ifdef COUNT_VALID_BLOCK
+			std::shared_ptr<OpenGLBuffer> bufMissedHash;
+			std::shared_ptr<OpenGLBuffer> atomicCounter;
+			void InitCounter(int capacity);
+
+			int ResetCounter();
+#endif
+
 
 			int g_pageTableX;
 			int g_pageTableY;

@@ -4,31 +4,27 @@
 #include "texture.h"
 #include "../mathematics/geometry.h"
 #include "../volume/virtualvolumehierachy.h"
+#include "abstrgpuobject/abstrgpucacheblockmanager.h"
+#include "abstrgpuobject/abstrgpucache.h"
 
 namespace ysl
 {
 
-	class GPUCache :public OpenGLTexture
+	/**
+	 * \brief 
+	 * 
+	 * \note This class should not be derived from OpenGLTexture
+	 */
+
+
+	class GPUVolumeDataCache :public AbstrGPUCache
 	{
 		const Size3 & cacheSize;
 	public:
 		enum CacheExternalDataFormat { Red = OpenGLTexture::RED };
 		enum CacheExternalDataType { UInt8 = OpenGLTexture::UInt8 };
 		enum CacheInternalDataFormat { Red8 = OpenGLTexture::R8 };
-		GPUCache(const Size3 & cacheSize, void * data);
-
-
-
-	};
-
-
-	class AbstrGPUCacheFaultHandler
-	{
-	public:
-		AbstrGPUCacheFaultHandler() = default;
-		virtual std::vector<VirtualMemoryBlockIndex> CaptureCacheFault() = 0;
-		virtual void Reset() = 0;
-		virtual ~AbstrGPUCacheFaultHandler() = default;
+		GPUVolumeDataCache(const Size3 & cacheSize, void * data);
 	};
 
 
@@ -57,17 +53,6 @@ namespace ysl
 	};
 
 
-	class AbstrGPUCacheBlockManager
-	{
-	protected:
-		VirtualMemoryManager * vmManager;
-		AbstrGPUCacheFaultHandler * gcmHandler;
-	public:
-		AbstrGPUCacheBlockManager(VirtualMemoryManager * vmm, AbstrGPUCacheFaultHandler * gcm):vmManager(vmm),gcmHandler(gcm){}
-		virtual bool TransferData(GPUCache* dest, CPUVolumeDataCache* src) = 0;
-		virtual ~AbstrGPUCacheBlockManager(){}
-	};
-
 	class PingPongTransferManager:public AbstrGPUCacheBlockManager
 	{
 		std::shared_ptr<OpenGLBuffer> pbo[2];
@@ -75,10 +60,9 @@ namespace ysl
 	public:
 		PingPongTransferManager(VirtualMemoryManager * vmm, AbstrGPUCacheFaultHandler * gcm);
 
-		bool TransferData(GPUCache* dest, CPUVolumeDataCache* src) override;
+		bool TransferData(GPUVolumeDataCache* dest, CPUVolumeDataCache* src) override;
 		~PingPongTransferManager();
 	};
-
 
 }
 

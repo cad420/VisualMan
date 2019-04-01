@@ -49,6 +49,7 @@ namespace ysl
 				virtual std::vector<MemAddrIndex> CaptureMemFault()const;
 		};
 
+
 		class AbstrServerMemoryObject:public AbstrMemoryObject
 		{
 			public:

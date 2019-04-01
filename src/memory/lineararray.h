@@ -120,10 +120,12 @@ namespace ysl
 		Linear3DArray(size_type x, size_type y,size_type z ,const T * data) :Linear3DArray(x,y,z, nullptr, true)
 		{
 			const auto t = x*y*z;
+			
 			m_data = static_cast<T*>(AllocAligned<T>(t));
 			if (m_data == nullptr)
 			{
-				std::cout << "Bad Alloc\n";
+				std::cout << "Bad Alloc in Linear3DArray(size_type x, size_type y,size_type z ,const T * data)\n";
+
 				return;
 			}
 			if(data)
@@ -151,8 +153,6 @@ namespace ysl
 			Linear3DArray(array.size.x, array.size.y,array.size.z, array.m_data, array.own)
 		{
 			array.m_data = nullptr;
-
-			std::cout << "Linear3DArray(Linear3DArray && array)" << std::endl;
 		}
 
 		Linear3DArray & operator=(Linear3DArray && array)noexcept

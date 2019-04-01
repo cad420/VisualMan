@@ -26,28 +26,22 @@ namespace ysl
 		size_type x, y, z;
 	};
 
-	class BlockData
+	class CPUCache
 	{
 	public:
 		virtual const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock) = 0;
 		virtual const unsigned char * ReadBlockDataFromCPUCache(int blockId) = 0;
-		~BlockData(){}
+		virtual const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index) = 0;
+		virtual ~CPUCache(){}
 	};
 
-	class CPUVolumeDataCache : public ysl::LVDReader
+	class CPUVolumeDataCache : public ysl::LVDReader,public CPUCache
 	{
 		static constexpr int nLogBlockSize = 7;		//
 
 		static constexpr ysl::Size3 cacheBlockSize{ 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
 		static constexpr ysl::Size3 cacheDim{ 16,16,16 };
 		static constexpr ysl::Size3 cacheSize = cacheDim * (1 << nLogBlockSize);
-
-		//static constexpr size_t cacheBlockCountAtWidth = 4;
-		//static constexpr size_t cacheBlockCountAtHeight= 4;
-		//static constexpr size_t cacheBlockCountAtDepth = 4;
-		//static constexpr size_t m_cacheWidth = cacheBlockCountAtWidth*(1<<nLogBlockSize);
-		//static constexpr size_t m_cacheHeight = cacheBlockCountAtHeight*(1 << nLogBlockSize);
-		//static constexpr size_t m_cacheDepth = cacheBlockCountAtDepth*(1 << nLogBlockSize);
 
 		static constexpr size_t totalCacheBlocks = cacheDim.x*cacheDim.y*cacheDim.z;
 
@@ -79,11 +73,8 @@ namespace ysl
 			const auto x = SizeByBlock().x, y = SizeByBlock().y, z = SizeByBlock().z;
 			return zBlock * x*y + yBlock * x + xBlock;
 		}
-
 		void createCache();
-
 		void initLRU();
-
 	public:
 		explicit CPUVolumeDataCache(const std::string& fileName);
 		bool IsValid()const { return m_valid; }
@@ -93,9 +84,9 @@ namespace ysl
 		ysl::Size3 CPUCacheDim()const { return cacheDim; }
 		ysl::Size3 CPUCacheSize()const { return cacheSize; }
 
-		virtual const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock) { return ReadBlockDataFromCPUCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
-		virtual const unsigned char * ReadBlockDataFromCPUCache(int blockId);
-		virtual const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index) { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
+		const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock)override{ return ReadBlockDataFromCPUCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
+		const unsigned char * ReadBlockDataFromCPUCache(int blockId)override;
+		const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index)override { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
 	};
 
 }

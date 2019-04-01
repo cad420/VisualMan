@@ -27,13 +27,18 @@ uniform ivec3 repeatOffset;							// repeat boarder size
 layout(binding = 0, rgba32i) uniform volatile iimage3D pageDirTexutre;
 layout(binding = 1, rgba32i) uniform volatile iimage3D pageTableTexture;
 layout(binding = 2, rgba32f) uniform volatile image2DRect entryPos;
-layout(binding = 4,rgba32f) uniform volatile image2DRect interResult;
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
+layout(binding = 4,rgba32f) uniform volatile image2DRect interResult;
+
 
 // keywords buffer shows the read-write feature of the buffer.
 layout(std430, binding = 0) buffer HashTable {int blockId[];}hashTable;
-
 layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
+
+
+layout(std430, binding = 2) buffer CounterHash{int blockId[];}counterHash;
+layout(binding = 5, offset = 0)uniform atomic_uint blockCounter;
+
 
 vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
@@ -43,12 +48,20 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	vec3 voxelCoord=vec3(samplePos * (volumeDataSizeNoRepeat));
 	//int dataSize = volumeDataSizeNoRepeat.x;
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
-	if(pageTableEntry.w == 2)		// Unmapped flag
-	{
-		ivec3 blockCoord = ivec3(voxelCoord/blockDataSizeNoRepeat);
-		int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
+
+
+	ivec3 blockCoord = ivec3(voxelCoord/blockDataSizeNoRepeat);
+	int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
 				+blockCoord.y * totalPageTableSize.x 
 				+blockCoord.x;
+	if(atomicCompSwap(counterHash.blockId[blockId],0,1) == 0)
+	{
+		atomicCounterIncrement(blockCounter);
+	}
+
+	if(pageTableEntry.w == 2)		// Unmapped flag
+	{
+
 		if(atomicCompSwap(hashTable.blockId[blockId],0,1) == 0)
 		{
 			uint index = atomicCounterIncrement(atomic_count);

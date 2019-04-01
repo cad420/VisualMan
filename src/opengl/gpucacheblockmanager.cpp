@@ -2,10 +2,12 @@
 
 #include "../opengl/openglutils.h"
 
+#include "abstrgpuobject/abstrgpucache.h"
+
 namespace ysl
 {
-	GPUCache::GPUCache(const Size3& cacheSize,void * data):
-	OpenGLTexture(Texture3D
+	GPUVolumeDataCache::GPUVolumeDataCache(const Size3& cacheSize,void * data):
+	AbstrGPUCache(OpenGLTexture::Texture3D
 		,OpenGLTexture::Linear
 		,OpenGLTexture::Linear
 		,OpenGLTexture::ClampToEdge
@@ -78,7 +80,7 @@ namespace ysl
 		InitGPUAtomicCounter();
 	}
 
-	std::vector<VirtualMemoryBlockIndex> HashBasedGPUCacheFaultHandler::CaptureCacheMiss()
+	std::vector<VirtualMemoryBlockIndex> HashBasedGPUCacheFaultHandler::CaptureCacheFault()
 	{
 		//atomicCounter->Bind();
 		const auto counters = static_cast<int*>(atomicCounter->Map(OpenGLBuffer::ReadOnly));
@@ -87,7 +89,7 @@ namespace ysl
 		//atomicCounter->Unmap();
 		//atomicCounter->Unbind();
 
-		std::cout << count << std::endl;
+		//std::cout << count << std::endl;
 		std::vector<VirtualMemoryBlockIndex> hits;
 		if (count == 0)
 			return hits;
@@ -142,13 +144,13 @@ namespace ysl
 		InitPingPongSwapPBO();
 	}
 
-	bool PingPongTransferManager::TransferData(GPUCache* dest,
+	bool PingPongTransferManager::TransferData(GPUVolumeDataCache* dest,
 	                                           CPUVolumeDataCache* src)
 	{
 		assert(gcmHandler);
 		assert(vmManager);
 		const std::size_t blockSize = src->BlockSize();
-		const auto hits = gcmHandler->CaptureCacheMiss();
+		const auto hits = gcmHandler->CaptureCacheFault();
 		gcmHandler->Reset();
 		const auto missedBlocks = hits.size();
 		if (missedBlocks <= 0)

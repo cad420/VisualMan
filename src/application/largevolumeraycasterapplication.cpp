@@ -7,8 +7,8 @@
 
 #include <algorithm>
 
-const std::string tfName = R"(D:\scidata\tf1.tfi)";
-//const std::string tfName = R"(D:\\subregion.1dt)";
+//const std::string tfName = R"(D:\scidata\tf1.tfi)";
+const std::string tfName = R"(D:\\subregion.1dt)";
 
 namespace ysl
 {
@@ -38,14 +38,12 @@ namespace ysl
 
 		LargeVolumeRayCaster::LargeVolumeRayCaster(int argc, char** argv, int w, int h, const std::string& fileName) :
 			ImGuiApplication(argc, argv, w, h),
-		gpuCacheBlockSize{10 ,1,1 },
+		gpuCacheBlockSize{10,10,10 },
 		largeVolumeCache(fileName),
 		pageTableManager(gpuCacheBlockSize,&largeVolumeCache)
-			
 		{
 			camera = FocusCamera{ Point3f{0.f,0.f,5.f} };
 			tfData.resize(256);
-
 			g_initialWidth = 800, g_initialHeight = 600;
 			step = 0.001;
 			ka = 1.0;
@@ -251,6 +249,9 @@ namespace ysl
 			{
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 			} while (CaptureAndHandleCacheFault());
+#ifdef COUNT_VALID_BLOCK
+			std::cout <<"Valid Block:"<< ResetCounter() << std::endl;
+#endif // COUNT_VALID_BLOCK
 
 			// Draw final result quad texture on screen
 
@@ -302,7 +303,7 @@ namespace ysl
 		{
 			///// GPU block Cache Texture
 			ysl::Size3 gpuBlockCacheSize = gpuCacheBlockSize * largeVolumeCache.BlockSize(); // number of block at every dim
-			texCache = std::make_shared<GPUCache>(gpuBlockCacheSize, nullptr);
+			texCache = std::make_shared<GPUVolumeDataCache>(gpuBlockCacheSize, nullptr);
 		}
 
 		bool LargeVolumeRayCaster::CaptureAndHandleCacheFault()
@@ -327,6 +328,44 @@ namespace ysl
 
 			return true;
 		}
+
+#ifdef COUNT_VALID_BLOCK
+		void LargeVolumeRayCaster::InitCounter(int capacity)
+		{
+			const std::size_t totalBlockCountBytes = capacity * sizeof(int);
+			bufMissedHash = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer,
+				OpenGLBuffer::StreamDraw);
+			bufMissedHash->AllocateFor(nullptr, totalBlockCountBytes);
+			GL_ERROR_REPORT;
+			bufMissedHash->BindBufferBase(2);
+
+			atomicCounter = std::make_shared<OpenGLBuffer>(OpenGLBuffer::AtomicCounterBuffer,
+				OpenGLBuffer::DynamicCopy);
+			atomicCounter->AllocateFor(nullptr, sizeof(GLuint));
+			atomicCounter->BindBufferBase(5);
+			atomicCounter->Unbind();
+
+
+		}
+
+		int LargeVolumeRayCaster::ResetCounter()
+		{
+			const auto ptr = bufMissedHash->Map(OpenGLBuffer::WriteOnly);
+			memset(ptr, 0, bufMissedHash->Size());
+			bufMissedHash->Unmap();
+
+			const auto counters = static_cast<int*>(atomicCounter->Map(OpenGLBuffer::ReadOnly));
+			const int count = counters[0];
+			atomicCounter->Unbind();
+
+			atomicCounter->BindBufferBase(5);
+			unsigned int zero = 0;
+			atomicCounter->AllocateFor(&zero, sizeof(unsigned int));
+
+			return count;
+
+		}
+#endif
 
 		void LargeVolumeRayCaster::InitializeShaders()
 		{
@@ -432,14 +471,19 @@ namespace ysl
 
 			OpenGLConfiguration();
 			InitGPUPageTableBuffer();
-
-			
 			InitGPUBlockCacheTexture();
-			//InitPingPongSwapPBO();
-
 			SetShaderUniforms();
 			InitTransferFunctionTexture();
 			InitRayCastingTexture();
+
+
+
+#ifdef COUNT_VALID_BLOCK
+			const auto s = largeVolumeCache.SizeByBlock();
+			InitCounter(s.x*s.y*s.z);
+			ResetCounter();
+#endif
+
 			GL_ERROR_REPORT;
 
 			cacheFaultHandler = std::make_shared<HashBasedGPUCacheFaultHandler>(5000, largeVolumeCache.SizeByBlock());
