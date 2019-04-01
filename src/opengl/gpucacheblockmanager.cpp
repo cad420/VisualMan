@@ -93,6 +93,7 @@ namespace ysl
 		std::vector<VirtualMemoryBlockIndex> hits;
 		if (count == 0)
 			return hits;
+
 		const auto missedBlocks = count;
 		GL_ERROR_REPORT;
 		//hits.clear();
@@ -103,6 +104,7 @@ namespace ysl
 		for (auto i = 0; i < missedBlocks; i++)
 		{
 			const auto blockId = ptr[i];
+			std::cout << "blockId:" << blockId << std::endl;
 			hits.emplace_back(blockId,dim.x, dim.y, dim.z);
 		}
 
@@ -151,6 +153,21 @@ namespace ysl
 		assert(vmManager);
 		const std::size_t blockSize = src->BlockSize();
 		const auto hits = gcmHandler->CaptureCacheFault();
+
+
+		//////
+
+
+		for(const auto & item:hits)
+		{
+			std::cout << item.x << " " << item.y << " " << item.z << std::endl;
+		}
+
+
+		//////
+
+
+		
 		gcmHandler->Reset();
 		const auto missedBlocks = hits.size();
 		if (missedBlocks <= 0)

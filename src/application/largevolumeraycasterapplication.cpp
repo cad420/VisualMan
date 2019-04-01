@@ -7,8 +7,8 @@
 
 #include <algorithm>
 
-//const std::string tfName = R"(D:\scidata\tf1.tfi)";
-const std::string tfName = R"(D:\\subregion.1dt)";
+const std::string tfName = R"(D:\scidata\tf1.tfi)";
+//const std::string tfName = R"(D:\\subregion.1dt)";
 
 namespace ysl
 {
@@ -38,7 +38,7 @@ namespace ysl
 
 		LargeVolumeRayCaster::LargeVolumeRayCaster(int argc, char** argv, int w, int h, const std::string& fileName) :
 			ImGuiApplication(argc, argv, w, h),
-		gpuCacheBlockSize{10,10,10 },
+		gpuCacheBlockSize{4,4,4},
 		largeVolumeCache(fileName),
 		pageTableManager(gpuCacheBlockSize,&largeVolumeCache)
 		{
@@ -467,8 +467,6 @@ namespace ysl
 			std::cout << "Block Dimension: " << largeVolumeCache.SizeByBlock() << std::endl;
 			std::cout << "Block Size: " << largeVolumeCache.BlockSize() << std::endl;
 
-
-
 			OpenGLConfiguration();
 			InitGPUPageTableBuffer();
 			InitGPUBlockCacheTexture();
@@ -483,9 +481,7 @@ namespace ysl
 			InitCounter(s.x*s.y*s.z);
 			ResetCounter();
 #endif
-
 			GL_ERROR_REPORT;
-
 			cacheFaultHandler = std::make_shared<HashBasedGPUCacheFaultHandler>(5000, largeVolumeCache.SizeByBlock());
 			GL_ERROR_REPORT;
 			pingpongTransferManager = std::make_shared<PingPongTransferManager>(&pageTableManager, cacheFaultHandler.get());

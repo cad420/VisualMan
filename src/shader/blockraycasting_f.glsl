@@ -36,8 +36,8 @@ layout(std430, binding = 0) buffer HashTable {int blockId[];}hashTable;
 layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
 
 
-layout(std430, binding = 2) buffer CounterHash{int blockId[];}counterHash;
-layout(binding = 5, offset = 0)uniform atomic_uint blockCounter;
+//layout(std430, binding = 2) buffer CounterHash{int blockId[];}counterHash;
+//layout(binding = 5, offset = 0)uniform atomic_uint blockCounter;
 
 
 vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
@@ -49,19 +49,17 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	//int dataSize = volumeDataSizeNoRepeat.x;
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
 
-
-	ivec3 blockCoord = ivec3(voxelCoord/blockDataSizeNoRepeat);
-	int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
-				+blockCoord.y * totalPageTableSize.x 
-				+blockCoord.x;
-	if(atomicCompSwap(counterHash.blockId[blockId],0,1) == 0)
-	{
-		atomicCounterIncrement(blockCounter);
-	}
+	//if(atomicCompSwap(counterHash.blockId[blockId],0,1) == 0)
+	//{
+	//	atomicCounterIncrement(blockCounter);
+	//}
 
 	if(pageTableEntry.w == 2)		// Unmapped flag
 	{
-
+		ivec3 blockCoord = ivec3(voxelCoord/blockDataSizeNoRepeat);
+	    int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
+				+blockCoord.y * totalPageTableSize.x 
+				+blockCoord.x;
 		if(atomicCompSwap(hashTable.blockId[blockId],0,1) == 0)
 		{
 			uint index = atomicCounterIncrement(atomic_count);

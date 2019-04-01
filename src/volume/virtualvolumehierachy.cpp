@@ -24,10 +24,6 @@ namespace ysl
 		//			dirEntry.w = Mapped;
 		//			(PageDir)(x, y, z) = dirEntry;
 		//		}
-
-		std::vector<int> a;
-		a.emplace_back();
-		a.push_back(1);
 	}
 
 	void VirtualMemoryManager::initPageTable(const Size3& blockDim)
