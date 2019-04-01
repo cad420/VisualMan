@@ -115,6 +115,7 @@ namespace ysl
 			T * data,
 			bool own):size(x,y,z),m_data(data),own(own),xyPlaneSize(x*y)
 		{
+
 		}
 
 		Linear3DArray(size_type x, size_type y,size_type z ,const T * data) :Linear3DArray(x,y,z, nullptr, true)
