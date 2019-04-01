@@ -42,7 +42,7 @@ namespace ysl
 		{
 			camera = FocusCamera{ Point3f{0.f,0.f,5.f} };
 			tfData.resize(256);
-			gpuCacheBlockSize = Size3{10,10,10};
+			gpuCacheBlockSize = Size3{16,1,1};
 			g_initialWidth = 800, g_initialHeight = 600;
 			step = 0.001;
 			ka = 1.0;
