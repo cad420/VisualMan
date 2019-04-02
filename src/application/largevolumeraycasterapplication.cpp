@@ -450,13 +450,13 @@ namespace ysl
 			InitializeShaders();
 			InitializeProxyGeometry();
 
-			g_pageTableX = pageTableManager.PageTableSize().x;
-			g_pageTableY = pageTableManager.PageTableSize().y;
-			g_pageTableZ = pageTableManager.PageTableSize().z;
+			//g_pageTableX = pageTableManager.PageTableSize().x;
+			//g_pageTableY = pageTableManager.PageTableSize().y;
+			//g_pageTableZ = pageTableManager.PageTableSize().z;
 
-			g_cacheWidth = largeVolumeCache.CPUCacheSize().x;
-			g_cacheHeight = largeVolumeCache.CPUCacheSize().y;
-			g_cacheDepth = largeVolumeCache.CPUCacheSize().z;
+			//g_cacheWidth = largeVolumeCache.CPUCacheSize().x;
+			//g_cacheHeight = largeVolumeCache.CPUCacheSize().y;
+			//g_cacheDepth = largeVolumeCache.CPUCacheSize().z;
 			//int blockSize = BlockSize();
 			g_repeat = largeVolumeCache.BoundaryRepeat();
 			g_blockDataSize = largeVolumeCache.BlockSize();

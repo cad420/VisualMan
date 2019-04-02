@@ -70,13 +70,6 @@ namespace ysl
 			float kd;
 			float shininess;
 
-			//static constexpr int pageTableBlockEntry = 16;
-
-			//Timer g_timer;
-			//Timer g_timer2;
-
-			//static constexpr std::size_t missedBlockCapacity = 5000 * sizeof(unsigned int);
-
 			std::shared_ptr<OpenGLTexture> texTransferFunction;
 			std::shared_ptr<OpenGLFramebufferObject> framebuffer;
 			std::shared_ptr<OpenGLTexture> texEntryPos;
@@ -89,7 +82,6 @@ namespace ysl
 			OpenGLVertexArrayObject proxyVAO;
 			std::shared_ptr<OpenGLBuffer> rayCastingVBO;
 			OpenGLVertexArrayObject rayCastingVAO;
-
 
 			// One LOD Data
 			ysl::Size3 gpuCacheBlockSize;				
@@ -106,13 +98,13 @@ namespace ysl
 			void InitCounter(int capacity);
 			int ResetCounter();
 #endif
-			int g_pageTableX;
-			int g_pageTableY;
-			int g_pageTableZ;
+			//int g_pageTableX;
+			//int g_pageTableY;
+			//int g_pageTableZ;
 
-			int g_cacheWidth;
-			int g_cacheHeight;
-			int g_cacheDepth;
+			//int g_cacheWidth;
+			//int g_cacheHeight;
+			//int g_cacheDepth;
 
 			int g_repeat;
 			int g_blockDataSize;
