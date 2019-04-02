@@ -245,9 +245,20 @@ public:
 	}
 };
 
+
+
 int main(int argc, char *argv[])
 {
+<<<<<<< HEAD
 
+=======
+	std::vector<A> avec;
+	A  a(1,2,3);
+	avec.emplace_back(a);
+	avec.push_back(a);
+	avec.emplace_back(std::move(a));
+	avec.emplace_back(1,2,3);
+>>>>>>> feature1
 
 	return 0;
 }

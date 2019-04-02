@@ -10,8 +10,8 @@ public:
 	OpenGLCurrentContext();
 	OpenGLCurrentContext(const OpenGLCurrentContext &) = delete;
 	OpenGLCurrentContext & operator=(const OpenGLCurrentContext&) = delete;
-	OpenGLCurrentContext(OpenGLCurrentContext &&) = delete;
-	OpenGLCurrentContext & operator=(OpenGLCurrentContext&&) = delete;
+	OpenGLCurrentContext(OpenGLCurrentContext &&)noexcept;
+	OpenGLCurrentContext & operator=(OpenGLCurrentContext&&)noexcept;
 	bool IsValid()const;
 	bool operator==(const OpenGLCurrentContext & ctx)const;
 	bool operator!=(const OpenGLCurrentContext & ctx)const;

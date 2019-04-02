@@ -47,11 +47,8 @@ namespace ysl
 
 	enum EntryFlag { Empty = 0, Unmapped = 2, Mapped = 1 };
 
-	template<
-		int xPageTableEntry,
-		int yPageTableEntry,
-		int zPageTableEntry>
-		class VolumeVirtualMemoryHierarchy :public LargeVolumeCache
+
+	class VirtualMemoryManager
 	{
 
 	public:
@@ -63,82 +60,18 @@ namespace ysl
 		{
 			int x, y, z, w;
 		};
-		Linear3DArray<PageDirEntry> PageDir;
-		Linear3DArray<PageTableEntry> PageTable;
-		/////
+
+	private:
+		//Linear3DArray<PageDirEntry> PageDir;
+		Linear3DArray<PageTableEntry> pageTable;
 		std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>> g_lruList;
 
 		const Size3 physicalMemoryBlock;
 		const Size3 virtualMemoryBlock;
-			/**
-		 * \brief 
-		 * \param missedBlockIndices 
-		 * \return 
-		 */
-
-
-
-		/////
-
-	private:
-
-		std::unique_ptr<LargeVolumeCache> volumeCache;
-
-		void initPageDir()
-		{
-
-			PageDir = Linear3DArray<PageDirEntry>(
-				RoundUpDivide(PageTable.Size().x, xPageTableEntry),
-				RoundUpDivide(PageTable.Size().y, yPageTableEntry),
-				RoundUpDivide(PageTable.Size().z, zPageTableEntry),
-				nullptr
-				);
-
-			for (auto z = 0; z < PageDir.Size().z; z++)
-				for (auto y = 0; y < PageDir.Size().y; y++)
-					for (auto x = 0; x < PageDir.Size().x; x++)
-					{
-						PageDirEntry dirEntry;
-						dirEntry.x = x * xPageTableEntry;
-						dirEntry.y = y * yPageTableEntry;
-						dirEntry.z = z * zPageTableEntry;
-						dirEntry.w = Mapped;
-						(PageDir)(x, y, z) = dirEntry;
-					}
-		}
-
-		/**
-		 * \brief Initializes the page table with all entries are unmapped
-		 */
-
-		void  initPageTable(const Size3& blockDim)
-		{
-			// Only initialization flag filed, the table entry is determined by cache miss at run time using lazy evaluation policy.
-
-			PageTable = Linear3DArray<PageTableEntry>(blockDim, nullptr);
-			for (auto z = 0; z < PageTable.Size().z; z++)
-				for (auto y = 0; y < PageTable.Size().y; y++)
-					for (auto x = 0; x < PageTable.Size().x; x++)
-					{
-						PageTableEntry entry;
-						//entry.x = x * blockSize;
-						//entry.y = y * blockSize;
-						//entry.z = z * blockSize;
-						entry.x = -1;
-						entry.y = -1;
-						entry.z = -1;
-						entry.w = Unmapped;
-						(PageTable)(x, y, z) = entry;
-					}
-		}
-
-		/**
-		 * \brief  Initializes the page table with all entries are mapped
-		 */
-
-		 //void initPageTable(const Size3& blockDim)
-		 //{
-
+		const Size3 blockSize;
+		CPUVolumeDataCache * const cacheData;
+		void initPageDir();
+		void initPageTable(const Size3& blockDim);
 
 		 //	const auto blockSize = BlockSize();
 
@@ -157,69 +90,26 @@ namespace ysl
 		 //			}
 		 //}
 
-
-		void initLRUList()
-		{
-			//const auto tot = cacheBlockCount();
-			//const auto size = BlockSize();
-			////const auto w = xCacheBlockCount(), h = yCacheBlockCount(), d = zCacheBlockCount();
-			//const auto dim = CacheDim();
-			//for (auto z = 0; z < dim.x; z++)
-			//	for (auto y = 0; y < dim.y; y++)
-			//		for (auto x = 0; x < dim.z; x++) 
-			//		{
-			//			m_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1,-1,-1), CacheBlockAbstractIndex(x*size,y*size,z*size)));
-			//		}
-		}
+		void initLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize);
 
 	public:
 		using size_type = std::size_t;
-		VolumeVirtualMemoryHierarchy(const std::string fileName) :LargeVolumeCache(fileName)
+		VirtualMemoryManager(const Size3& physicalMemoryBlock, CPUVolumeDataCache * virtualData): physicalMemoryBlock(physicalMemoryBlock),
+			virtualMemoryBlock(virtualData->SizeByBlock()),
+			cacheData(virtualData),
+			blockSize({ (std::size_t)virtualData->BlockSize(), (std::size_t)virtualData->BlockSize(),  (std::size_t)virtualData->BlockSize() })
 		{
 
-			initPageTable(SizeByBlock());
-
-			initPageDir();
-
-			initLRUList();
+			initPageTable(virtualMemoryBlock);
+			initLRUList(physicalMemoryBlock, blockSize);
 		}
 
-		VolumeVirtualMemoryHierarchy(const Size3 & physicalMemoryBlock,const Size3 & virtualMemoryBlock):LargeVolumeCache(""),
-		virtualMemoryBlock(virtualMemoryBlock),
-		physicalMemoryBlock(physicalMemoryBlock)
-		{
-			
-		}
+		std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices);
+		Linear3DArray<PageTableEntry> & PageTable(int level);
+		Size3 PageTableSize();
+		Size3 BlockSize()const;
 
-		
-
-		std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex> & missedBlockIndices);
-
-		/**
-	 * \brief Returns \a level th page table data
-	 * \return
-	 */
-		Linear3DArray<PageTableEntry> PageTableData(int level)const;
-
-		//VolumeVirtualMemoryHierarchy(const Size3 & physicalMemoryBlockDim)
-		//{
-		//	
-		//}
-
-
-
-		//void updateCacheMiss(const std::vector<GlobalBlockAbstractIndex> & hits)
-		//{
-		//	for(const auto & i:hits)
-		//	{
-		//		(*PageTable)(i.x, i.y, i.z).w = Mapped;
-		//		auto & last = m_lruList.back();
-		//		(*PageTable)(last.first.x, last.first.y, last.first.z).w = Unmapped;
-		//		m_lruList.splice(m_lruList.begin(), m_lruList, --m_lruList.end());		// move from tail to head
-		//		auto d = ReadBlockDataFromCache(i);
-		//	}
-		//}
-
+		CPUVolumeDataCache * VirtualData() { return cacheData; }
 	};
 
 
@@ -239,7 +129,6 @@ namespace ysl
 		}
 
 		void Resize(const ysl::Size3 & size);
-
 	};
 
 	class PageTableTexture :public OpenGLTexture

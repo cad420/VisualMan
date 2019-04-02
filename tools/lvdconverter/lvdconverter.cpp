@@ -217,10 +217,8 @@ int main(int argc, char *argv[])
 
 	int repeat;
 	std::cin >> x >> y >> z >> repeat >> log;
-
 	std::string outFileName;
 	std::cin >> outFileName;
-
 
 	if(log == 6)
 	{

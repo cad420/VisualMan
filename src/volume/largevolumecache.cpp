@@ -18,7 +18,7 @@ namespace ysl
 {
 
 
-	void LargeVolumeCache::createCache()
+	void CPUVolumeDataCache::createCache()
 	{
 		//constexpr auto maxDataBytes = (1ULL<<33);		// 8GB
 
@@ -49,13 +49,13 @@ namespace ysl
 		m_volumeCache.reset(p);
 	}
 
-	void LargeVolumeCache::initLRU()
+	void CPUVolumeDataCache::initLRU()
 	{
 		for (auto i = std::size_t(0); i < totalCacheBlocks; i++)
 			m_lruList.push_front(LRUListCell(i, m_blockIdInCache.end()));
 	}
 
-	LargeVolumeCache::LargeVolumeCache(const std::string& fileName) :
+	CPUVolumeDataCache::CPUVolumeDataCache(const std::string& fileName) :
 		LVDReader(fileName),
 		m_valid(true)
 	{
@@ -69,7 +69,7 @@ namespace ysl
 		//sizeByBlock = SizeByBlock();
 	}
 
-	const unsigned char* LargeVolumeCache::ReadBlockDataFromCPUCache(int blockId)
+	const unsigned char* CPUVolumeDataCache::ReadBlockDataFromCPUCache(int blockId)
 	{
 		//assert(m_volumeCache != nullptr);
 		//std::lock_guard<std::mutex> guard(m_lock);

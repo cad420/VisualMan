@@ -11,6 +11,12 @@
 #include "../cameras/camera.h"
 #include "../opengl/shader.h"
 #include "../gui/transferfunctionwidget.h"
+#include "gpucacheblockmanager.h"
+
+
+
+
+//#define COUNT_VALID_BLOCK
 
 
 namespace ysl
@@ -19,11 +25,8 @@ namespace ysl
 	{
 
 		constexpr int pageTableBlockEntry = 16;
-		class LargeVolumeRayCaster:public ImGuiApplication,
-								   public VolumeVirtualMemoryHierarchy<
-									pageTableBlockEntry, 
-									pageTableBlockEntry, 
-									pageTableBlockEntry>
+		class LargeVolumeRayCaster:public ImGuiApplication
+
 		{
 		public:
 			LargeVolumeRayCaster(int argc, char ** argv, int w, int h,const std::string & fileName);
@@ -36,34 +39,21 @@ namespace ysl
 			void DrawImGui() override;
 			void RenderLoop() override;
 		private:
-
 			void OpenGLConfiguration();
-
 			void InitGPUPageTableBuffer();
-			void InitGPUBlockCacheTexture();
-			void initGPUCacheLRUPolicyList();
-			void InitPingPongSwapPBO();
-			void InitHashBuffer();
-			void InitMissTableBuffer();
-			void InitGPUAtomicCounter();
-
+			void InitGPUBlockCacheTexture();		// texCache
 			void InitializeProxyGeometry();
 			void InitializeResource();
 			void InitTransferFunctionTexture();
 			void InitRayCastingTexture();
-		
 			void InitializeShaders();
 			void SetShaderUniforms();
-
-			bool CaptureAndHandleCacheMiss();
-			void InitBlockExistsHash();
-			void InitMissedBlockVector();
+			bool CaptureAndHandleCacheFault();
 
 			FocusCamera camera;
 			ysl::Transform projMatrix;
 			ysl::Transform orthoMatrix;
 			ysl::Transform modelMatrix;
-
 			ysl::ShaderProgram rayCastingShaderProgram;
 			ysl::ShaderProgram positionShaderProgram;
 			ysl::ShaderProgram quadsShaderProgram;
@@ -80,14 +70,14 @@ namespace ysl
 			float kd;
 			float shininess;
 
-			static constexpr int pageTableBlockEntry = 16;
-			Timer g_timer;
-			Timer g_timer2;
+			//static constexpr int pageTableBlockEntry = 16;
+
+			//Timer g_timer;
+			//Timer g_timer2;
 
 			//static constexpr std::size_t missedBlockCapacity = 5000 * sizeof(unsigned int);
 
 			std::shared_ptr<OpenGLTexture> texTransferFunction;
-
 			std::shared_ptr<OpenGLFramebufferObject> framebuffer;
 			std::shared_ptr<OpenGLTexture> texEntryPos;
 			std::shared_ptr<OpenGLTexture> texExitPos;
@@ -99,20 +89,23 @@ namespace ysl
 			OpenGLVertexArrayObject proxyVAO;
 			std::shared_ptr<OpenGLBuffer> rayCastingVBO;
 			OpenGLVertexArrayObject rayCastingVAO;
+
+
+			// One LOD Data
+			ysl::Size3 gpuCacheBlockSize;				
 			std::shared_ptr<OpenGLTexture> texPageTable;
-			std::shared_ptr<OpenGLTexture> texCache;
-			std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>> g_lruList;
-			std::shared_ptr<OpenGLBuffer> blockPingBuf;
-			std::shared_ptr<OpenGLBuffer> blockPongBuf;
-			std::vector<VirtualMemoryBlockIndex> hits;
+			std::shared_ptr<HashBasedGPUCacheFaultHandler> cacheFaultHandler; // Belong to Client-end memory
+			std::shared_ptr<PingPongTransferManager> pingpongTransferManager;
+			std::shared_ptr<GPUVolumeDataCache> texCache;			 // Client-end memory
+			CPUVolumeDataCache largeVolumeCache;		// Server-end memory
+			VirtualMemoryManager pageTableManager;		// Server-end memory
 
-			std::vector<int> posInCache;
-			ysl::Size3 gpuCacheBlockSize;
+#ifdef COUNT_VALID_BLOCK
 			std::shared_ptr<OpenGLBuffer> bufMissedHash;
-			std::shared_ptr<OpenGLBuffer> bufMissedTable;
 			std::shared_ptr<OpenGLBuffer> atomicCounter;
-
-
+			void InitCounter(int capacity);
+			int ResetCounter();
+#endif
 			int g_pageTableX;
 			int g_pageTableY;
 			int g_pageTableZ;
@@ -126,10 +119,6 @@ namespace ysl
 			int g_originalDataWidth;
 			int g_originalDataHeight;
 			int g_originalDataDepth;
-
-			int g_xBlockCount;
-			int g_yBlockCount;
-			int g_zBlockCount;
 
 			int g_initialWidth ,g_initialHeight;
 

@@ -17,7 +17,7 @@ out vec4 fragColor;			// MRT 0
 
 uniform sampler3D cacheVolume;						// volume block cache
 //uniform ivec3 totalPageDirSize;						// page dir texture size
-uniform ivec3 totalPageTableSize;					// page table texture size
+uniform ivec3 totalPageTableSize;					// page table texture size1
 //uniform ivec3 pageTableBlockEntrySize;				// page table block entry size
 uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (no repeat)
 uniform ivec3 blockDataSizeNoRepeat;				// block data size (no repeat)
@@ -27,13 +27,18 @@ uniform ivec3 repeatOffset;							// repeat boarder size
 layout(binding = 0, rgba32i) uniform volatile iimage3D pageDirTexutre;
 layout(binding = 1, rgba32i) uniform volatile iimage3D pageTableTexture;
 layout(binding = 2, rgba32f) uniform volatile image2DRect entryPos;
-layout(binding = 4,rgba32f) uniform volatile image2DRect interResult;
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
+layout(binding = 4, rgba32f) uniform volatile image2DRect interResult;
+
 
 // keywords buffer shows the read-write feature of the buffer.
 layout(std430, binding = 0) buffer HashTable {int blockId[];}hashTable;
-
 layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
+
+
+//layout(std430, binding = 2) buffer CounterHash{int blockId[];}counterHash;
+//layout(binding = 5, offset = 0)uniform atomic_uint blockCounter;
+
 
 vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
@@ -43,12 +48,15 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	vec3 voxelCoord=vec3(samplePos * (volumeDataSizeNoRepeat));
 	//int dataSize = volumeDataSizeNoRepeat.x;
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
-	if(pageTableEntry.w == 2)		// Unmapped flag
-	{
-		ivec3 blockCoord = ivec3(voxelCoord/blockDataSizeNoRepeat);
-		int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
+
+
+	ivec3 blockCoord = ivec3(voxelCoord / blockDataSizeNoRepeat);
+	int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
 				+blockCoord.y * totalPageTableSize.x 
 				+blockCoord.x;
+
+	if(pageTableEntry.w == 2)		// Unmapped flag
+	{
 		if(atomicCompSwap(hashTable.blockId[blockId],0,1) == 0)
 		{
 			uint index = atomicCounterIncrement(atomic_count);
@@ -57,15 +65,18 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 		}
 		mapped = false;
 	}
-	else
+	else 
 	{
 		vec3 samplePoint = pageTableEntry.xyz + blockOffset + (repeatOffset);
 		samplePoint = samplePoint/textureSize(cacheVolume,0);
 		scalar = texture(cacheVolume,samplePoint);
 		mapped = true;
+		//return vec4(0.8+blockId*0.005,0.9,0.8,0.8);
 	}
 	return scalar;
 }
+
+
 
 vec3 PhongShadingEx(vec3 samplePos, vec3 diffuseColor)
 {
