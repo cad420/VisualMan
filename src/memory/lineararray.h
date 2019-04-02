@@ -37,7 +37,7 @@ namespace ysl
 				std::cout << "Bad Alloc\n";
 				return;
 			}
-			if(data)memcpy(m_data, data, x*y);
+			if(data)memcpy(m_data, data, x*y*sizeof(T));
 		}
 
 		Linear2DArray(const Size2 & size, const T * data) :Linear2DArray(size.x, size.y, data)
@@ -105,7 +105,7 @@ namespace ysl
 		bool own;
 	public:
 
-		Linear3DArray():size(0,0,0),m_data(nullptr),own(false),xyPlaneSize(0)
+		Linear3DArray():size(0,0,0),m_data(nullptr), xyPlaneSize(0),own(false)
 		{
 		}
 
@@ -120,16 +120,14 @@ namespace ysl
 		Linear3DArray(size_type x, size_type y,size_type z ,const T * data) :Linear3DArray(x,y,z, nullptr, true)
 		{
 			const auto t = x*y*z;
-			
 			m_data = static_cast<T*>(AllocAligned<T>(t));
 			if (m_data == nullptr)
 			{
 				std::cout << "Bad Alloc in Linear3DArray(size_type x, size_type y,size_type z ,const T * data)\n";
-
 				return;
 			}
 			if(data)
-				memcpy(m_data, data,t);
+				memcpy(m_data, data,t*sizeof(T));
 		}
 
 		Linear3DArray(const Size3 & sze,
@@ -161,6 +159,7 @@ namespace ysl
 			size = array.size;
 			m_data = array.m_data;
 			own = array.own;
+			xyPlaneSize = array.xyPlaneSize;
 			array.m_data = nullptr;
 			return *this;
 		}

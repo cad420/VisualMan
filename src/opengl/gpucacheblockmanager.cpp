@@ -61,9 +61,9 @@ namespace ysl
 
 	void HashBasedGPUCacheFaultHandler::ResetMissedBlockVector()
 	{
-		const auto ptr = bufMissedTable->Map(OpenGLBuffer::WriteOnly);
-		memset(ptr, 0, bufMissedTable->Size());
-		bufMissedTable->Unmap();
+		//const auto ptr = bufMissedTable->Map(OpenGLBuffer::WriteOnly);
+		//memset(ptr, 0, bufMissedTable->Size());
+		//bufMissedTable->Unmap();
 
 		atomicCounter->BindBufferBase(3);
 		unsigned int zero = 0;
@@ -104,7 +104,7 @@ namespace ysl
 		for (auto i = 0; i < missedBlocks; i++)
 		{
 			const auto blockId = ptr[i];
-			std::cout << "blockId:" << blockId << std::endl;
+			//std::cout << "blockId:" << blockId << std::endl;
 			hits.emplace_back(blockId,dim.x, dim.y, dim.z);
 		}
 
@@ -153,22 +153,14 @@ namespace ysl
 		assert(vmManager);
 		const std::size_t blockSize = src->BlockSize();
 		const auto hits = gcmHandler->CaptureCacheFault();
-
-
 		//////
-
-
-		for(const auto & item:hits)
-		{
-			std::cout << item.x << " " << item.y << " " << item.z << std::endl;
-		}
-
-
+		//for(const auto & item:hits)
+		//{
+		//	std::cout << item.x << " " << item.y << " " << item.z << std::endl;
+		//}
 		//////
-
-
-		
 		gcmHandler->Reset();
+
 		const auto missedBlocks = hits.size();
 		if (missedBlocks <= 0)
 			return false;

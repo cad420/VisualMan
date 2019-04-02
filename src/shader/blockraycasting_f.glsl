@@ -17,7 +17,7 @@ out vec4 fragColor;			// MRT 0
 
 uniform sampler3D cacheVolume;						// volume block cache
 //uniform ivec3 totalPageDirSize;						// page dir texture size
-uniform ivec3 totalPageTableSize;					// page table texture size
+uniform ivec3 totalPageTableSize;					// page table texture size1
 //uniform ivec3 pageTableBlockEntrySize;				// page table block entry size
 uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (no repeat)
 uniform ivec3 blockDataSizeNoRepeat;				// block data size (no repeat)
@@ -28,7 +28,7 @@ layout(binding = 0, rgba32i) uniform volatile iimage3D pageDirTexutre;
 layout(binding = 1, rgba32i) uniform volatile iimage3D pageTableTexture;
 layout(binding = 2, rgba32f) uniform volatile image2DRect entryPos;
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
-layout(binding = 4,rgba32f) uniform volatile image2DRect interResult;
+layout(binding = 4, rgba32f) uniform volatile image2DRect interResult;
 
 
 // keywords buffer shows the read-write feature of the buffer.
@@ -49,17 +49,14 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	//int dataSize = volumeDataSizeNoRepeat.x;
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
 
-	//if(atomicCompSwap(counterHash.blockId[blockId],0,1) == 0)
-	//{
-	//	atomicCounterIncrement(blockCounter);
-	//}
+
+	ivec3 blockCoord = ivec3(voxelCoord / blockDataSizeNoRepeat);
+	int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
+				+blockCoord.y * totalPageTableSize.x 
+				+blockCoord.x;
 
 	if(pageTableEntry.w == 2)		// Unmapped flag
 	{
-		ivec3 blockCoord = ivec3(voxelCoord/blockDataSizeNoRepeat);
-	    int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
-				+blockCoord.y * totalPageTableSize.x 
-				+blockCoord.x;
 		if(atomicCompSwap(hashTable.blockId[blockId],0,1) == 0)
 		{
 			uint index = atomicCounterIncrement(atomic_count);
@@ -68,15 +65,18 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 		}
 		mapped = false;
 	}
-	else
+	else 
 	{
 		vec3 samplePoint = pageTableEntry.xyz + blockOffset + (repeatOffset);
 		samplePoint = samplePoint/textureSize(cacheVolume,0);
 		scalar = texture(cacheVolume,samplePoint);
 		mapped = true;
+		//return vec4(0.8+blockId*0.005,0.9,0.8,0.8);
 	}
 	return scalar;
 }
+
+
 
 vec3 PhongShadingEx(vec3 samplePos, vec3 diffuseColor)
 {

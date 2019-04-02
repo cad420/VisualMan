@@ -95,16 +95,17 @@ namespace ysl
 	public:
 		using size_type = std::size_t;
 		VirtualMemoryManager(const Size3& physicalMemoryBlock, CPUVolumeDataCache * virtualData): physicalMemoryBlock(physicalMemoryBlock),
-			cacheData(virtualData),
 			virtualMemoryBlock(virtualData->SizeByBlock()),
+			cacheData(virtualData),
 			blockSize({ (std::size_t)virtualData->BlockSize(), (std::size_t)virtualData->BlockSize(),  (std::size_t)virtualData->BlockSize() })
 		{
+
 			initPageTable(virtualMemoryBlock);
 			initLRUList(physicalMemoryBlock, blockSize);
 		}
 
 		std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices);
-		Linear3DArray<PageTableEntry>& PageTable(int level);
+		Linear3DArray<PageTableEntry> & PageTable(int level);
 		Size3 PageTableSize();
 		Size3 BlockSize()const;
 

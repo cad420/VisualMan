@@ -72,8 +72,8 @@ namespace ysl
 
 			//static constexpr int pageTableBlockEntry = 16;
 
-			Timer g_timer;
-			Timer g_timer2;
+			//Timer g_timer;
+			//Timer g_timer2;
 
 			//static constexpr std::size_t missedBlockCapacity = 5000 * sizeof(unsigned int);
 
@@ -104,11 +104,8 @@ namespace ysl
 			std::shared_ptr<OpenGLBuffer> bufMissedHash;
 			std::shared_ptr<OpenGLBuffer> atomicCounter;
 			void InitCounter(int capacity);
-
 			int ResetCounter();
 #endif
-
-
 			int g_pageTableX;
 			int g_pageTableY;
 			int g_pageTableZ;

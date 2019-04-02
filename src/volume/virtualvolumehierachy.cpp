@@ -29,7 +29,6 @@ namespace ysl
 	void VirtualMemoryManager::initPageTable(const Size3& blockDim)
 	{
 		// Only initialization flag filed, the table entry is determined by cache miss at run time using lazy evaluation policy.
-
 		pageTable = Linear3DArray<PageTableEntry>(blockDim, nullptr);
 		for (auto z = 0; z < pageTable.Size().z; z++)
 			for (auto y = 0; y < pageTable.Size().y; y++)
@@ -50,12 +49,12 @@ namespace ysl
 			for (auto y = 0; y < physicalMemoryBlock.y; y++)
 				for (auto x = 0; x < physicalMemoryBlock.x; x++)
 				{
-					g_lruList.push_back(std::make_pair(PageTableEntryAbstractIndex(-1, -1, -1),
-					                                   PhysicalMemoryBlockIndex(
-						                                   x * page3DSize.x, y * page3DSize.y, z * page3DSize.z)));
+					g_lruList.emplace_back(
+						PageTableEntryAbstractIndex(-1, -1, -1),
+						PhysicalMemoryBlockIndex( x * page3DSize.x, y * page3DSize.y, z * page3DSize.z )
+					);
 				}
 	}
-
 	//VirtualMemoryManager::VirtualMemoryManager(const Size3& physicalMemoryBlock,
 	//										   const Size3& virtualMemoryBlock,
 	//                                           const Size3& blockSize):
@@ -66,9 +65,6 @@ namespace ysl
 	//	initPageTable(virtualMemoryBlock);
 	//	initLRUList(physicalMemoryBlock, blockSize);
 	//}
-
-	
-
 	std::vector<PhysicalMemoryBlockIndex> VirtualMemoryManager::UpdatePageTable(
 		const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices)
 	{

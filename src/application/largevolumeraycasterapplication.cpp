@@ -38,7 +38,7 @@ namespace ysl
 
 		LargeVolumeRayCaster::LargeVolumeRayCaster(int argc, char** argv, int w, int h, const std::string& fileName) :
 			ImGuiApplication(argc, argv, w, h),
-		gpuCacheBlockSize{4,4,4},
+		gpuCacheBlockSize{13,13,12},
 		largeVolumeCache(fileName),
 		pageTableManager(gpuCacheBlockSize,&largeVolumeCache)
 		{
@@ -173,13 +173,11 @@ namespace ysl
 			// clear intermediate result
 			framebuffer->Bind();
 			proxyVAO.bind();
-
 			// Cull face
 			positionShaderProgram.bind();
 			positionShaderProgram.setUniformValue("projMatrix", projMatrix.Matrix());
 			positionShaderProgram.setUniformValue("worldMatrix", modelMatrix.Matrix());
 			positionShaderProgram.setUniformValue("viewMatrix", camera.view().Matrix());
-
 
 			glDrawBuffer(GL_COLOR_ATTACHMENT0);					// Draw into attachment 0
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -204,8 +202,6 @@ namespace ysl
 			//g_clearIntermediateProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, *g_texExitPos);
 
 			glDrawBuffer(GL_COLOR_ATTACHMENT2);
-			
-
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
@@ -247,6 +243,7 @@ namespace ysl
 			GL_ERROR_REPORT;
 			do
 			{
+				//cacheFaultHandler->Reset();
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 			} while (CaptureAndHandleCacheFault());
 #ifdef COUNT_VALID_BLOCK
@@ -281,40 +278,49 @@ namespace ysl
 		{
 			// page table
 			const auto pageTableSize = pageTableManager.PageTableSize();
+
+			const auto ptr = pageTableManager.PageTable(0).Data();
+
 			texPageTable = OpenGLTexture::CreateTexture3D(OpenGLTexture::RGBA32UI, OpenGLTexture::Linear,
 				OpenGLTexture::Linear, OpenGLTexture::ClampToEdge,
 				OpenGLTexture::ClampToEdge,
 				OpenGLTexture::ClampToEdge,
 				OpenGLTexture::RGBAInteger,
 				OpenGLTexture::UInt32, pageTableSize.x, pageTableSize.y,
-				pageTableSize.z, pageTableManager.PageTable(0).Data());
+				pageTableSize.z,ptr);
 
 			// Bind to iimage3D
 			texPageTable->Bind();
 			texPageTable->BindToDataImage(1, 0, false, 0, OpenGLTexture::Read, OpenGLTexture::RGBA32UI);
 
 			//const auto pageTableSize = pageTableManager.PageTableSize();
-			texPageTable->SetData(OpenGLTexture::RGBA32UI, OpenGLTexture::RGBAInteger, OpenGLTexture::UInt32,
-				pageTableSize.x, pageTableSize.y, pageTableSize.z, pageTableManager.PageTable(0).Data());
+			//texPageTable->SetData(OpenGLTexture::RGBA32UI, OpenGLTexture::RGBAInteger, OpenGLTexture::UInt32,
+			//	pageTableSize.x, pageTableSize.y, pageTableSize.z, pageTableManager.PageTable(0).Data());
+			//texPageTable->Unbind();
 
 		}
 
 		void LargeVolumeRayCaster::InitGPUBlockCacheTexture()
 		{
 			///// GPU block Cache Texture
-			ysl::Size3 gpuBlockCacheSize = gpuCacheBlockSize * largeVolumeCache.BlockSize(); // number of block at every dim
+			const auto gpuBlockCacheSize = gpuCacheBlockSize * largeVolumeCache.BlockSize(); // number of block at every dim
+			//std::cout << "GPU BLock Cache Size:" << gpuBlockCacheSize << std::endl;
+			
 			texCache = std::make_shared<GPUVolumeDataCache>(gpuBlockCacheSize, nullptr);
 		}
 
 		bool LargeVolumeRayCaster::CaptureAndHandleCacheFault()
 		{
 			const auto flag = pingpongTransferManager->TransferData(texCache.get(), &largeVolumeCache);
-
+			
 			if (!flag)
 				return false;
 
 			const auto pageTableSize = pageTableManager.PageTableSize();
 
+
+			
+			const auto ptr = pageTableManager.PageTable(0).Data();
 			// update page table
 			texPageTable->Bind();
 			texPageTable->SetData(OpenGLTexture::RGBA32UI,
@@ -323,7 +329,7 @@ namespace ysl
 				pageTableSize.x,
 				pageTableSize.y,
 				pageTableSize.z,
-				pageTableManager.PageTable(0).Data());
+				ptr);
 			texPageTable->Unbind();
 
 			return true;
@@ -459,9 +465,11 @@ namespace ysl
 
 
 			modelMatrix = Scale(ysl::Vector3f(g_originalDataWidth,g_originalDataHeight,g_originalDataDepth).Normalized());
+		
+
 
 			std::cout << "Page Table Size:" << pageTableManager.PageTableSize() << std::endl;
-			std::cout << "Cache Size: " << largeVolumeCache.CPUCacheSize() << std::endl;
+			std::cout << "CPU Cache Size: " << largeVolumeCache.CPUCacheSize() << std::endl;
 			std::cout << "Padding: " << largeVolumeCache.BoundaryRepeat() << std::endl;
 			std::cout << "Sampled data regions: " << largeVolumeCache.OriginalDataSize() << std::endl;
 			std::cout << "Block Dimension: " << largeVolumeCache.SizeByBlock() << std::endl;
@@ -583,10 +591,12 @@ namespace ysl
 			const auto sizeByBlock = largeVolumeCache.SizeByBlock();
 
 
-			const auto totalPageTableSize = ysl::Vector3i{(int)sizeByBlock.x,(int)sizeByBlock.y,(int)sizeByBlock.z};
+			//const auto totalPageTableSize = ysl::Vector3i{ (int)sizeByBlock.x,(int)sizeByBlock.y,(int)sizeByBlock.z };
+			const auto ts = pageTableManager.PageTableSize();
+			const auto totalPageTableSize = ysl::Vector3i{(int)ts.x,(int)ts.y,(int)ts.z};
 
 			const auto blockDataSize = ysl::Vector3i{g_blockDataSize - 2 * g_repeat, g_blockDataSize - 2 * g_repeat, g_blockDataSize - 2 * g_repeat};
-			const auto volumeDataSize = ysl::Vector3i{g_originalDataWidth, g_originalDataHeight, g_originalDataDepth};
+			//const auto volumeDataSize = ysl::Vector3i{g_originalDataWidth, g_originalDataHeight, g_originalDataDepth};
 			//const auto pageTableBlockEntrySize = ysl::Vector3i{ pageTableBlockEntry, pageTableBlockEntry, pageTableBlockEntry };
 			const auto repeatSize = ysl::Vector3i{ g_repeat, g_repeat, g_repeat };
 			const auto repeatOffset = ysl::Vector3i{ g_repeat,g_repeat,g_repeat };
@@ -596,8 +606,12 @@ namespace ysl
 			rayCastingShaderProgram.bind();
 			//rayCastingShaderProgram.setUniformValue("totalPageDirSize",totalPageDirSize);
 			rayCastingShaderProgram.setUniformValue("totalPageTableSize", totalPageTableSize);
+
+			//std::cout << "SetShaderUniforms:" << totalPageTableSize << std::endl;
+
+
 			rayCastingShaderProgram.setUniformValue("blockDataSize", blockDataSize);
-			rayCastingShaderProgram.setUniformValue("volumeDataSize", volumeDataSize);
+			//rayCastingShaderProgram.setUniformValue("volumeDataSize", volumeDataSize);
 			//rayCastingShaderProgram.setUniformValue("pageTableBlockEntrySize", pageTableBlockEntrySize);
 			rayCastingShaderProgram.setUniformValue("repeatSize", repeatSize);
 			rayCastingShaderProgram.setUniformValue("repeatOffset", repeatOffset);
@@ -609,7 +623,7 @@ namespace ysl
 			//std::cout << "totalPageDirSize:" << totalPageDirSize<<std::endl;
 			std::cout << "totalPageTableSize:" << totalPageTableSize <<std::endl;
 			std::cout << "Block Data Size:" << blockDataSize << std::endl;
-			std::cout << "Volume Data Size:" << volumeDataSize << std::endl;
+			//std::cout << "Volume Data Size:" << volumeDataSize << std::endl;
 			//std::cout << "Page Table Block Entry Size:" << pageTableBlockEntrySize << std::endl;
 			std::cout << "Padding Size:" << repeatSize << std::endl;
 			std::cout << "Repeat Offset:" << repeatOffset << std::endl;
