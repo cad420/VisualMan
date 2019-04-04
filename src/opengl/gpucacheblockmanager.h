@@ -17,8 +17,8 @@ namespace ysl
 		std::shared_ptr<OpenGLBuffer> pbo[2];
 		void InitPingPongSwapPBO();
 	public:
-		PingPongTransferManager(PageTableManager * vmm, AbstrGPUCacheFaultHandler * gcm);
-		bool TransferData(GPUVolumeDataCache* dest, CPUVolumeDataCache* src) override;
+		PingPongTransferManager(std::shared_ptr<PageTableManager> vmm, std::shared_ptr<AbstrGPUCacheFaultHandler> gcm);
+		bool TransferData(GPUVolumeDataCache * dest, CPUVolumeDataCache* src) override;
 		~PingPongTransferManager();
 	};
 

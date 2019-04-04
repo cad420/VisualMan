@@ -4,7 +4,8 @@
 namespace ysl
 {
 	AbstrGPUCacheBlockManager::
-	AbstrGPUCacheBlockManager(PageTableManager* vmm, AbstrGPUCacheFaultHandler* gcm): vmManager(vmm), gcmHandler(gcm)
+	AbstrGPUCacheBlockManager(std::shared_ptr<PageTableManager> vmm, std::shared_ptr<AbstrGPUCacheFaultHandler> gcm):
+	vmManager(std::move(vmm)), gcmHandler(std::move(gcm))
 	{
 	}
 

@@ -19,7 +19,7 @@ namespace ysl
 		pbo[1]->Unbind();
 	}
 
-	PingPongTransferManager::PingPongTransferManager(PageTableManager * vmm,AbstrGPUCacheFaultHandler * gcm):AbstrGPUCacheBlockManager(vmm,gcm)
+	PingPongTransferManager::PingPongTransferManager(std::shared_ptr<PageTableManager> vmm, std::shared_ptr<AbstrGPUCacheFaultHandler> gcm):AbstrGPUCacheBlockManager(vmm,gcm)
 	{
 		InitPingPongSwapPBO();
 	}
@@ -29,6 +29,7 @@ namespace ysl
 	{
 		assert(gcmHandler);
 		assert(vmManager);
+
 		const std::size_t blockSize = src->BlockSize();
 		const auto hits = gcmHandler->CaptureCacheFault();
 		gcmHandler->Reset();

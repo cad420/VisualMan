@@ -30,10 +30,10 @@ namespace ysl
 			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			msg,
 			0, NULL);
-		printf("%d %s\n",dw, msg);
+		printf("[%d]%s\n",dw, msg);
 	}
 
-	WindowsMappingRawIO::WindowsMappingRawIO(const std::string& fileName,
+	WindowsMappingRawIO::WindowsMappingRawIO(const std::string & fileName,
 		std::size_t fileSize,
 		int FileAccessFlags,
 		int MapAccessFlags) :

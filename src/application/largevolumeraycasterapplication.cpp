@@ -270,7 +270,6 @@ namespace ysl
 		}
 
 
-
 		void LargeVolumeRayCaster::InitGPUPageTableBuffer()
 		{
 
@@ -469,7 +468,7 @@ namespace ysl
 			GL_ERROR_REPORT;
 			cacheFaultHandler = std::make_shared<HashBasedGPUCacheFaultHandler>(5000, largeVolumeCache->BlockDim());
 			GL_ERROR_REPORT;
-			pingpongTransferManager = std::make_shared<PingPongTransferManager>(pageTableManager.get(), cacheFaultHandler.get());
+			pingpongTransferManager = std::make_shared<PingPongTransferManager>(pageTableManager, cacheFaultHandler);
 			GL_ERROR_REPORT;
 
 		}

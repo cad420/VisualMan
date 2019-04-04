@@ -90,9 +90,14 @@ namespace ysl
 			std::shared_ptr<HashBasedGPUCacheFaultHandler> cacheFaultHandler; // Belong to Client-end memory
 			std::shared_ptr<PingPongTransferManager> pingpongTransferManager;
 			std::shared_ptr<GPUVolumeDataCache> texCache;			 // Client-end memory
-			//CPUVolumeDataCache largeVolumeCache;		// Server-end memory
 			std::shared_ptr<CPUVolumeDataCache> largeVolumeCache;
 			std::shared_ptr<PageTableManager> pageTableManager;		// Server-end memory
+
+			struct LODData
+			{
+				
+			};
+
 
 #ifdef COUNT_VALID_BLOCK
 			std::shared_ptr<OpenGLBuffer> bufMissedHash;

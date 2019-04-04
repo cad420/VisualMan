@@ -13,11 +13,10 @@ namespace ysl
 	class AbstrGPUCacheBlockManager
 	{
 	protected:
-		PageTableManager * vmManager;
-		AbstrGPUCacheFaultHandler * gcmHandler;
+		std::shared_ptr<PageTableManager> vmManager;
+		std::shared_ptr<AbstrGPUCacheFaultHandler> gcmHandler;
 	public:
-		AbstrGPUCacheBlockManager(PageTableManager* vmm, AbstrGPUCacheFaultHandler* gcm);
-
+		AbstrGPUCacheBlockManager(std::shared_ptr<PageTableManager> vmm, std::shared_ptr<AbstrGPUCacheFaultHandler> gcm);
 		virtual bool TransferData(GPUVolumeDataCache* dest, CPUVolumeDataCache* src) = 0;
 		virtual ~AbstrGPUCacheBlockManager();
 	};
