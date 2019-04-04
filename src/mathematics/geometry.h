@@ -538,14 +538,12 @@ namespace ysl
 
 	};
 
-
 	template<typename T>
 	std::ostream & operator<<(std::ostream & os, const Vector3<T> & v)
 	{
 		os << "[" << v.x << "," << v.y << "," << v.z << "]";
 		return os;
 	}
-
 
 	template<typename T>
 	constexpr Vector3<T> operator*(Float s, const Vector3<T> & v)

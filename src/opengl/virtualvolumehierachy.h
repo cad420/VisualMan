@@ -6,6 +6,7 @@
 #include "../volume/largevolumecache.h"
 #include <list>
 #include "gpupagetable.h"
+#include "gpuvolumedatacache.h"
 
 namespace ysl
 {
@@ -59,10 +60,14 @@ namespace ysl
 		//Linear3DArray<PageDirEntry> PageDir;
 		Linear3DArray<PageTableEntry> pageTable;
 		std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>> g_lruList;
-		const Size3 physicalMemoryBlock;
-		const Size3 virtualMemoryBlock;
-		const Size3 blockSize;
-		CPUVolumeDataCache * const cacheData;
+		//const Size3 physicalMemoryBlock;
+		//const Size3 virtualMemoryBlock;
+		//const Size3 blockSize;
+		//CPUVolumeDataCache * const cacheData;
+
+		const std::shared_ptr<CPUVolumeDataCache> cacheData;
+		const std::shared_ptr<GPUVolumeDataCache> gpuCacheData;
+
 		std::shared_ptr<GPUPageTableDataCache> texPageTable;
 
 		void InitGPUPageTable();
@@ -70,22 +75,35 @@ namespace ysl
 		void InitLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize);
 	public:
 		using size_type = std::size_t;
-		PageTableManager(const Size3& physicalMemoryBlock, CPUVolumeDataCache * virtualData): physicalMemoryBlock(physicalMemoryBlock),
-		virtualMemoryBlock(virtualData->BlockDim()),
-		blockSize({ (std::size_t)virtualData->BlockSize(), (std::size_t)virtualData->BlockSize(),  (std::size_t)virtualData->BlockSize() }),
-		cacheData(virtualData)
+		//PageTableManager(const Size3 & physicalMemoryBlock, std::shared_ptr<CPUVolumeDataCache> virtualData): physicalMemoryBlock(physicalMemoryBlock),
+		//virtualMemoryBlock(virtualData->BlockDim()),
+		//blockSize(virtualData->BlockSize()),
+		//cacheData(virtualData)
+		//{
+
+		//	InitCPUPageTable(virtualMemoryBlock);
+		//	InitLRUList(physicalMemoryBlock, blockSize);
+		//	InitGPUPageTable();
+		//}
+
+		PageTableManager(std::shared_ptr<GPUVolumeDataCache>  physicalData, std::shared_ptr<CPUVolumeDataCache> virtualData):
+			cacheData(std::move(virtualData)),
+			gpuCacheData(std::move(physicalData))
 		{
 
-			InitCPUPageTable(virtualMemoryBlock);
-			InitLRUList(physicalMemoryBlock, blockSize);
+			InitCPUPageTable(cacheData->BlockDim());
+			InitLRUList(gpuCacheData->BlockDim(), gpuCacheData->BlockSize());
 			InitGPUPageTable();
 		}
+
 		std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices);
 		Linear3DArray<PageTableEntry> & PageTable(int level);
 		Size3 PageTableSize();
 		Size3 BlockSize()const;
+		void BindTextureToImage(int index);
 		void UpdatePageTable();
-		CPUVolumeDataCache* VirtualData();
+		std::shared_ptr<CPUVolumeDataCache> VirtualData();
+
 	};
 }
 

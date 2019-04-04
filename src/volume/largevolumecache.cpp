@@ -72,9 +72,10 @@ namespace ysl
 		//sizeByBlock = SizeByBlock();
 	}
 
-	int CPUVolumeDataCache::BlockSize()
+	Size3 CPUVolumeDataCache::BlockSize()
 	{
-		return lvdReader.BlockSize();
+		const std::size_t len = lvdReader.BlockSize();
+		return Size3{ len,len,len };
 	}
 
 	int CPUVolumeDataCache::Padding()

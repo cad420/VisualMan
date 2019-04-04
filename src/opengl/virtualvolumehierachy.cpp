@@ -2,6 +2,7 @@
 #include "virtualvolumehierachy.h"
 #include "../application/largevolumeraycasterapplication.h"
 #include "../volume/largevolumecache.h"
+#include "openglutils.h"
 
 namespace ysl
 {
@@ -13,9 +14,8 @@ namespace ysl
 
 		texPageTable = std::make_shared<GPUPageTableDataCache>(pageTableSize, ptr);
 		// Bind to iimage3D
-		texPageTable->Bind();
-		texPageTable->BindToDataImage(1, 0, false, 0, OpenGLTexture::Read, OpenGLTexture::RGBA32UI);
 
+		BindTextureToImage(1);
 	}
 
 	void PageTableManager::InitCPUPageTable(const Size3& blockDim)
@@ -111,7 +111,15 @@ namespace ysl
 
 	Size3 PageTableManager::BlockSize() const
 	{
-		return blockSize;
+		return cacheData->BlockSize();
+	}
+
+	void PageTableManager::BindTextureToImage(int index)
+	{
+		texPageTable->Bind();
+		texPageTable->BindToDataImage(index, 0, false, 0, OpenGLTexture::Read, OpenGLTexture::RGBA32UI);
+		texPageTable->Unbind();
+		GL_ERROR_REPORT;
 	}
 
 	void PageTableManager::UpdatePageTable()
@@ -130,7 +138,7 @@ namespace ysl
 		texPageTable->Unbind();
 	}
 
-	CPUVolumeDataCache* PageTableManager::VirtualData()
+	std::shared_ptr<CPUVolumeDataCache> PageTableManager::VirtualData()
 	{
 		return cacheData;
 	}

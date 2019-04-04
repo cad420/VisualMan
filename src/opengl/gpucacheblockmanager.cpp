@@ -30,7 +30,7 @@ namespace ysl
 		assert(gcmHandler);
 		assert(vmManager);
 
-		const std::size_t blockSize = src->BlockSize();
+		const auto blockSize = src->BlockSize();
 		const auto hits = gcmHandler->CaptureCacheFault();
 		gcmHandler->Reset();
 
@@ -40,7 +40,7 @@ namespace ysl
 		const auto posInCache = vmManager->UpdatePageTable(hits);	 // policy
 
 
-		const auto blockBytes = blockSize * blockSize * blockSize * sizeof(char);
+		const auto blockBytes = blockSize.x * blockSize.y * blockSize.z * sizeof(char);
 		// Ping-Pong PBO Transfer
 		auto curPBO = 0;
 		auto i = 0;
@@ -59,9 +59,9 @@ namespace ysl
 			pbo[1 - curPBO]->Bind();
 			dest->SetSubData(OpenGLTexture::RED,
 				OpenGLTexture::UInt8,
-				posInCache[i].x, blockSize,
-				posInCache[i].y, blockSize,
-				posInCache[i].z, blockSize,
+				posInCache[i].x, blockSize.x,
+				posInCache[i].y, blockSize.y,
+				posInCache[i].z, blockSize.z,
 				nullptr);
 			pbo[1 - curPBO]->Unbind();
 			i++;
@@ -77,9 +77,9 @@ namespace ysl
 		pbo[1 - curPBO]->Bind();
 		dest->SetSubData(OpenGLTexture::RED,
 			OpenGLTexture::UInt8,
-			posInCache[i].x, blockSize,
-			posInCache[i].y, blockSize,
-			posInCache[i].z, blockSize,
+			posInCache[i].x, blockSize.x,
+			posInCache[i].y, blockSize.y,
+			posInCache[i].z, blockSize.z,
 			nullptr);
 		pbo[1 - curPBO]->Unbind();
 		return true;

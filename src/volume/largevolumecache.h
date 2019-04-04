@@ -32,7 +32,7 @@ namespace ysl
 		virtual const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock) = 0;
 		virtual const unsigned char * ReadBlockDataFromCPUCache(int blockId) = 0;
 		virtual const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index) = 0;
-		virtual int BlockSize() = 0;
+		virtual Size3 BlockSize() = 0;
 		virtual Size3 BlockDim() = 0;
 		//virtual std::size_t MemoryBytes()const = 0;
 		virtual ~AbstrCPUBlockCache();
@@ -95,17 +95,14 @@ namespace ysl
 		//ysl::Size3 CPUCacheDim()const { return cacheDim; }
 
 		ysl::Size3 CPUCacheSize()const override { return CacheBlockDim()*(1<<nLogBlockSize); }
-		int BlockSize() override;
 		int Padding()override;
 		Size3 OriginalDataSize()override;
 		Size3 BlockDim() override;
+		Size3 BlockSize() override;
 		const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock)override{ return ReadBlockDataFromCPUCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
 		const unsigned char * ReadBlockDataFromCPUCache(int blockId)override;
 		const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index)override { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
 	};
-
-
-
 }
 
 

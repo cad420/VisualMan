@@ -105,14 +105,10 @@ namespace ysl
 			void InitCounter(int capacity);
 			int ResetCounter();
 #endif
-			int padding;
-			int blockSize;
-			int validDataWidth;
-			int validDataHeight;
-			int validDataDepth;
-			int windowWidth;
-			int windowHeight;
-			//int g_blockBytes;
+
+			//int windowWidth;
+			//int windowHeight;
+			Vec2i windowSize;
 			std::shared_ptr<imgui::TransferFunctionWidget> TFWidget;
 		};
 	}

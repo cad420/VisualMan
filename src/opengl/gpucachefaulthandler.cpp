@@ -10,8 +10,9 @@ namespace ysl
 		bufMissedHash = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer,
 			OpenGLBuffer::StreamDraw);
 		bufMissedHash->AllocateFor(nullptr, totalBlockCountBytes);
-		GL_ERROR_REPORT;
-		bufMissedHash->BindBufferBase(0);
+		//GL_ERROR_REPORT;
+		//bufMissedHash->BindBufferBase(0);
+		BindHashTableTo(0);
 	}
 
 	void HashBasedGPUCacheFaultHandler::InitMissTableBuffer()
@@ -20,8 +21,9 @@ namespace ysl
 		bufMissedTable = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ShaderStorageBuffer,
 			OpenGLBuffer::StreamDraw);
 		bufMissedTable->AllocateFor(nullptr, missedBlockCapacity);
-		GL_ERROR_REPORT;
-		bufMissedTable->BindBufferBase(1);
+		//GL_ERROR_REPORT;
+		//bufMissedTable->BindBufferBase(1);
+		BindFaultTableTo(1);
 	}
 
 	void HashBasedGPUCacheFaultHandler::InitGPUAtomicCounter()
@@ -29,8 +31,9 @@ namespace ysl
 		atomicCounter = std::make_shared<OpenGLBuffer>(OpenGLBuffer::AtomicCounterBuffer,
 			OpenGLBuffer::DynamicCopy);
 		atomicCounter->AllocateFor(nullptr, sizeof(GLuint));
-		atomicCounter->BindBufferBase(3);
-		atomicCounter->Unbind();
+		BindAtomicCounterTo(3);
+		//atomicCounter->BindBufferBase(3);
+		//atomicCounter->Unbind();
 		GL_ERROR_REPORT;
 	}
 
@@ -96,6 +99,31 @@ namespace ysl
 		GL_ERROR_REPORT;
 		return hits;
 
+	}
+
+	void HashBasedGPUCacheFaultHandler::BindHashTableTo(int index)
+	{
+		bufMissedHash->Bind();
+		bufMissedHash->BindBufferBase(index);
+		bufMissedHash->Unbind();
+		GL_ERROR_REPORT;
+	}
+
+	void HashBasedGPUCacheFaultHandler::BindFaultTableTo(int index)
+	{
+		bufMissedTable->Bind();
+		bufMissedTable->BindBufferBase(index);
+		bufMissedTable->Unbind();
+		GL_ERROR_REPORT;
+	}
+
+
+	void HashBasedGPUCacheFaultHandler::BindAtomicCounterTo(int index)
+	{
+		atomicCounter->Bind();
+		atomicCounter->BindBufferBase(index);
+		atomicCounter->Unbind();
+		GL_ERROR_REPORT;
 	}
 
 	void HashBasedGPUCacheFaultHandler::Reset()

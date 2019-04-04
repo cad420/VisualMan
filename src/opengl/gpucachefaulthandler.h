@@ -22,6 +22,9 @@ namespace ysl
 	public:
 		HashBasedGPUCacheFaultHandler(int capacity, const Size3 & dim);
 		std::vector<VirtualMemoryBlockIndex> CaptureCacheFault() override;
+		void BindHashTableTo(int index);
+		void BindFaultTableTo(int index);
+		void BindAtomicCounterTo(int index);
 		void Reset() override;
 		~HashBasedGPUCacheFaultHandler();
 	};
