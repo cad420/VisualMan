@@ -40,19 +40,19 @@ namespace ysl
 			//std::vector<MemoryBlockIndex> UpdatePageTable(const std::vector<MemoryBlockIndex>& missedBlockIndices);
 		};
 
-
 		// 内存模型基类
 		class AbstrMemoryObject
 		{
 			public:
 				AbstrMemoryObject(MemoryFaultHandler * handler);
 				virtual std::vector<MemAddrIndex> CaptureMemFault()const;
+
 		};
 
 
 		class AbstrServerMemoryObject:public AbstrMemoryObject
 		{
-			public:
+
 		};
 
 		class AbstrVirtualMemoryObject:public AbstrServerMemoryObject

@@ -40,7 +40,6 @@ namespace ysl
 
 		LVDReader(const std::vector<std::string> & fileName,const std::vector<int> & lods = std::vector<int>{});
 
-
 		bool Valid()const { return validFlag; }
 
 		ysl::Size3 Size(int lod = 0) const { return vSize; }
@@ -63,6 +62,8 @@ namespace ysl
 		std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> ReadAll(int lod = 0);
 
 		void ReadBlock(char * dest, int blockId,int lod = 0);
+
+		unsigned char* ReadBlock(int blockId, int lod = 0);
 
 	};
 

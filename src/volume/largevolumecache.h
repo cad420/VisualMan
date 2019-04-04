@@ -26,27 +26,39 @@ namespace ysl
 		size_type x, y, z;
 	};
 
-	class CPUCache
+	class AbstrCPUBlockCache
 	{
 	public:
 		virtual const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock) = 0;
 		virtual const unsigned char * ReadBlockDataFromCPUCache(int blockId) = 0;
 		virtual const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index) = 0;
-		virtual ~CPUCache(){}
+		virtual int BlockSize() = 0;
+		virtual Size3 BlockDim() = 0;
+		//virtual std::size_t MemoryBytes()const = 0;
+		virtual ~AbstrCPUBlockCache();
 	};
 
-	class CPUVolumeDataCache : public ysl::LVDReader,public CPUCache
+	class AbstrBlockedVolumeDataCPUCache:public AbstrCPUBlockCache
+	{
+		const Size3 cacheBlockDim;
+	public:
+		AbstrBlockedVolumeDataCPUCache(const Size3 & blockDim) :cacheBlockDim(blockDim) {}
+		virtual int Padding() = 0;
+		virtual Size3 OriginalDataSize() = 0;
+		virtual Size3 CPUCacheSize() const= 0;
+		Size3 CacheBlockDim()const { return cacheBlockDim; }
+	};
+
+
+	class CPUVolumeDataCache :public AbstrBlockedVolumeDataCPUCache
 	{
 		static constexpr int nLogBlockSize = 7;		//
-
 		static constexpr ysl::Size3 cacheBlockSize{ 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
 		static constexpr ysl::Size3 cacheDim{ 16,16,16 };
 		static constexpr ysl::Size3 cacheSize = cacheDim * (1 << nLogBlockSize);
-
 		static constexpr size_t totalCacheBlocks = cacheDim.x*cacheDim.y*cacheDim.z;
 
 		using Cache = ysl::Block3DArray<unsigned char, nLogBlockSize>;
-
 		struct LRUListCell;
 		using LRUHash = std::map<int, std::list<LRUListCell>::iterator>;
 		struct LRUListCell
@@ -55,39 +67,44 @@ namespace ysl
 			LRUHash::iterator hashIter;
 			LRUListCell(int index, LRUHash::iterator itr) :blockCacheIndex{ index }, hashIter{ itr }{}
 		};
+
 		std::list<LRUListCell> m_lruList;
 		LRUHash	m_blockIdInCache;		// blockId---> (blockIndex,the position of blockIndex in list)
-
 		bool m_valid;
 		std::unique_ptr<Cache> m_volumeCache;
-
-		//ysl::Size3 sizeByBlock;
-		//ysl::Size3 cacheSize;
-		//ysl::Size3 blockSize;
-
-		//std::mutex m_lock;
+		LVDReader lvdReader;
 
 
 		int blockCoordinateToBlockId(int xBlock, int yBlock, int zBlock)const
 		{
-			const auto x = SizeByBlock().x, y = SizeByBlock().y, z = SizeByBlock().z;
+			const auto size = lvdReader.SizeByBlock();
+			const auto x = size.x, y = size.y, z = size.z;
 			return zBlock * x*y + yBlock * x + xBlock;
 		}
 		void createCache();
 		void initLRU();
 	public:
-		explicit CPUVolumeDataCache(const std::string& fileName);
+		explicit CPUVolumeDataCache(const std::string& fileName,const Size3 & cacheBlockDim = {16,16,16});
 		bool IsValid()const { return m_valid; }
-		//int blockCount()const { totalCacheBlocks; }
-		std::size_t CPUCacheBlockCount() const { return totalCacheBlocks; }
-		ysl::Size3 CPUCacheBlockSize()const { return cacheBlockSize; }
-		ysl::Size3 CPUCacheDim()const { return cacheDim; }
-		ysl::Size3 CPUCacheSize()const { return cacheSize; }
 
+		//std::size_t CPUCacheBlockCount() const { return totalCacheBlocks; }
+		Size3 CPUCacheBlockSize()const
+		{
+			return Size3{ 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
+		}
+		//ysl::Size3 CPUCacheDim()const { return cacheDim; }
+
+		ysl::Size3 CPUCacheSize()const override { return CacheBlockDim()*(1<<nLogBlockSize); }
+		int BlockSize() override;
+		int Padding()override;
+		Size3 OriginalDataSize()override;
+		Size3 BlockDim() override;
 		const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock)override{ return ReadBlockDataFromCPUCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
 		const unsigned char * ReadBlockDataFromCPUCache(int blockId)override;
 		const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index)override { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
 	};
+
+
 
 }
 

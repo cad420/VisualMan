@@ -1,32 +1,24 @@
 
 #include "virtualvolumehierachy.h"
 #include "../application/largevolumeraycasterapplication.h"
+#include "../volume/largevolumecache.h"
 
 namespace ysl
 {
-	void VirtualMemoryManager::initPageDir()
+	void PageTableManager::InitGPUPageTable()
 	{
-		//PageDir = Linear3DArray<PageDirEntry>(
-		//	RoundUpDivide(PageTable.Size().x, xPageTableEntry),
-		//	RoundUpDivide(PageTable.Size().y, yPageTableEntry),
-		//	RoundUpDivide(PageTable.Size().z, zPageTableEntry),
-		//	nullptr
-		//	);
+		// page table
+		const auto pageTableSize = PageTableSize();
+		const auto ptr = PageTable(0).Data();
 
-		//for (auto z = 0; z < PageDir.Size().z; z++)
-		//	for (auto y = 0; y < PageDir.Size().y; y++)
-		//		for (auto x = 0; x < PageDir.Size().x; x++)
-		//		{
-		//			PageDirEntry dirEntry;
-		//			dirEntry.x = x * xPageTableEntry;
-		//			dirEntry.y = y * yPageTableEntry;
-		//			dirEntry.z = z * zPageTableEntry;
-		//			dirEntry.w = Mapped;
-		//			(PageDir)(x, y, z) = dirEntry;
-		//		}
+		texPageTable = std::make_shared<GPUPageTableDataCache>(pageTableSize, ptr);
+		// Bind to iimage3D
+		texPageTable->Bind();
+		texPageTable->BindToDataImage(1, 0, false, 0, OpenGLTexture::Read, OpenGLTexture::RGBA32UI);
+
 	}
 
-	void VirtualMemoryManager::initPageTable(const Size3& blockDim)
+	void PageTableManager::InitCPUPageTable(const Size3& blockDim)
 	{
 		// Only initialization flag filed, the table entry is determined by cache miss at run time using lazy evaluation policy.
 		pageTable = Linear3DArray<PageTableEntry>(blockDim, nullptr);
@@ -43,7 +35,7 @@ namespace ysl
 				}
 	}
 
-	void VirtualMemoryManager::initLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize)
+	void PageTableManager::InitLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize)
 	{
 		for (auto z = 0; z < physicalMemoryBlock.z; z++)
 			for (auto y = 0; y < physicalMemoryBlock.y; y++)
@@ -65,7 +57,8 @@ namespace ysl
 	//	initPageTable(virtualMemoryBlock);
 	//	initLRUList(physicalMemoryBlock, blockSize);
 	//}
-	std::vector<PhysicalMemoryBlockIndex> VirtualMemoryManager::UpdatePageTable(
+
+	std::vector<PhysicalMemoryBlockIndex> PageTableManager::UpdatePageTable(
 		const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices)
 	{
 		const auto missedBlocks = missedBlockIndices.size();
@@ -99,27 +92,47 @@ namespace ysl
 			g_lruList.splice(g_lruList.begin(), g_lruList, --g_lruList.end()); // move from tail to head, LRU policy
 
 			physicalIndices.push_back({xInCache, yInCache, zInCache});
-
 			//std::cout << last.first.x << " " << last.first.y << " " << last.first.z << " " << xInCache << " " << yInCache << " " << zInCache << std::endl;
 		}
 
 		return physicalIndices;
 	}
 
-	Linear3DArray<VirtualMemoryManager::PageTableEntry>& VirtualMemoryManager::PageTable(int level)
+	Linear3DArray<PageTableManager::PageTableEntry>& PageTableManager::PageTable(int level)
 	{
 		assert(level == 0);
 		return pageTable; 
 	}
 
-	Size3 VirtualMemoryManager::PageTableSize()
+	Size3 PageTableManager::PageTableSize()
 	{
 		return pageTable.Size();
 	}
 
-	Size3 VirtualMemoryManager::BlockSize() const
+	Size3 PageTableManager::BlockSize() const
 	{
 		return blockSize;
+	}
+
+	void PageTableManager::UpdatePageTable()
+	{
+		const auto pageTableSize = PageTableSize();
+		const auto ptr = PageTable(0).Data();
+		// update page table
+		texPageTable->Bind();
+		texPageTable->SetData(OpenGLTexture::RGBA32UI,
+			OpenGLTexture::RGBAInteger,
+			OpenGLTexture::UInt32,
+			pageTableSize.x,
+			pageTableSize.y,
+			pageTableSize.z,
+			ptr);
+		texPageTable->Unbind();
+	}
+
+	CPUVolumeDataCache* PageTableManager::VirtualData()
+	{
+		return cacheData;
 	}
 
 	//const Linear3DArray<PageTableEntry> &PageTableManager::PageTable(int level) const

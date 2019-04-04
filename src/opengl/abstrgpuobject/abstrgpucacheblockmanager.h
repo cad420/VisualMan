@@ -1,8 +1,8 @@
 
 #ifndef _ABSTRGPUCACHEBLOCKMANAGER_H_
 #define _ABSTRGPUCACHEBLOCKMANAGER_H_
-#include "../gpucacheblockmanager.h"
 #include "abstrgpucachefaulthandler.h"
+#include "../virtualvolumehierachy.h"
 
 
 namespace ysl
@@ -13,12 +13,13 @@ namespace ysl
 	class AbstrGPUCacheBlockManager
 	{
 	protected:
-		VirtualMemoryManager * vmManager;
+		PageTableManager * vmManager;
 		AbstrGPUCacheFaultHandler * gcmHandler;
 	public:
-		AbstrGPUCacheBlockManager(VirtualMemoryManager * vmm, AbstrGPUCacheFaultHandler * gcm) :vmManager(vmm), gcmHandler(gcm) {}
+		AbstrGPUCacheBlockManager(PageTableManager* vmm, AbstrGPUCacheFaultHandler* gcm);
+
 		virtual bool TransferData(GPUVolumeDataCache* dest, CPUVolumeDataCache* src) = 0;
-		virtual ~AbstrGPUCacheBlockManager() {}
+		virtual ~AbstrGPUCacheBlockManager();
 	};
 }
 

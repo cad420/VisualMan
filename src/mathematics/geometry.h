@@ -557,8 +557,6 @@ namespace ysl
 	constexpr Vector3<T> Abs(const Vector3<T> & v) {
 		return Vector3<T>(std::abs(v.x()), std::abs(v.y()), std::abs(v.z()));
 	}
-
-
 	/*
 	* Point3D
 	*/
