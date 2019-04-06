@@ -39,7 +39,7 @@ namespace ysl
 		GL_ERROR_REPORT;
 	}
 
-	void LODAggregate::Bind(const ShaderBindingPoint& bp)
+	void LODAggregate::Bind(const SHADERBINDINGPOINT& bp)
 	{
 		cacheFaultHandler->BindHashTableTo(bp.HASH_TABLE_BUFFER_BINDING_POINT);
 		cacheFaultHandler->BindAtomicCounterTo(bp.ATOMIC_COUNTER_BINDING_POINT);
