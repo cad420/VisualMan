@@ -90,7 +90,6 @@ namespace ysl
 			cacheData(std::move(virtualData)),
 			gpuCacheData(std::move(physicalData))
 		{
-
 			InitCPUPageTable(cacheData->BlockDim());
 			InitLRUList(gpuCacheData->BlockDim(), gpuCacheData->BlockSize());
 			InitGPUPageTable();

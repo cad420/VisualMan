@@ -39,9 +39,9 @@ namespace ysl
 
 		LargeVolumeRayCaster::LargeVolumeRayCaster(int argc, char** argv, int w, int h, const std::string& fileName) :
 			ImGuiApplication(argc, argv, w, h),
-		gpuCacheBlockSize{10,10,10},
-		largeVolumeCache(std::make_shared<CPUVolumeDataCache>(fileName)),
-		windowSize(800,600)
+		fileName(fileName),
+		windowSize(800,600),
+		currentLod(0)
 		{
 
 			camera = FocusCamera{ Point3f{0.f,0.f,5.f} };
@@ -52,6 +52,10 @@ namespace ysl
 			kd = 1.0;
 			shininess = 50.0f;
 
+			SBP.PAGE_TABLE_CACHE_BINDING_POINT = 1;		
+			SBP.ATOMIC_COUNTER_BINDING_POINT = 3;
+			SBP.HASH_TABLE_BUFFER_BINDING_POINT = 0;
+			SBP.FAULT_TABLE_BUFFER_BINDING_POINT = 1;
 
 		}
 
@@ -209,8 +213,6 @@ namespace ysl
 
 			rayCastingShaderProgram.bind();
 
-			rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *texCache);
-
 
 			rayCastingShaderProgram.setUniformSampler("texStartPos", OpenGLTexture::TextureUnit0, *texEntryPos);
 			rayCastingShaderProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, *texExitPos);
@@ -228,18 +230,25 @@ namespace ysl
 			//auto halfWay = g_lightDirection - g_camera.front();
 			//if (halfWay.Length() > 1e-10) halfWay.Normalize();
 			//g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
+
 			const auto lod = CalcLOD();
 			
-			//std::cout << "LOD:" << CalcLOD() << std::endl;
-			const auto ts = pageTableManager->PageTableSize();
+			aggregates[currentLod]->Bind(SBP);
+			const auto ts = aggregates[currentLod]->PageTableSize();
 			const auto totalPageTableSize = ysl::Vector3i{(int)ts.x,(int)ts.y,(int)ts.z};
-			const auto validDataSize = largeVolumeCache->OriginalDataSize();
+
+			//const auto validDataSize = largeVolumeCache->OriginalDataSize();
+			const auto validDataSize = aggregates[currentLod]->OriginalDataSize();
+
 			const auto volumeDataSizeNoRepeat = ysl::Vector3i( validDataSize.x,validDataSize.y,validDataSize.z );
 
+			//rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *texCache);
+			rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5,*aggregates[currentLod]->TextureCache());
 			rayCastingShaderProgram.setUniformValue("totalPageTableSize", totalPageTableSize);
 			rayCastingShaderProgram.setUniformValue("volumeDataSizeNoRepeat", volumeDataSizeNoRepeat);
-
 			rayCastingVAO.bind();
+
+		
 
 			GL_ERROR_REPORT;
 			do
@@ -271,43 +280,32 @@ namespace ysl
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // This is important
 		}
 
-		void LargeVolumeRayCaster::InitGPUPageTableBuffer()
-		{
-
-			//pageTableManager(gpuCacheBlockSize, &largeVolumeCache);
-
-			// page table
-			//const auto pageTableSize = pageTableManager.PageTableSize();
-
-			//const auto ptr = pageTableManager.PageTable(0).Data();
-
-			//texPageTable = std::make_shared<GPUPageTableDataCache>(pageTableSize, ptr);
-			//// Bind to iimage3D
-			//texPageTable->Bind();
-			//texPageTable->BindToDataImage(1, 0, false, 0, OpenGLTexture::Read, OpenGLTexture::RGBA32UI);
-
-		}
-
-		void LargeVolumeRayCaster::InitGPUBlockCacheTexture()
-		{
-			///// GPU block Cache Texture
-			//const auto gpuBlockCacheSize = gpuCacheBlockSize * largeVolumeCache->BlockSize(); // number of block at every dim
-		}
-
+#ifndef USE_AGGREGATE
 		bool LargeVolumeRayCaster::CaptureAndHandleCacheFault()
 		{
-			const auto flag = pingpongTransferManager->TransferData(texCache.get(), largeVolumeCache.get());
-			if (!flag)
-				return false;
-			pageTableManager->UpdatePageTable();
+			//const auto flag = pingpongTransferManager->TransferData(texCache.get(), largeVolumeCache.get());
+			//if (!flag)
+			//	return false;
+			//pageTableManager->UpdatePageTable();
+			//return true;
 
-			return true;
+			return aggregates[currentLod]->CaptureAndHandleCacheFault();
 		}
+#endif
 
 		int LargeVolumeRayCaster::CalcLOD()
 		{
 			const auto distance = (camera.position() - Point3f(0,0,0)).Length();
 			return distance / 0.5;
+		}
+
+		void LargeVolumeRayCaster::InitializeLODs(const std::vector<std::string> fileNames)
+		{
+			Size3 blockSize[] = {{8,8,8},{4,4,4},{2,2,2},{1,1,1}};
+			for(auto i = 0 ; i <  fileNames.size() && i < 4;i++)
+			{
+				aggregates.push_back(std::make_shared<LODAggregate>(fileNames[i],blockSize[i] ));
+			}
 		}
 
 #ifdef COUNT_VALID_BLOCK
@@ -419,17 +417,7 @@ namespace ysl
 		{
 			InitializeShaders();
 			InitializeProxyGeometry();
-
-			//std::cout << "Page Table Size:" << pageTableManager->PageTableSize() << std::endl;
-			//std::cout << "CPU Cache Size: " << largeVolumeCache->CPUCacheSize() << std::endl;
-			//std::cout << "Padding: " << largeVolumeCache->Padding() << std::endl;
-			//std::cout << "Sampled data regions: " << largeVolumeCache->OriginalDataSize() << std::endl;
-			//std::cout << "Block Dimension: " << largeVolumeCache->BlockDim() << std::endl;
-			//std::cout << "Block Size: " << largeVolumeCache->BlockSize() << std::endl;
-
-		
 			OpenGLConfiguration();
-			SetShaderUniforms();
 			InitTransferFunctionTexture();
 			InitRayCastingTexture();
 #ifdef COUNT_VALID_BLOCK
@@ -438,14 +426,20 @@ namespace ysl
 			ResetCounter();
 #endif
 
-			texCache = std::make_shared<GPUVolumeDataCache>(gpuCacheBlockSize, largeVolumeCache->BlockSize(), nullptr);
-			pageTableManager = std::make_shared<PageTableManager>(texCache, largeVolumeCache);
-			const auto validDataSize = largeVolumeCache->OriginalDataSize();
-			modelMatrix = Scale(ysl::Vector3f(validDataSize.x, validDataSize.y, validDataSize.z).Normalized());
-			cacheFaultHandler = std::make_shared<HashBasedGPUCacheFaultHandler>(5000, largeVolumeCache->BlockDim());
-			pingpongTransferManager = std::make_shared<PingPongTransferManager>(pageTableManager, cacheFaultHandler);
-			GL_ERROR_REPORT;
+#ifndef USE_AGGREGATE
+			//largeVolumeCache = std::make_shared<CPUVolumeDataCache>(fileName);
+			//texCache = std::make_shared<GPUVolumeDataCache>(Size3{10,10,10}, largeVolumeCache->BlockSize(), nullptr);
+			//pageTableManager = std::make_shared<PageTableManager>(texCache, largeVolumeCache);
+			//const auto validDataSize = largeVolumeCache->OriginalDataSize();
+			//modelMatrix = Scale(ysl::Vector3f(validDataSize.x, validDataSize.y, validDataSize.z).Normalized());
+			//cacheFaultHandler = std::make_shared<HashBasedGPUCacheFaultHandler>(5000, largeVolumeCache->BlockDim());
+			//pingpongTransferManager = std::make_shared<PingPongTransferManager>(pageTableManager, cacheFaultHandler);
 
+			//aggregate = std::make_shared<LODAggregate>(fileName, Size3{ 10,10,10 });
+			InitializeLODs({ "D:\\Desktop\\s1.lvd" });
+#endif
+			SetShaderUniforms();
+			GL_ERROR_REPORT;
 		}
 
 		void LargeVolumeRayCaster::InitTransferFunctionTexture()
@@ -539,10 +533,15 @@ namespace ysl
 		{
 			/// Set Shader Uniforms
 
-			//const auto sizeByBlock = largeVolumeCache.SizeByBlock();
 
-			const auto blockSize = largeVolumeCache->BlockSize();
-			const auto padding = largeVolumeCache->Padding();
+
+			//const auto blockSize = largeVolumeCache->BlockSize();
+			//const auto padding = largeVolumeCache->Padding();
+
+			const auto blockSize = aggregates[currentLod]->BlockSize();
+			const auto padding = aggregates[currentLod]->Padding();
+			
+
 
 			const auto blockDataSize = ysl::Vector3i(blockSize.x - 2 * padding, blockSize.y - 2 * padding, blockSize.z - 2 * padding);
 			const auto repeatSize = ysl::Vector3i( padding, padding, padding );
@@ -556,13 +555,13 @@ namespace ysl
 			rayCastingShaderProgram.setUniformValue("blockDataSizeNoRepeat", blockDataSizeNoRepeat);
 			rayCastingShaderProgram.unbind();
 
-			std::cout << "Block Data Size:" << blockDataSize << std::endl;
-			std::cout << "Padding Size:" << repeatSize << std::endl;
-			std::cout << "Repeat Offset:" << repeatOffset << std::endl;
-			std::cout << "Block Data Size No Repeat:" << blockDataSizeNoRepeat << std::endl;
+			//std::cout << "Block Data Size:" << blockDataSize << std::endl;
+			//std::cout << "Padding Size:" << repeatSize << std::endl;
+			//std::cout << "Repeat Offset:" << repeatOffset << std::endl;
+			//std::cout << "Block Data Size No Repeat:" << blockDataSizeNoRepeat << std::endl;
 			//std::cout << "Volume Data Size No Repeat:" << volumeDataSizeNoRepeat << std::endl;
-			quadsShaderProgram.bind();
-			quadsShaderProgram.unbind();
+			//quadsShaderProgram.bind();
+			//quadsShaderProgram.unbind();
 		}
 
 	}

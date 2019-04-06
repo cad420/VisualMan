@@ -14,8 +14,12 @@
 #include "../opengl/gpuvolumedatacache.h"
 #include "../opengl/gpucacheblockmanager.h"
 #include "../opengl/gpupagetable.h"
+#include "lodaggregate.h"
 
 //#define COUNT_VALID_BLOCK
+
+//#define USE_AGGREGATE
+
 
 
 namespace ysl
@@ -40,8 +44,6 @@ namespace ysl
 			void RenderLoop() override;
 		private:
 			void OpenGLConfiguration();
-			void InitGPUPageTableBuffer();
-			void InitGPUBlockCacheTexture();		// texCache
 			void InitializeProxyGeometry();
 			void InitializeResource();
 			void InitTransferFunctionTexture();
@@ -86,17 +88,23 @@ namespace ysl
 			OpenGLVertexArrayObject rayCastingVAO;
 
 			// One LOD Data
-			ysl::Size3 gpuCacheBlockSize;				
-			std::shared_ptr<HashBasedGPUCacheFaultHandler> cacheFaultHandler; // Belong to Client-end memory
-			std::shared_ptr<PingPongTransferManager> pingpongTransferManager;
-			std::shared_ptr<GPUVolumeDataCache> texCache;			 // Client-end memory
-			std::shared_ptr<CPUVolumeDataCache> largeVolumeCache;
-			std::shared_ptr<PageTableManager> pageTableManager;		// Server-end memory
+			//ysl::Size3 gpuCacheBlockSize;		
 
-			struct LODData
-			{
-				
-			};
+#ifndef USE_AGGREGATE
+
+			std::string fileName;
+			//std::shared_ptr<HashBasedGPUCacheFaultHandler> cacheFaultHandler; // Belong to Client-end memory
+			//std::shared_ptr<PingPongTransferManager> pingpongTransferManager;
+			//std::shared_ptr<GPUVolumeDataCache> texCache;			 // Client-end memory
+			//std::shared_ptr<CPUVolumeDataCache> largeVolumeCache;
+			//std::shared_ptr<PageTableManager> pageTableManager;		// Server-end memory
+#endif
+			std::vector<std::shared_ptr<LODAggregate>> aggregates;
+			int currentLod;
+
+			//std::shared_ptr<LODAggregate> aggregate;
+			SHADERBINDINGPOINT SBP;
+			void InitializeLODs(const std::vector<std::string> fileNames);
 
 
 #ifdef COUNT_VALID_BLOCK

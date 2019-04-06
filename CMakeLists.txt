@@ -196,7 +196,10 @@ ${UTILS_SRC_LIST}
 ${CORE_SRC_LIST}
 ${SHAPE_SRC_LIST}
 ${APP_SRC_LIST}
-${ABSTRGPUOBJ_SRC_LIST})
+${ABSTRGPUOBJ_SRC_LIST} "src/opengl/lodaggregate.cpp")
+
+
+
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

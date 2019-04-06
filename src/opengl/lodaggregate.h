@@ -36,6 +36,13 @@ namespace ysl
 		LODAggregate(const std::string & fileName,const Size3 & blockDim);
 		bool CaptureAndHandleCacheFault();
 		void Bind(const ShaderBindingPoint & bp);
+
+		std::shared_ptr<GPUVolumeDataCache> TextureCache()const;
+
+		Size3 PageTableSize()const;
+		Size3 OriginalDataSize()const;
+		Size3 BlockSize()const;
+		int Padding()const;
 	};
 
 }
