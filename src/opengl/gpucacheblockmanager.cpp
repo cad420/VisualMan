@@ -32,6 +32,15 @@ namespace ysl
 
 		const auto blockSize = src->BlockSize();
 		const auto hits = gcmHandler->CaptureCacheFault();
+
+		///
+		std::cout << "Hits:" << std::endl;
+		for(const auto & item:hits)
+		{
+			std::cout << "[" << item.x << " " << item.y << " " << item.z << "]" << std::endl;
+		}
+		///
+
 		gcmHandler->Reset();
 
 		const auto missedBlocks = hits.size();

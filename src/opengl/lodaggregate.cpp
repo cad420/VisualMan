@@ -31,9 +31,9 @@ namespace ysl
 		largeVolumeCache = std::make_shared<CPUVolumeDataCache>(fileName);
 		texCache = std::make_shared<GPUVolumeDataCache>(blockDim, largeVolumeCache->BlockSize(), nullptr);
 		pageTableManager = std::make_shared<PageTableManager>(texCache, largeVolumeCache);
-
+		
 		const auto d = largeVolumeCache->CacheBlockDim();
-		const auto hashSize = d.x * d.y*d.z;
+		const auto hashSize = 1000;
 		cacheFaultHandler = std::make_shared<HashBasedGPUCacheFaultHandler>(hashSize, largeVolumeCache->BlockDim());
 		pingpongTransferManager = std::make_shared<PingPongTransferManager>(pageTableManager, cacheFaultHandler);
 		GL_ERROR_REPORT;
@@ -45,6 +45,7 @@ namespace ysl
 		cacheFaultHandler->BindAtomicCounterTo(bp.ATOMIC_COUNTER_BINDING_POINT);
 		cacheFaultHandler->BindFaultTableTo(bp.FAULT_TABLE_BUFFER_BINDING_POINT);
 		pageTableManager->BindTextureToImage(bp.PAGE_TABLE_CACHE_BINDING_POINT);
+
 	}
 
 	std::shared_ptr<GPUVolumeDataCache> LODAggregate::TextureCache() const

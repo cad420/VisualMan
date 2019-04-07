@@ -60,7 +60,7 @@ namespace ysl
 
 
 
-	HashBasedGPUCacheFaultHandler::HashBasedGPUCacheFaultHandler(int capacity, const Size3& dim) :capacity(capacity), dim(dim)
+	HashBasedGPUCacheFaultHandler::HashBasedGPUCacheFaultHandler(int capacity, const Size3& virtualBlockDim) :capacity(capacity), dim(virtualBlockDim)
 	{
 		InitHashBuffer(capacity);
 		InitMissTableBuffer();

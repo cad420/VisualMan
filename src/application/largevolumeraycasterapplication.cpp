@@ -198,8 +198,8 @@ namespace ysl
 			clearIntermediateProgram.setUniformValue("projMatrix", projMatrix.Matrix());
 			clearIntermediateProgram.setUniformValue("worldMatrix", ysl::Transform{}.Matrix());
 			clearIntermediateProgram.setUniformValue("viewMatrix", camera.view().Matrix());
-			//g_clearIntermediateProgram.setUniformSampler("texStartPos", OpenGLTexture::TextureUnit0, *g_texEntryPos);
-			//g_clearIntermediateProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, *g_texExitPos);
+			//clearIntermediateProgram.setUniformSampler("texStartPos", OpenGLTexture::TextureUnit0, *g_texEntryPos);
+			//clearIntermediateProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, *g_texExitPos);
 
 			glDrawBuffer(GL_COLOR_ATTACHMENT2);
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -236,7 +236,7 @@ namespace ysl
 			currentLod = 0;
 
 			SetShaderUniforms();
-			aggregates[currentLod]->Bind(SBP);
+			//aggregates[currentLod]->Bind(SBP);
 
 			const auto ts = aggregates[currentLod]->PageTableSize();
 			const auto totalPageTableSize = ysl::Vector3i{ (int)ts.x,(int)ts.y,(int)ts.z };
@@ -304,7 +304,7 @@ namespace ysl
 		void LargeVolumeRayCaster::InitializeLODs(const std::vector<std::string> fileNames)
 		{
 
-			Size3 blockSize[] = { {3,3,3},{2,2,2},{2,2,2},{1,1,1} };
+			Size3 blockSize[] = { {60,1,1},{2,2,2},{2,2,2},{1,1,1} };
 			for (auto i = 0; i < fileNames.size() && i < 4; i++)
 			{
 				aggregates.push_back(std::make_shared<LODAggregate>(fileNames[i], blockSize[i]));
@@ -502,7 +502,6 @@ namespace ysl
 				windowSize.x,
 				windowSize.y,
 				nullptr);
-
 
 			texIntermediateResult->BindToDataImage(4, 0, false, 0, OpenGLTexture::ReadAndWrite,
 				OpenGLTexture::RGBA32F);
