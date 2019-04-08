@@ -9,8 +9,8 @@
 
 
 //const std::string tfName = R"(D:\scidata\tf1.tfi)";
-const std::string tfName = R"(D:\\subregion.1dt)";
-
+//const std::string tfName = R"(D:\\subregion.1dt)";
+const std::string tfName = R"(d:\temp.txt)";
 namespace ysl
 {
 	namespace app
@@ -170,6 +170,13 @@ namespace ysl
 		void LargeVolumeRayCaster::RenderLoop()
 		{
 
+
+			auto lod = CalcLOD();
+			currentLod = lod;
+
+			const auto s = aggregates[currentLod]->OriginalDataSize();
+			const auto worldMatrix = Scale(ysl::Vector3f(0.5,0.5,3));
+
 			glClear(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
 			// clear intermediate result
@@ -178,7 +185,7 @@ namespace ysl
 			// Cull face
 			positionShaderProgram.bind();
 			positionShaderProgram.setUniformValue("projMatrix", projMatrix.Matrix());
-			positionShaderProgram.setUniformValue("worldMatrix", modelMatrix.Matrix());
+			positionShaderProgram.setUniformValue("worldMatrix", worldMatrix.Matrix());
 			positionShaderProgram.setUniformValue("viewMatrix", camera.view().Matrix());
 
 			glDrawBuffer(GL_COLOR_ATTACHMENT0);					// Draw into attachment 0
@@ -215,11 +222,9 @@ namespace ysl
 
 
 
-			auto lod = CalcLOD();
-			currentLod = lod;
+
 			std::cout << "Lod:" << lod << std::endl;
 			aggregates[currentLod]->Bind(sbp);
-
 			rayCastingShaderProgram.bind();
 			//GL_ERROR_REPORT;
 			//SetShaderUniforms();
