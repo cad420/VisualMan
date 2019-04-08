@@ -9,7 +9,7 @@
 namespace ysl
 {
 
-	struct ShaderBindingPoint
+	struct SHADERBINDINGPOINT
 	{
 		int PAGE_TABLE_CACHE_BINDING_POINT;
 		int HASH_TABLE_BUFFER_BINDING_POINT;
@@ -34,8 +34,23 @@ namespace ysl
 		void InitGPUBlockCacheTexture(const Size3 & blockDim);		// texCache
 	public:
 		LODAggregate(const std::string & fileName,const Size3 & blockDim);
+
+		std::shared_ptr<GPUVolumeDataCache> GPUCache()const;
+		std::shared_ptr<CPUVolumeDataCache> CPUCache()const;
+
+		Size3 PageTableSize()const;
+		Size3 OriginalDataSize()const;
+		Size3 BlockSize()const;
+
+		Size3 CPUBlockDim()const;
+		Size3 CPUCacheSize()const;
+		Size3 GPUBlockDim()const;
+		Size3 GPUCacheSize()const;
+		int Padding()const;
+
+
 		bool CaptureAndHandleCacheFault();
-		void Bind(const ShaderBindingPoint & bp);
+		void Bind(const SHADERBINDINGPOINT & bp);
 	};
 
 }

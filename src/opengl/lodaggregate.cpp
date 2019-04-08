@@ -15,7 +15,7 @@ namespace ysl
 
 	void LODAggregate::InitGPUBlockCacheTexture(const Size3 & blockDim)
 	{
-		texCache = std::make_shared<GPUVolumeDataCache>(Size3{10,10,10}, largeVolumeCache->BlockSize(), nullptr);
+		texCache = std::make_shared<GPUVolumeDataCache>(blockDim, largeVolumeCache->BlockSize(), nullptr);
 	}
 
 	bool LODAggregate::CaptureAndHandleCacheFault()
@@ -23,9 +23,7 @@ namespace ysl
 		const auto flag = pingpongTransferManager->TransferData(texCache.get(), largeVolumeCache.get());
 		if (!flag)
 			return false;
-
 		pageTableManager->UpdatePageTable();
-
 		return true;
 	}
 
@@ -39,9 +37,63 @@ namespace ysl
 		GL_ERROR_REPORT;
 	}
 
-	void LODAggregate::Bind(const ShaderBindingPoint& bp)
+	void LODAggregate::Bind(const SHADERBINDINGPOINT& bp)
 	{
 		pageTableManager->BindTextureToImage(bp.PAGE_TABLE_CACHE_BINDING_POINT);
-
+		cacheFaultHandler->BindHashTableTo(bp.HASH_TABLE_BUFFER_BINDING_POINT);
+		cacheFaultHandler->BindAtomicCounterTo(bp.ATOMIC_COUNTER_BINDING_POINT);
+		cacheFaultHandler->BindFaultTableTo(bp.FAULT_TABLE_BUFFER_BINDING_POINT);
 	}
+
+
+	std::shared_ptr<GPUVolumeDataCache> LODAggregate::GPUCache() const
+	{
+		return texCache;
+	}
+
+	std::shared_ptr<CPUVolumeDataCache> LODAggregate::CPUCache() const
+	{
+		return largeVolumeCache;
+	}
+
+	Size3 LODAggregate::PageTableSize() const
+	{
+		return pageTableManager->PageTableSize();
+	}
+
+	Size3 LODAggregate::OriginalDataSize() const
+	{
+		return largeVolumeCache->OriginalDataSize();
+	}
+
+	Size3 LODAggregate::BlockSize() const
+	{
+		return largeVolumeCache->BlockSize();
+	}
+
+	Size3 LODAggregate::CPUBlockDim() const
+	{
+		return largeVolumeCache->BlockDim();
+	}
+
+	Size3 LODAggregate::CPUCacheSize() const
+	{
+		return CPUBlockDim() * BlockSize();
+	}
+
+	Size3 LODAggregate::GPUBlockDim() const
+	{
+		return texCache->BlockDim();
+	}
+
+	Size3 LODAggregate::GPUCacheSize() const
+	{
+		return GPUBlockDim() * BlockSize();
+	}
+
+	int LODAggregate::Padding() const
+	{
+		return largeVolumeCache->Padding();
+	}
+
 }
