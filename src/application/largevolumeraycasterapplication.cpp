@@ -244,7 +244,7 @@ namespace ysl
 			const auto volumeDataSizeNoRepeat = ysl::Vector3i(validDataSize.x, validDataSize.y, validDataSize.z);
 
 			//rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *texCache);
-			rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *aggregates[currentLod]->TextureCache());
+			rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *aggregates[currentLod]->GPUCache());
 			rayCastingShaderProgram.setUniformValue("totalPageTableSize", totalPageTableSize);
 			rayCastingShaderProgram.setUniformValue("volumeDataSizeNoRepeat", volumeDataSizeNoRepeat);
 
@@ -308,7 +308,28 @@ namespace ysl
 			for (auto i = 0; i < fileNames.size() && i < 4; i++)
 			{
 				aggregates.push_back(std::make_shared<LODAggregate>(fileNames[i], blockSize[i]));
+				PrintAggregateInfo(aggregates.back());
 			}
+		}
+
+		void LargeVolumeRayCaster::PrintAggregateInfo(const std::shared_ptr<LODAggregate>& aggr)
+		{
+			const auto blockSize = aggr->BlockSize();
+			const auto gpuBlockDim = aggr->GPUBlockDim();
+			const auto gpuCacheSize = aggr->GPUCacheSize();
+			const auto cpuBlockDim = aggr->CPUBlockDim();
+			const auto cpuCacheSize = aggr->CPUCacheSize();
+			const auto actualDataSize = aggr->OriginalDataSize();
+
+
+			std::cout << "Block Size:" << blockSize << std::endl;
+			std::cout << "GPU Block Dim:" << gpuBlockDim << std::endl;
+			std::cout << "GPU Cache Size:" << gpuCacheSize << std::endl;
+			std::cout << "CPU Block Dim:" << cpuBlockDim << std::endl;
+			std::cout << "CPU Cache Size:" << cpuCacheSize << std::endl;
+			std::cout << "Actual Data Size:" << actualDataSize << std::endl;
+
+
 		}
 
 #ifdef COUNT_VALID_BLOCK
@@ -439,7 +460,7 @@ namespace ysl
 			//pingpongTransferManager = std::make_shared<PingPongTransferManager>(pageTableManager, cacheFaultHandler);
 
 			//aggregate = std::make_shared<LODAggregate>(fileName, Size3{ 10,10,10 });
-			InitializeLODs({ "D:\\Desktop\\s1.lvd"  });
+			InitializeLODs({ "D:\\Desktop\\s1.lvd" });
 #endif
 			//SetShaderUniforms();
 			GL_ERROR_REPORT;

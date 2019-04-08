@@ -37,11 +37,17 @@ namespace ysl
 		bool CaptureAndHandleCacheFault();
 		void Bind(const SHADERBINDINGPOINT & bp);
 
-		std::shared_ptr<GPUVolumeDataCache> TextureCache()const;
+		std::shared_ptr<GPUVolumeDataCache> GPUCache()const;
+		std::shared_ptr<CPUVolumeDataCache> CPUCache()const;
 
 		Size3 PageTableSize()const;
 		Size3 OriginalDataSize()const;
 		Size3 BlockSize()const;
+
+		Size3 CPUBlockDim()const;
+		Size3 CPUCacheSize()const;
+		Size3 GPUBlockDim()const;
+		Size3 GPUCacheSize()const;
 		int Padding()const;
 	};
 

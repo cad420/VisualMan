@@ -105,7 +105,7 @@ namespace ysl
 			//std::shared_ptr<LODAggregate> aggregate;
 			SHADERBINDINGPOINT SBP;
 			void InitializeLODs(const std::vector<std::string> fileNames);
-
+			void PrintAggregateInfo(const std::shared_ptr<LODAggregate> & aggr);
 
 #ifdef COUNT_VALID_BLOCK
 			std::shared_ptr<OpenGLBuffer> bufMissedHash;

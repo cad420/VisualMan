@@ -48,9 +48,14 @@ namespace ysl
 
 	}
 
-	std::shared_ptr<GPUVolumeDataCache> LODAggregate::TextureCache() const
+	std::shared_ptr<GPUVolumeDataCache> LODAggregate::GPUCache() const
 	{
 		return texCache;
+	}
+
+	std::shared_ptr<CPUVolumeDataCache> LODAggregate::CPUCache() const
+	{
+		return largeVolumeCache;
 	}
 
 	Size3 LODAggregate::PageTableSize() const
@@ -66,6 +71,26 @@ namespace ysl
 	Size3 LODAggregate::BlockSize() const
 	{
 		return largeVolumeCache->BlockSize();
+	}
+
+	Size3 LODAggregate::CPUBlockDim() const
+	{
+		return largeVolumeCache->BlockDim();
+	}
+
+	Size3 LODAggregate::CPUCacheSize() const
+	{
+		return CPUBlockDim() * BlockSize();
+	}
+
+	Size3 LODAggregate::GPUBlockDim() const
+	{
+		return texCache->BlockDim();
+	}
+
+	Size3 LODAggregate::GPUCacheSize() const
+	{
+		return GPUBlockDim() * BlockSize();
 	}
 
 	int LODAggregate::Padding() const
