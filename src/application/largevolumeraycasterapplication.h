@@ -98,10 +98,10 @@ namespace ysl
 			//std::shared_ptr<PageTableManager> pageTableManager;		// Server-end memory
 
 
-			std::shared_ptr<LODAggregate> aggregate;
-
+			std::vector<std::shared_ptr<LODAggregate>> aggregates;
+			int currentLod;
+			int lodCount;
 			void InitializeLODs(const std::vector<std::string> fileNames);
-
 
 #ifdef COUNT_VALID_BLOCK
 			std::shared_ptr<OpenGLBuffer> bufMissedHash;

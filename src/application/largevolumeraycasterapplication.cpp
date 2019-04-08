@@ -8,8 +8,8 @@
 
 
 
-const std::string tfName = R"(D:\scidata\tf1.tfi)";
-//const std::string tfName = R"(D:\\subregion.1dt)";
+//const std::string tfName = R"(D:\scidata\tf1.tfi)";
+const std::string tfName = R"(D:\\subregion.1dt)";
 
 namespace ysl
 {
@@ -17,7 +17,7 @@ namespace ysl
 	{
 		const static int g_proxyGeometryVertexIndices[] = { 1,3,7,1,7,5,0,4,6,0,6,2,2,6,7,2,7,3,0,1,5,0,5,4,4,5,7,4,7,6,0,2,3,0,3,1 };
 		static const float xCoord = 1.0, yCoord = 1.0, zCoord = 1.0;
-		static float g_proxyGeometryVertices[] = 
+		static float g_proxyGeometryVertices[] =
 		{
 			0,0,0,
 			xCoord, 0.0, 0.0 ,
@@ -39,9 +39,9 @@ namespace ysl
 
 		LargeVolumeRayCaster::LargeVolumeRayCaster(int argc, char** argv, int w, int h, const std::string& fileName) :
 			ImGuiApplication(argc, argv, w, h),
-		//gpuCacheBlockSize{10,10,10},
-		//largeVolumeCache(std::make_shared<CPUVolumeDataCache>(fileName)),
-		windowSize(800,600)
+			//gpuCacheBlockSize{10,10,10},
+			//largeVolumeCache(std::make_shared<CPUVolumeDataCache>(fileName)),
+			windowSize(800, 600)
 		{
 
 			camera = FocusCamera{ Point3f{0.f,0.f,5.f} };
@@ -57,6 +57,7 @@ namespace ysl
 			sbp.FAULT_TABLE_BUFFER_BINDING_POINT = 1;
 			sbp.HASH_TABLE_BUFFER_BINDING_POINT = 0;
 
+			currentLod = 0;
 
 		}
 
@@ -142,26 +143,26 @@ namespace ysl
 		{
 			TFWidget->Draw();
 
-		/*	ImGui::Begin("Control Panel");
-			ImGui::Text("Page Table Size:[%d, %d, %d]", g_pageTableX, g_pageTableY, g_pageTableZ);
-			ImGui::Text("Cache Block Count In CPU:[%d, %d, %d]", g_cacheWidth, g_cacheHeight, g_cacheDepth);
-			ImGui::Text("Cache Block Count In GPU:[%d, %d, %d]", gpuCacheBlockSize.x, gpuCacheBlockSize.y, gpuCacheBlockSize.z);
-			ImGui::Text("Cache Block Size:[%d]", BlockSize());
-			ImGui::Text("Block Border:%d", g_repeat);
-			ImGui::Text("Upload Block Count Per Frame:%d", g_uploadBlockCountPerFrame);
-			ImGui::Text("Missing Cache Block Count Per Frame:%d", g_missingCacheCountPerFrame);
-			ImGui::Text("Rendering pass count per frame:%d", g_renderPassPerFrame);
-			const auto Gbs = double(g_blockBytes * g_uploadBlockCountPerFrame) / (1 << 30);
-			const auto s = double(g_blockUploadMicroSecondsPerFrame) / 1000000;
-			ImGui::Text("BandWidth: %f Gb/s", Gbs / s);
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			/*	ImGui::Begin("Control Panel");
+				ImGui::Text("Page Table Size:[%d, %d, %d]", g_pageTableX, g_pageTableY, g_pageTableZ);
+				ImGui::Text("Cache Block Count In CPU:[%d, %d, %d]", g_cacheWidth, g_cacheHeight, g_cacheDepth);
+				ImGui::Text("Cache Block Count In GPU:[%d, %d, %d]", gpuCacheBlockSize.x, gpuCacheBlockSize.y, gpuCacheBlockSize.z);
+				ImGui::Text("Cache Block Size:[%d]", BlockSize());
+				ImGui::Text("Block Border:%d", g_repeat);
+				ImGui::Text("Upload Block Count Per Frame:%d", g_uploadBlockCountPerFrame);
+				ImGui::Text("Missing Cache Block Count Per Frame:%d", g_missingCacheCountPerFrame);
+				ImGui::Text("Rendering pass count per frame:%d", g_renderPassPerFrame);
+				const auto Gbs = double(g_blockBytes * g_uploadBlockCountPerFrame) / (1 << 30);
+				const auto s = double(g_blockUploadMicroSecondsPerFrame) / 1000000;
+				ImGui::Text("BandWidth: %f Gb/s", Gbs / s);
+				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-			ImGui::SliderFloat("step", &step, 0.001, 1.0);
-			ImGui::SliderFloat("ka", &ka, 0.0f, 1.0f);
-			ImGui::SliderFloat("kd", &kd, 0.0f, 1.0f);
-			ImGui::SliderFloat("ks", &ks, 0.0f, 1.0f);
-			ImGui::SliderFloat("shininess", &shininess, 0.0f, 50.f);
-			ImGui::End();*/
+				ImGui::SliderFloat("step", &step, 0.001, 1.0);
+				ImGui::SliderFloat("ka", &ka, 0.0f, 1.0f);
+				ImGui::SliderFloat("kd", &kd, 0.0f, 1.0f);
+				ImGui::SliderFloat("ks", &ks, 0.0f, 1.0f);
+				ImGui::SliderFloat("shininess", &shininess, 0.0f, 50.f);
+				ImGui::End();*/
 
 
 		}
@@ -211,13 +212,42 @@ namespace ysl
 			glDepthFunc(GL_LESS);
 			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
-			aggregate->Bind(sbp);
+
+
+
+			auto lod = CalcLOD();
+			currentLod = lod;
+			std::cout << "Lod:" << lod << std::endl;
+			aggregates[currentLod]->Bind(sbp);
 
 			rayCastingShaderProgram.bind();
 			//GL_ERROR_REPORT;
-			SetShaderUniforms();
+			//SetShaderUniforms();
+
+			const auto blockSize = aggregates[currentLod]->BlockSize();
+			const auto padding = aggregates[currentLod]->Padding();
+
+			const auto blockDataSize = ysl::Vector3i(blockSize.x - 2 * padding, blockSize.y - 2 * padding, blockSize.z - 2 * padding);
+			const auto repeatSize = ysl::Vector3i(padding, padding, padding);
+			const auto repeatOffset = ysl::Vector3i(padding, padding, padding);
+			const auto blockDataSizeNoRepeat = ysl::Vector3i(blockSize.x - 2 * padding, blockSize.y - 2 * padding, blockSize.z - 2 * padding);
+			rayCastingShaderProgram.setUniformValue("blockDataSize", blockDataSize);
+			rayCastingShaderProgram.setUniformValue("repeatSize", repeatSize);
+			rayCastingShaderProgram.setUniformValue("repeatOffset", repeatOffset);
+			rayCastingShaderProgram.setUniformValue("blockDataSizeNoRepeat", blockDataSizeNoRepeat);
+
+
+			const auto ts = aggregates[currentLod]->PageTableSize();
+			const auto totalPageTableSize = ysl::Vector3i{ (int)ts.x,(int)ts.y,(int)ts.z };
+			const auto validDataSize = aggregates[currentLod]->OriginalDataSize();
+			const auto volumeDataSizeNoRepeat = ysl::Vector3i(validDataSize.x, validDataSize.y, validDataSize.z);
+
+			rayCastingShaderProgram.setUniformValue("totalPageTableSize", totalPageTableSize);
+			rayCastingShaderProgram.setUniformValue("volumeDataSizeNoRepeat", volumeDataSizeNoRepeat);
+			rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *aggregates[currentLod]->GPUCache());
+
 			//GL_ERROR_REPORT;
-			rayCastingShaderProgram.setUniformSampler("cacheVolume", OpenGLTexture::TextureUnit5, *aggregate->GPUCache());
+
 			rayCastingShaderProgram.setUniformSampler("texStartPos", OpenGLTexture::TextureUnit0, *texEntryPos);
 			rayCastingShaderProgram.setUniformSampler("texEndPos", OpenGLTexture::TextureUnit1, *texExitPos);
 			rayCastingShaderProgram.setUniformSampler("texTransfunc", OpenGLTexture::TextureUnit2, *texTransferFunction);
@@ -234,16 +264,9 @@ namespace ysl
 			//auto halfWay = g_lightDirection - g_camera.front();
 			//if (halfWay.Length() > 1e-10) halfWay.Normalize();
 			//g_rayCastingShaderProgram.setUniformValue("halfway", halfWay);
-			const auto lod = CalcLOD();
-			
-			//std::cout << "LOD:" << CalcLOD() << std::endl;
-			const auto ts = aggregate->PageTableSize();
-			const auto totalPageTableSize = ysl::Vector3i{(int)ts.x,(int)ts.y,(int)ts.z};
-			const auto validDataSize = aggregate->OriginalDataSize();
-			const auto volumeDataSizeNoRepeat = ysl::Vector3i( validDataSize.x,validDataSize.y,validDataSize.z );
 
-			rayCastingShaderProgram.setUniformValue("totalPageTableSize", totalPageTableSize);
-			rayCastingShaderProgram.setUniformValue("volumeDataSizeNoRepeat", volumeDataSizeNoRepeat);
+			//std::cout << "LOD:" << CalcLOD() << std::endl;
+
 
 			rayCastingVAO.bind();
 
@@ -255,7 +278,7 @@ namespace ysl
 
 
 #ifdef COUNT_VALID_BLOCK
-			std::cout <<"Valid Block:"<< ResetCounter() << std::endl;
+			std::cout << "Valid Block:" << ResetCounter() << std::endl;
 #endif // COUNT_VALID_BLOCK
 
 			// Draw final result quad texture on screen
@@ -308,19 +331,24 @@ namespace ysl
 			//pageTableManager->UpdatePageTable();
 			//return true;
 
-			return aggregate->CaptureAndHandleCacheFault();
+			return aggregates[currentLod]->CaptureAndHandleCacheFault();
 		}
 
 		int LargeVolumeRayCaster::CalcLOD()
 		{
-			const auto distance = (camera.position() - Point3f(0,0,0)).Length();
-			return distance / 0.5;
+			const auto distance = (camera.position() - Point3f(0, 0, 0)).Length()*0.5;
+			auto lod = std::sqrt(distance);
+			if (lod >= lodCount)lod = lodCount - 1;
+			return lod;
 		}
 
 		void LargeVolumeRayCaster::InitializeLODs(const std::vector<std::string> fileNames)
 		{
-			Size3 blockSize[] = { {3,3,3},{2,2,2},{2,2,2},{1,1,1} };
-			aggregate = std::make_shared<LODAggregate>("D:\\Desktop\\s1.lvd", blockSize[0]);
+			Size3 blockSize[] = { {10,10,10},{4,4,4},{3,3,3},{1,1,1} };
+			for (auto i = 0; i < fileNames.size() && i < 4; i++)
+			{
+				aggregates.push_back(std::make_shared<LODAggregate>(fileNames[i], blockSize[0]));
+			}
 		}
 
 #ifdef COUNT_VALID_BLOCK
@@ -406,7 +434,7 @@ namespace ysl
 				reinterpret_cast<void*>(sizeof(g_proxyGeometryVertices) / 2));
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
-			
+
 			proxyEBO = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ElementArrayBuffer);
 			proxyEBO->Bind();
 			proxyEBO->AllocateFor(g_proxyGeometryVertexIndices, sizeof(g_proxyGeometryVertexIndices));
@@ -440,9 +468,9 @@ namespace ysl
 			//std::cout << "Block Dimension: " << largeVolumeCache->BlockDim() << std::endl;
 			//std::cout << "Block Size: " << largeVolumeCache->BlockSize() << std::endl;
 
-		
+
 			OpenGLConfiguration();
-			
+
 			InitTransferFunctionTexture();
 			InitRayCastingTexture();
 #ifdef COUNT_VALID_BLOCK
@@ -459,8 +487,9 @@ namespace ysl
 			//pingpongTransferManager = std::make_shared<PingPongTransferManager>(pageTableManager, cacheFaultHandler);
 			//GL_ERROR_REPORT;
 
-			InitializeLODs({"D:\\Desktop\\head.lvd"});
-			SetShaderUniforms();
+			InitializeLODs({ "C:\\data\\subregion_9000_10700_2_128.lvd","D:\\Desktop\\sub_992.lvd","D:\\Desktop\\sub_496.lvd" });
+			lodCount = 3;
+			//SetShaderUniforms();
 		}
 
 		void LargeVolumeRayCaster::InitTransferFunctionTexture()
@@ -556,28 +585,9 @@ namespace ysl
 
 			//const auto sizeByBlock = largeVolumeCache.SizeByBlock();
 
-			const auto blockSize = aggregate->BlockSize();
-			const auto padding = aggregate->Padding();
 
-			const auto blockDataSize = ysl::Vector3i(blockSize.x - 2 * padding, blockSize.y - 2 * padding, blockSize.z - 2 * padding);
-			const auto repeatSize = ysl::Vector3i( padding, padding, padding );
-			const auto repeatOffset = ysl::Vector3i( padding,padding,padding );
-			const auto blockDataSizeNoRepeat = ysl::Vector3i( blockSize.x - 2 * padding,blockSize.y - 2 * padding,blockSize.z - 2 * padding );
-
-			//rayCastingShaderProgram.bind();
-			rayCastingShaderProgram.setUniformValue("blockDataSize", blockDataSize);
-			rayCastingShaderProgram.setUniformValue("repeatSize", repeatSize);
-			rayCastingShaderProgram.setUniformValue("repeatOffset", repeatOffset);
-			rayCastingShaderProgram.setUniformValue("blockDataSizeNoRepeat", blockDataSizeNoRepeat);
 			//rayCastingShaderProgram.unbind();
 
-			std::cout << "Block Data Size:" << blockDataSize << std::endl;
-			std::cout << "Padding Size:" << repeatSize << std::endl;
-			std::cout << "Repeat Offset:" << repeatOffset << std::endl;
-			std::cout << "Block Data Size No Repeat:" << blockDataSizeNoRepeat << std::endl;
-			//std::cout << "Volume Data Size No Repeat:" << volumeDataSizeNoRepeat << std::endl;
-			//quadsShaderProgram.bind();
-			//quadsShaderProgram.unbind();
 		}
 
 	}
