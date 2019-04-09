@@ -50,7 +50,7 @@ namespace ysl
 			void InitializeShaders();
 			void SetShaderUniforms();
 			bool CaptureAndHandleCacheFault();
-			int CalcLOD();
+			int CalcLOD()const;
 
 			FocusCamera camera;
 			Transform projMatrix;
@@ -60,6 +60,7 @@ namespace ysl
 			ShaderProgram positionShaderProgram;
 			ShaderProgram quadsShaderProgram;
 			ShaderProgram clearIntermediateProgram;
+			//ShaderProgram testShader;
 			Point2i lastMousePos;
 			TransferFunction tfObject;
 			std::vector<ysl::RGBASpectrum> tfData;

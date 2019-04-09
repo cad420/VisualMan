@@ -175,7 +175,7 @@ namespace ysl
 			currentLod = lod;
 
 			const auto s = aggregates[currentLod]->OriginalDataSize();
-			const auto worldMatrix = Scale(ysl::Vector3f(0.5,0.5,3));
+			const auto worldMatrix = Scale(ysl::Vector3f(1,1,6));
 
 			glClear(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
@@ -339,7 +339,7 @@ namespace ysl
 			return aggregates[currentLod]->CaptureAndHandleCacheFault();
 		}
 
-		int LargeVolumeRayCaster::CalcLOD()
+		int LargeVolumeRayCaster::CalcLOD()const
 		{
 			const auto distance = (camera.position() - Point3f(0, 0, 0)).Length()*0.5;
 			auto lod = std::sqrt(distance);
@@ -423,6 +423,15 @@ namespace ysl
 			clearIntermediateProgram.addShaderFromFile("D:\\code\\MRE\\src\\shader\\clear_f.glsl",
 				ysl::ShaderProgram::ShaderType::Fragment);
 			clearIntermediateProgram.link();
+
+
+			// test shader
+
+			//testShader.create();
+			//testShader.addShaderFromFile("D:\\code\\MRE\\src\\shader\\test.glsl",ysl::ShaderProgram::ShaderType::Compute);
+			//testShader.link();
+			//std::cout << "Shader linked\n";
+			//GL_ERROR_REPORT
 		}
 
 		void LargeVolumeRayCaster::InitializeProxyGeometry()

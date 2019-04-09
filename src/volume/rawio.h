@@ -49,18 +49,12 @@ namespace ysl
 			ReadOnly = PAGE_READONLY,
 			ReadWrite = PAGE_READWRITE
 		};
-	
 	public:
 		WindowsMappingRawIO(const std::string & fileName, std::size_t fileSize,int FileAccessFlags, int MapAccessFlags);
-
 		unsigned char* FileMemPointer(unsigned long long offset, std::size_t size) override;
-
 		void DestroyFileMemPointer(unsigned char* addr) override;
-
 		bool WriteCommit() override;
-
 		bool Close() override;
-
 		~WindowsMappingRawIO();
 	};
 #endif
