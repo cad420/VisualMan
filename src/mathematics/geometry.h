@@ -738,8 +738,8 @@ namespace ysl
 
 	};
 
-	template<typename T, typename U>
-	Point3<T> operator*(const U & s, const Point3<T> & p)
+	template<typename T>
+	Point3<T> operator*(const Float & s, const Point3<T> & p)
 	{
 		return p * s;
 	}
