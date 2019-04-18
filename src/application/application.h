@@ -28,6 +28,7 @@ namespace ysl
 				virtual void MouseReleaseEvent(MouseEvent *e) = 0;
 				virtual void MouseMoveEvent(MouseEvent *e) = 0;
 				virtual void WindowResizeEvent(ResizeEvent * event)=0;
+				virtual void MouseWheelEvent(WheelEvent* e) = 0;
 				static Application * app;
 		};
 	}

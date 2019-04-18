@@ -94,6 +94,12 @@ namespace ysl
 		{
 
 		}
+
+		void LargeVolumeRayCaster::MouseWheelEvent(WheelEvent* e)
+		{
+			std::cout << "xoffset:" << e->xoffset << " yoffset:" << e->yoffset << std::endl;
+		}
+
 		void LargeVolumeRayCaster::WindowResizeEvent(ResizeEvent* event)
 		{
 			const auto x = event->size().x;
@@ -143,26 +149,29 @@ namespace ysl
 		{
 			TFWidget->Draw();
 
-			/*	ImGui::Begin("Control Panel");
-				ImGui::Text("Page Table Size:[%d, %d, %d]", g_pageTableX, g_pageTableY, g_pageTableZ);
-				ImGui::Text("Cache Block Count In CPU:[%d, %d, %d]", g_cacheWidth, g_cacheHeight, g_cacheDepth);
-				ImGui::Text("Cache Block Count In GPU:[%d, %d, %d]", gpuCacheBlockSize.x, gpuCacheBlockSize.y, gpuCacheBlockSize.z);
-				ImGui::Text("Cache Block Size:[%d]", BlockSize());
-				ImGui::Text("Block Border:%d", g_repeat);
-				ImGui::Text("Upload Block Count Per Frame:%d", g_uploadBlockCountPerFrame);
-				ImGui::Text("Missing Cache Block Count Per Frame:%d", g_missingCacheCountPerFrame);
-				ImGui::Text("Rendering pass count per frame:%d", g_renderPassPerFrame);
-				const auto Gbs = double(g_blockBytes * g_uploadBlockCountPerFrame) / (1 << 30);
-				const auto s = double(g_blockUploadMicroSecondsPerFrame) / 1000000;
-				ImGui::Text("BandWidth: %f Gb/s", Gbs / s);
-				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+				ImGui::Begin("Control Panel");
+				//ImGui::Text("Page Table Size:[%d, %d, %d]", g_pageTableX, g_pageTableY, g_pageTableZ);
+				//ImGui::Text("Cache Block Count In CPU:[%d, %d, %d]", g_cacheWidth, g_cacheHeight, g_cacheDepth);
+				//ImGui::Text("Cache Block Count In GPU:[%d, %d, %d]", gpuCacheBlockSize.x, gpuCacheBlockSize.y, gpuCacheBlockSize.z);
+				//ImGui::Text("Cache Block Size:[%d]", BlockSize());
+				//ImGui::Text("Block Border:%d", g_repeat);
+				//ImGui::Text("Upload Block Count Per Frame:%d", g_uploadBlockCountPerFrame);
+				//ImGui::Text("Missing Cache Block Count Per Frame:%d", g_missingCacheCountPerFrame);
+				//ImGui::Text("Rendering pass count per frame:%d", g_renderPassPerFrame);
+				//const auto Gbs = double(g_blockBytes * g_uploadBlockCountPerFrame) / (1 << 30);
+				//const auto s = double(g_blockUploadMicroSecondsPerFrame) / 1000000;
+				//ImGui::Text("BandWidth: %f Gb/s", Gbs / s);
+				//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-				ImGui::SliderFloat("step", &step, 0.001, 1.0);
-				ImGui::SliderFloat("ka", &ka, 0.0f, 1.0f);
-				ImGui::SliderFloat("kd", &kd, 0.0f, 1.0f);
-				ImGui::SliderFloat("ks", &ks, 0.0f, 1.0f);
-				ImGui::SliderFloat("shininess", &shininess, 0.0f, 50.f);
-				ImGui::End();*/
+				//ImGui::SliderFloat("step", &step, 0.001, 1.0);
+				//ImGui::SliderFloat("ka", &ka, 0.0f, 1.0f);
+				//ImGui::SliderFloat("kd", &kd, 0.0f, 1.0f);
+				//ImGui::SliderFloat("ks", &ks, 0.0f, 1.0f);
+				//ImGui::SliderFloat("shininess", &shininess, 0.0f, 50.f);
+
+				//ImGui::Text("Current Level of Details: %d", currentLod);
+				//ImGui::Text("Total traced blocks per frame:", totalTracedBlocks);
+				ImGui::End();
 
 
 		}
@@ -175,7 +184,7 @@ namespace ysl
 			currentLod = lod;
 
 			const auto s = aggregates[currentLod]->OriginalDataSize();
-			const auto worldMatrix = Scale(ysl::Vector3f(1,1,6));
+			const auto worldMatrix = Scale(ysl::Vector3f(1,1,1));
 
 			glClear(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
@@ -342,14 +351,14 @@ namespace ysl
 		int LargeVolumeRayCaster::CalcLOD()const
 		{
 			const auto distance = (camera.position() - Point3f(0, 0, 0)).Length()*0.5;
-			auto lod = std::sqrt(distance);
+			auto lod = 1.5*std::sqrt(distance);
 			if (lod >= lodCount)lod = lodCount - 1;
 			return lod;
 		}
 
 		void LargeVolumeRayCaster::InitializeLODs(const std::vector<std::string> fileNames)
 		{
-			Size3 blockSize[] = { {10,10,10},{4,4,4},{3,3,3},{1,1,1} };
+			Size3 blockSize[] = { {12,12,12},{8,8,8},{4,4,4},{2,2,2} };
 			for (auto i = 0; i < fileNames.size() && i < 4; i++)
 			{
 				aggregates.push_back(std::make_shared<LODAggregate>(fileNames[i], blockSize[0]));
@@ -472,6 +481,10 @@ namespace ysl
 
 		void LargeVolumeRayCaster::InitializeResource()
 		{
+
+
+
+
 			InitializeShaders();
 			InitializeProxyGeometry();
 

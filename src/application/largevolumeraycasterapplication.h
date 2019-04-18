@@ -35,6 +35,7 @@ namespace ysl
 			void MousePressEvent(MouseEvent* event) override;
 			void MouseMoveEvent(MouseEvent* event) override;
 			void MouseReleaseEvent(MouseEvent* e) override;
+			void MouseWheelEvent(WheelEvent* e) override;
 			void WindowResizeEvent(ResizeEvent* event) override;
 			void InitializeOpenGLResources() override;
 			void DrawImGui() override;
@@ -71,6 +72,8 @@ namespace ysl
 			float ks;
 			float kd;
 			float shininess;
+
+			int totalTracedBlocks;
 
 			//static constexpr std::size_t missedBlockCapacity = 5000 * sizeof(unsigned int);
 

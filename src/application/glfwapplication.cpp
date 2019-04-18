@@ -86,6 +86,14 @@ namespace ysl
 			app->WindowResizeEvent(&e);
 		}
 
+		void glfwMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+		{
+			const auto app = App(GLFWApplication);
+			assert(app->window == window);	// Check if the context receiving the event is current context
+			WheelEvent e(xoffset, yoffset);
+			app->MouseWheelEvent(&e);
+		}
+
 		GLFWApplication::~GLFWApplication()
 		{
 			DestroyOpenGLContext();
@@ -163,6 +171,7 @@ namespace ysl
 			glfwSetWindowSizeCallback(window, glfwWindowSizeCallback);
 			glfwSetCursorPosCallback(window,glfwCursorPosCallback);
 			glfwSetMouseButtonCallback(window, glfwMouseButtonCallback);
+			glfwSetScrollCallback(window, glfwMouseScrollCallback);
 
 		}
 		void GLFWApplication::DestroyOpenGLContext()
@@ -191,6 +200,10 @@ namespace ysl
 			(void)event;
 		}
 
+		void GLFWApplication::MouseWheelEvent(WheelEvent* e)
+		{
+			(void)e;
+		}
 	}
 	
 }

@@ -95,6 +95,7 @@ namespace ysl
 
 	const unsigned char* CPUVolumeDataCache::ReadBlockDataFromCPUCache(int blockId)
 	{
+
 		const auto it = m_blockIdInCache.find(blockId);
 		if (it == m_blockIdInCache.end())
 		{
@@ -120,9 +121,6 @@ namespace ysl
 			m_lruList.splice(m_lruList.begin(), m_lruList, it->second);			// move the node that it->second points to the head.
 			return m_volumeCache->BlockData(it->second->blockCacheIndex);
 		}
-		return nullptr;
-
-		return lvdReader.ReadBlock(blockId);
 	}
 
 }
