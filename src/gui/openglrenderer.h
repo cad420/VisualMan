@@ -2,7 +2,6 @@
 #ifndef _OPENGLRENDERER_H_
 #define _OPENGLRENDERER_H_
 
-#include "../volume/virtualvolumehierachy.h"
 #include "../cameras/camera.h"
 #include "../opengl/shader.h"
 #include "../opengl/framebuffer.h"

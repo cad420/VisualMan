@@ -137,13 +137,14 @@ int main()
 
 	//std::unique_ptr<unsigned char> buf(new unsigned char[x*y*z]);
 
-	std::shared_ptr<ysl::AbstrRawIO> rm(new ysl::WindowsMappingRawIO(inFileName, ysl::Size3(x,y,z), 1));
+	std::shared_ptr<ysl::AbstrRawIO> rm(new ysl::WindowsMappingRawIO(inFileName, x*y*z, ysl::WindowsMappingRawIO::FileAccess::Read,ysl::WindowsMappingRawIO::MapAccess::ReadOnly));
 	const auto ptr = rm->FileMemPointer(0, x*y*z);
 	if(!ptr)
 	{
 		std::cout << "File mapping failed\n";
 		return 0;
 	}
+
 	ysl::Sampler3D<unsigned char> sampler(reinterpret_cast<unsigned char*>(ptr), { x,y,z });
 
 	//ysl::RawReader reader(inFileName, {x,y,z},1);
@@ -158,10 +159,9 @@ int main()
 //#pragma omp parallel for
 	for(int zz = 0 ;zz < sampleSize.z;zz+=sliceStep)
 	{
-
 		std::size_t actualSlice;
-
 		if (zz + sliceStep >= sampleSize.z) actualSlice = sampleSize.z - zz;
+
 		else actualSlice = sliceStep;
 
 		const auto actualBytes = actualSlice * sampleSize.x * sampleSize.y;

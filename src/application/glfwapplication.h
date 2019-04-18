@@ -36,6 +36,7 @@ namespace ysl
 			void MouseReleaseEvent(MouseEvent* e) override;
 			void MouseMoveEvent(MouseEvent* e) override;
 			void WindowResizeEvent(ResizeEvent* event) override;
+			void MouseWheelEvent(WheelEvent* e) override;
 
 			GLFWwindow * window;
 			int width;
@@ -48,6 +49,7 @@ namespace ysl
 			friend void glfwCursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 			friend void glfwMouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 			friend void glfwWindowSizeCallback(GLFWwindow * window, int width, int height);
+			friend void glfwMouseScrollCallback(GLFWwindow * window, double xoffset, double yoffset);
 		};
 
 	}

@@ -26,7 +26,12 @@ namespace ysl
 					for (auto x = 0; x < m_nx; x++)
 						(*this)(x, y) = d[x + y * m_nx];
 		}
-		constexpr size_t BlockSize()const { return 1 << nLogBlockSize; }
+
+		constexpr size_t BlockSize()const
+		{
+			return 1 << nLogBlockSize;
+		}
+
 		int Width()const
 		{
 			return m_nx;
@@ -35,6 +40,7 @@ namespace ysl
 		{
 			return  m_ny;
 		}
+
 		/**
 		 * \brief  Returns the multiple of BlockSize()
 		 */
@@ -57,6 +63,7 @@ namespace ysl
 		{
 			return const_cast<T&>(static_cast<const Block2DArray&>(*this)(x, y));
 		}
+
 		const T & operator()(int x, int y)const
 		{
 			const auto xBlock = Block(x), yBlock = Block(y);
@@ -80,6 +87,7 @@ namespace ysl
 					m_data[i].~T();
 			FreeAligned(m_data);
 		}
+
 	};
 
 	template <typename T, int nLogBlockSize>
@@ -98,12 +106,15 @@ namespace ysl
 			m_nyBlocks(RoundUp(m_ny) >> nLogBlockSize),
 			m_nzBlocks(RoundUp(m_nz) >> nLogBlockSize),
 			m_valid(true)
-		{}
+		{
+		}
+
 
 	public:
 		Block3DArray(int x, int y, int z, const T * linearArray) :Block3DArray(x, y, z)
 		{
 			const auto nAlloc = RoundUp(m_nx) * RoundUp(m_ny) * RoundUp(m_nz);
+
 			m_data = AllocAligned<T>(nAlloc);
 
 			if (m_data == nullptr)
@@ -112,14 +123,16 @@ namespace ysl
 				return;
 			}
 
-			//for (auto i = 0; i < nAlloc; i++) new (&m_data[i])T();
+
 			if (linearArray)
 			{
+
 #pragma omp parallel for
 				for (auto z = 0; z < m_nz; z++)
 					for (auto y = 0; y < m_ny; y++)
 						for (auto x = 0; x < m_nx; x++)
 							(*this)(x, y, z) = linearArray[x + y * m_nx + z * m_nx*m_ny];
+
 			}
 
 		}
@@ -148,16 +161,19 @@ namespace ysl
 		}
 
 		const T * Data()const { return m_data; }
+
 		T * Data() { return m_data; }
 
 		int Width()const
 		{
 			return m_nx;
 		}
+
 		int Height()const
 		{
 			return m_ny;
 		}
+
 		int Depth()const
 		{
 			return m_nz;
@@ -200,6 +216,7 @@ namespace ysl
 		{
 			return const_cast<T&>(static_cast<const Block3DArray&>(*this)(x, y, z));
 		}
+
 		const T & operator()(int x, int y, int z)const
 		{
 			const auto xBlock = Block(x), yBlock = Block(y), zBlock = Block(z);

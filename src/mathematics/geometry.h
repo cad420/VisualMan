@@ -538,14 +538,12 @@ namespace ysl
 
 	};
 
-
 	template<typename T>
 	std::ostream & operator<<(std::ostream & os, const Vector3<T> & v)
 	{
 		os << "[" << v.x << "," << v.y << "," << v.z << "]";
 		return os;
 	}
-
 
 	template<typename T>
 	constexpr Vector3<T> operator*(Float s, const Vector3<T> & v)
@@ -557,8 +555,6 @@ namespace ysl
 	constexpr Vector3<T> Abs(const Vector3<T> & v) {
 		return Vector3<T>(std::abs(v.x()), std::abs(v.y()), std::abs(v.z()));
 	}
-
-
 	/*
 	* Point3D
 	*/
@@ -742,8 +738,8 @@ namespace ysl
 
 	};
 
-	template<typename T, typename U>
-	Point3<T> operator*(const U & s, const Point3<T> & p)
+	template<typename T>
+	Point3<T> operator*(const Float & s, const Point3<T> & p)
 	{
 		return p * s;
 	}

@@ -97,6 +97,7 @@ aux_source_directory("src/cameras" CAM_SRC_LIST)
 aux_source_directory("src/opengl" OPENGL_SRC_LIST)
 aux_source_directory("src/gui" MYGUI_SRC_LIST)
 aux_source_directory("lib/3rdparty" 3RDPARTY_SRC_LIST)
+aux_source_directory("src/opengl/abstrgpuobject" ABSTRGPUOBJ_SRC_LIST)
 
 
 set(GL3W_LIST "lib/gl3w/GL/gl3w.c")
@@ -194,7 +195,10 @@ ${OPENGL_SRC_LIST}
 ${UTILS_SRC_LIST} 
 ${CORE_SRC_LIST}
 ${SHAPE_SRC_LIST}
-${APP_SRC_LIST})
+${APP_SRC_LIST}
+${ABSTRGPUOBJ_SRC_LIST} "src/opengl/lodaggregate.cpp")
+
+
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
