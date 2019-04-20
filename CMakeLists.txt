@@ -146,6 +146,9 @@ ${RENDER_SRC_LIST} src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h
 target_link_libraries(ApplicationTest glfw ${OPENGL_LIBRARIES})
 
 
+add_executable("test" "test/test.cpp" ${UTILS_SRC_LIST})
+
+
 #aux_source_directory("src/downsample" DOWNSAMPLE_SRC_LIST)
 
 #FIND_PACKAGE(VTK)

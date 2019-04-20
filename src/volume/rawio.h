@@ -3,6 +3,7 @@
 #include "../mathematics/geometry.h"
 #include <unordered_map>
 #include <unordered_set>
+#include "reflection.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -17,7 +18,7 @@
 namespace ysl
 {
 
-	class AbstrRawIO
+	class AbstrRawIO:public Reflectable
 	{
 	protected:
 		std::string fileName;
@@ -64,7 +65,6 @@ namespace ysl
 		~WindowsMappingRawIO();
 	};
 #endif
-
 
 #ifdef __linux__
 

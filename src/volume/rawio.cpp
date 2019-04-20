@@ -14,7 +14,6 @@ namespace ysl
 	{
 
 	}
-
 	
 
 #ifdef _WIN32

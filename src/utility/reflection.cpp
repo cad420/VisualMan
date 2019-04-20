@@ -1,49 +1,65 @@
 
 #include "reflection.h"
+#include <iostream>
+#include <string>
+#include <unordered_map>
 
 namespace ysl{
 
-    static std::unique_ptr<std::map<std::string,ClassInfo>> classInfoMap;
+	static std::map<std::string, ClassInfo>* classInfoMap = nullptr;
 
     bool Register(const ClassInfo & ci)
     {
+		std::cout << classInfoMap << std::endl;
         if(!classInfoMap)
-            classInfoMap = std::make_unique<std::map<std::string,ClassInfo>>();
-        if(classInfoMap->find(ci.className) == classInfoMap->end()){
-            (*classInfoMap)[ci.className] = ci;
+        {
+            classInfoMap = new std::map<std::string,ClassInfo>();
+			std::cout << classInfoMap << std::endl;
+			std::cout << "Create Map\n";
         }
+		if (classInfoMap->find(ci.className) == classInfoMap->end())
+		{
+			auto p = classInfoMap->insert({ci.className,ci});
+        }
+		return true;
     }
 
-    IMPLEMENT_CLASS(Reflectable);
+	int RegistedCount()
+	{
+		return classInfoMap->size();
+	}
+
+	IMPLEMENT_CLASS(Reflectable);
 
 
+	ClassInfo::ClassInfo(const std::string & className, Constructor constructor):
+	className(className),
+	constructor(constructor)
+	{
+		Register(*this);
+	}
 
-    std::size_t CountedObject::objectNum = 0;
+	Reflectable* ClassInfo::CreateObject() const
+	{
+		return constructor ? constructor() : nullptr;
+	}
 
-    void CountedObject::init()
-    {
-        objectNum++;
-    }
+	Reflectable::Reflectable()
+	{
+		
+	}
 
-    void CountedObject::~CountedObject()
-    {
-        objectNum--;
-    }
+	Reflectable::~Reflectable()
+	{
+		
+	}
 
-    void CountedObject::CountedObject()
-    {
-        init();
-    }
-
-    void CountedObject::CountedObject(const CountedObject &obj)
-    {
-        init();
-    }
-
-    std::size_t CountedObject::ObjectCount() const
-    {
-        return objectNum;
-    }
-
-
+	Reflectable* Reflectable::CreateObject(const std::string name)
+	{
+		// statically link internal class
+		auto it = classInfoMap->find(name);
+		if (it != classInfoMap->end())
+			return it->second.CreateObject();
+		return nullptr;
+	}
 }

@@ -1,0 +1,57 @@
+
+#ifndef _COUNTEDOBJECT_H_
+#define _COUNTEDOBJECT_H_
+
+
+namespace ysl
+{
+
+
+	template <typename ClassName>
+	class CountedObject {
+	public:
+		int ObjectCount()const;
+		~CountedObject();
+	protected:
+		CountedObject();
+		CountedObject(const CountedObject & obj);
+	private:
+		static int objectNum;
+		void init();
+	};
+
+	template<typename ClassName>
+	int CountedObject<ClassName>::objectNum = 0;
+
+	template <typename ClassName>
+	int CountedObject<ClassName>::ObjectCount() const
+	{
+		return objectNum;
+	}
+
+	template <typename ClassName>
+	CountedObject<ClassName>::~CountedObject()
+	{
+		objectNum--;
+	}
+
+	template <typename ClassName>
+	CountedObject<ClassName>::CountedObject()
+	{
+		init();
+	}
+
+	template <typename ClassName>
+	CountedObject<ClassName>::CountedObject(const CountedObject& obj)
+	{
+		init();
+	}
+
+	template <typename ClassName>
+	void CountedObject<ClassName>::init()
+	{
+		objectNum++;
+	}
+}
+
+#endif
