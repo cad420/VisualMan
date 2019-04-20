@@ -20,14 +20,11 @@ namespace ysl{
         }
 		return true;
     }
-
 	int RegistedCount()
 	{
 		return classInfoMap->size();
 	}
-
 	IMPLEMENT_CLASS(Reflectable,"reflectable");
-
 
 	ClassInfo::ClassInfo(const std::string & className, Constructor constructor):
 	className(className),
