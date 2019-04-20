@@ -15,15 +15,15 @@
 #include "interpulator.h"
 
 
-struct LVDFileHeader
-{
-	uint32_t magicNumber;	//  4
-	uint32_t vSize[3];		//	12
-	uint32_t oSize[3];		//  12
-	uint32_t repeat;		//  4
-	uint32_t logBlockSize;	//  4
-	char reserved[28];		// 28	 == 64bytes in total
-};
+//struct LVDFileHeader
+//{
+//	uint32_t magicNumber;	//  4
+//	uint32_t vSize[3];		//	12
+//	uint32_t oSize[3];		//  12
+//	uint32_t repeat;		//  4
+//	uint32_t logBlockSize;	//  4
+//	char reserved[28];		// 28	 == 64bytes in total
+//};
 
 //#define WRITE_SINGLE_BLOCK
 

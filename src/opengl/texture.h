@@ -4,7 +4,7 @@
 #include "../../lib/gl3w/GL/glcorearb.h"
 #include "transformation.h"
 #include "openglcontext.h"
-#include "../volume/cachepolicy.h"
+#include "../io/cachepolicy.h"
 
 //#include "openglutils.h"
 

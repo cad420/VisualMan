@@ -72,7 +72,7 @@ file(GLOB CAMERAS_HEADERS "src/cameras/*.h")
 file(GLOB MATH_HEADERS "src/mathematics/*.h")
 file(GLOB MEMORY_HEADERS "src/memory/*.h")
 file(GLOB UTILS_HEADERS "src/utility/*.h")
-file(GLOB VOLUME_HEADERS "src/volume/*.h")
+file(GLOB VOLUME_HEADERS "src/io/*.h")
 
 
 message(STATUS "PROJECT_HEADERS:${PROJECT_HEADERS}")
@@ -86,7 +86,7 @@ message(STATUS ${PROJECT_HEADERS})
 aux_source_directory("src" SRC_LIST)
 aux_source_directory("imgui" GUI_SRC_LIST)
 aux_source_directory("src/memory" MEM_SRC_LIST)
-aux_source_directory("src/volume" VOLUME_SRC_LIST)
+aux_source_directory("src/io" IO_SRC_LIST)
 aux_source_directory("src/core" CORE_SRC_LIST)
 aux_source_directory("src/mathematics" MATH_SRC_LIST)
 aux_source_directory("src/shape" SHAPE_SRC_LIST)
@@ -120,7 +120,7 @@ file(GLOB TEST_HEADERS "test/*.h")
 #${3RDPARTY_SRC_LIST}
 #${CORE_SRC_LIST} 
 #${MEM_SRC_LIST} 
-#${VOLUME_SRC_LIST} 
+#${IO_SRC_LIST} 
 #${UTILS_SRC_LIST}
 #${MATH_SRC_LIST}
 #src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h)
@@ -135,7 +135,7 @@ ${CORE_SRC_LIST}
 ${UTILS_SRC_LIST}
 ${MYGUI_SRC_LIST} 
 ${GUI_SRC_LIST}
-${VOLUME_SRC_LIST} 
+${IO_SRC_LIST} 
 ${MEM_SRC_LIST} 
 ${MATH_SRC_LIST}
 ${GL3W_LIST}
@@ -167,17 +167,17 @@ add_executable("lvdconverter"
 "tools/lvdconverter/lvdconverter" 
 ${CORE_SRC_LIST} 
 ${MEM_SRC_LIST} 
-${VOLUME_SRC_LIST} 
+${IO_SRC_LIST} 
 ${UTILS_SRC_LIST}
 ${MATH_SRC_LIST}
 )
 
 add_executable("downsample" 
 "tools/downsample/downsample"
-${VOLUME_SRC_LIST} ${MEM_SRC_LIST} "src/volume/rawio.cpp")
+${IO_SRC_LIST} ${MEM_SRC_LIST} "src/io/rawio.cpp")
 #target_link_libraries(downsample)
 
-add_executable("printvolume" "test/printvolume.cpp" ${VOLUME_SRC_LIST} ${MEM_SRC_LIST})
+add_executable("printvolume" "test/printvolume.cpp" ${IO_SRC_LIST} ${MEM_SRC_LIST})
 #---------------------------------------------------
 # MRE Module
 #---------------------------------------------------
@@ -190,7 +190,7 @@ ${SRC_LIST}
 ${GL3W_LIST} 
 ${GUI_SRC_LIST} 
 ${MYGUI_SRC_LIST} 
-${VOLUME_SRC_LIST} 
+${IO_SRC_LIST} 
 ${MEM_SRC_LIST} 
 ${CAM_SRC_LIST} 
 ${MATH_SRC_LIST}

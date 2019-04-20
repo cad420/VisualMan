@@ -20,7 +20,7 @@ namespace ysl
 		LVDHeader header;
 		//std::shared_ptr<AbstrRawIO> lvdIO;
 
-		AbstrRawIO* lvdIO;
+		AbstraFileMap* lvdIO;
 		unsigned char * lvdPtr;
 
 		ysl::Size3 vSize;

@@ -1,6 +1,6 @@
 #include "lodaggregate.h"
 
-#include "../volume/largevolumecache.h"
+#include "../io/largevolumecache.h"
 #include "gpucachefaulthandler.h"
 #include "gpuvolumedatacache.h"
 #include "gpucacheblockmanager.h"

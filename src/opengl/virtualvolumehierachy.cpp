@@ -1,7 +1,7 @@
 
 #include "virtualvolumehierachy.h"
 #include "../application/largevolumeraycasterapplication.h"
-#include "../volume/largevolumecache.h"
+#include "../io/largevolumecache.h"
 #include "openglutils.h"
 
 namespace ysl

@@ -18,24 +18,24 @@
 namespace ysl
 {
 
-	class AbstrRawIO:public Reflectable
+	class AbstraFileMap:public Reflectable
 	{
 	protected:
 		std::string fileName;
 		std::size_t fileSize;
 		int flags;
 	public:
-		AbstrRawIO(const std::string & fileName, std::size_t fileSize,int flags);
+		AbstraFileMap(const std::string & fileName, std::size_t fileSize,int flags);
 		virtual unsigned char* FileMemPointer(unsigned long long offset, std::size_t size) = 0;
 		virtual void DestroyFileMemPointer(unsigned char* addr) = 0;
 		virtual bool WriteCommit() = 0;
 		virtual bool Close()=0;
-		virtual ~AbstrRawIO() {}
+		virtual ~AbstraFileMap() {}
 	};
 
 #ifdef _WIN32
 
-	class WindowsMappingRawIO :public AbstrRawIO
+	class WindowsFileMapping :public AbstraFileMap
 	{
 		HANDLE f;
 		HANDLE mapping;
@@ -57,18 +57,18 @@ namespace ysl
 			ReadWrite = PAGE_READWRITE
 		};
 	public:
-		WindowsMappingRawIO(const std::string & fileName, std::size_t fileSize,int FileAccessFlags, int MapAccessFlags);
+		WindowsFileMapping(const std::string & fileName, std::size_t fileSize,int FileAccessFlags, int MapAccessFlags);
 		unsigned char* FileMemPointer(unsigned long long offset, std::size_t size) override;
 		void DestroyFileMemPointer(unsigned char* addr) override;
 		bool WriteCommit() override;
 		bool Close() override;
-		~WindowsMappingRawIO();
+		~WindowsFileMapping();
 	};
 #endif
 
 #ifdef __linux__
 
-class LinuxMappingRawIO:public AbstrRawIO{
+class LinuxMappingRawIO:public AbstraFileMap{
 	public:
 	LinuxMappingRawIO(const std::string & fileName,std::size_t fileSize);
 	unsigned char * FileMemPointer(unsigned long long offset,std::size_t size)override;

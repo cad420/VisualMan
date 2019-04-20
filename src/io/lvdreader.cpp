@@ -85,9 +85,9 @@ namespace ysl
 		// I don't konw why smart pointer can not be applied here
 
 
-		lvdIO = (new WindowsMappingRawIO(fileName,bytes,
-			WindowsMappingRawIO::FileAccess::Read,
-			WindowsMappingRawIO::MapAccess::ReadOnly ));
+		lvdIO = (new WindowsFileMapping(fileName,bytes,
+			WindowsFileMapping::FileAccess::Read,
+			WindowsFileMapping::MapAccess::ReadOnly ));
 
 		lvdPtr = lvdIO->FileMemPointer(0, bytes);
 		if (!lvdPtr)

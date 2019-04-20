@@ -10,14 +10,14 @@
 
 namespace ysl
 {
-	AbstrRawIO::AbstrRawIO(const std::string& fileName, std::size_t fileSize,int flags) :fileName(fileName),fileSize(fileSize),flags(flags)
+	AbstraFileMap::AbstraFileMap(const std::string& fileName, std::size_t fileSize,int flags) :fileName(fileName),fileSize(fileSize),flags(flags)
 	{
 
 	}
 	
 
 #ifdef _WIN32
-	void WindowsMappingRawIO::PrintLastErrorMsg()
+	void WindowsFileMapping::PrintLastErrorMsg()
 	{
 		DWORD dw = GetLastError();
 		char msg[512];
@@ -32,11 +32,11 @@ namespace ysl
 		printf("[%d]%s\n",dw, msg);
 	}
 
-	WindowsMappingRawIO::WindowsMappingRawIO(const std::string & fileName,
+	WindowsFileMapping::WindowsFileMapping(const std::string & fileName,
 		std::size_t fileSize,
 		int FileAccessFlags,
 		int MapAccessFlags) :
-	AbstrRawIO(fileName,fileSize,flags),
+	AbstraFileMap(fileName,fileSize,flags),
 	addr(nullptr),
 	fileAccess(FileAccessFlags),
 	mapAccess(MapAccessFlags)
@@ -97,7 +97,7 @@ namespace ysl
 
 	}
 
-	unsigned char* WindowsMappingRawIO::FileMemPointer(unsigned long long offset, std::size_t size)
+	unsigned char* WindowsFileMapping::FileMemPointer(unsigned long long offset, std::size_t size)
 	{
 
 		LARGE_INTEGER os;
@@ -126,29 +126,29 @@ namespace ysl
 		return addr;
 	}
 
-	void WindowsMappingRawIO::DestroyFileMemPointer(unsigned char* addr)
+	void WindowsFileMapping::DestroyFileMemPointer(unsigned char* addr)
 	{
 		mappedPointers.erase(addr);
 		UnmapViewOfFile((LPVOID)addr);
 	}
 
-	bool WindowsMappingRawIO::WriteCommit()
+	bool WindowsFileMapping::WriteCommit()
 	{
 		return true;
 	}
 
-	bool WindowsMappingRawIO::Close()
+	bool WindowsFileMapping::Close()
 	{
 		for (auto addr : mappedPointers)
-			WindowsMappingRawIO::DestroyFileMemPointer(addr);
+			WindowsFileMapping::DestroyFileMemPointer(addr);
 		CloseHandle(f);
 		CloseHandle(mapping);
 		return true;
 	}
 
-	WindowsMappingRawIO::~WindowsMappingRawIO()
+	WindowsFileMapping::~WindowsFileMapping()
 	{
-		WindowsMappingRawIO::Close();
+		WindowsFileMapping::Close();
 	}
 #endif /*_WIN32*/
 }

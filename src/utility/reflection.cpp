@@ -14,8 +14,6 @@ namespace ysl{
         if(!classInfoMap)
         {
             classInfoMap = new std::map<std::string,ClassInfo>();
-			std::cout << classInfoMap << std::endl;
-			std::cout << "Create Map\n";
         }
 		if (classInfoMap->find(ci.className) == classInfoMap->end())
 		{
