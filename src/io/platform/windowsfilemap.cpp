@@ -131,7 +131,6 @@ namespace ysl
 			WindowsFileMapping::DestroyFileMemPointer(addr);
 		CloseHandle(f);
 		CloseHandle(mapping);
-		std::cout << "Mapping Close\n";
 		return true;
 	}
 
