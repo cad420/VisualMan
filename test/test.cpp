@@ -1,21 +1,11 @@
 #include <iostream>
 #include <string>
-#include "../src/volume/volume_utils.h"
 #include "../src/utility/cmdline.h"
-#include "../src/volume/volume.h"
-//#include "abcflowgen.h"
 #include <atomic>
 #include <thread>
-//#include "timer.h"
-//#include "../lib/3rdparty/rapidjson/document.h"
-#include "../src/volume/rawreader.h"
-#include "../src/volume/lvdconverter.h"
-
-
+#include "../src/io/lvdconverter.h"
 #include <iterator>
-#include <vector>
 #include "../src/utility/reflection.h"
-
 
 //int LVDTester()
 //{
@@ -217,7 +207,7 @@ int jsonTest()
 
 namespace ysl
 {
-	class A :public ysl::Reflectable
+	class A :public Reflectable
 	{
 		DECLARE_CLASS(A)
 	public:
@@ -253,13 +243,13 @@ namespace ysl
 		}
 	};
 
-	IMPLEMENT_CLASS(A)
+	IMPLEMENT_CLASS(A,"a_")
 }
 
 int main(int argc, char *argv[])
 {
 
-	auto obj = ysl::Reflectable::CreateObject("A");
+	auto obj = ysl::Reflectable::CreateObject("a_");
 	if(obj)
 	{
 		std::cout << "obj is not null\n";

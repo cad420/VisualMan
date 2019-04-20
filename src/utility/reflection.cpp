@@ -10,7 +10,6 @@ namespace ysl{
 
     bool Register(const ClassInfo & ci)
     {
-		std::cout << classInfoMap << std::endl;
         if(!classInfoMap)
         {
             classInfoMap = new std::map<std::string,ClassInfo>();
