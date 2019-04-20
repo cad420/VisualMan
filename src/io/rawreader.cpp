@@ -4,6 +4,7 @@
 
 #include <cstring> // memcpy
 
+#include "platform/windowsfilemap.h"
 
 
 namespace ysl
@@ -21,7 +22,7 @@ namespace ysl
 		const auto rawBytes = dimensions.x * dimensions.y * dimensions.z * voxelSize;
 			
 #ifdef _WIN32
-		io.reset(new WindowsMappingRawIO(fileName,rawBytes,WindowsMappingRawIO::Read,WindowsMappingRawIO::MapAccess::ReadOnly));
+		io.reset(new WindowsFileMapping(fileName,rawBytes,WindowsFileMapping::Read,WindowsFileMapping::MapAccess::ReadOnly));
 		ptr = reinterpret_cast<unsigned char*>(io->FileMemPointer(0, rawBytes));
 #elif
 		static_assert(false);

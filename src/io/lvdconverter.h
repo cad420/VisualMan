@@ -50,11 +50,11 @@ namespace ysl
 		ysl::Vector3i m_blockDimension;
 
 		//std::unique_ptr<RawType[]> m_rawBuf;
-		std::shared_ptr<ysl::AbstrRawIO> rawIO;
+		std::shared_ptr<ysl::AbstraFileMap> rawIO;
 		unsigned char * rawPtr;
 
 		//std::unique_ptr<RawType[]> m_lvdBuf;
-		std::shared_ptr<ysl::AbstrRawIO> lvdIO;
+		std::shared_ptr<ysl::AbstraFileMap> lvdIO;
 		unsigned char * lvdPtr;
 
 		const int m_repeat;
@@ -166,10 +166,10 @@ namespace ysl
 		}
 
 #ifdef _WIN32
-		rawIO = std::make_shared<WindowsMappingRawIO>(fileName,
+		rawIO = std::make_shared<WindowsFileMapping>(fileName,
 			rawBytes,
-			WindowsMappingRawIO::Read, 
-			WindowsMappingRawIO::ReadOnly);
+			WindowsFileMapping::Read, 
+			WindowsFileMapping::ReadOnly);
 
 		rawPtr = rawIO->FileMemPointer(0, rawBytes);
 		if(!rawPtr)
@@ -178,9 +178,9 @@ namespace ysl
 		}
 		const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
 
-		lvdIO = std::make_shared<WindowsMappingRawIO>(outFileName,
-			lvdBytes+LVD_HEADER_SIZE,WindowsMappingRawIO::FileAccess::Write | WindowsMappingRawIO::FileAccess::Read,
-			WindowsMappingRawIO::ReadWrite);
+		lvdIO = std::make_shared<WindowsFileMapping>(outFileName,
+			lvdBytes+LVD_HEADER_SIZE,WindowsFileMapping::FileAccess::Write | WindowsFileMapping::FileAccess::Read,
+			WindowsFileMapping::ReadWrite);
 		lvdPtr = lvdIO->FileMemPointer(0, lvdBytes + LVD_HEADER_SIZE);
 
 		if (!lvdPtr)

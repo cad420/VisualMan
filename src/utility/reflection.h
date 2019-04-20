@@ -15,8 +15,8 @@
 * We can make use of the feature that any static variable will be constructed before main()
 */
 
-#define IMPLEMENT_CLASS(className)																		\
-        ClassInfo className::class_info_(#className,&className::CreateObject);							\
+#define IMPLEMENT_CLASS(className,externalName)																		\
+        ClassInfo className::class_info_(externalName,&className::CreateObject);							\
         Reflectable * className::CreateObject()															\
 		{																								\
 			return new className;																		\

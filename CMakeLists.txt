@@ -65,6 +65,7 @@ include_directories("src/utility")
 include_directories("src/opengl")
 include_directories("lib/3rdparty")
 
+
 # Set headers neede by target
 #file(GLOB PROJECT_HEADERS "gui/*.h")
 file(GLOB CORE_HEADERS "src/core/*.h")
@@ -87,6 +88,7 @@ aux_source_directory("src" SRC_LIST)
 aux_source_directory("imgui" GUI_SRC_LIST)
 aux_source_directory("src/memory" MEM_SRC_LIST)
 aux_source_directory("src/io" IO_SRC_LIST)
+aux_source_directory("src/io/platform" IO_PLATFORM_SRC_LIST)
 aux_source_directory("src/core" CORE_SRC_LIST)
 aux_source_directory("src/mathematics" MATH_SRC_LIST)
 aux_source_directory("src/shape" SHAPE_SRC_LIST)
@@ -199,7 +201,7 @@ ${UTILS_SRC_LIST}
 ${CORE_SRC_LIST}
 ${SHAPE_SRC_LIST}
 ${APP_SRC_LIST}
-${ABSTRGPUOBJ_SRC_LIST} "src/opengl/lodaggregate.cpp")
+${ABSTRGPUOBJ_SRC_LIST} ${IO_PLATFORM_SRC_LIST} "src/opengl/lodaggregate.cpp")
 
 
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})

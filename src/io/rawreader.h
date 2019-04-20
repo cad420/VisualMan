@@ -18,7 +18,7 @@ namespace ysl
 		uint64_t offset;
 		//std::ifstream file;
 
-		std::shared_ptr<AbstrRawIO> io;
+		std::shared_ptr<AbstraFileMap> io;
 		unsigned char * ptr;
 		uint64_t seekAmt;
 		

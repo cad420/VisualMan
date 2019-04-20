@@ -1,11 +1,12 @@
 
 #include "lvdreader.h"
 #include <iostream>
+#include "platform/windowsfilemap.h"
 
 namespace ysl
 {
 
-	LVDReader::LVDReader(const std::string& fileName) : validFlag(true)
+	LVDReader::LVDReader(const std::string& fileName) : validFlag(true),lvdIO(nullptr)
 	{
 
 		std::ifstream fileHandle;
@@ -84,15 +85,15 @@ namespace ysl
 		/// TODO:: Memeory Leak
 		// I don't konw why smart pointer can not be applied here
 
-
 		lvdIO = (new WindowsFileMapping(fileName,bytes,
 			WindowsFileMapping::FileAccess::Read,
 			WindowsFileMapping::MapAccess::ReadOnly ));
 
+
+
 		lvdPtr = lvdIO->FileMemPointer(0, bytes);
 		if (!lvdPtr)
 			throw std::runtime_error("LVDReader: bad mapping");
-
 #elif 
 		static_assert(false);
 #endif
@@ -107,11 +108,6 @@ namespace ysl
 			for (int i = 0; i < fileName.size(); i++)
 				levelOfDetails.push_back(i);
 		}
-
-
-
-
-
 	}
 
 	void LVDReader::ReadBlock(char * dest, int blockId,int lod)
@@ -131,4 +127,8 @@ namespace ysl
 		return d + blockCount * blockId;
 	}
 
+	LVDReader::~LVDReader()
+	{
+		delete lvdIO;
+	}
 }
