@@ -27,6 +27,7 @@ namespace ysl
 			void * sym = nullptr;
 			for (auto iter = repo.cbegin(); sym == nullptr && iter != repo.cend(); ++iter)
 				sym = iter->second->Symbol(name);
+			return sym;
 		}
 
 		void LibraryReposity::AddDefaultLibrary()
