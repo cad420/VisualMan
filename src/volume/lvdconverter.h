@@ -2,6 +2,8 @@
 #ifndef _LVDCONVERTER_H_
 #define _LVDCONVERTER_H_
 
+#include <cstring>
+
 #include "../mathematics/geometry.h"
 #include "../mathematics/numeric.h"
 
@@ -185,7 +187,7 @@ namespace ysl
 		{
 			throw std::runtime_error("lvd file bad mapping");
 		}
-#elif
+#else
 		static_assert(false);
 #endif
 	}

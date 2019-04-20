@@ -8,6 +8,12 @@
 #include <Windows.h>
 #endif
 
+#ifdef __linux__
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#endif
+
 namespace ysl
 {
 
@@ -63,6 +69,21 @@ namespace ysl
 
 		~WindowsMappingRawIO();
 	};
+#endif
+
+
+#ifdef __linux__
+
+class LinuxMappingRawIO:public AbstrRawIO{
+	public:
+	LinuxMappingRawIO(const std::string & fileName,std::size_t fileSize);
+	unsigned char * FileMemPointer(unsigned long long offset,std::size_t size)override;
+	void DestroyFileMemPointer(unsigned char * addr)override;
+	bool WriteCommit()override;
+	bool Close()override;
+	~LinuxMappingRawIO();
+};
+
 #endif
 
 }
