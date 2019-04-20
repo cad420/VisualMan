@@ -16,7 +16,10 @@
 
 namespace ysl
 {
+	AbstrCPUBlockCache::~AbstrCPUBlockCache()
+	{
 
+	}
 
 	void CPUVolumeDataCache::createCache()
 	{
@@ -55,11 +58,11 @@ namespace ysl
 			m_lruList.push_front(LRUListCell(i, m_blockIdInCache.end()));
 	}
 
-	CPUVolumeDataCache::CPUVolumeDataCache(const std::string& fileName) :
-		LVDReader(fileName),
-		m_valid(true)
+	CPUVolumeDataCache::CPUVolumeDataCache(const std::string& fileName,const Size3 & cacheBlockDim):AbstrBlockedVolumeDataCPUCache(cacheBlockDim),
+	m_valid(true),
+	lvdReader(fileName)
 	{
-		if (BlockSizeInLog() != nLogBlockSize)
+		if (lvdReader.BlockSizeInLog() != nLogBlockSize)
 		{
 			m_valid = false;
 			return;
@@ -69,10 +72,29 @@ namespace ysl
 		//sizeByBlock = SizeByBlock();
 	}
 
+	Size3 CPUVolumeDataCache::BlockSize()
+	{
+		const std::size_t len = lvdReader.BlockSize();
+		return Size3{ len,len,len };
+	}
+
+	int CPUVolumeDataCache::Padding()
+	{
+		return lvdReader.BoundaryRepeat();
+	}
+
+	Size3 CPUVolumeDataCache::OriginalDataSize()
+	{
+		return lvdReader.OriginalDataSize();
+	}
+
+	Size3 CPUVolumeDataCache::BlockDim()
+	{
+		return lvdReader.SizeByBlock();
+	}
+
 	const unsigned char* CPUVolumeDataCache::ReadBlockDataFromCPUCache(int blockId)
 	{
-		//assert(m_volumeCache != nullptr);
-		//std::lock_guard<std::mutex> guard(m_lock);
 
 		const auto it = m_blockIdInCache.find(blockId);
 		if (it == m_blockIdInCache.end())
@@ -90,18 +112,15 @@ namespace ysl
 			lastCell.hashIter = newItr.first;		// Mapping new 
 			auto d = (char*)m_volumeCache->BlockData(lastCell.blockCacheIndex);
 			assert(d);
-			ReadBlock(d, blockId);
+			lvdReader.ReadBlock(d, blockId);
 			//SHOW_LIST_STATE
-			//std::cout << "**" << std::endl;
 			return m_volumeCache->BlockData(lastCell.blockCacheIndex);
 		}
 		else
 		{
-			//std::cout << "$" << std::endl;
 			m_lruList.splice(m_lruList.begin(), m_lruList, it->second);			// move the node that it->second points to the head.
 			return m_volumeCache->BlockData(it->second->blockCacheIndex);
 		}
-		return nullptr;
 	}
 
 }

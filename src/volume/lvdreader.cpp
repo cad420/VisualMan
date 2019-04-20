@@ -124,4 +124,11 @@ namespace ysl
 		//fileHandle.read(dest, sizeof(char) * blockCount);
 	}
 
+	unsigned char* LVDReader::ReadBlock(int blockId, int lod)
+	{
+		const size_t blockCount = BlockDataCount();
+		const auto d = lvdPtr + LVD_HEADER_SIZE;
+		return d + blockCount * blockId;
+	}
+
 }

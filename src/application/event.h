@@ -16,9 +16,19 @@ public:
 
 	ysl::Point2i m_pos;
 	int m_buttons;
+
 	MouseEvent(const ysl::Point2i & pos, int button) :m_pos(pos), m_buttons(button) {}
 	ysl::Point2i pos()const { return m_pos; }
 	int buttons()const { return m_buttons; }
+};
+
+
+class WheelEvent:public Event
+{
+public:
+	double xoffset;
+	double yoffset;
+	WheelEvent(double xoffset,double yoffset):xoffset(xoffset),yoffset(yoffset){}
 };
 
 

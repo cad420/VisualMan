@@ -10,9 +10,9 @@ namespace ysl
 	{
 		class AbstrMemoryObject;
 
-		struct MemAddrIndex
+		struct MemoryAddress
 		{
-			
+
 		};
 
 		// 缺页策略
@@ -21,11 +21,15 @@ namespace ysl
 
 		public:
 			MemoryFaultPolicy();
-			std::vector<MemAddrIndex> Fault(const std::vector<MemAddrIndex>& missedBlockIndices);
+			std::vector<MemoryAddress> Fault(const std::vector<MemoryAddress>& missedBlockIndices);
 
 			~MemoryFaultPolicy();
 
 		};
+
+
+
+
 
 		// 缺页处理类，用来实现交换算法
 
@@ -40,37 +44,45 @@ namespace ysl
 			//std::vector<MemoryBlockIndex> UpdatePageTable(const std::vector<MemoryBlockIndex>& missedBlockIndices);
 		};
 
+		class AbstrMemoryManager;
 
-		// 内存模型基类
 		class AbstrMemoryObject
 		{
-			public:
-				AbstrMemoryObject(MemoryFaultHandler * handler);
-				virtual std::vector<MemAddrIndex> CaptureMemFault()const;
+			AbstrMemoryManager * manager;
+		public:
+			AbstrMemoryObject(MemoryFaultHandler * handler);
+			virtual std::vector<MemoryAddress> CaptureMemFault()const;
+			virtual void * Fetch(const MemoryAddress & addr);
+			AbstrMemoryManager * Manager();
+			virtual ~AbstrMemoryObject() = 0;
+			friend AbstrMemoryManager;
 		};
 
 
-		class AbstrServerMemoryObject:public AbstrMemoryObject
+		class AbstrServerMemoryObject :public AbstrMemoryObject
 		{
 			public:
 		};
 
-		class AbstrVirtualMemoryObject:public AbstrServerMemoryObject
+		class AbstrClientMemoryObject :public AbstrMemoryObject
 		{
 			public:
 		};
 
-		class AbstrClientMemoryObject:public AbstrMemoryObject
-		{
-			
-		};
-
-
-		// 一个聚合类，主要用来建立联系。
-		class AbstrVirtualMemoryManager
+		class AbstrVirtualMemoryObject :public AbstrServerMemoryObject
 		{
 		public:
-			static AbstrVirtualMemoryObject * CreateVirtualMemoryObject(AbstrClientMemoryObject * clientMem, AbstrServerMemoryObject * serverMem);;
+			virtual MemoryAddress Translate(const MemoryAddress & va);
+			void SetExplicitUpdate(bool enable);
+			void ResetFaults();
+		    std::vector<MemoryAddress> Faults()const;
+		};
+
+		class AbstrMemoryManager:public AbstrVirtualMemoryObject			// Page table
+		{
+		public:
+			AbstrMemoryManager(AbstrClientMemoryObject * clientMem, AbstrServerMemoryObject * serverMem);
+
 		};
 
 	}

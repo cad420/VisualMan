@@ -60,6 +60,8 @@ namespace ysl
 			shader = glCreateShader(GL_VERTEX_SHADER);
 		else if (type == ShaderType::Fragment)
 			shader = glCreateShader(GL_FRAGMENT_SHADER);
+		else if (type == ShaderType::Compute)
+			shader = glCreateShader(GL_COMPUTE_SHADER);
 
 		if (shader == 0)
 		{

@@ -1,23 +1,16 @@
 
-#ifdef _MSC_VER
-#pragma once
-#endif
-#include "abstrgpuobject/abstrgpucache.h"
-
-
 #ifndef _GPUPAGETABLE_H_
 #define _GPUPAGETABLE_H_
-
+#include "abstrgpuobject/abstrgpucache.h"
+//#include "../volume/largevolumecache.h"
 namespace ysl
 {
-	class GPUPageTableCache:public AbstrGPUCache
+	class GPUPageTableDataCache :public AbstrGPUCache
 	{
-		
+		const Size3 & cacheSize;
+	public:
+		GPUPageTableDataCache(const Size3 & cacheSize, void * data);
 	};
-
-
-	
-
 }
 
 #endif
