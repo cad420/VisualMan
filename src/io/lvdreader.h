@@ -16,8 +16,7 @@ namespace ysl
 	{
 		std::string fileName;
 		LVDHeader header;
-		//std::unique_ptr<AbstraFileMap> lvdIO;
-		AbstraFileMap* lvdIO;
+		//AbstraFileMap* lvdIO;
 		unsigned char * lvdPtr;
 		ysl::Size3 vSize;
 		ysl::Size3 bSize;
@@ -45,8 +44,9 @@ namespace ysl
 		void ReadBlock(char * dest, int blockId,int lod = 0);
 		unsigned char* ReadBlock(int blockId, int lod = 0);
 		~LVDReader();
+	private:
+		std::unique_ptr<AbstraFileMap> lvdIO;		// the declaration must be behind the declaration of ~LVDReader()
 	};
-
 
 	template <typename T, int nLogBlockSize>
 	std::shared_ptr<Block3DArray<T, nLogBlockSize>> LVDReader::ReadAll(int lod)

@@ -82,22 +82,15 @@ namespace ysl
 		const std::size_t bytes = std::size_t(vx) * vy*vz + LVD_HEADER_SIZE;
 
 #ifdef _WIN32
-		/// TODO:: Memeory Leak
-		// I don't konw why smart pointer can not be applied here
-
-		lvdIO = (new WindowsFileMapping(fileName,bytes,
+		lvdIO = std::make_unique<WindowsFileMapping>(fileName, bytes,
 			WindowsFileMapping::FileAccess::Read,
-			WindowsFileMapping::MapAccess::ReadOnly ));
-
-
-
+			WindowsFileMapping::MapAccess::ReadOnly);
 		lvdPtr = lvdIO->FileMemPointer(0, bytes);
 		if (!lvdPtr)
 			throw std::runtime_error("LVDReader: bad mapping");
 #elif 
 		static_assert(false);
 #endif
-
 	}
 
 	LVDReader::LVDReader(const std::vector<std::string>& fileName, const std::vector<int>& lods)
@@ -129,6 +122,6 @@ namespace ysl
 
 	LVDReader::~LVDReader()
 	{
-		delete lvdIO;
+		//delete lvdIO;
 	}
 }
