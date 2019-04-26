@@ -9,8 +9,10 @@
 
 
 //const std::string tfName = R"(D:\scidata\tf1.tfi)";
-const std::string tfName = R"(D:\\subregion.1dt)";
+//const std::string tfName = R"(D:\\subregion.1dt)";
 //const std::string tfName = R"(d:\temp.txt)";
+//const std::string tfName = R"(D:\ctl.tfi)";
+const std::string tfName = "D:\\Desktop\\tf.TF1D";
 namespace ysl
 {
 	namespace app
@@ -60,6 +62,8 @@ namespace ysl
 
 			currentLod = 0;
 
+			//float clearColor[4] = { 1,1,1,1 };
+			SetClearColor(clearColor);
 		}
 
 		void LargeVolumeRayCaster::MousePressEvent(MouseEvent* event)
@@ -150,29 +154,33 @@ namespace ysl
 		{
 			TFWidget->Draw();
 
-				ImGui::Begin("Control Panel");
-				//ImGui::Text("Page Table Size:[%d, %d, %d]", g_pageTableX, g_pageTableY, g_pageTableZ);
-				//ImGui::Text("Cache Block Count In CPU:[%d, %d, %d]", g_cacheWidth, g_cacheHeight, g_cacheDepth);
-				//ImGui::Text("Cache Block Count In GPU:[%d, %d, %d]", gpuCacheBlockSize.x, gpuCacheBlockSize.y, gpuCacheBlockSize.z);
-				//ImGui::Text("Cache Block Size:[%d]", BlockSize());
-				//ImGui::Text("Block Border:%d", g_repeat);
-				//ImGui::Text("Upload Block Count Per Frame:%d", g_uploadBlockCountPerFrame);
-				//ImGui::Text("Missing Cache Block Count Per Frame:%d", g_missingCacheCountPerFrame);
-				//ImGui::Text("Rendering pass count per frame:%d", g_renderPassPerFrame);
-				//const auto Gbs = double(g_blockBytes * g_uploadBlockCountPerFrame) / (1 << 30);
-				//const auto s = double(g_blockUploadMicroSecondsPerFrame) / 1000000;
-				//ImGui::Text("BandWidth: %f Gb/s", Gbs / s);
-				//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			const auto resolution = aggregates[currentLod]->OriginalDataSize();
 
-				//ImGui::SliderFloat("step", &step, 0.001, 1.0);
-				//ImGui::SliderFloat("ka", &ka, 0.0f, 1.0f);
-				//ImGui::SliderFloat("kd", &kd, 0.0f, 1.0f);
-				//ImGui::SliderFloat("ks", &ks, 0.0f, 1.0f);
-				//ImGui::SliderFloat("shininess", &shininess, 0.0f, 50.f);
+			ImGui::Begin("Control Panel");
 
-				//ImGui::Text("Current Level of Details: %d", currentLod);
-				//ImGui::Text("Total traced blocks per frame:", totalTracedBlocks);
-				ImGui::End();
+			//ImGui::Text("Page Table Size:[%d, %d, %d]", g_pageTableX, g_pageTableY, g_pageTableZ);
+			//ImGui::Text("Cache Block Count In CPU:[%d, %d, %d]", g_cacheWidth, g_cacheHeight, g_cacheDepth);
+			//ImGui::Text("Cache Block Count In GPU:[%d, %d, %d]", gpuCacheBlockSize.x, gpuCacheBlockSize.y, gpuCacheBlockSize.z);
+			//ImGui::Text("Cache Block Size:[%d]", BlockSize());
+			//ImGui::Text("Block Border:%d", g_repeat);
+			//ImGui::Text("Upload Block Count Per Frame:%d", g_uploadBlockCountPerFrame);
+			//ImGui::Text("Missing Cache Block Count Per Frame:%d", g_missingCacheCountPerFrame);
+			//ImGui::Text("Rendering pass count per frame:%d", g_renderPassPerFrame);
+			//const auto Gbs = double(g_blockBytes * g_uploadBlockCountPerFrame) / (1 << 30);
+			//const auto s = double(g_blockUploadMicroSecondsPerFrame) / 1000000;
+			//ImGui::Text("BandWidth: %f Gb/s", Gbs / s);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::Text("Level of Detail: %d", currentLod);
+			ImGui::Text("Data Resolution: %d x %d x %d",resolution.x,resolution.y,resolution.z);
+			//ImGui::SliderFloat("step", &step, 0.001, 1.0);
+			//ImGui::SliderFloat("ka", &ka, 0.0f, 1.0f);
+			//ImGui::SliderFloat("kd", &kd, 0.0f, 1.0f);
+			//ImGui::SliderFloat("ks", &ks, 0.0f, 1.0f);
+			//ImGui::SliderFloat("shininess", &shininess, 0.0f, 50.f);
+
+			//ImGui::Text("Current Level of Details: %d", currentLod);
+			//ImGui::Text("Total traced blocks per frame:", totalTracedBlocks);
+			ImGui::End();
 
 
 		}
@@ -185,7 +193,7 @@ namespace ysl
 			currentLod = lod;
 
 			const auto s = aggregates[currentLod]->OriginalDataSize();
-			const auto worldMatrix = Scale(ysl::Vector3f(1,1,1));
+			const auto worldMatrix = Scale(ysl::Vector3f(1, 1, 0.1));
 
 			glClear(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
@@ -233,7 +241,7 @@ namespace ysl
 
 
 
-			std::cout << "Lod:" << lod << std::endl;
+			//std::cout << "Lod:" << lod << std::endl;
 			aggregates[currentLod]->Bind(sbp);
 			rayCastingShaderProgram.bind();
 			//GL_ERROR_REPORT;
@@ -359,7 +367,7 @@ namespace ysl
 
 		void LargeVolumeRayCaster::InitializeLODs(const std::vector<std::string> fileNames)
 		{
-			Size3 blockSize[] = { {10,10,10},{5,5,5},{4,4,4},{2,2,2} };
+			Size3 blockSize[] = { {5,5,5},{5,5,5},{5,5,5},{2,2,2} };
 			for (auto i = 0; i < fileNames.size() && i < 4; i++)
 			{
 				aggregates.push_back(std::make_shared<LODAggregate>(fileNames[i], blockSize[0]));
@@ -397,7 +405,7 @@ namespace ysl
 
 			return count;
 
-		}
+	}
 #endif
 
 		void LargeVolumeRayCaster::InitializeShaders()
@@ -515,7 +523,8 @@ namespace ysl
 			//pingpongTransferManager = std::make_shared<PingPongTransferManager>(pageTableManager, cacheFaultHandler);
 			//GL_ERROR_REPORT;
 
-			InitializeLODs({ "C:\\data\\subregion_9000_10700_2_128.lvd","D:\\Desktop\\sub_992.lvd","D:\\Desktop\\sub_496.lvd" });
+			//InitializeLODs({ "C:\\data\\subregion_9000_10700_2_128.lvd","D:\\Desktop\\sub_992.lvd","D:\\Desktop\\sub_496.lvd" });
+			InitializeLODs({ "D:\\scidata\\mrc\\ctl.lvd" ,"D:\\scidata\\mrc\\ctl_1024_1024_38.lvd","D:\\scidata\\mrc\\ctl_512_512_19.lvd" });
 			lodCount = 3;
 			//SetShaderUniforms();
 		}
@@ -618,5 +627,5 @@ namespace ysl
 
 		}
 
-	}
+}
 }

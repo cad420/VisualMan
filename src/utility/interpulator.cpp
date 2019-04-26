@@ -1,6 +1,8 @@
 
 
 #include "interpulator.h"
+#include <iostream>
+
 namespace ysl
 {
 	void ColorInterpulator::read(const std::string& fileName)
@@ -28,10 +30,15 @@ namespace ysl
 			rgba1[2] = bl / 255.0f;
 			rgba1[3] = al / 255.0f;
 			rgba2[0] = rr / 255.0f;
-			rgba2[1] = br / 255.0f;
-			rgba2[2] = gr / 255.0f;
+			rgba2[1] = gr / 255.0f;
+			rgba2[2] = br / 255.0f;
 			rgba2[3] = ar / 255.0f;
-			keys.emplace_back(intensity, ysl::RGBASpectrum{ rgba1 }, ysl::RGBASpectrum{ rgba2 });
+
+			const auto s1 = ysl::RGBASpectrum{ rgba1 };
+			const auto s2 = ysl::RGBASpectrum{ rgba2 };
+
+			std::cout <<s1 << " " << s2 << std::endl;
+			keys.emplace_back(intensity,s1,s2);
 		}
 		m_valid = true;
 		fclose(fp);
@@ -77,5 +84,7 @@ namespace ysl
 		}
 		for (int x = backStart; x < dimension; ++x)
 			transferFunction[x] = RGBASpectrum{ 0.f };
+
+
 	}
 }

@@ -164,8 +164,6 @@ void main()
 	}
 
 	imageStore(entryPos,ivec2(gl_FragCoord),vec4(rayEnd ,0.0));
-	
-
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;
 	imageStore(interResult,ivec2(gl_FragCoord),vec4(color));

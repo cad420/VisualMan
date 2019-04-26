@@ -1,8 +1,9 @@
 
-#include "../volume/rawreader.h"
+#include "../io/rawreader.h"
 #include "../mathematics/numeric.h"
 #include <string>
-#include "../volume/rawio.h"
+#include "../io/platform/windowsfilemap.h"
+//#include "../io/rawio.h"
 
 namespace ysl
 {
@@ -126,26 +127,27 @@ int main()
 	std::size_t x, y, z;
 	int sx, sy, sz;
 	std::string inFileName,outFileName;
-	std::cout << "[filename(str), x(int), y(int), z(int),xfactor(int), yfactor(int),zfactor(int), ouputfilename(str)]\n";
-	std::cin >> inFileName >> x >> y >> z >> sx >> sy >> sz>>outFileName;
+	std::size_t offset;
+	std::cout << "[filename(str), offset(std::size_t),  x(int), y(int), z(int),xfactor(int), yfactor(int),zfactor(int), ouputfilename(str)]\n";
+	std::cin >> inFileName >>offset>> x >> y >> z >> sx >> sy >> sz>>outFileName;
 
 	const auto sampleSize = ysl::Size3(1.0*x / sx + 0.5, 1.0*y / sy + 0.5, 1.0*z / sz + 0.5); 
 	ysl::Vector3f step( 1.0*x / sampleSize.x,1.0*y / sampleSize.y,1.0*z / sampleSize.z );
+
 
 	std::cout << "Downsample Size:" << sampleSize << std::endl;
 	std::cout << "Step:" << step << std::endl;
 
 	//std::unique_ptr<unsigned char> buf(new unsigned char[x*y*z]);
-
-	std::shared_ptr<ysl::AbstrRawIO> rm(new ysl::WindowsMappingRawIO(inFileName, x*y*z, ysl::WindowsMappingRawIO::FileAccess::Read,ysl::WindowsMappingRawIO::MapAccess::ReadOnly));
-	const auto ptr = rm->FileMemPointer(0, x*y*z);
+	std::shared_ptr<ysl::AbstraFileMap> rm(new ysl::WindowsFileMapping(inFileName, offset+x*y*z, ysl::WindowsFileMapping::FileAccess::Read,ysl::WindowsFileMapping::MapAccess::ReadOnly));
+	const auto ptr = rm->FileMemPointer(0, x*y*z + offset);
 	if(!ptr)
 	{
 		std::cout << "File mapping failed\n";
 		return 0;
 	}
 
-	ysl::Sampler3D<unsigned char> sampler(reinterpret_cast<unsigned char*>(ptr), { x,y,z });
+	ysl::Sampler3D<unsigned char> sampler(reinterpret_cast<unsigned char*>(ptr+offset), { x,y,z });
 
 	//ysl::RawReader reader(inFileName, {x,y,z},1);
 	//std::cout << "Reading Raw Data\n";

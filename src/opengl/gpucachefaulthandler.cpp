@@ -65,6 +65,7 @@ namespace ysl
 		InitHashBuffer(capacity);
 		InitMissTableBuffer();
 		InitGPUAtomicCounter();
+
 	}
 
 	std::vector<VirtualMemoryBlockIndex> HashBasedGPUCacheFaultHandler::CaptureCacheFault()

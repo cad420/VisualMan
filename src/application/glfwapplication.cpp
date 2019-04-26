@@ -113,9 +113,9 @@ namespace ysl
 			clearColor[3] = 1.00f;
 		}
 
-		void GLFWApplication::SetClearColor(float *color[4])
+		void GLFWApplication::SetClearColor(float* color)
 		{
-			memcpy(clearColor, color, sizeof(color));
+			memcpy(clearColor, color, 4*sizeof(float));
 		}
 
 		int GLFWApplication::Exec()

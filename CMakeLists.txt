@@ -170,13 +170,17 @@ add_executable("lvdconverter"
 ${CORE_SRC_LIST} 
 ${MEM_SRC_LIST} 
 ${IO_SRC_LIST} 
+${IO_PLATFORM_SRC_LIST}
 ${UTILS_SRC_LIST}
 ${MATH_SRC_LIST}
 )
 
 add_executable("downsample" 
 "tools/downsample/downsample"
-${IO_SRC_LIST} ${MEM_SRC_LIST} "src/io/rawio.cpp")
+${UTILS_SRC_LIST}
+${IO_SRC_LIST} 
+${MEM_SRC_LIST} 
+${IO_PLATFORM_SRC_LIST})
 #target_link_libraries(downsample)
 
 add_executable("printvolume" "test/printvolume.cpp" ${IO_SRC_LIST} ${MEM_SRC_LIST})

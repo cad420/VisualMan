@@ -168,8 +168,10 @@ namespace ysl
 	std::ofstream & 
 		operator<<(std::ofstream & fs,const CoefficientSpectrum<nSamples> & coe)
 	{
+		fs << "[";
 		for (auto i = 0; i < nSamples; i++)
-			fs << coe.c[i] << " ";
+			fs << coe.c[i] << ", ";
+		fs << "]";
 		return fs;
 	}
 
@@ -186,9 +188,11 @@ namespace ysl
 	std::ostream & 
 		operator<<(std::ostream & os, const CoefficientSpectrum<nSamples> & coe)
 	{
+		os << "[";
 		for (auto i = 0; i < nSamples; i++)
-			os << coe.c[i]<<" ";
-		os << std::endl;
+			os << coe.c[i]<<", ";
+		os << "]";
+
 		return os;
 	}
 

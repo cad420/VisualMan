@@ -7,7 +7,7 @@
 #include "../mathematics/geometry.h"
 #include "../mathematics/numeric.h"
 
-#include "rawio.h"
+#include "../src/io/platform/windowsfilemap.h"
 #include "lvdheader.h"
 
 
@@ -38,6 +38,7 @@ namespace ysl
 		int g_xSize, g_ySize, g_zSize;
 		int g_xBlockSize, g_yBlockSize, g_zBlockSize;
 		RawType g_emptyValue;
+		std::size_t rawPointerOffset;
 
 		void getData(RawType* dest, const RawType* src, size_t width, size_t height, size_t depth, size_t xb, size_t yb,
 		             size_t zb) const;
@@ -61,7 +62,7 @@ namespace ysl
 		static constexpr auto blockSize = 1 << nLogBlockSize;
 
 	public:
-		RawToLVDConverter(const std::string& fileName, int xSize, int ySize, int zSize, int repeat,const std::string & outFileName);
+		RawToLVDConverter(const std::string& fileName, int xSize, int ySize, int zSize, int repeat,const std::string & outFileName,std::size_t offset = 0);
 		auto DimensionInData()const { return m_dataSize; }
 		auto DimensionInBlock()const { return m_blockDimension; }
 		void setBoundaryValue(RawType value) { g_emptyValue = value; }
@@ -131,7 +132,7 @@ namespace ysl
 
 	template <int nLogBlockSize, typename LVDTraits>
 	RawToLVDConverter<nLogBlockSize, LVDTraits>::RawToLVDConverter(const std::string& fileName, int xSize, int ySize,
-	                                                               int zSize, int repeat,const std::string & outFileName):
+	                                                               int zSize, int repeat,const std::string & outFileName,std::size_t offset):
 		g_xSize(xSize),
 		g_ySize(ySize),
 		g_zSize(zSize),
@@ -139,7 +140,8 @@ namespace ysl
 		m_repeat(repeat),
 		g_xBlockSize(blockSize),
 		g_yBlockSize(blockSize),
-		g_zBlockSize(blockSize)
+		g_zBlockSize(blockSize),
+		rawPointerOffset(offset)
 	{
 		if (repeat < 0 || repeat > 2)
 		{
@@ -151,18 +153,19 @@ namespace ysl
 		m_blockDimension = { int(ysl::RoundUpDivide(xSize, blockedSize)), int(ysl::RoundUpDivide(ySize, blockedSize)) , int(ysl::RoundUpDivide(zSize, blockedSize)) };
 		//m_blockDimension = {int(xSize / blockedSize), int(ySize / blockedSize), int(zSize / blockedSize)};
 
-		std::cout << "Information:" << std::endl;
 		std::cout << g_xSize << " " << g_ySize << " " << g_zSize << std::endl;
-		std::cout << "block size:" << blockedSize << std::endl;
 		m_dataSize = m_blockDimension * ysl::Vector3i{blockSize, blockSize, blockSize};
 
+		std::cout << "Information:" << std::endl;
+		std::cout << "block size:" << blockedSize << std::endl;
 		std::cout << "lvd block dimension:" << m_blockDimension << std::endl;
 		std::cout << "lvd data dimension: " << m_dataSize << std::endl;
-		const auto rawBytes = std::size_t(xSize) * ySize * zSize * sizeof(RawType);
+
+		const auto rawBytes = std::size_t(xSize) * ySize * zSize * sizeof(RawType) + rawPointerOffset;
+
 		if (rawBytes == 0)
 		{
-			std::cout << "empty data.\n";
-			return;
+			throw std::runtime_error("empty data");
 		}
 
 #ifdef _WIN32
@@ -179,7 +182,8 @@ namespace ysl
 		const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
 
 		lvdIO = std::make_shared<WindowsFileMapping>(outFileName,
-			lvdBytes+LVD_HEADER_SIZE,WindowsFileMapping::FileAccess::Write | WindowsFileMapping::FileAccess::Read,
+			lvdBytes+LVD_HEADER_SIZE,
+			WindowsFileMapping::FileAccess::Write | WindowsFileMapping::FileAccess::Read,
 			WindowsFileMapping::ReadWrite);
 		lvdPtr = lvdIO->FileMemPointer(0, lvdBytes + LVD_HEADER_SIZE);
 
@@ -218,7 +222,7 @@ namespace ysl
 					const int blockIndex = xb + yb * m_blockDimension.x + zb * m_blockDimension.x * m_blockDimension.y;
 
 					getData(buf + blockIndex * size_t(blockSize) * blockSize * blockSize,
-						rawPtr,
+						rawPtr + rawPointerOffset,
 					    blockSize,
 						blockSize,
 						blockSize,

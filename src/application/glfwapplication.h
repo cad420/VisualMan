@@ -25,7 +25,7 @@ namespace ysl
 			~GLFWApplication();
 			GLFWApplication(int argc, char ** argv, int w, int h);
 
-			void SetClearColor(float * color[4]);
+			void SetClearColor(float* color);
 			int Exec() override;
 		protected:
 			virtual void RenderLoop() = 0;

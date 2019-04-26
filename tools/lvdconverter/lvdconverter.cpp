@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "../../src/volume/lvdconverter.h"
+#include "../../src/io/lvdconverter.h"
 
 //
 //int LVDTester()
@@ -205,7 +205,7 @@
 
 int main(int argc, char *argv[])
 {
-	std::cout << "[filename(str), x(int) ,y(int) ,z(int), padding(int),log(int), outfilename(str)]\n";
+	std::cout << "[filename(str), offset(std::size_t), x(int) ,y(int) ,z(int), padding(int),log(int), outfilename(str)]\n";
 	int x, y, z, log;
 
 	//std::cin >> x >> y >> z;
@@ -215,6 +215,9 @@ int main(int argc, char *argv[])
 	std::string fileName;
 	std::cin >> fileName;
 
+	std::size_t offset;
+	std::cin >> offset;
+
 	int repeat;
 	std::cin >> x >> y >> z >> repeat >> log;
 	std::string outFileName;
@@ -222,12 +225,12 @@ int main(int argc, char *argv[])
 
 	if(log == 6)
 	{
-		ysl::RawToLVDConverter<6> converter(fileName, x, y, z, repeat, outFileName);
+		ysl::RawToLVDConverter<6> converter(fileName, x, y, z, repeat, outFileName,offset);
 		converter.convert();
 		converter.save(fileName);
 	}else if(log == 7)
 	{
-		ysl::RawToLVDConverter<7> converter(fileName, x, y, z, repeat, outFileName);
+		ysl::RawToLVDConverter<7> converter(fileName, x, y, z, repeat, outFileName,offset);
 		converter.convert();
 		converter.save(fileName);
 	}else
