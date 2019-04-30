@@ -1,6 +1,7 @@
 
 #ifndef _COUNTEDOBJECT_H_
 #define _COUNTEDOBJECT_H_
+#include <atomic>
 
 
 namespace ysl
@@ -16,12 +17,12 @@ namespace ysl
 		CountedObject();
 		CountedObject(const CountedObject & obj);
 	private:
-		static int objectNum;
+		static std::atomic_uint64_t objectNum;
 		void init();
 	};
 
-	template<typename ClassName>
-	int CountedObject<ClassName>::objectNum = 0;
+	//template<typename ClassName>
+	//int CountedObject<ClassName>::objectNum;
 
 	template <typename ClassName>
 	int CountedObject<ClassName>::ObjectCount() const
@@ -32,7 +33,7 @@ namespace ysl
 	template <typename ClassName>
 	CountedObject<ClassName>::~CountedObject()
 	{
-		objectNum--;
+		--objectNum;
 	}
 
 	template <typename ClassName>
@@ -50,7 +51,7 @@ namespace ysl
 	template <typename ClassName>
 	void CountedObject<ClassName>::init()
 	{
-		objectNum++;
+		++objectNum;
 	}
 }
 

@@ -367,7 +367,7 @@ namespace ysl
 
 		void LargeVolumeRayCaster::InitializeLODs(const std::vector<std::string> fileNames)
 		{
-			Size3 blockSize[] = { {5,5,5},{5,5,5},{5,5,5},{2,2,2} };
+			Size3 blockSize[] = { {10,10,10},{5,5,5},{5,5,5},{2,2,2} };
 			for (auto i = 0; i < fileNames.size() && i < 4; i++)
 			{
 				aggregates.push_back(std::make_shared<LODAggregate>(fileNames[i], blockSize[0]));
@@ -524,8 +524,8 @@ namespace ysl
 			//GL_ERROR_REPORT;
 
 			//InitializeLODs({ "C:\\data\\subregion_9000_10700_2_128.lvd","D:\\Desktop\\sub_992.lvd","D:\\Desktop\\sub_496.lvd" });
-			InitializeLODs({ "D:\\scidata\\mrc\\ctl.lvd" ,"D:\\scidata\\mrc\\ctl_1024_1024_38.lvd","D:\\scidata\\mrc\\ctl_512_512_19.lvd" });
-			lodCount = 3;
+			InitializeLODs({ "D:\\scidata\\mrc\\ctl.lvd" });
+			lodCount = 1;
 			//SetShaderUniforms();
 		}
 

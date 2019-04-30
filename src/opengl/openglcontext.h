@@ -3,8 +3,17 @@
 
 #include "../../lib/glfw/include/GLFW/glfw3.h"
 #include <memory>
+#include "openglobject.h"
 
-class OpenGLCurrentContext
+
+
+class GPUContext:public ysl::GPUObject
+{
+public:
+	GPUContext();
+};
+
+class OpenGLCurrentContext:public ysl::GPUObject
 {
 public:
 	OpenGLCurrentContext();
@@ -15,6 +24,8 @@ public:
 	bool IsValid()const;
 	bool operator==(const OpenGLCurrentContext & ctx)const;
 	bool operator!=(const OpenGLCurrentContext & ctx)const;
+	uint64_t MemoryUsage() override;
+	std::string ToString() const override;
 	static std::shared_ptr<OpenGLCurrentContext> GetCurrentOpenGLContext();
 private:
 	GLFWwindow * windowContext;

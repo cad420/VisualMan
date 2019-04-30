@@ -34,6 +34,16 @@ bool OpenGLCurrentContext::operator!=(const OpenGLCurrentContext& ctx) const
 	return !(ctx == *this);
 }
 
+uint64_t OpenGLCurrentContext::MemoryUsage()
+{
+
+}
+
+std::string OpenGLCurrentContext::ToString() const
+{
+	return "OpenGLCurrentContext";
+}
+
 std::shared_ptr<OpenGLCurrentContext> OpenGLCurrentContext::GetCurrentOpenGLContext()
 {
 	return std::make_shared<OpenGLCurrentContext>();
