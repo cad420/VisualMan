@@ -62,6 +62,7 @@ void OpenGLBuffer::VertexAttribPointer(int index, std::size_t size, DataType typ
 	glEnableVertexAttribArray(index);
 	glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 	GL_ERROR_REPORT;
+
 }
 
 //{
@@ -97,21 +98,23 @@ void OpenGLBuffer::Unbind()
 
 void OpenGLBuffer::BindBufferBase(int index)
 {
-	Bind();
+	//Bind();
 	glBindBufferBase(target, index, bufferId);
 }
 
 void * OpenGLBuffer::Map(Access access)
 {
-	Bind();
-	const auto ptr = glMapBuffer(target, access);
+	//Bind();
+	//const auto ptr = glMapBuffer(target, access);
+	const auto ptr = glMapNamedBuffer(bufferId, access);
 	return ptr;
 }
 
 void OpenGLBuffer::Unmap()
 {
-	Bind();
-	glUnmapBuffer(target);
+	//Bind();
+	//glUnmapBuffer(target);
+	glUnmapNamedBuffer(bufferId);
 }
 
 OpenGLBuffer::BufferType OpenGLBuffer::Type() const

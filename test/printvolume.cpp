@@ -1,7 +1,7 @@
 
-#include "../src/volume/volume_utils.h"
+#include "../src/io/volume_utils.h"
 #include <iomanip>
-#include "../src/volume/rawreader.h"
+#include "../src/io/rawreader.h"
 #ifndef _DOWNSAMPLE_H_
 #define _DOWNSAMPLE_H_
 

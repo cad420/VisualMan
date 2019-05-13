@@ -20,7 +20,9 @@ OpenGLTexture::OpenGLTexture(TextureTarget target_,
 	if (!currentContext->IsValid())
 		ysl::Error("No OpenGL Context.");
 	glGenTextures(1, &textureId);
+
 	glBindTexture(target, textureId);
+
 	if(target_ != TextureBuffer)
 	{
 		SetFilterMode(min, mag);
@@ -47,7 +49,7 @@ OpenGLTexture& OpenGLTexture::operator=(OpenGLTexture&& tex)noexcept
 
 void OpenGLTexture::Bind()
 {
-	glBindTexture(target, textureId);
+	//glBindTexture(target, textureId);
 }
 
 void OpenGLTexture::Unbind()
@@ -57,30 +59,34 @@ void OpenGLTexture::Unbind()
 
 void OpenGLTexture::SetFilterMode(FilterMode minMode, FilterMode magMode)
 {
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMode);
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, magMode);
+	//glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMode);
+	//glTexParameteri(target, GL_TEXTURE_MAG_FILTER, magMode);
+	glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, minMode);
+	glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, magMode);
 }
 
 void OpenGLTexture::SetWrapMode(WrapMode rMode, WrapMode sMode, WrapMode tMode)
 {	
-	glTexParameteri(target, GL_TEXTURE_WRAP_R, rMode);
+	glTextureParameteri(textureId, GL_TEXTURE_WRAP_R, rMode);
 	if(target == Texture2D || target== Texture2DRect || target == Texture3D)
-		glTexParameteri(target, GL_TEXTURE_WRAP_S, sMode);
+		glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, sMode);
 	if(target== Texture3D)
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, tMode);
+		glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, tMode);
 }
 
 void OpenGLTexture::SetData(InternalFormat internalFmt,
 	ExternalDataFormat extFmt, 
 	ExternalDataType extType, int x,int y,int z,void * data)
 {
-	Bind();
+	//Bind();
 	if (target == Texture1D )
-		glTexImage1D(target, 0, internalFmt, x, 0, extFmt, extType, data);
+		glTextureImage1DEXT(textureId, target,0, internalFmt, x, 0, extFmt, extType, data);
 	if (target == Texture2D || target == Texture2DRect)
-		glTexImage2D(target, 0, internalFmt, x, y, 0, extFmt, extType, data);
+		glTextureImage2DEXT(textureId,target, 0, internalFmt, x, y, 0, extFmt, extType, data);
 	if (target == Texture3D)
-		glTexImage3D(target, 0, internalFmt, x, y, z, 0, extFmt, extType, data);
+		glTextureImage3DEXT(textureId,target, 0, internalFmt, x, y, z, 0, extFmt, extType, data);
+
+	
 }
 
 void OpenGLTexture::SetSubData(
@@ -88,13 +94,13 @@ void OpenGLTexture::SetSubData(
 	ExternalDataType extType, int xOffset,int x,
 	int yOffset,int y, int zOffset, int z,const void* data)
 {
-	Bind();
+	//Bind();
 	if (target == Texture1D )
-		glTexSubImage1D(target, 0, xOffset, x,  extFmt, extType, data);
+		glTextureSubImage1D(textureId, 0, xOffset, x,  extFmt, extType, data);
 	if (target == Texture2D || target == Texture2DRect)
-		glTexSubImage2D(target, 0, xOffset,yOffset, x, y,  extFmt, extType, data);
+		glTextureSubImage2D(textureId, 0, xOffset,yOffset, x, y,  extFmt, extType, data);
 	if (target == Texture3D)
-		glTexSubImage3D(target, 0, xOffset,yOffset,zOffset,x, y, z, extFmt, extType, data);
+		glTextureSubImage3D(textureId, 0, xOffset,yOffset,zOffset,x, y, z, extFmt, extType, data);
 }
 
 OpenGLTexture::TextureTarget OpenGLTexture::Target() const
@@ -122,7 +128,7 @@ void OpenGLTexture::GetTexture(int level,
 void OpenGLTexture::BindToDataImage(int imageUnit, int level, bool layered, int layer, Access access,
 	InternalFormat fmt)
 {
-	Bind();
+	//Bind();
 	glBindImageTexture(imageUnit, textureId, level, layered, layer, access, fmt);
 }
 
@@ -130,21 +136,27 @@ void OpenGLTexture::BindTextureBuffer(std::shared_ptr<OpenGLBuffer> buffer, Open
 {
 	if(buffer->Target() == OpenGLBuffer::TextureBuffer)
 	{
-		Bind();
-		glTexBuffer(GL_TEXTURE_BUFFER, format,buffer->bufferId);
+		//Bind();
+		//glTexBuffer(GL_TEXTURE_BUFFER, format,buffer->bufferId);
+		glTextureBuffer(textureId, format,buffer->bufferId);
 		GL_ERROR_REPORT;
 	}
 }
 
 void OpenGLTexture::SaveAsImage(const std::string& fileName)
 {
-	Bind();
+	//Bind();
 	int texDim[2];
-	glGetTexLevelParameteriv(target, 0, GL_TEXTURE_WIDTH, texDim);
-	glGetTexLevelParameteriv(target, 0, GL_TEXTURE_HEIGHT, texDim+1);
+	glGetTextureLevelParameteriv(textureId, 0, GL_TEXTURE_WIDTH, texDim);
+	glGetTextureLevelParameteriv(textureId, 0, GL_TEXTURE_HEIGHT, texDim+1);
 	GL_ERROR_REPORT;
-	std::unique_ptr<char[]> imageBuf(new char[std::size_t(texDim[0])*texDim[1] * 4 * sizeof(char)]);
-	glGetTexImage(target, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageBuf.get());
+	const auto bufSize = std::size_t(texDim[0])*texDim[1] * 4 * sizeof(char);
+	std::unique_ptr<char[]> imageBuf(new char[bufSize]);
+	if (!imageBuf)
+	{
+		throw std::runtime_error("Create buffer failed\n");
+	}
+	glGetTextureImage(textureId, 0, GL_RGBA, GL_UNSIGNED_BYTE,bufSize, imageBuf.get());
 	GL_ERROR_REPORT;
 	stbi_write_jpg(fileName.c_str(), texDim[0], texDim[1], 4, imageBuf.get(), 100);
 

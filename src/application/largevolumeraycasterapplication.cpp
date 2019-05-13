@@ -461,11 +461,14 @@ namespace ysl
 			proxyVBO->Bind();
 			proxyVBO->AllocateFor(g_proxyGeometryVertices, sizeof(g_proxyGeometryVertices));
 
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-				reinterpret_cast<void*>(sizeof(g_proxyGeometryVertices) / 2));
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+			//glEnableVertexAttribArray(0);
+			//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+			//	reinterpret_cast<void*>(sizeof(g_proxyGeometryVertices) / 2));
+			//glEnableVertexAttribArray(1);
+			//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+
+			proxyVBO->VertexAttribPointer(0, 3, OpenGLBuffer::Float, false, 3 * sizeof(float), reinterpret_cast<void*>(sizeof(g_proxyGeometryVertices) / 2));
+			proxyVBO->VertexAttribPointer(1, 3, OpenGLBuffer::Float, false, 3 * sizeof(float), reinterpret_cast<void*>(0));
 
 			proxyEBO = std::make_shared<OpenGLBuffer>(OpenGLBuffer::ElementArrayBuffer);
 			proxyEBO->Bind();
@@ -481,10 +484,12 @@ namespace ysl
 			rayCastingVBO->Bind();
 			rayCastingVBO->AllocateFor(nullptr, 6 * sizeof(ysl::Point2f));
 
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
+			//glEnableVertexAttribArray(0);
+			//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
+			//glEnableVertexAttribArray(1);
+			//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
+			rayCastingVBO->VertexAttribPointer(0, 2, OpenGLBuffer::Float, false, 2 * sizeof(float), reinterpret_cast<void*>(0));
+			rayCastingVBO->VertexAttribPointer(1, 2, OpenGLBuffer::Float, false, 2 * sizeof(float), reinterpret_cast<void*>(0));
 			rayCastingVAO.unbind();
 		}
 

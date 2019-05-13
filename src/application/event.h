@@ -40,8 +40,6 @@ public:
 	int key()const { return m_key; }
 };
 
-
-
 class ResizeEvent :public Event
 {
 public:

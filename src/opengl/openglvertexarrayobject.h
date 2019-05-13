@@ -1,5 +1,7 @@
 #ifndef _OPENGLVERTEXARRAYOBJECT_H_
 #define _OPENGLVERTEXARRAYOBJECT_H_
+#include <memory>
+#include "openglbuffer.h"
 
 class OpenGLVertexArrayObject
 {
@@ -13,7 +15,8 @@ public:
 	void destroy();
 	~OpenGLVertexArrayObject() = default;
 private:
-	unsigned int m_vbo;
+	unsigned int vao;
+
 };
 
 #endif

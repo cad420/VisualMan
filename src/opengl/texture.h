@@ -54,7 +54,6 @@ public:
 		RGBA32F = GL_RGBA32F,
 		RGBA32UI = GL_RGBA32UI,
 		InternalDepthComponent = GL_DEPTH_COMPONENT
-		
 	};
 
 	enum  ExternalDataFormat
@@ -67,16 +66,12 @@ public:
 		
 	};
 
-
-
-
 	enum Access
 	{
 		Read= GL_READ_ONLY,
 		Write = GL_WRITE_ONLY,
 		ReadAndWrite = GL_READ_WRITE
 	};
-
 	
 	enum ExternalDataType
 	{
@@ -84,7 +79,6 @@ public:
 		UInt8 = GL_UNSIGNED_BYTE,
 		Float32 = GL_FLOAT
 	};
-
 
 	OpenGLTexture(TextureTarget target,
 		FilterMode min = FilterMode::Linear,

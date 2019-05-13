@@ -29,7 +29,6 @@ public:
 		ColorAttachment6 = GL_COLOR_ATTACHMENT6,
 		ColorAttachment7 = GL_COLOR_ATTACHMENT7,
 		ColorAttachment8 = GL_COLOR_ATTACHMENT8,
-
 	};
 
 	OpenGLFramebufferObject();

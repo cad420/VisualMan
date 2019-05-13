@@ -2,21 +2,24 @@
 #include "framebuffer.h"
 #include "GL/gl3w.h"
 #include "error.h"
+#include "openglutils.h"
 
 OpenGLFramebufferObject::OpenGLFramebufferObject():currentContext(OpenGLCurrentContext::GetCurrentOpenGLContext())
 {
-	glGenFramebuffers(1, &framebufferObjectId);
+	glCreateFramebuffers(1, &framebufferObjectId);
 }
 
 void OpenGLFramebufferObject::AttachTexture(Attachment attach, const std::shared_ptr<OpenGLTexture>& texture,int level, int offset)
 {
-	auto texTarget = texture->Target();
-	if (texTarget == OpenGLTexture::Texture1D)
-		glFramebufferTexture1D(GL_FRAMEBUFFER, attach, texTarget, texture->NativeTextureId(), level);
-	if (texTarget == OpenGLTexture::Texture2D || texTarget == OpenGLTexture::Texture2DRect)
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attach, texTarget, texture->NativeTextureId(), level);
-	if(texTarget == OpenGLTexture::Texture3D)
-		glFramebufferTexture3D(GL_FRAMEBUFFER,attach,texTarget,texture->NativeTextureId(),level,offset);
+	//auto texTarget = texture->Target();
+	//if (texTarget == OpenGLTexture::Texture1D)
+	//	glFramebufferTexture1D(GL_FRAMEBUFFER, attach, texTarget, texture->NativeTextureId(), level);
+	//if (texTarget == OpenGLTexture::Texture2D || texTarget == OpenGLTexture::Texture2DRect)
+	//	glFramebufferTexture2D(GL_FRAMEBUFFER, attach, texTarget, texture->NativeTextureId(), level);
+	//if(texTarget == OpenGLTexture::Texture3D)
+	//	glFramebufferTexture3D(GL_FRAMEBUFFER,attach,texTarget,texture->NativeTextureId(),level,offset);
+	glNamedFramebufferTexture(framebufferObjectId, attach, texture->NativeTextureId(),level);
+	GL_ERROR_REPORT
 }
 
 void OpenGLFramebufferObject::UnattachedTexture(const std::shared_ptr<OpenGLTexture>& texture)
@@ -41,8 +44,8 @@ void OpenGLFramebufferObject::SaveAsImage(const std::string& fileName, Attachmen
 
 void OpenGLFramebufferObject::CheckFramebufferStatus()
 {
-	Bind();
-	const auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	//Bind();
+	const auto status = glCheckNamedFramebufferStatus(framebufferObjectId,GL_FRAMEBUFFER);
 	switch (status) {
 	case GL_FRAMEBUFFER_COMPLETE: // Everything's OK
 
@@ -88,6 +91,5 @@ OpenGLFramebufferObject::~OpenGLFramebufferObject()
 	if (*currentContext != *OpenGLCurrentContext::GetCurrentOpenGLContext())
 		ysl::Warning("Current context is different from the context which the object is created with");
 	glDeleteFramebuffers(1, &framebufferObjectId);
-
 }
 

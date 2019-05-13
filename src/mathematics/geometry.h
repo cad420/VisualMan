@@ -34,21 +34,25 @@ namespace ysl
 		return false;
 	}
 
-	template <class T> class Vector2;
-	template <class T> class Vector3;
-	template <class T> class Point3;
-	template <class T> class Point2;
-	template <class T> class Normal3;
+	template <typename T> class Vector2;
+	template <typename T> class Vector3;
+	template <typename T> class Point3;
+	template <typename T> class Point2;
+	template <typename T> class Normal3;
+	template <typename T> class Vector4;
 
 	using Vector3f = Vector3<Float>;
 	using Vector3i = Vector3<int>;
 	using Point3f = Point3<Float>;
 	using Point3i = Point3<int>;
+	using Vector4f = Vector4<Float>;
+
 
 	using Vector2f = Vector2<Float>;
 	using Vector2i = Vector2<int>;
 	using Point2f = Point2<Float>;
 	using Point2i = Point2<int>;
+	using Vector4i = Vector4<int>;
 
 	using Size3 = Vector3<std::size_t>;
 	using Size2 = Vector2<std::size_t>;
@@ -57,6 +61,8 @@ namespace ysl
 	using Vec3i = Vector3i;
 	using Vec2f = Vector2f;
 	using Vec2i = Vector2i;
+	using Vec4f = Vector4f;
+	using Vec4i = Vector4i;
 
 	template<typename T>
 	class Vector2 {
@@ -553,7 +559,7 @@ namespace ysl
 
 	template<typename T>
 	constexpr Vector3<T> Abs(const Vector3<T> & v) {
-		return Vector3<T>(std::abs(v.x()), std::abs(v.y()), std::abs(v.z()));
+		return Vector3<T>(std::abs(v.x), std::abs(v.y), std::abs(v.z));
 	}
 	/*
 	* Point3D
@@ -890,6 +896,194 @@ namespace ysl
 	};
 
 
+	template<typename T>
+	class Vector4 {
+	public:
+		T x, y, z,w;
+		constexpr Vector4() :x(0), y(0), z(0),w(0) {}
+		constexpr Vector4(const T &x, const T &y, const T& z,const T &w) : x(x), y(y), z(z),w(w)
+		{
+			//assert(!HasNaN());
+		}
+
+		//constexpr Vector3(const Normal3<T> & n):x(n.x),y(n.y),z(n.z){}
+		//Vector3D(const Vector3D<T> & v) :x(T(v.x)), y(T(v.y)), z(T(v.z)) {}
+		bool HasNaN()const
+		{
+			return IsNaN(x) || IsNaN(y) || IsNaN(z) || IsNaN(w);
+		}
+
+		constexpr Vector4<T> operator+(const Vector4<T> & v)const
+		{
+			//assert(!v.HasNaN());
+			return Vector4<T>(x + v.x, y + v.y, z + v.z,w+v.w);
+		}
+
+		//constexpr Point3<T> operator+(const Point3<T> & p)const
+		//{
+		//	//assert(!p.HasNaN());
+		//	return Point3<T>{x + p.x, y + p.y, z + p.z};
+		//}
+
+		constexpr Vector4<T> & operator+=(const Vector4<T> & v) 
+		{
+			//assert(!v.HasNaN());
+			x += v.x;
+			y += v.y;
+			z += v.z;
+			w += v.w;
+			return *this;
+		}
+
+		constexpr Vector4<T> operator-(const Vector4<T> & v)const
+		{
+			//assert(!v.HasNaN());
+			return Vector4<T>(x - v.x, y - v.y, z - v.z,w -v.w);
+		}
+
+		constexpr Vector4<T> & operator-=(const Vector4<T> & v)
+		{
+			//assert(!v.HasNaN());
+			x -= v.x;
+			y -= v.y;
+			z -= v.z;
+			w -= v.w;
+			return *this;
+		}
+
+
+		template<typename U>
+		explicit operator Vector4<U>()const
+		{
+			return Vector4<U>(U(x), U(y), U(z),U(w));
+		}
+
+
+		//unary operator
+		constexpr Vector4<T> operator-()const
+		{
+			return Vector4<T>(-x, -y, -z,-w);
+		}
+
+		constexpr Vector4<T> operator*(const Vector4<T> & v)const
+		{
+			return { x*v.x,y*v.y,z*v.z,w*v.w };
+		}
+
+		constexpr Vector3<T> operator*=(const Vector3<T> & v)
+		{
+			x *= v.x;
+			y *= v.y;
+			z *= v.z;
+			return *this;
+		}
+
+		
+		constexpr Vector4<T> operator*(const Float s)const
+		{
+			//assert(!IsNaN(s));
+			return Vector4<T>(s*x, s*y, s*z,s*w);
+		}
+		
+		constexpr Vector4<T> & operator*=(const Float s)
+		{
+			//assert(!IsNaN(s));
+			x *= s;
+			y *= s;
+			z *= s;
+			w *= s;
+			return *this;
+		}
+
+
+		constexpr Vector4<T> operator/(Float s)const
+		{
+			//assert(!IsNaN(s));
+			const auto inv = static_cast<Float>(1) / s;
+			return Vector4<T>(x*inv, y*inv, z*inv,w*inv);
+		}
+
+		constexpr Vector4<T> &operator/=(Float s)
+		{
+			//	assert(!IsNaN(s));
+			const auto inv = static_cast<Float>(1) / s;
+			x *= inv; 
+			y *= inv; 
+			z *= inv;; 
+			w *= inv;
+			return *this;
+		}
+
+		const T & operator[](int i)const {
+			assert(i >= 0 && i < 4);
+			return *(&x + i);
+		}
+		T & operator[](int i) {
+			assert(i >= 0 && i < 4);
+			return *(&x + i);
+		}
+
+
+
+		static Float Dot(const Vector4f & v1, const Vector4f & v2)
+		{
+			return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z + v1.w * v2.w;
+		}
+
+
+		constexpr Float LengthSquared()const { return x * x + y * y + z * z + w*w; }
+
+		constexpr Float Length()const { return std::sqrt(LengthSquared()); }
+
+		constexpr Vector4<T> Normalized()const
+		{
+			//if len is too small?
+			const auto len = Length();
+			return (*this) / len;
+		}
+
+		constexpr void Normalize()
+		{
+			//if len is too small?
+			const auto len = Length();
+			(*this) /= len;
+		}
+
+		constexpr bool IsNull()const
+		{
+			return x == 0 && y == 0 && z == 0 && w == 0;
+		}
+
+		T * Data()
+		{
+			return &x;
+		}
+
+		const T * ConstData()const
+		{
+			return &x;
+		}
+
+	};
+
+	template<typename T>
+	std::ostream & operator<<(std::ostream & os, const Vector4<T> & v)
+	{
+		os << "[" << v.x << ", " << v.y << ", " << v.z << ", "<<v.w<<"]";
+		return os;
+	}
+
+	template<typename T>
+	constexpr Vector3<T> operator*(Float s, const Vector4<T> & v)
+	{
+		return v * s;
+	}
+
+	template<typename T>
+	constexpr Vector4<T> Abs(const Vector4<T> & v) {
+		return Vector4<T>(std::abs(v.x), std::abs(v.y), std::abs(v.z),std::abs(v.w));
+	}
+
 	//Geometry Inline Functions
 
 	//For Vector3<T>
@@ -1079,6 +1273,7 @@ namespace ysl
 
 
 	};
+
 
 	class Ray
 	{

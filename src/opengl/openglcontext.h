@@ -6,14 +6,21 @@
 #include "openglobject.h"
 
 
-
-class GPUContext:public ysl::GPUObject
+namespace ysl
 {
-public:
-	GPUContext();
-};
+	class GPUContext 
+	{
+	public:
+		GPUContext();
+		GPUContext(const GPUContext &) = delete;
+		GPUContext & operator=(const GPUContext &) = delete;
+		GPUContext(GPUContext &&)noexcept;
+		GPUContext & operator=(GPUContext &&)noexcept;
+		virtual bool IsValid()const = 0;
+	};
+}
 
-class OpenGLCurrentContext:public ysl::GPUObject
+class OpenGLCurrentContext
 {
 public:
 	OpenGLCurrentContext();
@@ -24,11 +31,10 @@ public:
 	bool IsValid()const;
 	bool operator==(const OpenGLCurrentContext & ctx)const;
 	bool operator!=(const OpenGLCurrentContext & ctx)const;
-	uint64_t MemoryUsage() override;
-	std::string ToString() const override;
 	static std::shared_ptr<OpenGLCurrentContext> GetCurrentOpenGLContext();
 private:
 	GLFWwindow * windowContext;
 };
+
 
 #endif

@@ -29,7 +29,6 @@
 
 namespace ysl
 {
-
 	class GPUObject:public CountedObject<GPUObject> {
 		static uint64_t totalMemoryUsage;
 	public:
@@ -37,6 +36,7 @@ namespace ysl
 		virtual uint64_t MemoryUsage()=0;
 		virtual std::string ToString()const = 0;
 		static uint64_t TotalMemoryUsage();
+		virtual ~GPUObject() = 0;
 	};
 
 	inline uint64_t GPUObject::TotalMemoryUsage()

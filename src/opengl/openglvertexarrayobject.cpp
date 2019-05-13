@@ -2,20 +2,20 @@
 #include "openglvertexarrayobject.h"
 #include "../../lib/gl3w/GL/gl3w.h"
 
-OpenGLVertexArrayObject::OpenGLVertexArrayObject():m_vbo(0)
+OpenGLVertexArrayObject::OpenGLVertexArrayObject():vao(0)
 {
 }
 
 void OpenGLVertexArrayObject::create()
 {
-	glGenVertexArrays(1, &m_vbo);
+	glCreateVertexArrays(1, &vao);
 }
 
 void OpenGLVertexArrayObject::bind()
 {
-	if(!m_vbo)
+	if(!vao)
 		return;
-	glBindVertexArray(m_vbo);
+	glBindVertexArray(vao);
 }
 
 void OpenGLVertexArrayObject::unbind()
@@ -25,6 +25,6 @@ void OpenGLVertexArrayObject::unbind()
 
 void OpenGLVertexArrayObject::destroy()
 {
-	glDeleteVertexArrays(1,&m_vbo);
+	glDeleteVertexArrays(1,&vao);
 }
 

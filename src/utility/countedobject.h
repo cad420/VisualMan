@@ -7,12 +7,11 @@
 namespace ysl
 {
 
-
 	template <typename ClassName>
 	class CountedObject {
 	public:
 		int ObjectCount()const;
-		~CountedObject();
+		virtual ~CountedObject();
 	protected:
 		CountedObject();
 		CountedObject(const CountedObject & obj);

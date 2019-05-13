@@ -207,43 +207,7 @@ int jsonTest()
 
 namespace ysl
 {
-	class A :public Reflectable
-	{
-		DECLARE_CLASS(A)
-	public:
-		A()
-		{
-			std::cout << "A has been called\n";
-		}
-		A(int a, int b, int c)
-		{
-			std::cout << "constructor\n";
-		}
 
-		A(const A & other)
-		{
-			std::cout << "A(const A & other)\n";
-		}
-
-		A& operator=(const A & other)
-		{
-			std::cout << "A& operator=(const A & other)\n";
-			return *this;
-		}
-
-		A(A && other)noexcept
-		{
-			std::cout << "A(A && other)\n";
-		}
-
-		A& operator=(A && other)noexcept
-		{
-			std::cout << "A& operator=(A && other)\n";
-			return *this;
-		}
-	};
-
-	IMPLEMENT_CLASS(A,"a_")
 }
 
 int main(int argc, char *argv[])
