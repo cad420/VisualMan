@@ -1,28 +1,14 @@
-#include "../src/application/glfwapplication.h"
-
-
-
-class NewGraphicApiTestApp:public ysl::app::GLFWApplication
-{
-public:
-	NewGraphicApiTestApp(int argc, char ** argv) :GLFWApplication(argc, argv, 800, 600)
-	{
-		
-	}
-	void RenderLoop() override
-	{
-		
-	}
-
-	void InitializeOpenGLResources() override
-	{
-
-	}
-
-
-};
+#include "../src/application/glfwapplication2.h"
+#include "../src/graphic/assembly.h"
 
 int main(int argc,char ** argv)
 {
-	return NewGraphicApiTestApp(argc, argv).Exec();
+	using namespace ysl::gpu;
+	using namespace ysl::app;
+	GLFWApplication2 app("Test GLFW Window", RenderContextFormat(), 800, 600);
+	app.AddUIEventListener(Ref<IEventListener>(new Assembly));
+	auto ret = app.Exec();
+
+	system("pause");
+	return ret;
 }

@@ -10,7 +10,7 @@ namespace ysl
 {
 	namespace gpu
 	{
-		class Primitive:public Renderable
+		class GRAPHICS_EXPORT_IMPORT Primitive:public Renderable
 		{
 		public:
 			Primitive() = default;

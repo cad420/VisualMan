@@ -8,7 +8,7 @@ namespace ysl
 	namespace gpu
 	{
 
-		class DepthFuncState:public RenderStateNonIndexed
+		class GRAPHICS_EXPORT_IMPORT DepthFuncState:public RenderStateNonIndexed
 		{
 		public:
 			DepthFuncState(Func type) :RenderStateNonIndexed(RS_DepthFunc){}

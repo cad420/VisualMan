@@ -9,7 +9,7 @@ namespace ysl
 		void Renderable::Render(const Actor* actor, const RenderState * state, const Camera * camera, RenderContext * context)
 		{
 			std::cout << "Renderable::Render\n";
-			Render_Implement(actor);
+			Render_Implement(actor,state,camera,context);
 		}
 	}
 }

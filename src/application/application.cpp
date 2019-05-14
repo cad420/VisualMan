@@ -9,7 +9,6 @@ namespace ysl
 	{
 
 		Application * Application::app = nullptr;
-
 		Application::Application(int argc, char** argv)
 		{
 			(void)argc;

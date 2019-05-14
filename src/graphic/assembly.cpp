@@ -1,4 +1,4 @@
-
+//#include "assembly.h"
 #include "assembly.h"
 #include <iostream>
 
@@ -6,26 +6,54 @@ namespace ysl
 {
 	namespace gpu
 	{
-		void RenderAssembly::UpdateEvent()
+		void Assembly::InitEvent()
 		{
-			std::cout << "RenderAssembly::UpdateEvent()\n";
-
+			std::cout << "Assembly::InitEvent\n";
 		}
 
-		void RenderAssembly::MousePressEvent(MouseButton button, int xpos, int ypos)
+		void Assembly::DestroyEvent()
 		{
-			std::cout << "RenderAssembly::MousePressEvent" << std::endl;
+			std::cout << "Assembly::DestroyEvent\n";
 		}
 
-		void RenderAssembly::MouseReleaseEvent(MouseButton button, int xpos, int ypos)
+		void Assembly::UpdateEvent()
 		{
-			std::cout << "RenderAssembly::MouseReleaseEvent" << std::endl;
+			std::cout << "Assembly::UpdateEvent\n";
 		}
 
-		void RenderAssembly::ResizeEvent(int w, int h)
+		void Assembly::MousePressEvent(EMouseButton button, int xpos, int ypos)
 		{
-			std::cout << "RenderAssembly::ResizeEvent:"<<w<<", "<<h << std::endl;
+			std::cout << "Assembly::MousePressEvent:" << button << " " << xpos << " " << ypos << std::endl;
+		}
 
+		void Assembly::MouseReleaseEvent(EMouseButton button, int xpos, int ypos)
+		{
+			std::cout << "Assembly::MouseReleaseEvent:"<<button<<" "<<xpos<<" "<<ypos<< std::endl;
+		}
+
+		void Assembly::MouseMoveEvent(EMouseButton button, int xpos, int ypos)
+		{
+			std::cout << "Assembly::MouseMoveEvent:" << button << " " << xpos << " " << ypos << std::endl;
+		}
+
+		void Assembly::MouseWheelEvent(int ydegree, int xdegree)
+		{
+			std::cout << "Assembly::MouseWheelEvent:" << xdegree << " " << ydegree << std::endl;
+		}
+
+		void Assembly::KeyPressEvent(EKeyButton key)
+		{
+			std::cout << "Assembly::MouseReleaseEvent:"<<key << std::endl;
+		}
+
+		void Assembly::KeyReleaseEvent(EKeyButton key)
+		{
+			std::cout << "Assembly::KeyReleaseEvent:"<< key<<  std::endl;
+		}
+
+		void Assembly::ResizeEvent(int w, int h)
+		{
+			std::cout << "Assembly::ResizeEvent:"<<w<<" "<<h << std::endl;
 		}
 	}
 }

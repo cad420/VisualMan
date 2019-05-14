@@ -10,7 +10,7 @@ namespace ysl
 	namespace gpu 
 	{
 
-		class Actor 
+		class GRAPHICS_EXPORT_IMPORT Actor
 		{
 		public:
 			Actor() = default;

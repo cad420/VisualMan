@@ -9,11 +9,11 @@ namespace ysl
 {
 	namespace gpu
 	{
-		class AbstraSceneManager
+		class GRAPHICS_EXPORT_IMPORT AbstraSceneManager
 		{
 		public:
 			AbstraSceneManager() = default;
-			virtual ~AbstraSceneManager();
+			virtual ~AbstraSceneManager() = default;
 			Bound3f BoundingBox()const { return bound; }
 			void SetBoundingBox(const Bound3f & bound) { this->bound = bound; }
 			virtual void AppendActors(ActorRefArray& actorArray) = 0;

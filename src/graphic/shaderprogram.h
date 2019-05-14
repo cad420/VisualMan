@@ -1,12 +1,12 @@
 
-#ifndef _PROGRAM_H_
-#define _PROGRAM_H_
-#include <string>
+#ifndef _SHADERPROGRAM_H_
+#define _SHADERPROGRAM_H_
 #include "../../lib/gl3w/GL/glcorearb.h"
-#include "graphictype.h"
+#include <string>
 #include <vector>
 #include <map>
 #include "abstrarenderstate.h"
+#include "graphictype.h"
 
 namespace ysl
 {
@@ -16,14 +16,14 @@ namespace ysl
 
 		enum GLSLShaderType 
 		{
-			ST_VERTEX_SHADER = GL_VERTEX_SHADER, //!< A shader that is intended to run on the programmable vertex processor.
-			ST_TESS_CONTROL_SHADER = GL_TESS_CONTROL_SHADER, //!< A shader that is intended to run on the programmable tessellation processor in the control stage.
-			ST_TESS_EVALUATION_SHADER = GL_TESS_EVALUATION_SHADER, //!< A shader that is intended to run on the programmable tessellation processor in the evaluation stage.
-			ST_GEOMETRY_SHADER = GL_GEOMETRY_SHADER, //!< A shader that is intended to run on the programmable geometry processor.
-			ST_FRAGMENT_SHADER = GL_FRAGMENT_SHADER //!< A shader that is intended to run on the programmable fragment processor.
+			ST_VERTEX_SHADER = GL_VERTEX_SHADER, 
+			ST_TESS_CONTROL_SHADER = GL_TESS_CONTROL_SHADER, 
+			ST_TESS_EVALUATION_SHADER = GL_TESS_EVALUATION_SHADER,
+			ST_GEOMETRY_SHADER = GL_GEOMETRY_SHADER, 
+			ST_FRAGMENT_SHADER = GL_FRAGMENT_SHADER 
 		};
 
-		class GLSLShader
+		class GRAPHICS_EXPORT_IMPORT GLSLShader
 		{
 		public:
 			GLSLShader() = delete;
@@ -39,43 +39,42 @@ namespace ysl
 		private:
 			GLSLShaderType type;
 			std::string source;
-			unsigned int handle;
-			bool compiled;
+			unsigned int handle = 0;
+			bool compiled = false;
 		};
 
 
-		class GLSLVertexShader:public GLSLShader
+		class GRAPHICS_EXPORT_IMPORT GLSLVertexShader:public GLSLShader
 		{
 		public:
 			GLSLVertexShader():GLSLShader(ST_VERTEX_SHADER){}
 		};
 
-		class GLSLFragmentShader :public GLSLShader
+		class GRAPHICS_EXPORT_IMPORT GLSLFragmentShader :public GLSLShader
 		{
 		public:
 			GLSLFragmentShader() :GLSLShader(ST_FRAGMENT_SHADER) {}
 		};
 
-		class GLSLTessControlShader :public GLSLShader
+		class GRAPHICS_EXPORT_IMPORT GLSLTessControlShader :public GLSLShader
 		{
 		public:
 			GLSLTessControlShader() :GLSLShader(ST_TESS_CONTROL_SHADER) {}
 		};
 
-		class GLSLTessEvaluationShader :public GLSLShader
+		class GRAPHICS_EXPORT_IMPORT GLSLTessEvaluationShader :public GLSLShader
 		{
 		public:
 			GLSLTessEvaluationShader() :GLSLShader(ST_TESS_EVALUATION_SHADER) {}
 		};
 
-		class GLSLGeometryShader :public GLSLShader
+		class GRAPHICS_EXPORT_IMPORT GLSLGeometryShader :public GLSLShader
 		{
 		public:
 			GLSLGeometryShader() :GLSLShader(ST_GEOMETRY_SHADER) {}
 		};
 
-
-		class GLSLProgram:public RenderStateNonIndexed
+		class GRAPHICS_EXPORT_IMPORT GLSLProgram:public RenderStateNonIndexed
 		{
 		public:
 			GLSLProgram():RenderStateNonIndexed(RS_GLSLProgram){}
@@ -86,7 +85,7 @@ namespace ysl
 			void AttachShader(Ref<GLSLShader> shader);
 			void DetachShader(Ref<GLSLShader> shader);
 			void DetachAllShaders();
-			void ApplyUniformSet(Ref<UniformSet> uset);
+			void ApplyUniformSet(Ref<UniformSet> set);
 
 			// RenderStateNonIndexed
 
@@ -95,7 +94,6 @@ namespace ysl
 			std::vector<Ref<GLSLShader>> shaders;
 			std::map<std::string, int> dataLocation;
 			Ref<UniformSet> uniformSet;
-			
 		};
 	}
 }

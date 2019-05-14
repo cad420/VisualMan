@@ -14,7 +14,7 @@ namespace ysl
 		};
 
 
-		class RenderQueue
+		class GRAPHICS_EXPORT_IMPORT RenderQueue
 		{
 			public:	
 		};

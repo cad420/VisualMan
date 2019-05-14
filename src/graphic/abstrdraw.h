@@ -1,6 +1,9 @@
 
 #ifndef _DRAW_H_
 #define _DRAW_H_
+
+#include "graphictype.h"
+
 namespace ysl
 {
 	namespace gpu
@@ -11,7 +14,7 @@ namespace ysl
 			DT_TRIANGLES
 		};
 
-		class AbstrDrawCall
+		class GRAPHICS_EXPORT_IMPORT AbstrDrawCall
 		{
 		public:
 			AbstrDrawCall():drawType(DT_TRIANGLES){}

@@ -9,7 +9,7 @@ namespace ysl
 {
 	namespace gpu
 	{
-		class Framebuffer
+		class GRAPHICS_EXPORT_IMPORT Framebuffer
 		{
 			public:
 

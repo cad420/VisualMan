@@ -12,20 +12,20 @@ namespace ysl
 {
 	namespace gpu
 	{
-		class RenderStudio:public AbstraRenderStudio
+		class GRAPHICS_EXPORT_IMPORT RenderStudio:public AbstraRenderStudio
 		{
 		public:
 			RenderStudio(){}
-			void SetCamera(const Ref(Camera) & camera)
+			void SetCamera(const Ref<Camera> & camera)
 			{
 				this->camera = camera;
 			};
-			Ref(Camera) GetCamera()const { return camera; };
+			Ref<Camera> GetCamera()const { return camera; };
 
 			
 		protected:
-			std::vector<Ref(AbstraSceneManager)> sceneManagers;
-			Ref(Camera) camera;
+			std::vector<Ref<AbstraSceneManager>> sceneManagers;
+			Ref<Camera> camera;
 		};
 	}
 }

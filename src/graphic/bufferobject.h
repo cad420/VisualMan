@@ -2,15 +2,12 @@
 #ifndef _BUFFEROBJECT_H_
 #define _BUFFEROBJECT_H_
 #include <cstdint>
-
+#include "graphictype.h"
 namespace ysl
 {
 	namespace gpu
 	{
-
-
-
-		class BufferObject
+		class GRAPHICS_EXPORT_IMPORT BufferObject
 		{
 		public:
 			unsigned int Handle()const { return handle; }
@@ -25,6 +22,7 @@ namespace ysl
 		private:
 			unsigned int handle;
 			uint64_t bufferSize;
+
 		};
 	}
 }

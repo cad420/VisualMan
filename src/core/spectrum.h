@@ -244,10 +244,22 @@ namespace ysl
 	//	}
 	//};
 
-
-
 	using RGBASpectrum = CoefficientSpectrum<4>;
 	using RGBSpectrum = CoefficientSpectrum<3>;
+
+	inline
+		RGBSpectrum
+		Lerp(Float t, const RGBSpectrum & s1, const RGBSpectrum & s2)
+	{
+		return s1 * (1 - t) + s2 * t;
+	}
+
+	inline
+		RGBASpectrum
+		Lerp(Float t, const RGBASpectrum & s1, const RGBASpectrum & s2)
+	{
+		return (1 - t)*s1 + t * s2;
+	}
 	
 }
 

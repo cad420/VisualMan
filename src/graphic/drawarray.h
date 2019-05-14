@@ -8,7 +8,7 @@ namespace ysl
 {
 	namespace gpu
 	{
-		class DrawArray:public AbstrDrawCall
+		class GRAPHICS_EXPORT_IMPORT DrawArray:public AbstrDrawCall
 		{
 		public:
 			DrawArray();

@@ -7,7 +7,7 @@ namespace ysl
 {
 	namespace gpu
 	{
-		class Renderer:public AbstraRenderer
+		class GRAPHICS_EXPORT_IMPORT Renderer:public AbstraRenderer
 		{
 		public:
 			Renderer() = default;

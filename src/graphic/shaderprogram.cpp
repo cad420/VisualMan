@@ -1,5 +1,5 @@
 
-#include "program.h"
+#include "shaderprogram.h"
 #include <iostream>
 
 namespace ysl
@@ -22,7 +22,7 @@ namespace ysl
 
 		bool GLSLShader::Compile()
 		{
-
+			return false;
 		}
 
 		void GLSLProgram::CreateProgram()
@@ -42,6 +42,7 @@ namespace ysl
 
 		bool GLSLProgram::Linked()
 		{
+			return false;
 		}
 
 		void GLSLProgram::AttachShader(Ref<GLSLShader> shader)

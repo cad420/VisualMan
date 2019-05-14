@@ -52,8 +52,23 @@
 #include <memory>
 #include "../../lib/gl3w/GL/glcorearb.h"
 
+
+#if defined(MRE_EXPORT_DLL)
+#define GRAPHICS_EXPORT_IMPORT __declspec(dllexport)
+#else
+#define GRAPHICS_EXPORT_IMPORT __declspec(dllimport)
+#endif
+
+
+
 template<typename Ty>
 using Ref = std::shared_ptr<Ty>;
+
+template<typename Ty>
+using WeakRef = std::weak_ptr<Ty>;
+
+template<typename Ty>
+using ExclRef = std::unique_ptr<Ty>;
 
 
 

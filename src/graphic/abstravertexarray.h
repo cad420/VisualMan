@@ -8,7 +8,7 @@ namespace ysl
 	namespace gpu 
 	{
 
-		class AbstraVertexArray
+		class GRAPHICS_EXPORT_IMPORT AbstraVertexArray
 		{
 		public:
 		private:

@@ -29,6 +29,11 @@ set(_GLFW_INCLUDE_DIR "${GLFW_DIR}/include")								 #glfw headers
 set(_GL3W_INCLUDE_DIR "lib/gl3w")											 #gl3w headers
 include_directories(${_GLFW_INCLUDE_DIR} ${_GL3W_INCLUDE_DIR})			 
 
+
+#---------------------------------------------------
+add_subdirectory("src/graphic")
+#---------------------------------------------------
+
 #---------------------------------------------------
 # Package Find
 #---------------------------------------------------
@@ -131,6 +136,14 @@ file(GLOB TEST_HEADERS "test/*.h")
 
 aux_source_directory("src/application" APP_SRC_LIST)
 
+
+#---------------------------------------------------
+# Binary
+#---------------------------------------------------
+
+#---------------------------------------------------
+# application_test test
+#---------------------------------------------------
 add_executable("ApplicationTest" 
 "test/application_test.cpp"
 ${CORE_SRC_LIST}
@@ -147,24 +160,29 @@ ${CAM_SRC_LIST}
 ${RENDER_SRC_LIST} src/algorithm/marchingcubes.cpp src/algorithm/marchingcubes.h)
 target_link_libraries(ApplicationTest glfw ${OPENGL_LIBRARIES})
 
-
+#---------------------------------------------------
+# test test
+#---------------------------------------------------
 add_executable("test" "test/test.cpp" ${UTILS_SRC_LIST})
 
+#---------------------------------------------------
+# graphicapi test
+#---------------------------------------------------
+add_executable("graphicsapi" 
+"test/newgraphicapi_test.cpp" 
+"src/application/glfwapplication2.cpp"
+"src/utility/error.cpp"
+)
+target_link_libraries("graphicsapi" rasterizer glfw)
 
-#aux_source_directory("src/downsample" DOWNSAMPLE_SRC_LIST)
+#---------------------------------------------------
+# printvolume test
+#---------------------------------------------------
+add_executable("printvolume" "test/printvolume.cpp" ${IO_SRC_LIST} ${MEM_SRC_LIST})
 
-#FIND_PACKAGE(VTK)
-#if(VTK_FOUND)
-#	message(STATUS "VTK Found:" ${VTK_LIBRARIES})
-#endif()
-
-
-#set(TBB_DIR "D:\\tbb\\tbb2019_20190206oss\\cmake")
-#FIND_PACKAGE(TBB)
-#if(TBB_FOUND)
-#message(STATUS "TBB Found:" ${TBB_IMPORTED_TARGETS})
-#endif()
-
+#--------------------------------------------
+# Tool: LVDConverter
+#--------------------------------------------
 add_executable("lvdconverter" 
 "tools/lvdconverter/lvdconverter" 
 ${CORE_SRC_LIST} 
@@ -175,6 +193,9 @@ ${UTILS_SRC_LIST}
 ${MATH_SRC_LIST}
 )
 
+#---------------------------------------------
+# Tool: Downsample
+#---------------------------------------------
 add_executable("downsample" 
 "tools/downsample/downsample"
 ${UTILS_SRC_LIST}
@@ -183,12 +204,10 @@ ${MEM_SRC_LIST}
 ${IO_PLATFORM_SRC_LIST})
 #target_link_libraries(downsample)
 
-add_executable("printvolume" "test/printvolume.cpp" ${IO_SRC_LIST} ${MEM_SRC_LIST})
-#---------------------------------------------------
-# MRE Module
-#---------------------------------------------------
 
-
+#---------------------------------------------------
+# Main: MRE project
+#---------------------------------------------------
 add_executable(
 ${PROJECT_NAME} 
 ${RENDER_SRC_LIST}
@@ -206,9 +225,6 @@ ${CORE_SRC_LIST}
 ${SHAPE_SRC_LIST}
 ${APP_SRC_LIST}
 ${ABSTRGPUOBJ_SRC_LIST} ${IO_PLATFORM_SRC_LIST} "src/opengl/lodaggregate.cpp")
-
-
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES})
-
 set_target_properties(${PROJECT_NAME} PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})

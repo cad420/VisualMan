@@ -1,7 +1,7 @@
 
 #ifndef _RENDERABLE_H_
 #define _RENDERBALE_H_
-
+#include "graphictype.h"
 namespace ysl
 {
 	namespace gpu
@@ -11,7 +11,7 @@ namespace ysl
 		class RenderState;
 		class Actor;
 
-		class Renderable
+		class GRAPHICS_EXPORT_IMPORT Renderable
 		{
 		public:
 			Renderable() = default;

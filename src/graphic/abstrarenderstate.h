@@ -3,13 +3,14 @@
 #define _ABSTRARENDERSTATE_H_
 #include "graphictype.h"
 #include "camera.h"
-#include "program.h"
+#include <vector>
 
 namespace ysl
 {
 	namespace gpu
 	{
 		class RenderContext;
+		class GLSLProgram;
 
 		enum RenderStateType
 		{
@@ -36,31 +37,31 @@ namespace ysl
 			RS_NONE,
 		};
 
-		class RenderState
+		class GRAPHICS_EXPORT_IMPORT RenderState
 		{
 		public:
 			RenderState() = delete;
 			RenderState(RenderStateType type) :type(type) {}
 			virtual void Apply(int index, Ref<Camera> camera, RenderContext * context)const = 0;
 			RenderStateType Type()const { return type; }
+			virtual ~RenderState() = default;
 		private:
 			RenderStateType type;
 		};
 
 
-		class RenderStateNonIndexed :public RenderState
+		class GRAPHICS_EXPORT_IMPORT RenderStateNonIndexed :public RenderState
 		{
 		public:
 			RenderStateNonIndexed(RenderStateType type) :RenderState(type) {}
 		};
 
-		class RenderStateSet
+		class GRAPHICS_EXPORT_IMPORT RenderStateSet
 		{
 		public:
 			RenderStateSet() = default;
 			void SetRenderState(Ref<RenderState> state);
 			void AddRenderState(Ref<RenderState> state);
-
 			Ref<GLSLProgram> Program()const { return program; }
 		private:
 			std::vector<Ref<RenderState>> renderStates;
