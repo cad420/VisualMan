@@ -13,7 +13,7 @@ namespace ysl
 			{
 				auto & item = *it;
 				if (item->IsEnabled() && item->OnRenderingStartedEvent(this) && item->IsRemoveAfterCallEnabled())
-					callbacks.erase(it);
+					it = callbacks.erase(it);
 			}
 		}
 
@@ -24,7 +24,7 @@ namespace ysl
 			{
 				auto & item = *it;
 				if (item->IsEnabled() && item->OnRenderingFinishedEvent(this) && item->IsRemoveAfterCallEnabled())
-					callbacks.erase(it);
+					it = callbacks.erase(it);
 			}
 		}
 

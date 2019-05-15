@@ -4,21 +4,29 @@ namespace ysl
 {
 	namespace graphics
 	{
-		void UniformSet::AddUniform(Ref<Uniform> uniform)
-		{
-			bool exist = false;
-			for (auto & u : uniforms)
-				if (u->GetName() == uniform->GetName())
-					exist = true;
-			if (!exist)
-				uniforms.push_back(uniform);
-		}
-
 		void UniformSet::SetUniform(Ref<Uniform> uniform)
 		{
+			auto exist = false;
 			for (auto & u : uniforms)
+			{
 				if (u->GetName() == uniform->GetName())
+				{
 					u = uniform;
+					exist = true;
+				}
+			}
+			if (!exist)
+				uniforms.push_back(std::move(uniform));
+		}
+
+		Ref<Uniform> UniformSet::GetUniform(const char* name)
+		{
+			for(auto each:uniforms)
+			{
+				if (each->GetName() == name)
+					return each;
+			}
+			return nullptr;
 		}
 
 		void UniformSet::RemoveUniform(Ref<Uniform> uniform)
@@ -26,16 +34,22 @@ namespace ysl
 			for(auto it = uniforms.begin();it != uniforms.end();++it)
 			{
 				if ((*it)->GetName() == uniform->GetName())
-					uniforms.erase(it);
+				{
+					it = uniforms.erase(it);
+					break;
+				}
 			}
 		}
 
-		void UniformSet::RemoveUniform(const std::string& name)
+		void UniformSet::RemoveUniform(const char * name)
 		{
 			for (auto it = uniforms.begin(); it != uniforms.end(); ++it)
 			{
 				if ((*it)->GetName() == name)
-					uniforms.erase(it);
+				{
+					it = uniforms.erase(it);
+					break;
+				}
 			}
 		}
 

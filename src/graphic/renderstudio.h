@@ -36,12 +36,12 @@ namespace ysl
 			const std::vector<Ref<AbstraRenderer>> & Renderers()const { return renderers; }
 
 			
-			
 		protected:
 			std::vector<Ref<AbstraSceneManager>> sceneManagers;
 			std::vector<Ref<AbstraRenderer>> renderers;
 
 			std::vector<Ref<Actor>> actorQueue; // extract from scene manager
+
 
 			Ref<Camera> camera;
 

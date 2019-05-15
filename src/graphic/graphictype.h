@@ -400,4 +400,12 @@ enum PolygonMode
 	PM_POINT = GL_POINT
 };
 
+enum EnableState
+{
+	EN_BLEND, 
+	EN_CULL_FACE, 
+	EN_DEPTH_TEST, 
+	EN_STENCIL_TEST, 
+};
+
 #endif

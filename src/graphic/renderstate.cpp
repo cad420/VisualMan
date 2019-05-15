@@ -11,5 +11,11 @@ namespace ysl
 			std::cout << "Apply Depth Function State\n";
 
 		}
+
+		void TextureSampler::Apply(int index, Ref<Camera> camera, RenderContext* context) const
+		{
+			std::cout << "Apply TExtureSampler State\n";
+
+		}
 	}
 }

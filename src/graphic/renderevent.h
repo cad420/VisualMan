@@ -11,7 +11,7 @@ namespace ysl
 		class AbstraRenderStudio;
 		class AbstraRenderer;
 
-		class IRenderEvent
+		class GRAPHICS_EXPORT_IMPORT IRenderEvent
 		{
 		public:
 			virtual bool OnRenderingStartedEvent(const graphics::AbstraRenderStudio * studio) = 0;

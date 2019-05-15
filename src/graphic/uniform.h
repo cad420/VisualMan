@@ -118,17 +118,15 @@ namespace ysl
 		{
 		public:
 			UniformSet() = default;
-			void AddUniform(Ref<Uniform> uniform);
 			void SetUniform(Ref<Uniform> uniform);
+			Ref<Uniform> GetUniform(const char * name);
 			void RemoveUniform(Ref<Uniform> uniform);
-			void RemoveUniform(const std::string & name);
+			void RemoveUniform(const char * name);
 			void RemoveAllUniforms();
 			const auto & Uniforms()const { return uniforms; }
 			auto & Uniforms() { return uniforms; }
-
 		private:
 			std::vector<Ref<Uniform>> uniforms;
-
 		};
 	}
 }

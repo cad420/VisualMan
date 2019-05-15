@@ -34,7 +34,11 @@ class DataArena
 	std::list<std::pair<uint8_t*, int>> m_used;
 	std::list<std::pair<uint8_t*, int>> m_available;
 public:
-	explicit DataArena(size_t size = 1024 * 1024) :m_blockSize(size), m_currentAllocBlockSize(0), m_currentBlock(nullptr), m_currentBlockPos(0), m_fragmentSize(0)
+	explicit DataArena(size_t size = 1024 * 1024) :m_blockSize(size), 
+	m_currentAllocBlockSize(0), 
+	m_currentBlock(nullptr), 
+	m_currentBlockPos(0), 
+	m_fragmentSize(0)
 	{
 		// Default block is 1MB
 	}
@@ -134,6 +138,18 @@ public:
 		return ptr;
 	}
 
+	void Release()
+	{
+		for (auto it = m_used.begin(); it != m_used.end(); ++it)FreeAligned(it->first);
+		for (auto it = m_available.begin(); it != m_available.end(); ++it)FreeAligned(it->first);
+		FreeAligned(m_currentBlock);
+	}
+
+	void Shrink()
+	{
+		for (auto it = m_available.begin(); it != m_available.end(); ++it)FreeAligned(it->first);
+	}
+
 
 	void Reset()
 	{
@@ -164,9 +180,7 @@ public:
 
 	~DataArena()
 	{
-		for (auto it = m_used.begin(); it != m_used.end(); ++it)FreeAligned(it->first);
-		for (auto it = m_available.begin(); it != m_available.end(); ++it)FreeAligned(it->first);
-		FreeAligned(m_currentBlock);
+		Release();
 	}
 };
 #endif
