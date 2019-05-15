@@ -39,8 +39,6 @@ namespace ysl
 			// texture unit
 
 
-
-
 		private:
 			Ref<RenderStateSet> renderStateSet; // shading program is in it
 			Ref<UniformSet> uniformSet;

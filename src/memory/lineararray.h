@@ -254,7 +254,7 @@ namespace ysl
 			m_data = static_cast<T*>(AllocAligned<T>(t));
 			if (m_data == nullptr)
 			{
-				std::cout << "Bad Alloc in Linear3DArray(size_type x, size_type y,size_type z ,const T * data)\n";
+				throw std::runtime_error("Bad Alloc in Linear3DArray(size_type x, size_type y,size_type z ,const T * data)\n");
 				return;
 			}
 			if(data)

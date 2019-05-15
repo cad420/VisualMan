@@ -55,41 +55,6 @@ namespace ysl
 	{
 		
 	};
-
-
-
-
-
-
-	class GPUState
-	{
-	public:
-		GPUState();
-		bool enableDepthTest;
-		DEPTH_FUNC depthFunc;
-		bool enableCullFace;
-		STATE_CULL cullState;
-		bool enableBlend;
-		bool enableScissor;
-		bool enableLighting;
-		bool enableLight[StateLightCount];
-		bool enableColorMaterial;
-		STATE_TEX enableTex[StateTUCount];
-		size_t activeTexUnit;
-		bool depthMask;
-		bool colorMask;
-		BLEND_EQUATION blendEquation;
-		BLEND_FUNC blendFuncSrc;
-		BLEND_FUNC blendFuncDst;
-		float lineWidth;
-
-	};
-
-	class StateManager
-	{
-		
-	};
-
 }
 
 #endif

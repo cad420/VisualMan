@@ -5,14 +5,22 @@
 #include <string>
 #include <vector>
 #include "../../lib/gl3w/GL/glcorearb.h"
+#include "../core/spectrum.h"
+#include "../mathematics/geometry.h"
+#include "../mathematics/transformation.h"
 #include "graphictype.h"
+
+namespace ysl {
+	struct Matrix3x3;
+	struct Matrix4x4;
+}
 
 namespace ysl
 {
 	namespace graphics
 	{
 
-		enum UniformType
+		enum Unifortype
 		{
 			UT_NONE = 0x0,
 
@@ -92,25 +100,79 @@ namespace ysl
 			UT_UNSIGNED_INT_SAMPLER_BUFFER = GL_UNSIGNED_INT_SAMPLER_BUFFER, //!< usamplerBuffer
 			UT_UNSIGNED_INT_SAMPLER_2D_RECT = GL_UNSIGNED_INT_SAMPLER_2D_RECT, //!< usampler2DRect
 
-			UT_UniformTypeCount
+			UT_UnifortypeCount
 		};
 
 
 		class GRAPHICS_EXPORT_IMPORT Uniform
 		{
 		public:
-			Uniform():type(UT_NONE){}
-			Uniform(const std::string & name):type(UT_NONE),name(name){}
+			Uniform() :type(UT_NONE) {}
+			Uniform(const std::string & name) :type(UT_NONE), name(name) {}
 			std::string GetName()const { return name; }
 			void SetName(const std::string & name) { this->name = name; }
-			UniformType Type()const { return type; }
+			Unifortype Type()const { return type; }
 
 			// massive variable setters
+			void setUniform1i(int count, const int* value) { resizeBytes(count * 1 * sizeof(int)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_INT; }
+			void setUniform2i(int count, const int* value) { resizeBytes(count * 2 * sizeof(int)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_INT_VEC2; }
+			void setUniform3i(int count, const int* value) { resizeBytes(count * 3 * sizeof(int)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_INT_VEC3; }
+			void setUniform4i(int count, const int* value) { resizeBytes(count * 4 * sizeof(int)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_INT_VEC4; }
 
+			void setUniform1ui(int count, const unsigned int* value) { resizeBytes(count * 1 * sizeof(unsigned int)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_UNSIGNED_INT; }
+			void setUniform2ui(int count, const unsigned int* value) { resizeBytes(count * 2 * sizeof(unsigned int)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_UNSIGNED_INT_VEC2; }
+			void setUniform3ui(int count, const unsigned int* value) { resizeBytes(count * 3 * sizeof(unsigned int)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_UNSIGNED_INT_VEC3; }
+			void setUniform4ui(int count, const unsigned int* value) { resizeBytes(count * 4 * sizeof(unsigned int)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_UNSIGNED_INT_VEC4; }
+
+			void setUniform1f(int count, const float* value) { resizeBytes(count * 1 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT; }
+			void setUniform2f(int count, const float* value) { resizeBytes(count * 2 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_VEC2; }
+			void setUniform3f(int count, const float* value) { resizeBytes(count * 3 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_VEC3; }
+			void setUniform4f(int count, const float* value) { resizeBytes(count * 4 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_VEC4; }
+
+			void setUniform1d(int count, const double* value) { resizeBytes(count * 1 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE; }
+			void setUniform2d(int count, const double* value) { resizeBytes(count * 2 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_VEC2; }
+			void setUniform3d(int count, const double* value) { resizeBytes(count * 3 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_VEC3; }
+			void setUniform4d(int count, const double* value) { resizeBytes(count * 4 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_VEC4; }
+
+			void setUniformMatrix2f(int count, const float* value) { resizeBytes(count * 2 * 2 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_MAT2; }
+			void setUniformMatrix3f(int count, const float* value) { resizeBytes(count * 3 * 3 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_MAT3; }
+			void setUniformMatrix4f(int count, const float* value) { resizeBytes(count * 4 * 4 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_MAT4; }
+
+			void setUniformMatrix2x3f(int count, const float* value) { resizeBytes(count * 2 * 3 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_MAT2x3; }
+			void setUniformMatrix3x2f(int count, const float* value) { resizeBytes(count * 3 * 2 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_MAT3x2; }
+			void setUniformMatrix2x4f(int count, const float* value) { resizeBytes(count * 2 * 4 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_MAT2x4; }
+			void setUniformMatrix4x2f(int count, const float* value) { resizeBytes(count * 4 * 2 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_MAT4x2; }
+			void setUniformMatrix3x4f(int count, const float* value) { resizeBytes(count * 3 * 4 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_MAT3x4; }
+			void setUniformMatrix4x3f(int count, const float* value) { resizeBytes(count * 4 * 3 * sizeof(float)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_FLOAT_MAT4x3; }
+
+			void setUniformMatrix2d(int count, const double* value) { resizeBytes(count * 2 * 2 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_MAT2; }
+			void setUniformMatrix3d(int count, const double* value) { resizeBytes(count * 3 * 3 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_MAT3; }
+			void setUniformMatrix4d(int count, const double* value) { resizeBytes(count * 4 * 4 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_MAT4; }
+
+			void setUniformMatrix2x3d(int count, const double* value) { resizeBytes(count * 2 * 3 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_MAT2x3; }
+			void setUniformMatrix3x2d(int count, const double* value) { resizeBytes(count * 3 * 2 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_MAT3x2; }
+			void setUniformMatrix2x4d(int count, const double* value) { resizeBytes(count * 2 * 4 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_MAT2x4; }
+			void setUniformMatrix4x2d(int count, const double* value) { resizeBytes(count * 4 * 2 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_MAT4x2; }
+			void setUniformMatrix3x4d(int count, const double* value) { resizeBytes(count * 3 * 4 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_MAT3x4; }
+			void setUniformMatrix4x3d(int count, const double* value) { resizeBytes(count * 4 * 3 * sizeof(double)); memcpy(&data[0], value, sizeof(data[0]) * data.size()); type = UT_DOUBLE_MAT4x3; }
+
+			void setUniformValue(const Matrix4x4 & value) { setUniformMatrix4f(1, value.Transposed().m[0]); }
+			void setUniformValue(const Matrix3x3 & value) { setUniformMatrix3f(1, value.Transposed().m[0]); };
+			void setUniformValue(const RGBSpectrum & value) { setUniform3f(1, value.c); }
+			void setUniformValue(const RGBASpectrum & value) { setUniform4f(1, value.c); }
+			void setUniformValue(const Vector3f & value) { setUniform3f(1, value.ConstData()); }
+			void setUniformValue(const Point3f & value) { setUniform3f(1, value.ConstData()); }
+			void setUniformValue(const Vector3i & value) { setUniform3i(1, value.ConstData()); }
+			void setUniformValue(const Vector2f & value) { setUniform2f(1, value.ConstData()); }
+			void setUniformValue(const Vector2i & value) { setUniform2i(1, value.ConstData()); }
+			void setUniformValue(bool value) { int v = value; setUniform1i(1, &v); }
+			void setUniformValue(int value) { setUniform1i(1, &value); };
+			void setUniformValue(float value) { setUniform1f(1, &value); }
 		private:
-			UniformType type;
+			void resizeBytes(int bytes) { data.resize(bytes); }
+			Unifortype type;
 			std::string name;
-			std::vector<int> mData;
+			std::vector<uint8_t> data;
 		};
 
 
