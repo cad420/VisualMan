@@ -29,6 +29,11 @@ namespace ysl
 			void KeyReleaseEvent(EKeyButton key) override;
 			void ResizeEvent(int w, int h) override;
 
+			virtual void UpdateScene(){}
+
+
+			Ref<RenderStudio> Rendering()const { return studio; }
+
 		protected:
 			Ref<RenderStudio> studio;
 			Ref<Camera> camera;

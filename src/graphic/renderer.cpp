@@ -1,17 +1,15 @@
 
 #include "renderer.h"
 #include <iostream>
+#include "../opengl/openglutils.h"
 
 namespace ysl
 {
 	namespace graphics
 	{
-		void Renderer::Render(const std::vector<Ref<Actor>> & rederQueue,
+		void Renderer::Render(const RenderQueue & rederQueue,
 			const Ref<Camera>& camera)
 		{
-
-			std::cout << "Renderer::Render has been called\n";
-
 
 			// active framebuffer and get context from fb
 
@@ -32,11 +30,30 @@ namespace ysl
 			// clear render states
 
 
-
-
 			// dispatch after-render events;
 
+			std::cout << "Renderer::Render has been called\n";
+			class Raii
+			{
+				Renderer * renderer;
+				std::vector<RenderState> oldRenderStates;
+			public:
+				Raii(Renderer * renderer, Camera * camera) :renderer(renderer)
+				{
+					renderer->DispatchOnRenderStartedEvent();
+					GL_CHECK
+				}
+				~Raii()
+				{
+					renderer->DispatchOnRenderFinishedEvent();
+					GL_CHECK
+				} 
+			}raii(this,camera.get());
 
+
+
+
+			return;
 		}
 	}
 }

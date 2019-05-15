@@ -75,6 +75,7 @@ GLenum PrintGLErrorMsg(const char * file, int line)
 #define GL_ERROR_REPORT void(0);
 #define GL_ERROR_ASSERT	void(0);
 #define GL(stmt) void(0);
+#define GL_CHECK void(0);
 #else
 #define GL_ERROR_REPORT								PrintGLErrorMsg(__FILE__, __LINE__);
 	//{												\
@@ -112,6 +113,30 @@ GLenum PrintGLErrorMsg(const char * file, int line)
       if (iCounter > 100) break;											\
     }																		\
   } while(0);
+
+#define GL_CHECK	\
+ do {																		\
+    GLenum glerr;															\
+    unsigned int iCounter = 0;												\
+    while((glerr = glGetError()) != GL_NO_ERROR) {							\
+      ysl::Warning("before line %u (%s): %s (%#x)",							\
+              __LINE__, __FILE__,											\
+              static_cast<unsigned>(glerr));								\
+	  PrintGLErrorType(glerr);												\
+      iCounter++;															\
+      if (iCounter > 100) break;											\
+    }																		\
+    iCounter = 0;															\
+    while((glerr = glGetError()) != GL_NO_ERROR) {							\
+      ysl::Warning(" on line %u (%s) caused GL error: %s (%#x)",			\
+              __LINE__, __FILE__,											\
+              static_cast<unsigned>(glerr));								\
+	  PrintGLErrorType(glerr);												\
+      iCounter++;															\
+      if (iCounter > 100) break;											\
+    }																		\
+  } while(0);
+
 
 #endif /*NDBUG*/
 

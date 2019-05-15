@@ -45,7 +45,7 @@ namespace ysl {
 			//glfwWindowHint(GLFW_STEREO, info.stereo());
 			glfwWindowHint(GLFW_SAMPLES, format.MultiSample() ? format.GetMultiSampleNumber() : 0);
 			glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_DONT_CARE);
-			glfwWindowHint(GLFW_DOUBLEBUFFER, format.DoubleBuffer());
+			glfwWindowHint(GLFW_DOUBLEBUFFER, format.HasDoubleBuffer());
 			glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
 
@@ -137,24 +137,24 @@ namespace ysl {
 
 		void GLFWApplication2::glfwCursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 		{
-			const auto app = Instance();
+			const auto ins = Instance();
 
-			assert(app->window == window);
+			ins->glfwWindow == window;
 			MouseEvent e({ int(xpos),int(ypos) }, 0);
-			if (app->mouseLeftButtonPressed)
+			if (ins->mouseLeftButtonPressed)
 				e.m_buttons |= MouseEvent::LeftButton;
-			if (app->mouseRightButtonPressed)
+			if (ins->mouseRightButtonPressed)
 				e.m_buttons |= MouseEvent::RightButton;
 			if (e.m_buttons)
-				app->DispatchMouseMoveEvent(graphics::Mouse_Left, xpos, ypos);
+				ins->DispatchMouseMoveEvent(graphics::Mouse_Left, xpos, ypos);
 		}
 
 
 		void GLFWApplication2::glfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 		{
 			const auto app = Instance();
-
-			assert(app->window == window);
+			
+			assert(app->glfwWindow == window);
 			double xpos, ypos;
 			glfwGetCursorPos(window, &xpos, &ypos);
 			MouseEvent e{ { int(xpos),int(ypos) }, 0 };
@@ -191,14 +191,14 @@ namespace ysl {
 		{
 			ResizeEvent e{ {width,height} };
 			const auto app = Instance();
-			assert(app->window == window);
+			assert(app->glfwWindow == window);
 			app->DispatchResizeEvent(width, height);
 		}
 
 		void GLFWApplication2::glfwMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 		{
 			const auto app = Instance();
-			assert(app->window == window);	// Check if the context receiving the event is current context
+			assert(app->glfwWindow == window);	// Check if the context receiving the event is current context
 			WheelEvent e(xoffset, yoffset);
 			app->DispatchMouseWheelEvent(yoffset, xoffset);
 		}

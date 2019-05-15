@@ -42,7 +42,7 @@ namespace ysl
 
 			Vec4i GetRGBABits()const { return rGBABits; }
 			Vec4i GetAccumRGBABits()const { return accumRGBABits; }
-			bool DoubleBuffer()const { return doubleBuffer; }
+			bool HasDoubleBuffer()const { return doubleBuffer; }
 			bool MultiSample()const { return bMultiSample; }
 			int GetMultiSampleNumber()const { return nMultiSamples; }
 			int GetDepthBufferBits()const { return nDepthBufferBits; }
@@ -62,6 +62,13 @@ namespace ysl
 			bool doubleBuffer = true;
 			bool bMultiSample = false;
 
+		};
+
+
+		enum ContextState
+		{
+			Context_OnRenderingStarted,
+			Context_OnRenderingFinished
 		};
 
 		class GRAPHICS_EXPORT_IMPORT RenderContext
@@ -85,9 +92,12 @@ namespace ysl
 
 			bool EnableUpdate()const { return enableUpdate; }
 			void SetEnableUpdate(bool update) { enableUpdate = update; }
-
 			void SetContextFormat(const RenderContextFormat& fmt);
-			
+			bool HasDoubleBuffer()const { return format.HasDoubleBuffer(); }
+			bool IsInitialized()const { return initialized; }
+
+			void SetContextState(ContextState state) {  contextState = state; }
+			ContextState GetContextState()const { return contextState; }
 
 			Ref<Framebuffer> GetFramebuffer();
 			Ref<FramebufferObject> CreateFramebufferObject();
@@ -99,7 +109,7 @@ namespace ysl
 
 
 			void AddUIEventListener(const Ref<IEventListener> & listener);
-			void DeleteUIEventListener(const Ref<IEventListener> & listener);
+			void RemoveUIEventListener(const Ref<IEventListener> & listener);
 
 			virtual void DispatchInitEvent();
 			virtual void DispatchUpdateEvent();
@@ -112,6 +122,8 @@ namespace ysl
 			virtual void DispatchKeyReleasedEvent(EKeyButton key);
 			virtual void DispatchKeyPressedEvent(EKeyButton key);
 
+			
+
 		private:
 			//GLFWwindow * windowContext;
 			std::vector<Ref<IEventListener>> listeners;
@@ -120,6 +132,9 @@ namespace ysl
 
 			RenderContextFormat format;
 			bool enableUpdate = true;
+			bool initialized = false;
+
+			ContextState contextState = Context_OnRenderingFinished;
 
 			// Render State
 

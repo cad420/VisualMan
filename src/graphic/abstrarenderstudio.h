@@ -4,6 +4,7 @@
 
 #include "graphictype.h"
 #include <vector>
+#include "renderevent.h"
 
 namespace ysl
 {
@@ -13,12 +14,12 @@ namespace ysl
 		{
 		public:
 			virtual ~AbstraRenderStudio()=default;
-
 			virtual void Render() = 0;
 			void DispatchRenderStartedEvent();
-			void dispatchRenderFinishedEvent();
+			void DispatchRenderFinishedEvent();
+			void AddRenderEventCallback(Ref<IRenderEvent> callback);
 		protected:
-
+			std::vector<Ref<IRenderEvent>> callbacks;
 		};
 	}
 }

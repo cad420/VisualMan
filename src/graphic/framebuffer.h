@@ -13,7 +13,8 @@ namespace ysl
 		{
 			friend class RenderContext;
 		public:
-			Framebuffer(RenderContext * context,
+			Framebuffer(
+				RenderContext * context,
 				int width,
 				int height,
 				ReadDrawBuffer readBuffer,

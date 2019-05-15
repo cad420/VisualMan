@@ -4,6 +4,7 @@
 #include "graphictype.h"
 #include "renderable.h"
 #include "../mathematics/transformation.h"
+#include "uniform.h"
 
 namespace ysl
 {
@@ -18,8 +19,9 @@ namespace ysl
 			const Transform & GetTransform()const { return transform; }
 		protected:
 			Bound3f bound;
-			Ref(Renderable) renderbles;
+			Ref<Renderable> renderbles;
 			Transform transform;
+			Ref<UniformSet> uniformSet;
 		};
 
 		using ActorRefArray = std::vector<Ref(Actor)>;

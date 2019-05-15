@@ -2,6 +2,8 @@
 #include "assembly.h"
 #include <iostream>
 
+#include "rendercontext.h"
+
 namespace ysl
 {
 	namespace graphics
@@ -9,6 +11,8 @@ namespace ysl
 		void Assembly::InitEvent()
 		{
 			std::cout << "Assembly::InitEvent\n";
+			studio = MakeRef<RenderStudio>();
+			
 		}
 
 		void Assembly::DestroyEvent()
@@ -19,6 +23,18 @@ namespace ysl
 		void Assembly::UpdateEvent()
 		{
 			std::cout << "Assembly::UpdateEvent\n";
+
+			//Update Scene
+
+			//UpdateScene();
+
+			// execute rendering
+			assert(studio);
+			studio->Render();
+
+			// swap buffer
+			if (Context()->HasDoubleBuffer())
+				Context()->SwapBuffer();
 		}
 
 		void Assembly::MousePressEvent(EMouseButton button, int xpos, int ypos)

@@ -13,11 +13,16 @@ namespace ysl {
 
 		bool RenderContext::InitContext()			// can be seemed as InitGLResources()
 		{
+			MakeCurrent();
 			gl3wInit();
 			if (!gl3wIsSupported(4, 4))
 			{
 				throw std::runtime_error("OpenGL 4.4 or higher is needed.");
 			}
+
+			/// TODO:: Lot of works to do here for robust.
+
+			initialized = true;
 		}
 
 		void RenderContext::DestroyGLResources()
@@ -56,10 +61,14 @@ namespace ysl {
 			{
 				listener->context = this;
 				listeners.push_back(listener);
+				if(IsInitialized())
+				{
+					listener->InitEvent();
+				}
 			}
 		}
 
-		void RenderContext::DeleteUIEventListener(const Ref<IEventListener> & listener)
+		void RenderContext::RemoveUIEventListener(const Ref<IEventListener> & listener)
 		{
 			if(listener->context == this)
 			{
@@ -78,10 +87,13 @@ namespace ysl {
 		{
 			std::cout << " RenderContext::DispatchInitEvent\n";
 			MakeCurrent();
-			for(const auto & each:listeners)
+			if(IsInitialized())
 			{
-				if (each->Enabled())
-					each->InitEvent();
+				for (const auto & each : listeners)
+				{
+					if (each->Enabled())
+						each->InitEvent();
+				}
 			}
 		}
 
@@ -186,5 +198,7 @@ namespace ysl {
 					each->KeyPressEvent(key);
 			}
 		}
+
+
 	}
 }

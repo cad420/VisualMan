@@ -8,7 +8,6 @@ int main(int argc,char ** argv)
 	GLFWApplication2 app("Test GLFW Window", RenderContextFormat(), 800, 600);
 	app.AddUIEventListener(Ref<IEventListener>(new Assembly));
 	auto ret = app.Exec();
-
 	system("pause");
 	return ret;
 }
