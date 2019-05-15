@@ -5,7 +5,7 @@ namespace ysl
 {
 	namespace graphics
 	{
-		void RenderStateSet::SetRenderState(Ref<RenderState> state)
+		void RenderStateSet::SetRenderState(Ref<RenderState> state, int index)
 		{
 			for (auto & each : renderStates)
 			{
