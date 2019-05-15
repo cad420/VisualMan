@@ -4,7 +4,7 @@
 #include "graphictype.h"
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		class RenderContext;
 		class Camera;

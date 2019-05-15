@@ -9,7 +9,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 
 		enum UniformType

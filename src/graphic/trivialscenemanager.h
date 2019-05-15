@@ -6,7 +6,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		class GRAPHICS_EXPORT_IMPORT TrivialSceneManager:public AbstraSceneManager
 		{

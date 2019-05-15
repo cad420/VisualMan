@@ -4,7 +4,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		void Assembly::InitEvent()
 		{

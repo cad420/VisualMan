@@ -6,7 +6,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		class RenderToken
 		{

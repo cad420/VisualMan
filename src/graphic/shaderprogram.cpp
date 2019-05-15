@@ -4,7 +4,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		void GLSLShader::SetFromSource(const std::string& source)
 		{
@@ -67,6 +67,8 @@ namespace ysl
 		void GLSLProgram::Apply(int index, Ref<Camera> camera, RenderContext* context) const
 		{
 			std::cout << "GLSLProgram::Apply\n";
+			// use program
+
 		}
 	}
 }

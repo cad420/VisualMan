@@ -3,10 +3,11 @@
 #define _ABSTRARENDERSTUDIO_H_
 
 #include "graphictype.h"
+#include <vector>
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		class GRAPHICS_EXPORT_IMPORT AbstraRenderStudio
 		{
@@ -17,6 +18,7 @@ namespace ysl
 			void DispatchRenderStartedEvent();
 			void dispatchRenderFinishedEvent();
 		protected:
+
 		};
 	}
 }

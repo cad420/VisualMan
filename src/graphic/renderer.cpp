@@ -4,7 +4,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		void Renderer::Render(const std::vector<Ref<Actor>> & rederQueue,
 			const Ref<Camera>& camera)

@@ -5,7 +5,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		namespace gl
 		{

@@ -13,7 +13,7 @@ namespace ysl {
 		std::thread::id GLFWApplication2::threadId;
 		std::mutex GLFWApplication2::mutex;
 
-		bool GLFWApplication2::InitWindow(const std::string& title, const gpu::RenderContextFormat& format, int width,
+		bool GLFWApplication2::InitWindow(const std::string& title, const graphics::RenderContextFormat& format, int width,
 			int height)
 		{
 			DestroyWindow();
@@ -50,7 +50,7 @@ namespace ysl {
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
 
 
-			if(format.Profile() != gpu::ContextProfile::Core)
+			if(format.Profile() != graphics::ContextProfile::Core)
 			{
 				throw std::runtime_error("Only support OpenGL Core Profile\n");
 			}
@@ -90,7 +90,7 @@ namespace ysl {
 			}
 		}
 
-		GLFWApplication2::GLFWApplication2(const std::string& title, const gpu::RenderContextFormat& format, int width,
+		GLFWApplication2::GLFWApplication2(const std::string& title, const graphics::RenderContextFormat& format, int width,
 			int height)
 		{
 			InitSingleton();
@@ -146,7 +146,7 @@ namespace ysl {
 			if (app->mouseRightButtonPressed)
 				e.m_buttons |= MouseEvent::RightButton;
 			if (e.m_buttons)
-				app->DispatchMouseMoveEvent(gpu::Mouse_Left, xpos, ypos);
+				app->DispatchMouseMoveEvent(graphics::Mouse_Left, xpos, ypos);
 		}
 
 
@@ -181,9 +181,9 @@ namespace ysl {
 			if (e.buttons())
 			{
 				if (action == GLFW_PRESS)
-					app->DispatchMousePressedEvent(gpu::EMouseButton(gpu::Mouse_Left | gpu::Mouse_Right), xpos, ypos);
+					app->DispatchMousePressedEvent(graphics::EMouseButton(graphics::Mouse_Left | graphics::Mouse_Right), xpos, ypos);
 				else if (action == GLFW_RELEASE)
-					app->DispatchMouseReleasedEvent(gpu::EMouseButton(gpu::Mouse_Left | gpu::Mouse_Right), xpos, ypos);
+					app->DispatchMouseReleasedEvent(graphics::EMouseButton(graphics::Mouse_Left | graphics::Mouse_Right), xpos, ypos);
 			}
 		}
 

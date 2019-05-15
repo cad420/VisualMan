@@ -8,10 +8,11 @@
 #include "graphictype.h"
 #include "framebuffer.h"
 #include "eventinterface.h"
+#include "framebufferobject.h"
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		enum class ContextProfile
 		{
@@ -23,7 +24,7 @@ namespace ysl
 		class RenderContextFormat
 		{
 		public:
-			RenderContextFormat() :
+			RenderContextFormat():
 				rGBABits(8, 8, 8, 0),
 				accumRGBABits(0, 0, 0, 0),
 				nDepthBufferBits(24),
@@ -66,7 +67,7 @@ namespace ysl
 		class GRAPHICS_EXPORT_IMPORT RenderContext
 		{
 		public:
-			RenderContext() = default;
+			RenderContext();
 			virtual ~RenderContext() = default;
 			RenderContext(const RenderContext &) = delete;
 			RenderContext & operator=(const RenderContext&) = delete;
@@ -88,8 +89,10 @@ namespace ysl
 			void SetContextFormat(const RenderContextFormat& fmt);
 			
 
-			virtual Ref<Framebuffer> GetFramebuffer();
-			virtual Ref<Framebuffer> CreateFramebufferObject();
+			Ref<Framebuffer> GetFramebuffer();
+			Ref<FramebufferObject> CreateFramebufferObject();
+			Ref<FramebufferObject> CreateFramebufferObject(int width,int height,ReadDrawBuffer readBuffer,ReadDrawBuffer drawBuffer);
+
 
 			virtual void DestroyGLResources();
 			virtual void Update() = 0;
@@ -112,6 +115,9 @@ namespace ysl
 		private:
 			//GLFWwindow * windowContext;
 			std::vector<Ref<IEventListener>> listeners;
+			std::vector<Ref<FramebufferObject>> framebufferObjects;
+			Ref<Framebuffer> framebuffer;
+
 			RenderContextFormat format;
 			bool enableUpdate = true;
 

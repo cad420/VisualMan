@@ -32,6 +32,24 @@
 //#include "../../lib/gl3w/GL/glcorearb.h"
 
 inline
+void PrintGLErrorType(GLenum glerr)
+{
+	std::string error;
+	switch (glerr)
+	{
+	case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+	case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+	case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+	case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
+	case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
+	case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+	case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+	default:							   error = "UNKNOWN_ERROR"; break;
+	}
+	ysl::Warning("%s", error.c_str());
+}
+
+inline
 GLenum PrintGLErrorMsg(const char * file, int line)
 {
 	GLenum errorCode;
@@ -56,7 +74,7 @@ GLenum PrintGLErrorMsg(const char * file, int line)
 #ifdef NDEBUG
 #define GL_ERROR_REPORT void(0);
 #define GL_ERROR_ASSERT	void(0);
-#define GL void(0);
+#define GL(stmt) void(0);
 #else
 #define GL_ERROR_REPORT								PrintGLErrorMsg(__FILE__, __LINE__);
 	//{												\
@@ -68,32 +86,36 @@ GLenum PrintGLErrorMsg(const char * file, int line)
 	//}
 	
 
-#define GL_ERROR_ASSERT							\
-		assert(glGetError() == GL_NO_ERROR);	\
+#define GL_ERROR_ASSERT														\
+		assert(glGetError() == GL_NO_ERROR);								\
 
-#define GL(stmt)                                                \
- do {                                                                 \
-    GLenum glerr;                                                      \
-    unsigned int iCounter = 0;                                         \
-    while((glerr = glGetError()) != GL_NO_ERROR) {                     \
+#define GL(stmt)															\
+ do {																		\
+    GLenum glerr;															\
+    unsigned int iCounter = 0;												\
+    while((glerr = glGetError()) != GL_NO_ERROR) {							\
       ysl::Warning("GL error calling %s before line %u (%s): %s (%#x)",     \
-              #stmt, __LINE__, __FILE__,                               \
-              static_cast<unsigned>(glerr));                           \
-      iCounter++;                                                      \
-      if (iCounter > 100) break;                        \
-    }                                                                  \
-    stmt;                                                              \
-    iCounter = 0;                                                      \
-    while((glerr = glGetError()) != GL_NO_ERROR) {                     \
+              #stmt, __LINE__, __FILE__,									\
+              static_cast<unsigned>(glerr));								\
+	  PrintGLErrorType(glerr);												\
+      iCounter++;															\
+      if (iCounter > 100) break;											\
+    }																		\
+    stmt;																	\
+    iCounter = 0;															\
+    while((glerr = glGetError()) != GL_NO_ERROR) {							\
       ysl::Warning("'%s' on line %u (%s) caused GL error: %s (%#x)", #stmt, \
-              __LINE__, __FILE__,                                      \
-              static_cast<unsigned>(glerr));                           \
-      iCounter++;                                                      \
-      if (iCounter > MAX_GL_ERROR_COUNT) break;                        \
-    }                                                                  \
+              __LINE__, __FILE__,											\
+              static_cast<unsigned>(glerr));								\
+	  PrintGLErrorType(glerr);												\
+      iCounter++;															\
+      if (iCounter > 100) break;											\
+    }																		\
   } while(0);
 
-
 #endif /*NDBUG*/
+
+
+
 
 #endif /*_OPENGLUTILS_H_*/

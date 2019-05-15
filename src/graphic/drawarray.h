@@ -6,22 +6,23 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		class GRAPHICS_EXPORT_IMPORT DrawArray:public AbstrDrawCall
 		{
 		public:
-			DrawArray();
+			DrawArray() = default;
 			void Render()const override
 			{
 				std::cout << "Draw Array Executed\n";
+				// glDrawArray;
+
 			}
 			int Start()const { return start; }
 			int Count()const { return count; }
 		private:
-			int start;
-			int count;
-
+			int start = 0;
+			int count = 0;
 		};
 	}
 }

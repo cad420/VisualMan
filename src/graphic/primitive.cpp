@@ -4,7 +4,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		void Primitive::Render_Implement(const Actor * actor, const RenderState* state, const Camera* camera, RenderContext * context)
 		{

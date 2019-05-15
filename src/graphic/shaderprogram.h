@@ -1,16 +1,18 @@
 
 #ifndef _SHADERPROGRAM_H_
 #define _SHADERPROGRAM_H_
+
 #include "../../lib/gl3w/GL/glcorearb.h"
 #include <string>
 #include <vector>
 #include <map>
 #include "abstrarenderstate.h"
 #include "graphictype.h"
+#include "uniform.h"
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		class UniformSet;
 
@@ -86,6 +88,30 @@ namespace ysl
 			void DetachShader(Ref<GLSLShader> shader);
 			void DetachAllShaders();
 			void ApplyUniformSet(Ref<UniformSet> set);
+
+			int GetUniformLocation(const char * name)const;
+
+			int WorldMatrixLocation()const;
+			int ViewMatrixLocation()const;
+			int ProjectionMatrixLocation()const;
+			int NormalMatrixLocation()const;
+
+
+			// Vertex Attribute 
+
+			int VertexPositionLocation()const;
+			int VertexNormalLocation()const;
+			int VertexTexCoordLocation()const;
+			int VertexColorLocation()const;
+
+			Ref<Uniform> GetUniform();
+			Ref<Uniform> CreateUniform(const char * name);
+			void RemoveUniform(const char *name);
+			void RemoveUniform(const Ref<Uniform> & uniform);
+
+			void GetAttribLocation(const char *name);
+
+
 
 			// RenderStateNonIndexed
 

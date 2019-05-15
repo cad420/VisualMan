@@ -9,6 +9,126 @@
 
 namespace ysl
 {
+
+	template<typename T,int nCacheLine = 64>
+	class Linear1DArray
+	{
+		using size_type = std::size_t;
+		std::size_t size;
+		T * data;
+		bool own;
+	public:
+		Linear1DArray():size(0),data(nullptr),own(true)
+		{
+			
+		}
+		Linear1DArray(size_type x,T * data,bool own):size(x),data(data),own(own)
+		{
+			
+		}
+
+		Linear1DArray(size_type x,const T * data):Linear1DArray(x,nullptr,true)
+		{
+			data = (T*)AllocAligned<T>(x);
+			if(data == nullptr)
+			{
+				throw std::runtime_error("Bad Alloc");
+			}
+			if (data)
+				memcpy(this->data, data, x * sizeof(T));
+		}
+
+		Linear1DArray(const Linear1DArray & array):Linear1DArray(array.size,array.data,array.own)
+		{
+			
+		}
+		Linear1DArray & operator=(const Linear1DArray & array)
+		{
+			Clear(); // clear previous data
+
+			this->size = array.size;
+			this->own = own;
+			memcpy(data, array.data, sizeof(T) * size);
+			return *this;
+		}
+
+		Linear1DArray(Linear1DArray && array)noexcept :
+			Linear1DArray(array.size, array.data, array.own)
+		{
+			array.data = nullptr;
+		}
+
+		Linear1DArray & operator=(Linear1DArray && array)noexcept
+		{
+			Clear(); // clear previous data
+
+			size = array.size;
+			data = array.data;
+			own = array.own;
+			array.data = nullptr;
+			return *this;
+		}
+
+		size_type Size()const { return size; }
+		std::size_t Count()const { return size; }
+
+		T & operator()(int x)
+		{
+			return const_cast<T&>(static_cast<const Linear1DArray &>(*this)(x));
+		}
+
+		const T & operator()(int x)const
+		{
+			return data[x];
+		}
+
+		/**
+		 * \brief 
+
+		 * Returns true if resize is success
+		 */
+		bool Resize(std::size_t x)
+		{
+			if(own)
+			{
+				if (x == size)
+					return false;
+
+				T * ptr = (T*)AllocAligned<T>(x);
+				if(x > size)
+				{
+					memcpy(ptr, data, size);
+				}else if(x < size)
+				{
+					memcpy(ptr, data, x);
+				}
+				Clear();
+				size = x;
+				data = ptr;
+				return true;
+			}
+			return false;
+		}
+
+		void Clear()
+		{
+			if (own)
+				FreeAligned(data);
+			data = nullptr;
+			size = 0;
+			own = true;
+		}
+
+		~Linear1DArray()
+		{
+			Clear();
+		}
+
+		const T * Data()const { return data; }
+		T * Data() { return data; }
+	};
+
+
 	template<typename T,int nCacheLine = 64>
 	class Linear2DArray
 	{
@@ -18,7 +138,7 @@ namespace ysl
 		bool m_own;
 	public:
 
-		Linear2DArray():size(0,0),m_data(nullptr),m_own(false)
+		Linear2DArray():size(0,0),m_data(nullptr),m_own(true)
 		{
 		}
 
@@ -50,6 +170,7 @@ namespace ysl
 		}
 		Linear2DArray & operator=(const Linear2DArray & array)
 		{
+			Clear();
 			this->size = array.size;
 			this->m_own = m_own;
 			memcpy(m_data, array.m_data, sizeof(T) * size.x * size.y);
@@ -64,6 +185,7 @@ namespace ysl
 
 		Linear2DArray & operator=(Linear2DArray && array)noexcept
 		{
+			Clear();
 			size = array.size;
 			m_data = array.m_data;
 			m_own = array.m_own;
@@ -84,10 +206,18 @@ namespace ysl
 			return m_data[y * size.x + x];
 		}
 
-		~Linear2DArray()
+		void Clear()
 		{
 			if (m_own)
 				FreeAligned(m_data);
+			size = Size2(0,0);
+			m_own = true;
+			m_data = nullptr;
+		}
+
+		~Linear2DArray()
+		{
+			Clear();
 		}
 
 		const T * Data()const { return m_data;}
@@ -105,7 +235,7 @@ namespace ysl
 		bool own;
 	public:
 
-		Linear3DArray():size(0,0,0),m_data(nullptr), xyPlaneSize(0),own(false)
+		Linear3DArray():size(0,0,0),m_data(nullptr), xyPlaneSize(0),own(true)
 		{
 		}
 
@@ -142,6 +272,7 @@ namespace ysl
 		}
 		Linear3DArray & operator=(const Linear3DArray &array)
 		{
+			Clear();
 			this->size = array.size;
 			this->xyPlaneSize = array.xyPlaneSize;
 			this->own = array.own;
@@ -156,7 +287,7 @@ namespace ysl
 
 		Linear3DArray & operator=(Linear3DArray && array)noexcept
 		{
-
+			Clear();
 			size = array.size;
 			m_data = array.m_data;
 			own = array.own;
@@ -195,10 +326,18 @@ namespace ysl
 			return m_data;
 		}
 
-		~Linear3DArray()
+		void Clear()
 		{
 			if (own)
 				FreeAligned(m_data);
+			own = true;
+			size = Size3(0, 0, 0);
+			m_data = nullptr;
+		}
+
+		~Linear3DArray()
+		{
+			Clear();
 		}
 	};
 }

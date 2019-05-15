@@ -3,7 +3,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		void AbstraRenderStudio::DispatchRenderStartedEvent()
 		{

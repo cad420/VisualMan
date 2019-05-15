@@ -3,7 +3,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		void RenderStateSet::SetRenderState(Ref<RenderState> state)
 		{

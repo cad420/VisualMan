@@ -4,7 +4,7 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		void DepthFuncState::Apply(int index, Ref<Camera> camera, RenderContext* context) const
 		{

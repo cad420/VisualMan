@@ -2,7 +2,7 @@
 #include "uniform.h"
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		void UniformSet::AddUniform(Ref<Uniform> uniform)
 		{

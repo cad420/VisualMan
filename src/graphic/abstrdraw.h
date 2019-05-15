@@ -6,22 +6,21 @@
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 
-		enum EDrawType
-		{
-			DT_TRIANGLES
-		};
+
 
 		class GRAPHICS_EXPORT_IMPORT AbstrDrawCall
 		{
 		public:
-			AbstrDrawCall():drawType(DT_TRIANGLES){}
+			AbstrDrawCall():drawType(PT_TRIANGLES){}
 			virtual void Render()const = 0;
+			void SetPrimitiveType(PrimitiveType type) { drawType = type; }
+			PrimitiveType GetPrimitiveType()const { return drawType; }
 			virtual ~AbstrDrawCall() = default;
 		private:
-			EDrawType drawType;
+			PrimitiveType drawType;
 		};
 	}
 }

@@ -3,8 +3,14 @@
 #include "../../lib/gl3w/GL/gl3w.h"
 
 namespace ysl {
-	namespace gpu
+	namespace graphics
 	{
+		RenderContext::RenderContext():
+		framebuffer(MakeRef<Framebuffer>(this,800,600,RDB_COLOR_ATTACHMENT0,RDB_COLOR_ATTACHMENT0))
+		{
+			int width = 800, height = 600;
+		}
+
 		bool RenderContext::InitContext()			// can be seemed as InitGLResources()
 		{
 			gl3wInit();
@@ -27,12 +33,20 @@ namespace ysl {
 
 		Ref<Framebuffer> RenderContext::GetFramebuffer()
 		{
-			return Ref < Framebuffer>();
+			return framebuffer;
 		}
 
-		Ref<Framebuffer> RenderContext::CreateFramebufferObject()
+		Ref<FramebufferObject> RenderContext::CreateFramebufferObject()
 		{
-			return Ref<Framebuffer>();
+			return CreateFramebufferObject(0, 0, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
+		}
+
+		Ref<FramebufferObject> RenderContext::CreateFramebufferObject(int width, int height, ReadDrawBuffer readBuffer,
+			ReadDrawBuffer drawBuffer)
+		{
+			framebufferObjects.push_back(MakeRef<FramebufferObject>(this,width, height, readBuffer, drawBuffer));
+			framebufferObjects.back()->Create();
+			return framebufferObjects.back();
 		}
 
 

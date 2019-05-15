@@ -3,7 +3,7 @@
 
 int main(int argc,char ** argv)
 {
-	using namespace ysl::gpu;
+	using namespace ysl::graphics;
 	using namespace ysl::app;
 	GLFWApplication2 app("Test GLFW Window", RenderContextFormat(), 800, 600);
 	app.AddUIEventListener(Ref<IEventListener>(new Assembly));

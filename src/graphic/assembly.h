@@ -1,12 +1,13 @@
 
 #ifndef _ASSEMBLY_H_
 #define _ASSEMBLY_H_
+
 #include "eventinterface.h"
-#include <vector>
+#include "renderstudio.h"
 
 namespace ysl
 {
-	namespace gpu
+	namespace graphics
 	{
 		class AbstraSceneManager;
 
@@ -29,7 +30,10 @@ namespace ysl
 			void ResizeEvent(int w, int h) override;
 
 		protected:
-			std::vector<Ref<AbstraSceneManager>> sceneManagers;
+			Ref<RenderStudio> studio;
+			Ref<Camera> camera;
+
+			double FPS;
 		};
 	}
 }
