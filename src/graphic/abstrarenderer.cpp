@@ -1,6 +1,7 @@
 
 #include "abstrarenderer.h"
 #include "renderevent.h"
+#include "../utility/error.h"
 
 namespace ysl
 {
@@ -8,29 +9,40 @@ namespace ysl
 	{
 		void AbstraRenderer::DispatchOnRenderStartedEvent()
 		{
-			std::cout << "AbstraRenderer::DispatchOnRenderStartedEvent\n";
-			for(auto it = callbacks.begin();it != callbacks.end();++it)
+			Debug("AbstraRenderer::DispatchOnRenderStartedEvent\n");
+
+			for(auto it = startedCallbacks.begin();it != startedCallbacks.end();)
 			{
 				auto & item = *it;
 				if (item->IsEnabled() && item->OnRendererStartedEvent(this) && item->IsRemoveAfterCallEnabled())
-					it = callbacks.erase(it);
+					it = startedCallbacks.erase(it);
+				else
+					++it;
 			}
 		}
 
 		void AbstraRenderer::DispatchOnRenderFinishedEvent()
 		{
-			std::cout << "AbstraRenderer::DispatchOnRenderFinishedEent\n";
-			for (auto it = callbacks.begin(); it != callbacks.end(); ++it)
+			Debug("AbstraRenderer::DispatchOnRenderFinishedEent\n");
+
+			for (auto it = finishedCallbacks.begin(); it != finishedCallbacks.end();)
 			{
 				auto & item = *it;
 				if (item->IsEnabled() && item->OnRendererFinishedEvent(this) && item->IsRemoveAfterCallEnabled())
-					it = callbacks.erase(it);
+					it = finishedCallbacks.erase(it);
+				else
+					++it;
 			}
 		}
 
-		void AbstraRenderer::AddRenderEventCallback(Ref<IRenderEvent> callback)
+		void AbstraRenderer::AddRenderStartedEventCallback(Ref<IRenderEvent> callback)
 		{
-			callbacks.push_back(std::move(callback));
+			startedCallbacks.push_back(std::move(callback));
+		}
+
+		void AbstraRenderer::AddRenderFinishedEventCallback(Ref<IRenderEvent> callback)
+		{
+			finishedCallbacks.push_back(std::move(callback));
 		}
 	}
 }

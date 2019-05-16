@@ -13,8 +13,8 @@ namespace ysl
 	{
 		class RenderNode
 		{
-			RenderNode() = default;
 		public:
+			RenderNode() = default;
 			Actor * actor = nullptr;
 			Renderable * renderable = nullptr;
 			const Shading * shading = nullptr;

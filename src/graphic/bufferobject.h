@@ -13,7 +13,8 @@ namespace ysl
 											      public std::enable_shared_from_this<BufferObject>
 		{
 		public:
-			BufferObject(){}
+			BufferObject() = default;
+			~BufferObject() { DestroyBufferObject(); }
 			/**
 			 * \brief A copy constructor
 			 * 
@@ -23,7 +24,7 @@ namespace ysl
 			{
 				handle = 0;
 				bufferSize = 0;
-				usage = BU_STATIC_DRAW;
+				bufferUsage = BU_STATIC_DRAW;
 				*this = other;
 			}
 			/**
@@ -34,11 +35,11 @@ namespace ysl
 			 */
 			BufferObject& operator=(const BufferObject & other)
 			{
-				Destroy();
+				DestroyBufferObject();
 				Linear1DArray<char>::operator=(other);
 				handle = other.handle;
 				bufferSize = other.bufferSize;
-				usage = other.usage;
+				bufferUsage = other.bufferUsage;
 				return *this;
 			}
 
@@ -51,7 +52,7 @@ namespace ysl
 			{
 				handle = other.handle;
 				bufferSize = other.bufferSize;
-				usage = other.usage;
+				bufferUsage = other.bufferUsage;
 				other.handle = 0;
 				other.bufferSize = 0;
 			}
@@ -63,11 +64,11 @@ namespace ysl
 			 */
 			BufferObject & operator=(BufferObject && other)noexcept
 			{
-				Destroy();
+				DestroyBufferObject();
 				Linear1DArray<char>::operator=(std::move(other));
 				handle = other.handle;
 				bufferSize = other.bufferSize;
-				usage = other.usage;
+				bufferUsage = other.bufferUsage;
 				other.handle = 0;
 				other.bufferSize = 0;
 				return *this;
@@ -77,23 +78,27 @@ namespace ysl
 			unsigned int Handle()const { return handle; }
 			uint64_t BufferSize()const { return Size(); }
 
-			void Create();
+			void CreateBufferObject();
 
-			void Destroy();
+			void DestroyBufferObject();
 
 			void Download();
 
-			void Upload();
+			void SetBufferData(size_t bytes,const void * data,BufferObjectUsage usage);
 
-			void * MapBuffer();
+			void SetBuferSubData(size_t offset,size_t bytes,const void * data);
+
+			//void Upload();
+
+			void * MapBuffer(BufferObjectAccess access);
 
 			void UnmapBuffer();
 
-			BufferObjectUsage Usage()const { return usage; }
+			BufferObjectUsage Usage()const { return bufferUsage; }
 		private:
 			unsigned int handle = 0;
 			uint64_t bufferSize = 0;
-			BufferObjectUsage usage = BU_STATIC_DRAW;
+			BufferObjectUsage bufferUsage = BU_STATIC_DRAW;
 		};
 	}
 }

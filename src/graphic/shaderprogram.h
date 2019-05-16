@@ -16,20 +16,13 @@ namespace ysl
 	{
 		class UniformSet;
 
-		enum GLSLShaderType 
-		{
-			ST_VERTEX_SHADER = GL_VERTEX_SHADER, 
-			ST_TESS_CONTROL_SHADER = GL_TESS_CONTROL_SHADER, 
-			ST_TESS_EVALUATION_SHADER = GL_TESS_EVALUATION_SHADER,
-			ST_GEOMETRY_SHADER = GL_GEOMETRY_SHADER, 
-			ST_FRAGMENT_SHADER = GL_FRAGMENT_SHADER 
-		};
+
 
 		class GRAPHICS_EXPORT_IMPORT GLSLShader
 		{
 		public:
 			GLSLShader() = delete;
-			GLSLShader(GLSLShaderType type) :type(type){}
+			GLSLShader(GLSLShaderType type) :type(type) {}
 			void SetFromSource(const std::string & source);
 			void SetFromFile(const std::string & fileName);
 			std::string Source()const { return source; }
@@ -37,7 +30,8 @@ namespace ysl
 			bool Compile();
 			void DestroyShader();
 			GLSLShaderType Type()const { return type; }
-			virtual ~GLSLShader() = default;
+			int Handle()const { return handle; }
+			virtual ~GLSLShader();
 		private:
 			GLSLShaderType type;
 			std::string source;
@@ -46,10 +40,10 @@ namespace ysl
 		};
 
 
-		class GRAPHICS_EXPORT_IMPORT GLSLVertexShader:public GLSLShader
+		class GRAPHICS_EXPORT_IMPORT GLSLVertexShader :public GLSLShader
 		{
 		public:
-			GLSLVertexShader():GLSLShader(ST_VERTEX_SHADER){}
+			GLSLVertexShader() :GLSLShader(ST_VERTEX_SHADER) {}
 		};
 
 		class GRAPHICS_EXPORT_IMPORT GLSLFragmentShader :public GLSLShader
@@ -76,14 +70,18 @@ namespace ysl
 			GLSLGeometryShader() :GLSLShader(ST_GEOMETRY_SHADER) {}
 		};
 
-		class GRAPHICS_EXPORT_IMPORT GLSLProgram:public RenderStateNonIndexed
+		class GRAPHICS_EXPORT_IMPORT GLSLProgram :public RenderStateNonIndexed
 		{
 		public:
-			GLSLProgram():RenderStateNonIndexed(RS_GLSLProgram){}
+			GLSLProgram() :RenderStateNonIndexed(RS_GLSLProgram) {}
+
+			virtual ~GLSLProgram();
 			void CreateProgram();
 			void DestroyProgram();
-			void Link();
+
+			bool Link();
 			bool Linked();
+			bool Reload();
 			void AttachShader(Ref<GLSLShader> shader);
 			void DetachShader(Ref<GLSLShader> shader);
 			void DetachAllShaders();
@@ -110,17 +108,20 @@ namespace ysl
 			void RemoveUniform(const Ref<Uniform> & uniform);
 
 			void GetAttribLocation(const char *name);
-
+			int Handle()const { return handle; }
 
 
 			// RenderStateNonIndexed
 
-			void Apply(int index, Ref<Camera> camera, RenderContext * context)const override;
+			void Apply(int index, const Camera * camera, RenderContext * context)const override;
 		private:
 			std::vector<Ref<GLSLShader>> shaders;
 			std::map<std::string, int> dataLocation;
 			Ref<UniformSet> uniformSet;
+			unsigned int handle = 0;
+			bool linked = false;
 		};
 	}
 }
+
 #endif

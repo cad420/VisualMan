@@ -1,6 +1,7 @@
 
 #include "rendercontext.h"
 #include "../../lib/gl3w/GL/gl3w.h"
+#include "../opengl/openglutils.h"
 
 namespace ysl {
 	namespace graphics
@@ -38,6 +39,7 @@ namespace ysl {
 
 		Ref<Framebuffer> RenderContext::GetFramebuffer()
 		{
+			assert(framebuffer);
 			return framebuffer;
 		}
 
@@ -55,7 +57,7 @@ namespace ysl {
 		}
 
 
-		void RenderContext::AddUIEventListener(const Ref<IEventListener> & listener)
+		void RenderContext::AddEventListener(const Ref<IEventListener> & listener)
 		{
 			if(listener->context == nullptr)
 			{
@@ -68,7 +70,7 @@ namespace ysl {
 			}
 		}
 
-		void RenderContext::RemoveUIEventListener(const Ref<IEventListener> & listener)
+		void RenderContext::RemoveEventListener(const Ref<IEventListener> & listener)
 		{
 			if(listener->context == this)
 			{
@@ -85,7 +87,7 @@ namespace ysl {
 
 		void RenderContext::DispatchInitEvent()
 		{
-			std::cout << " RenderContext::DispatchInitEvent\n";
+			//std::cout << " RenderContext::DispatchInitEvent\n";
 			MakeCurrent();
 			if(IsInitialized())
 			{
@@ -99,7 +101,7 @@ namespace ysl {
 
 		void RenderContext::DispatchUpdateEvent()
 		{
-			std::cout << "RenderContext::DispatchUpdateEvent\n";
+			//std::cout << "RenderContext::DispatchUpdateEvent\n";
 			MakeCurrent();
 			for (const auto & each : listeners)
 			{
@@ -110,7 +112,7 @@ namespace ysl {
 
 		void RenderContext::DispatchDestroyEvent()
 		{
-			std::cout << "RenderContext::DispatchDestroyEvent\n";
+			//std::cout << "RenderContext::DispatchDestroyEvent\n";
 			MakeCurrent();
 			for (const auto & each : listeners)
 			{
@@ -122,7 +124,7 @@ namespace ysl {
 
 		void RenderContext::DispatchResizeEvent(int w, int h)
 		{
-			std::cout << "RenderContext::DispatchResizeEvent:" << w << " " << h << std::endl;
+			//std::cout << "RenderContext::DispatchResizeEvent:" << w << " " << h << std::endl;
 			MakeCurrent();
 			for (const auto & each : listeners)
 			{
@@ -133,7 +135,7 @@ namespace ysl {
 
 		void RenderContext::DispatchMousePressedEvent(EMouseButton button, int xpos, int ypos)
 		{
-			std::cout << "DispatchMousePressedEvent:" << button<<" "<<xpos << " " << ypos << std::endl;
+			//std::cout << "DispatchMousePressedEvent:" << button<<" "<<xpos << " " << ypos << std::endl;
 			MakeCurrent();
 			for (const auto & each : listeners)
 			{
@@ -144,7 +146,7 @@ namespace ysl {
 
 		void RenderContext::DispatchMouseMoveEvent(EMouseButton button, int xpos, int ypos)
 		{
-			std::cout << "RenderContext::DispatchMouseMoveEvent:" << button << " " << xpos << " " << ypos << std::endl;
+			//std::cout << "RenderContext::DispatchMouseMoveEvent:" << button << " " << xpos << " " << ypos << std::endl;
 			MakeCurrent();
 			for (const auto & each : listeners)
 			{
@@ -155,7 +157,7 @@ namespace ysl {
 
 		void RenderContext::DispatchMouseReleasedEvent(EMouseButton button, int xpos, int ypos)
 		{
-			std::cout << "RenderContext::DispatchMouseReleasedEvent:" << button << " " << xpos << " " << ypos << std::endl;
+			//std::cout << "RenderContext::DispatchMouseReleasedEvent:" << button << " " << xpos << " " << ypos << std::endl;
 			MakeCurrent();
 			for (const auto & each : listeners)
 			{
@@ -166,7 +168,7 @@ namespace ysl {
 
 		void RenderContext::DispatchMouseWheelEvent(int ydegree, int xdegree)
 		{
-			std::cout << "RenderContext::DispatchMouseWheelEvent:" <<ydegree << std::endl;
+			//std::cout << "RenderContext::DispatchMouseWheelEvent:" <<ydegree << std::endl;
 			MakeCurrent();
 			for (const auto & each : listeners)
 			{
@@ -179,7 +181,7 @@ namespace ysl {
 		void RenderContext::DispatchKeyReleasedEvent(EKeyButton key)
 		{
 
-			std::cout << "RenderContext::DispatchKeyReleasedEvent:" << key << std::endl;
+			//std::cout << "RenderContext::DispatchKeyReleasedEvent:" << key << std::endl;
 			MakeCurrent();
 			for (const auto & each : listeners)
 			{
@@ -190,7 +192,7 @@ namespace ysl {
 
 		void RenderContext::DispatchKeyPressedEvent(EKeyButton key)
 		{
-			std::cout << "RenderContext::DispatchKeyPressedEvent:" << key << std::endl;
+			//std::cout << "RenderContext::DispatchKeyPressedEvent:" << key << std::endl;
 			MakeCurrent();
 			for (const auto & each : listeners)
 			{
@@ -199,6 +201,10 @@ namespace ysl {
 			}
 		}
 
-
+		void RenderContext::UseProgram(const GLSLProgram* program)
+		{
+			assert(program);
+			GL(glUseProgram(program->Handle()));
+		}
 	}
 }

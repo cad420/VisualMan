@@ -25,5 +25,5 @@ aux_source_directory("../memory" MEMORY_SRC)
 
 #message(STATUS  ${GRAPHIC_SRC})
 
-add_library("rasterizer" SHARED ${GRAPHIC_SRC} ${MATH_SRC} ${GL3W_SRC} ${MEMORY_SRC})
+add_library("rasterizer" STATIC ${GRAPHIC_SRC} ${MATH_SRC} ${GL3W_SRC} ${MEMORY_SRC} "../utility/error.cpp")
 target_link_libraries("rasterizer" ${OPENGL_LIBRARIES})

@@ -6,6 +6,10 @@ namespace ysl
 {
 	namespace graphics
 	{
+		void Primitive::AddDrawCall(Ref<AbstraDrawCall> dc)
+		{
+		}
+
 		void Primitive::Render_Implement(const Actor * actor, const RenderState* state, const Camera* camera, RenderContext * context)
 		{
 			std::cout << "Primitive::Render_Implement";

@@ -31,25 +31,29 @@ namespace ysl
 
 		void UniformSet::RemoveUniform(Ref<Uniform> uniform)
 		{
-			for(auto it = uniforms.begin();it != uniforms.end();++it)
+			for(auto it = uniforms.begin();it != uniforms.end();)
 			{
 				if ((*it)->GetName() == uniform->GetName())
 				{
 					it = uniforms.erase(it);
 					break;
 				}
+				else
+					++it;
 			}
 		}
 
 		void UniformSet::RemoveUniform(const char * name)
 		{
-			for (auto it = uniforms.begin(); it != uniforms.end(); ++it)
+			for (auto it = uniforms.begin(); it != uniforms.end();)
 			{
 				if ((*it)->GetName() == name)
 				{
 					it = uniforms.erase(it);
 					break;
 				}
+				else
+					++it;
 			}
 		}
 

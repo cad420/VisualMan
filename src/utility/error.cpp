@@ -50,4 +50,5 @@ namespace ysl
 		_internal_msg_process_(fmt, args, "Log");
 		va_end(args);
 	}
+
 }

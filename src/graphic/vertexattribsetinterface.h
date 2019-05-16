@@ -1,12 +1,16 @@
 
 #ifndef _VERTEXATTRIBSETINTERFACE_H_
 #define _VERTEXATTRIBSETINTERFACE_H_
-#include "abstraarray.h"
+//#include "abstraarray.h"
 
 namespace ysl
 {
 	namespace graphics
 	{
+
+
+		class AbstraArray;
+
 		class IVertexAttribSet
 		{
 		public:

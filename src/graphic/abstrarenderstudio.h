@@ -17,9 +17,11 @@ namespace ysl
 			virtual void Render() = 0;
 			void DispatchRenderStartedEvent();
 			void DispatchRenderFinishedEvent();
-			void AddRenderEventCallback(Ref<IRenderEvent> callback);
+			void AddRenderStartedEventCallback(Ref<IRenderEvent> callback);
+			void AddRenderFinishedEventCallback(Ref<IRenderEvent> callback);
 		protected:
-			std::vector<Ref<IRenderEvent>> callbacks;
+			std::vector<Ref<IRenderEvent>> renderStartedcallbacks;
+			std::vector<Ref<IRenderEvent>> renderFinishedCallbacks;
 		};
 	}
 }

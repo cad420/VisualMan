@@ -1,42 +1,87 @@
 
 #include "bufferobject.h"
+#include "../opengl/openglutils.h"
+#include <GLFW/glfw3.h>
 
 namespace ysl
 {
 	namespace graphics
 	{
-		void BufferObject::Create()
+		void BufferObject::CreateBufferObject()
 		{
-
+			if(handle == 0)
+			{
+				GL(glGenBuffers(1,&handle));
+				assert(handle);
+				bufferSize = 0;
+			}
 		}
 
-		void BufferObject::Destroy()
+		void BufferObject::DestroyBufferObject()
 		{
-			// glDeleteBuffers(1,&handle);
-			handle = 0;
-			bufferSize = 0;
+			if(handle != 0)
+			{
+				UnmapBuffer();
+				GL(glDeleteBuffers(1, &handle));
+				handle = 0;
+				bufferSize = 0;
+			}
+
 		}
 
 		void BufferObject::Download()
 		{
-
+			if(handle != 0)
+			{
+				Resize(bufferSize);
+				void * ptr = nullptr;
+				GL(ptr = MapBuffer(BA_READ_ONLY));
+				memcpy(Data(), ptr, BufferSize());
+				UnmapBuffer();
+			}
 		}
 
-		void BufferObject::Upload()
+		void BufferObject::SetBufferData(size_t bytes, const void* data, BufferObjectUsage usage)
 		{
-
+			CreateBufferObject();
+			assert(handle);
+			GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
+			GL(glBufferData(GL_ARRAY_BUFFER, bytes, data, usage));
+			GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			bufferSize = bytes;
+			this->bufferUsage = usage;
 		}
 
-		void* BufferObject::MapBuffer()
+		void BufferObject::SetBuferSubData(size_t offset, size_t bytes, const void* data)
 		{
-			return nullptr;
+			assert(handle);
+			if(handle && data)
+			{
+				GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
+				GL(glBufferSubData(GL_ARRAY_BUFFER, offset, bytes, data));
+				GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			}
+		}
+
+		void* BufferObject::MapBuffer(BufferObjectAccess access)
+		{
+			CreateBufferObject();
+			void * ptr = nullptr;
+			GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
+			GL(ptr = glMapBuffer(handle, access));
+			GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			return ptr;
 		}
 
 		void BufferObject::UnmapBuffer()
 		{
-
+			if(handle != 0)
+			{
+				GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
+				GL(glUnmapBuffer(GL_ARRAY_BUFFER));
+				GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			}
 		}
-
 
 	}
 }

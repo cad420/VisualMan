@@ -22,6 +22,19 @@ namespace ysl
 	void Warning(const char* fmt, ...);
 
 	void Log(const char * fmt, ...);
+
+	inline
+	void Debug(const char * fmt, ...)
+	{
+#ifndef NDEBUG
+		va_list args;
+		va_start(args, fmt);
+		_internal_msg_process_(fmt, args, "Debug");
+		va_end(args);
+#else
+		void(0);
+#endif	
+	}
 }
 
 #endif

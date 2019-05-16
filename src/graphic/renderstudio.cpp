@@ -15,7 +15,6 @@ namespace ysl
 			std::cout << "Render Loop\n";
 
 			// calls for a renderer
-
 			assert(!renderers.empty());
 
 			class Raii
@@ -26,6 +25,10 @@ namespace ysl
 				Raii(RenderStudio * studio):studio(studio)
 				{
 					
+					assert(!studio->renderers.empty());
+					assert(studio->renderers[0]->GetFramebuffer());
+					assert(context);
+
 					if(studio->renderers.empty())
 					{
 						ysl::Log("No specified renderer\n");
@@ -42,7 +45,6 @@ namespace ysl
 						ysl::Error("The framebuffer has no corresponding context");
 						return;
 					}
-
 					context->MakeCurrent(); // Redundant ??
 					context->SetContextState(Context_OnRenderingStarted);
 					studio->DispatchRenderStartedEvent();
@@ -96,7 +98,6 @@ namespace ysl
 			// for each program, link it
 
 			// texture creation
-
 
 
 

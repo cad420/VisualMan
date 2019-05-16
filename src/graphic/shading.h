@@ -6,11 +6,14 @@
 #include "enableset.h"
 #include "renderstate.h"
 
+#include "renderstateset.h"
 
 namespace ysl
 {
 	namespace graphics
 	{
+
+
 		class Shading
 		{
 		public:
@@ -23,8 +26,8 @@ namespace ysl
 
 			// RenderState getter and setter 
 			Ref<RenderStateSet> CreateGetRenderStateSet() { return renderStateSet ? renderStateSet : (renderStateSet = MakeRef<RenderStateSet>()); }
-			void SetRenderState(Ref<RenderState> state) { CreateGetRenderStateSet()->SetRenderState(state); }
-			Ref<DepthFuncState> GetDepthFuncState(RenderStateType type) { return std::static_pointer_cast<DepthFuncState>(CreateGetRenderStateSet()->GetRenderState(type)); }
+			void SetRenderState(Ref<RenderState> state) { CreateGetRenderStateSet()->SetRenderState(state,-1); }
+			Ref<DepthFuncState> GetDepthFuncState(RenderStateType type) { return std::static_pointer_cast<DepthFuncState>(CreateGetRenderStateSet()->GetRenderState(type,-1)); }
 
 			// EnableState getter and setter
 			Ref<EnableStateSet> CreateGetEnableStateSet() { return enableSet ? enableSet : (enableSet = MakeRef<EnableStateSet>()); }

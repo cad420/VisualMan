@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "rendercontext.h"
+#include "../utility/error.h"
 
 namespace ysl
 {
@@ -12,7 +13,7 @@ namespace ysl
 		{
 			std::cout << "Assembly::InitEvent\n";
 			studio = MakeRef<RenderStudio>();
-			
+			ysl::Log("Render Studio has been created\n");
 		}
 
 		void Assembly::DestroyEvent()

@@ -1,19 +1,28 @@
 
 #ifndef _RENDERCONTEXT_H_
 #define _RENDERCONTEXT_H_
-#include "../mathematics/geometry.h"
 
 #include <memory>
 #include <vector>
+#include <array>
+
+#include "../mathematics/geometry.h"
 #include "graphictype.h"
 #include "framebuffer.h"
 #include "eventinterface.h"
 #include "framebufferobject.h"
+#include "shaderprogram.h"
+#include "vertexattribsetinterface.h"
+#include "enableset.h"
+#include "abstrarenderstate.h"
 
 namespace ysl
 {
 	namespace graphics
 	{
+		class RenderStateSet;
+		class RenderStateBox;
+
 		enum class ContextProfile
 		{
 			Core,
@@ -88,6 +97,9 @@ namespace ysl
 			}
 			virtual void SwapBuffer() = 0;
 			virtual void MakeCurrent() = 0;
+			virtual void Update() = 0;
+
+
 			bool InitContext();			// We use gl3w
 
 			bool EnableUpdate()const { return enableUpdate; }
@@ -105,11 +117,13 @@ namespace ysl
 
 
 			virtual void DestroyGLResources();
-			virtual void Update() = 0;
+			
+
+			void AddEventListener(const Ref<IEventListener> & listener);
+			void RemoveEventListener(const Ref<IEventListener> & listener);
 
 
-			void AddUIEventListener(const Ref<IEventListener> & listener);
-			void RemoveUIEventListener(const Ref<IEventListener> & listener);
+			// Event Call
 
 			virtual void DispatchInitEvent();
 			virtual void DispatchUpdateEvent();
@@ -122,12 +136,31 @@ namespace ysl
 			virtual void DispatchKeyReleasedEvent(EKeyButton key);
 			virtual void DispatchKeyPressedEvent(EKeyButton key);
 
-			
+			//Rendering State 
+
+			// glUseProgram
+			void UseProgram(const GLSLProgram * program);
+
+
+			// glVertexAttribArray
+			void BindVertexArray(const IVertexAttribSet * vas);
+
+			void ApplyRenderState(const RenderStateSet * rss);
+
+			void ApplyRenderEnable(const EnableStateSet * ess);
+
+
+
+		private:
+			void InitDefaultRenderState();
+			void InitDefaultRenderEnable();
+
 
 		private:
 			//GLFWwindow * windowContext;
 			std::vector<Ref<IEventListener>> listeners;
 			std::vector<Ref<FramebufferObject>> framebufferObjects;
+
 			Ref<Framebuffer> framebuffer;
 
 			RenderContextFormat format;
@@ -139,6 +172,10 @@ namespace ysl
 			// Render State
 
 			// Current GLSLProgram
+			Ref<GLSLProgram> curProgram;
+			std::array<RenderStateBox, RS_RenderStateCount> defaultRenderStates;
+
+
 
 		};
 

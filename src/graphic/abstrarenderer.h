@@ -21,14 +21,14 @@ namespace ysl
 			AbstraRenderer() = default;
 			virtual ~AbstraRenderer() = default;
 			virtual void Render(const RenderQueue & rederQueue, const Ref<Camera> & camera) = 0;
-			Ref<Framebuffer> GetFramebuffer() { return framebuffer; }
-			void SetFramebuffer(Ref<Framebuffer> fb) { this->framebuffer = fb; }
+			virtual Ref<Framebuffer> GetFramebuffer() = 0;
 			void DispatchOnRenderStartedEvent();
 			void DispatchOnRenderFinishedEvent();
-			void AddRenderEventCallback(Ref<IRenderEvent> callback);
+			void AddRenderStartedEventCallback(Ref<IRenderEvent> callback);
+			void AddRenderFinishedEventCallback(Ref<IRenderEvent> callback);
 		private:
-			Ref<Framebuffer> framebuffer;
-			std::vector<Ref<IRenderEvent>> callbacks;
+			std::vector<Ref<IRenderEvent>> startedCallbacks;
+			std::vector<Ref<IRenderEvent>> finishedCallbacks;
 		};
 
 	}

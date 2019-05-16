@@ -20,7 +20,7 @@ namespace ysl
 			RenderStudio()
 			{
 				camera = MakeRef<Camera>();  // A default camera
-				renderers.push_back(MakeRef<Renderer>(new Renderer));
+				renderers.push_back(MakeRef<Renderer>());
 			}
 			void SetCamera(const Ref<Camera> & camera)
 			{
@@ -32,23 +32,17 @@ namespace ysl
 			std::vector<Ref<AbstraSceneManager>> & SceneManager() { return sceneManagers; }
 			const std::vector<Ref<AbstraSceneManager>> & SceneManager()const { return sceneManagers; }
 
-			std::vector<Ref<AbstraRenderer>> & Renderers() { return renderers; }
-			const std::vector<Ref<AbstraRenderer>> & Renderers()const { return renderers; }
+			std::vector<Ref<Renderer>> & Renderers() { return renderers; }
+			const std::vector<Ref<Renderer>> & Renderers()const { return renderers; }
 
 			
 		protected:
 			std::vector<Ref<AbstraSceneManager>> sceneManagers;
-			std::vector<Ref<AbstraRenderer>> renderers;
-
+			std::vector<Ref<Renderer>> renderers;
 			std::vector<Ref<Actor>> actorQueue; // extract from scene manager
-
-
 			Ref<Camera> camera;
-
 		private:
-
 			RenderQueue MakeRenderQueue(const std::vector<Ref<Actor>> & queue);
-
 		};
 	}
 }
