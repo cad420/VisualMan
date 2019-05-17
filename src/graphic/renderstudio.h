@@ -7,17 +7,16 @@
 #include "camera.h"
 #include "graphictype.h"
 #include "abstrarenderstudio.h"
-#include "abstrarenderer.h"
 #include "renderer.h"
 
 namespace ysl
 {
 	namespace graphics
 	{
-		class GRAPHICS_EXPORT_IMPORT RenderStudio:public AbstraRenderStudio
+		class GRAPHICS_EXPORT_IMPORT Frame:public AbstraFrame
 		{
 		public:
-			RenderStudio()
+			Frame()
 			{
 				camera = MakeRef<Camera>();  // A default camera
 				renderers.push_back(MakeRef<Renderer>());

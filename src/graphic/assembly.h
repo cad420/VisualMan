@@ -11,7 +11,6 @@ namespace ysl
 	{
 		class AbstraSceneManager;
 
-
 		class GRAPHICS_EXPORT_IMPORT Assembly :public IEventListener
 		{
 		public:
@@ -32,10 +31,10 @@ namespace ysl
 			virtual void UpdateScene(){}
 
 
-			Ref<RenderStudio> Rendering()const { return studio; }
+			Ref<Frame> Rendering()const { return studio; }
 
 		protected:
-			Ref<RenderStudio> studio;
+			Ref<Frame> studio;
 			Ref<Camera> camera;
 
 			double FPS;

@@ -10,7 +10,7 @@ namespace ysl
 	{
 		class GLSLProgram;
 
-		class GRAPHICS_EXPORT_IMPORT RenderStateSet
+		class RenderStateSet
 		{
 		public:
 			RenderStateSet() = default;

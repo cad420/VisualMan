@@ -8,25 +8,32 @@ namespace ysl
 {
 	namespace graphics
 	{
-		class GRAPHICS_EXPORT_IMPORT TrivialSceneManager:public AbstraSceneManager
+		class TrivialSceneManager:public AbstraSceneManager
 		{
 		public:
 			TrivialSceneManager()
 			{
 				
 			}
-			void AddActor(const Ref(Actor) actor)
+			void AddActor(const Ref<Actor> actor)
 			{
 				this->actors.push_back(actor);
 			}
 
-			void AppendActors(ActorRefArray& actorArray)override
+			void ExtractActors(std::vector<Ref<Actor>> & actorArray)override
 			{
 				actorArray.insert(actorArray.end(), actors.begin(), actors.end());
 			}
+
+			std::vector<Ref<Actor>> Actors() override
+			{
+				return actors;
+			}
+
+
 		private:
 			void ComputeBoundingBox();
-			ActorRefArray actors;
+			std::vector<Ref<Actor>> actors;
 		};
 	}
 }

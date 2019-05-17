@@ -8,14 +8,14 @@ namespace ysl
 {
 	namespace graphics
 	{
-		class AbstraRenderStudio;
+		class AbstraFrame;
 		class AbstraRenderer;
 
 		class GRAPHICS_EXPORT_IMPORT IRenderEvent
 		{
 		public:
-			virtual bool OnRenderingStartedEvent(const graphics::AbstraRenderStudio * studio) = 0;
-			virtual bool OnRenderingFinishedEvent(const graphics::AbstraRenderStudio * studio) = 0;
+			virtual bool OnRenderingStartedEvent(const graphics::AbstraFrame * studio) = 0;
+			virtual bool OnRenderingFinishedEvent(const graphics::AbstraFrame * studio) = 0;
 			virtual bool OnRendererStartedEvent(const AbstraRenderer * renderer) = 0;
 			virtual bool OnRendererFinishedEvent(const AbstraRenderer * renderer) = 0;
 			void SetRemoveAfterCall(bool remove) { removeAfterCall = remove; }

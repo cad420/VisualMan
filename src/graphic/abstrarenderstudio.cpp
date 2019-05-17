@@ -7,7 +7,7 @@ namespace ysl
 {
 	namespace graphics
 	{
-		void AbstraRenderStudio::DispatchRenderStartedEvent()
+		void AbstraFrame::DispatchRenderStartedEvent()
 		{
 			Debug("AbstraRenderStudio::DispatchRenderStartedEvent()");
 			for (auto it = renderStartedcallbacks.begin(); it != renderStartedcallbacks.end(); )
@@ -20,7 +20,7 @@ namespace ysl
 			}
 		}
 
-		void AbstraRenderStudio::DispatchRenderFinishedEvent()
+		void AbstraFrame::DispatchRenderFinishedEvent()
 		{
 			Debug("AbstraRenderStudio::DispatchRenderFinishedEvent()");
 			for (auto it = renderFinishedCallbacks.begin(); it != renderFinishedCallbacks.end(); )
@@ -33,12 +33,12 @@ namespace ysl
 			}
 		}
 
-		void AbstraRenderStudio::AddRenderStartedEventCallback(Ref<IRenderEvent> callback)
+		void AbstraFrame::AddRenderStartedEventCallback(Ref<IRenderEvent> callback)
 		{
 			renderStartedcallbacks.push_back(std::move(callback));
 		}
 
-		void AbstraRenderStudio::AddRenderFinishedEventCallback(Ref<IRenderEvent> callback)
+		void AbstraFrame::AddRenderFinishedEventCallback(Ref<IRenderEvent> callback)
 		{
 			renderFinishedCallbacks.push_back(std::move(callback));
 		}

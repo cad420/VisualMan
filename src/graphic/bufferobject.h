@@ -99,6 +99,7 @@ namespace ysl
 			unsigned int handle = 0;
 			uint64_t bufferSize = 0;
 			BufferObjectUsage bufferUsage = BU_STATIC_DRAW;
+			bool mapped = false;
 		};
 	}
 }

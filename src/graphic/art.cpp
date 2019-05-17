@@ -4,7 +4,7 @@ namespace ysl
 {
 	namespace graphics
 	{
-		Ref<Shading> Art::GetShader(int lod, int pass)
+		Ref<Shading> Artist::GetShader(int lod, int pass)
 		{
 			auto ptr = CreateGetLOD(lod);
 			if (ptr)
@@ -15,11 +15,10 @@ namespace ysl
 			return nullptr;
 		}
 
-		Ref<ShadingPasses> Art::CreateGetLOD(int lod)
+		Ref<ShadingPasses>& Artist::CreateGetLOD(int lod)
 		{
 			if (lod >= 0 && lod < MaxLodLevel)
 				return LodShadingPasses[lod] ? LodShadingPasses[lod] : LodShadingPasses[lod] = MakeRef<ShadingPasses>();
-			return nullptr;
 		}
 	}
 }

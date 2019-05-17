@@ -4,6 +4,12 @@
 #include "../utility/error.h"
 #include "event.h"
 #include "../graphic/abstraarray.h"
+#include "../graphic/drawarray.h"
+#include "../graphic/primitive.h"
+#include "openglutils.h"
+#include "../graphic/renderstudio.h"
+#include "../graphic/trivialscenemanager.h"
+#include "../graphic/actor.h"
 
 
 namespace ysl {
@@ -15,8 +21,11 @@ namespace ysl {
 		std::mutex GLFWApplication2::mutex;
 
 
-		unsigned VAO;
-		Ref<graphics::GLSLProgram> glslProgram;
+		//unsigned VAO;
+		//Ref<graphics::GLSLProgram> glslProgram;
+		//Ref<graphics::ArrayFloat3> triangle;
+		Ref<graphics::Primitive> primitive;
+		Ref<graphics::Frame> frame;
 
 		bool GLFWApplication2::InitWindow(const std::string& title, const graphics::RenderContextFormat& format, int width,
 			int height)
@@ -108,23 +117,18 @@ namespace ysl {
 			// vertex shader
 
 
+			
+
+
 			Ref<graphics::GLSLProgram> program;
 
-			auto  vertShader = MakeRef<graphics::GLSLShader>(ST_VERTEX_SHADER);
-			vertShader->SetFromSource(vertexShaderSource);
-			//vertShader->CreateShader();
-			assert(vertShader->Compile());
 
-			auto fragShader = MakeRef<graphics::GLSLShader>(ST_FRAGMENT_SHADER);
-			fragShader->SetFromSource(fragmentShaderSource);
-			//fragShader->CreateShader();
-			assert(fragShader->Compile());
 
-			glslProgram = MakeRef<graphics::GLSLProgram>();
+			//glslProgram = MakeRef<graphics::GLSLProgram>();
+			//glslProgram->AttachShader(vertShader);
+			//glslProgram->AttachShader(fragShader);
 
-			glslProgram->AttachShader(vertShader);
-			glslProgram->AttachShader(fragShader);
-			glslProgram->DetachShader(fragShader);
+			//glslProgram->DetachShader(fragShader);
 			//glslProgram->Link();
 			//assert(glslProgram->Linked());
 
@@ -183,39 +187,66 @@ namespace ysl {
 
 			//graphics::ArrayFloat3 triangle;
 
-			auto triangle = MakeRef<graphics::ArrayFloat3>();
-			auto bo = triangle->GetBufferObject();
-			bo->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
+			//triangle = MakeRef<graphics::ArrayFloat3>();
+			//triangle->GetBufferObject()->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
 
 
+			auto  vertShader = MakeRef<graphics::GLSLVertexShader>();
+			vertShader->SetFromSource(vertexShaderSource);
+			assert(vertShader->Compile());
+			auto fragShader = MakeRef<graphics::GLSLFragmentShader>();
+			fragShader->SetFromSource(fragmentShaderSource);
+			assert(fragShader->Compile());
+
+
+			 primitive = MakeRef<graphics::Primitive>();
+			auto vert = MakeRef<graphics::ArrayFloat3>();
+			vert->GetBufferObject()->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
+			primitive->SetVertexArray(vert);
+			primitive->DrawCalls().push_back(MakeRef<graphics::DrawArray>(0, 6));
+
+
+			frame = MakeRef<graphics::Frame>();
+			auto triSceneMnger = MakeRef<graphics::TrivialSceneManager>();
+			frame->SceneManager().push_back(triSceneMnger);
+			auto artist = MakeRef<graphics::Artist>();
+			auto shading = MakeRef<graphics::Shading>();
+			shading->CreateGetProgram()->AttachShader(vertShader);
+			shading->CreateGetProgram()->AttachShader(fragShader);
+			artist->CreateGetLOD(0)->push_back(shading);
+
+			//auto shader = artist->GetShader(0);
+			//shader->CreateGetProgram();
+			//auto glsl = artist->GetShader(0)->CreateGetProgram();
+			//glsl->AttachShader(vertShader);
+			//glsl->AttachShader(fragShader);
+
+			auto actor = MakeRef<graphics::Actor>(primitive, artist, nullptr);
+
+
+			triSceneMnger->AddActor(actor);
+			frame->SceneManager().push_back(triSceneMnger);
 
 
 			//unsigned int VAO;
-			unsigned int  VBO, EBO;
-			glGenVertexArrays(1, &VAO);
-			glGenBuffers(1, &VBO);
-			glGenBuffers(1, &EBO);
-			// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-			glBindVertexArray(VAO);
+			//unsigned int  VBO, EBO;
+			//glGenVertexArrays(1, &VAO);
+			//GL(glGenBuffers(1, &VBO));
+			//glGenBuffers(1, &EBO);
+			//glBindVertexArray(VAO);
 
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+			//GL(glBindBuffer(GL_ARRAY_BUFFER,VBO));
+			//GL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
 
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-			glEnableVertexAttribArray(0);
-
-			// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-			// remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
-			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-			// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-			// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-			glBindVertexArray(0);
+			//GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
+			//GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
+			//GL(glBindVertexArray(0));
+			//GL(glBindVertexArray(VAO));
+			//GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0));
+			//GL(glEnableVertexAttribArray(0));
+			//GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			//GL(glBindVertexArray(0));
 
 			// ----------------TEST CODE END--------------------------
 
@@ -264,20 +295,54 @@ namespace ysl {
 
 			// -----------TEST CODE ---------------------------
 
-			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
+			graphics::DrawArray drawArrayCall(0,6);
+
+			GL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
+			GL(glClear(GL_COLOR_BUFFER_BIT));
 
 			// draw our first triangle
 			//glUseProgram(shaderProgram);
+
+			assert(frame->SceneManager().size());
+			auto actors = frame->SceneManager()[0]->Actors();
+			assert(actors.size());
+
+			auto renderable = actors[0]->GetRenderableFromLod(0);
+
+			auto glslProgram = actors[0]->GetArt()->GetShader(0)->CreateGetProgram();
+
+
+			//GL(glBindVertexArray(VAO)); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+
+			//Debug("Buffer Handle:%d\n", primitive->GetVertexArray()->GetBufferObject()->Handle());
+			//GL(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+
+
+			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+			//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+			//GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0));
+			//GL(glEnableVertexAttribArray(0));
+			//auto pri = std::dynamic_pointer_cast<graphics::Primitive>(renderable);
+
+			//assert(pri);
+			//BindVertexArray(pri.get());
+
 			glslProgram->Apply(-1, nullptr, this);
-			glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-			//glDrawArrays(GL_TRIANGLES, 0, 6);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+			renderable->Render(nullptr, nullptr, nullptr, this);
+
+			//GL(glDrawArrays(GL_TRIANGLES, 0, 6));
+			//drawArrayCall.Render();
+			//GL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+
 
 			// ------------TEST CODE--------------------------
 
-			glfwSwapBuffers(glfwWindow);
 
+
+
+			glfwSwapBuffers(glfwWindow);
 		}
 
 		int GLFWApplication2::Exec()

@@ -10,7 +10,7 @@ namespace ysl
 {
 	namespace graphics
 	{
-		void RenderStudio::Render()
+		void Frame::Render()
 		{
 			std::cout << "Render Loop\n";
 
@@ -19,10 +19,10 @@ namespace ysl
 
 			class Raii
 			{
-				RenderStudio * const studio;
+				Frame * const studio;
 				RenderContext * context;
 			public:
-				Raii(RenderStudio * studio):studio(studio)
+				Raii(Frame * studio):studio(studio)
 				{
 					
 					assert(!studio->renderers.empty());
@@ -66,7 +66,7 @@ namespace ysl
 			// construct actor queue from scene manager
 			for(const auto & scene:sceneManagers)
 			{
-				scene->AppendActors(actorQueue);
+				scene->ExtractActors(actorQueue);
 			}
 
 			// construct render queue from actor queue
@@ -85,7 +85,7 @@ namespace ysl
 
 		}
 
-		RenderQueue RenderStudio::MakeRenderQueue(const std::vector<Ref<Actor>>& queue)
+		RenderQueue Frame::MakeRenderQueue(const std::vector<Ref<Actor>>& queue)
 		{
 			std::cout << "RenderStudio::MakeRenderQueue\n";
 

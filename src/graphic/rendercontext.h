@@ -12,14 +12,13 @@
 #include "eventinterface.h"
 #include "framebufferobject.h"
 #include "shaderprogram.h"
-#include "vertexattribsetinterface.h"
-#include "enableset.h"
-#include "abstrarenderstate.h"
 
 namespace ysl
 {
 	namespace graphics
 	{
+		class EnableStateSet;
+		class IVertexAttribSet;
 		class RenderStateSet;
 		class RenderStateBox;
 
@@ -145,6 +144,8 @@ namespace ysl
 			// glVertexAttribArray
 			void BindVertexArray(const IVertexAttribSet * vas);
 
+			void Bind_VAO(int vbo_handle);
+
 			void ApplyRenderState(const RenderStateSet * rss);
 
 			void ApplyRenderEnable(const EnableStateSet * ess);
@@ -152,21 +153,32 @@ namespace ysl
 
 
 		private:
+
+			void GetMaxInteger();
+
 			void InitDefaultRenderState();
 			void InitDefaultRenderEnable();
 
 
 		private:
+
+			struct MAXINTEGER
+			{
+				int MAX_VERTEX_ATTRIBS = 0;
+				int MAX_TEXTURE_IMAGE_UNITE = 0;
+			}maxInteger;
+
+
+
 			//GLFWwindow * windowContext;
 			std::vector<Ref<IEventListener>> listeners;
 			std::vector<Ref<FramebufferObject>> framebufferObjects;
-
 			Ref<Framebuffer> framebuffer;
+
 
 			RenderContextFormat format;
 			bool enableUpdate = true;
 			bool initialized = false;
-
 			ContextState contextState = Context_OnRenderingFinished;
 
 			// Render State
@@ -176,6 +188,12 @@ namespace ysl
 			std::array<RenderStateBox, RS_RenderStateCount> defaultRenderStates;
 
 
+			struct VertexArrayInfo
+			{
+				unsigned vertexBufferHandle = 0;
+				bool enabled = false;
+			};
+			std::array<VertexArrayInfo, VA_VertexAttribArrayCount> vertexAttributeInfo;
 
 		};
 

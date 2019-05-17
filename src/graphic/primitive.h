@@ -1,12 +1,12 @@
 
-#ifndef _MESH_H_
-#define _MESH_H_
-#include "renderable.h"
+#ifndef _PRIMITIVE_H_
+#define _PRIMITIVE_H_
 #include <vector>
 #include <array>
 #include "graphictype.h"
 #include "abstrdraw.h"
 #include "vertexattribsetinterface.h"
+#include "renderable.h"
 
 namespace ysl
 {
@@ -21,28 +21,45 @@ namespace ysl
 		{
 		public:
 			Primitive() = default;
-			virtual ~Primitive() = default;
+			virtual ~Primitive();
 			const std::vector<Ref<AbstrDrawCall>> & DrawCalls()const { return drawCalls; }
 			std::vector<Ref<AbstrDrawCall>> & DrawCalls(){ return drawCalls; }
 			void AddDrawCall(Ref<AbstraDrawCall> dc);
 			// IVertexAttribSet
-			void SetVertexArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexPointAttrib] = std::move(data); }
+			void SetVertexArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexPointAttrib] = std::move(data); bind2VAO(VA_VertexPointAttrib); }
 			Ref<AbstraArray> GetVertexArray()override { return vertexAttribArrays[VA_VertexPointAttrib]; }
-			void SetNormalArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexNormalAttrib] = std::move(data); }
+			Ref<const AbstraArray> GetVertexArray() const override { return vertexAttribArrays[VA_VertexPointAttrib]; }
+
+
+			void SetNormalArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexNormalAttrib] = std::move(data); bind2VAO(VA_VertexNormalAttrib); }
 			Ref<AbstraArray> GetNormalArray()override { return vertexAttribArrays[VA_VertexNormalAttrib]; }
-			void SetColorArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexColorAttrib] = std::move(data); }
+			Ref<const AbstraArray> GetNormalArray() const override { return vertexAttribArrays[VA_VertexNormalAttrib]; }
+
+			void SetColorArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexColorAttrib] = std::move(data); bind2VAO(VA_VertexColorAttrib); }
 			Ref<AbstraArray> GetColorArray()override { return vertexAttribArrays[VA_VertexColorAttrib]; }
-			void SetTexCoordArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexTexCoordAttrib] = std::move(data); }
+			Ref<const AbstraArray> GetColorArray() const override { return vertexAttribArrays[VA_VertexColorAttrib]; }
+
+			void SetTexCoordArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexTexCoordAttrib] = std::move(data); bind2VAO(VA_VertexTexCoordAttrib); }
 			Ref<AbstraArray> GetTexCoordArray()override { return vertexAttribArrays[VA_VertexTexCoordAttrib]; }
-			void SetVertexAttribArray(int attribLocation, Ref<AbstraArray> data)override { vertexAttribArrays[attribLocation] = std::move(data); }
+			Ref<const AbstraArray> GetTexCoordArray() const override { return vertexAttribArrays[VA_VertexTexCoordAttrib]; }
+
+
+			void SetVertexAttribArray(int attribLocation, Ref<AbstraArray> data)override { vertexAttribArrays[attribLocation] = std::move(data); bind2VAO(attribLocation); }
 			Ref<AbstraArray> GetVertexAttribArray(int attribLocation)override { return vertexAttribArrays[attribLocation]; }
+			Ref<const AbstraArray> GetVertexAttribArray(int attribLocation) const override { return vertexAttribArrays[attribLocation]; }
 
 		protected:
-			void Render_Implement(const Actor * actor, const RenderState* state, const Camera* camera, RenderContext * context)override;
+			void Render_Implement(const Actor * actor, const RenderState* state, const Camera* camera, RenderContext * context)const override;
+
+			void bind2VAO(int attribLocation);
 		private:
 			//static constexpr int MaxVertexAttribArray = 8;
+
+			unsigned int vaoHandle = 0;
+
 			std::vector<Ref<AbstrDrawCall>> drawCalls;
 			std::array<Ref<AbstraArray>, VA_VertexAttribArrayCount> vertexAttribArrays;
+			std::array<bool, VA_VertexAttribArrayCount> boundToVAO = { false ,false,false,false};
 		};
 	}
 }

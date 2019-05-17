@@ -17,12 +17,11 @@ namespace ysl
 		class Shading
 		{
 		public:
-			Shading() = default;
+			Shading()=default;
 			virtual ~Shading() = default;
-
 			// Shading Program getter and setter
-			Ref<GLSLProgram> CreateGetProgram() { return renderStateSet->CreateGetProgram(); }
-			void SetProgram(Ref<GLSLProgram> program) { renderStateSet->SetProgram(program); }
+			Ref<GLSLProgram> CreateGetProgram() { return CreateGetRenderStateSet()->CreateGetProgram(); }
+			void SetProgram(Ref<GLSLProgram> program) { CreateGetRenderStateSet()->SetProgram(program); }
 
 			// RenderState getter and setter 
 			Ref<RenderStateSet> CreateGetRenderStateSet() { return renderStateSet ? renderStateSet : (renderStateSet = MakeRef<RenderStateSet>()); }
@@ -41,12 +40,12 @@ namespace ysl
 
 			// texture unit
 
-
 		private:
 			Ref<RenderStateSet> renderStateSet; // shading program is in it
 			Ref<UniformSet> uniformSet;
 			Ref<EnableStateSet> enableSet;
 		};
+
 	}
 }
 

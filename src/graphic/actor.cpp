@@ -1,31 +1,43 @@
 
 #include "actor.h"
+#include "renderable.h"
 
 namespace ysl
 {
 	namespace graphics
 	{
-		void Actor::DispatchOnActorRenderStartedEvent()
+		Actor::Actor(Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform) :
+			art(std::move(art)), transform(std::move(transform))
 		{
-			for(auto & each:callbacks)
+			renderables[0] = std::move(renderable);
+		}
+
+		void Actor::DispatchOnActorRenderStartedEvent(const Camera * camera, Renderable * renderable, const Artist * art, int pass)
+		{
+			for (auto & each : actorEvents)
 			{
 				if (each->IsEventEnable())
-					each->OnActorRenderStartedEvent();
+					each->OnActorRenderStartedEvent(this, camera, renderable, art, pass);
 			}
 		}
 
-		void Actor::DispatchOnActorRenderFinishedEvent()
+		void Actor::DispatchOnActorDeletingEvent(const Camera * camera, Renderable * renderable, const Artist * art, int pass)
 		{
-			for (auto & each : callbacks)
+			for (auto & each : actorEvents)
 			{
-				if (each->IsEventEnable())
-					each->OnActorRenderFinishedEvent();
+				each->OnActorDeletingEvent(this, camera, renderable, art, pass);
 			}
 		}
 
-		void Actor::AddActorEventCallback(Ref<IActorEvent> callback)
+		void Actor::AddActorRenderEventCallback(Ref<IActorEvent> callback)
 		{
-			callbacks.push_back(std::move(callback));
+			actorEvents.push_back(std::move(callback));
+		}
+
+		Ref<Renderable> Actor::GetRenderableFromLod(int lod)
+		{
+			assert(lod >= 0 && lod < 8);
+			return renderables[lod];
 		}
 	}
 }

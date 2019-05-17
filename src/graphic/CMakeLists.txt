@@ -5,7 +5,6 @@ cmake_minimum_required (VERSION 3.3)
 project ("rasterizer")
 
 add_definitions(-DMRE_EXPORT_DLL)
-
 set(_GL3W_INCLUDE_DIR "lib/gl3w")											 #gl3w headers
 include_directories(${_GL3W_INCLUDE_DIR})
 set(GL3W_SRC "../../lib/gl3w/GL/gl3w.c")

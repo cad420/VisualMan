@@ -95,7 +95,7 @@ GLenum PrintGLErrorMsg(const char * file, int line)
     GLenum glerr;															\
     unsigned int iCounter = 0;												\
     while((glerr = glGetError()) != GL_NO_ERROR) {							\
-      ysl::Warning("GL error calling %s before line %u (%s): %s (%#x)",     \
+      ysl::Warning("GL error calling %s before line %u (%s): (%x)",     \
               #stmt, __LINE__, __FILE__,									\
               static_cast<unsigned>(glerr));								\
 	  PrintGLErrorType(glerr);												\
@@ -105,7 +105,7 @@ GLenum PrintGLErrorMsg(const char * file, int line)
     stmt;																	\
     iCounter = 0;															\
     while((glerr = glGetError()) != GL_NO_ERROR) {							\
-      ysl::Warning("'%s' on line %u (%s) caused GL error: %s (%#x)", #stmt, \
+      ysl::Warning("'%s' on line %u (%s) caused GL error: (%d)", #stmt, \
               __LINE__, __FILE__,											\
               static_cast<unsigned>(glerr));								\
 	  PrintGLErrorType(glerr);												\

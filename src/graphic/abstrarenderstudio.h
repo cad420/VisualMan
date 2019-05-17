@@ -10,10 +10,10 @@ namespace ysl
 {
 	namespace graphics
 	{
-		class GRAPHICS_EXPORT_IMPORT AbstraRenderStudio
+		class GRAPHICS_EXPORT_IMPORT AbstraFrame
 		{
 		public:
-			virtual ~AbstraRenderStudio()=default;
+			virtual ~AbstraFrame()=default;
 			virtual void Render() = 0;
 			void DispatchRenderStartedEvent();
 			void DispatchRenderFinishedEvent();

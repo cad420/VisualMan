@@ -70,16 +70,18 @@ namespace ysl
 			GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
 			GL(ptr = glMapBuffer(handle, access));
 			GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			mapped = true;
 			return ptr;
 		}
 
 		void BufferObject::UnmapBuffer()
 		{
-			if(handle != 0)
+			if(handle && mapped )
 			{
 				GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
 				GL(glUnmapBuffer(GL_ARRAY_BUFFER));
 				GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+				mapped = false;
 			}
 		}
 

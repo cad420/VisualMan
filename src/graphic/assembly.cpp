@@ -12,7 +12,7 @@ namespace ysl
 		void Assembly::InitEvent()
 		{
 			std::cout << "Assembly::InitEvent\n";
-			studio = MakeRef<RenderStudio>();
+			studio = MakeRef<Frame>();
 			ysl::Log("Render Studio has been created\n");
 		}
 

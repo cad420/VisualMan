@@ -1,13 +1,17 @@
 
 #include "rendercontext.h"
+#include "vertexattribsetinterface.h"
+
 #include "../../lib/gl3w/GL/gl3w.h"
 #include "../opengl/openglutils.h"
+
+#include "abstraarray.h"
 
 namespace ysl {
 	namespace graphics
 	{
-		RenderContext::RenderContext():
-		framebuffer(MakeRef<Framebuffer>(this,800,600,RDB_COLOR_ATTACHMENT0,RDB_COLOR_ATTACHMENT0))
+		RenderContext::RenderContext() :
+			framebuffer(MakeRef<Framebuffer>(this, 800, 600, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0))
 		{
 			int width = 800, height = 600;
 		}
@@ -22,6 +26,8 @@ namespace ysl {
 			}
 
 			/// TODO:: Lot of works to do here for robust.
+
+			GetMaxInteger();
 
 			initialized = true;
 		}
@@ -51,7 +57,7 @@ namespace ysl {
 		Ref<FramebufferObject> RenderContext::CreateFramebufferObject(int width, int height, ReadDrawBuffer readBuffer,
 			ReadDrawBuffer drawBuffer)
 		{
-			framebufferObjects.push_back(MakeRef<FramebufferObject>(this,width, height, readBuffer, drawBuffer));
+			framebufferObjects.push_back(MakeRef<FramebufferObject>(this, width, height, readBuffer, drawBuffer));
 			framebufferObjects.back()->Create();
 			return framebufferObjects.back();
 		}
@@ -59,11 +65,11 @@ namespace ysl {
 
 		void RenderContext::AddEventListener(const Ref<IEventListener> & listener)
 		{
-			if(listener->context == nullptr)
+			if (listener->context == nullptr)
 			{
 				listener->context = this;
 				listeners.push_back(listener);
-				if(IsInitialized())
+				if (IsInitialized())
 				{
 					listener->InitEvent();
 				}
@@ -72,9 +78,9 @@ namespace ysl {
 
 		void RenderContext::RemoveEventListener(const Ref<IEventListener> & listener)
 		{
-			if(listener->context == this)
+			if (listener->context == this)
 			{
-				for(auto it = listeners.begin() ; it != listeners.end();++it)
+				for (auto it = listeners.begin(); it != listeners.end(); ++it)
 				{
 					if (*it == listener)
 					{
@@ -89,7 +95,7 @@ namespace ysl {
 		{
 			//std::cout << " RenderContext::DispatchInitEvent\n";
 			MakeCurrent();
-			if(IsInitialized())
+			if (IsInitialized())
 			{
 				for (const auto & each : listeners)
 				{
@@ -129,7 +135,7 @@ namespace ysl {
 			for (const auto & each : listeners)
 			{
 				if (each->Enabled())
-					each->ResizeEvent(w,h);
+					each->ResizeEvent(w, h);
 			}
 		}
 
@@ -140,7 +146,7 @@ namespace ysl {
 			for (const auto & each : listeners)
 			{
 				if (each->Enabled())
-					each->MousePressEvent(button,xpos,ypos);
+					each->MousePressEvent(button, xpos, ypos);
 			}
 		}
 
@@ -162,7 +168,7 @@ namespace ysl {
 			for (const auto & each : listeners)
 			{
 				if (each->Enabled())
-					each->MouseReleaseEvent(button,xpos,ypos);
+					each->MouseReleaseEvent(button, xpos, ypos);
 			}
 		}
 
@@ -173,7 +179,7 @@ namespace ysl {
 			for (const auto & each : listeners)
 			{
 				if (each->Enabled())
-					each->MouseWheelEvent(ydegree,xdegree);
+					each->MouseWheelEvent(ydegree, xdegree);
 			}
 		}
 
@@ -205,6 +211,83 @@ namespace ysl {
 		{
 			assert(program);
 			GL(glUseProgram(program->Handle()));
+		}
+
+		void RenderContext::BindVertexArray(const IVertexAttribSet* vas)
+		{
+			//if (vas)
+			//{
+			//	for (auto i = 0; i < maxInteger.MAX_VERTEX_ATTRIBS; i++)
+			//	{
+			//		const auto ptr = vas->GetVertexAttribArray(i);
+			//		if (ptr == nullptr)
+			//		{
+			//			// if there is no corresponding generic vertex array, disable it.
+			//			if(vertexAttributeInfo[i].enabled)
+			//			{
+			//				vertexAttributeInfo[i].enabled = false;
+			//				vertexAttributeInfo[i].vertexBufferHandle = 0;
+			//				GL(glDisableVertexAttribArray(i));
+			//			}
+
+			//			GL(glDisableVertexAttribArray(i));
+
+
+			//		}
+			//		else
+			//		{
+			//			// If there is a coreesponding generic vertex array, enable it
+			//			if(!vertexAttributeInfo[i].enabled)
+			//			{
+			//				vertexAttributeInfo[i].enabled = true;
+			//				//vertexAttributeInfo[i].vertexBufferHandle = ptr->GetBufferObject()->Handle();
+			//				GL(glEnableVertexAttribArray(i));
+			//			}
+
+			//			const auto curBufferObjectHandle = ptr->GetBufferObject()->Handle();
+			//			if(curBufferObjectHandle != vertexAttributeInfo[i].vertexBufferHandle)
+			//			{
+			//				vertexAttributeInfo[i].vertexBufferHandle = curBufferObjectHandle;
+
+			//				GL(glBindBuffer(GL_ARRAY_BUFFER,curBufferObjectHandle));
+
+			//				GL(glVertexAttribPointer(i, // attribute location
+			//					ptr->ComponentNum(), // component of vector
+			//					ptr->Type(), // type enum
+			//					GL_FALSE,	// normalized
+			//					0,		// stride
+			//					reinterpret_cast<void*>(0)));		// offset
+
+			//				Debug("%d %d",ptr->ComponentNum(),ptr->Type());
+
+			//			}
+			//		}
+			//	}
+			//}
+		}
+
+		void RenderContext::Bind_VAO(int vbo_handle)
+		{
+			GL(glBindVertexArray(vbo_handle));
+		}
+
+		void RenderContext::ApplyRenderState(const RenderStateSet* rss)
+		{
+
+		}
+
+		void RenderContext::ApplyRenderEnable(const EnableStateSet* ess)
+		{
+
+		}
+
+		void RenderContext::GetMaxInteger()
+		{
+			// Get max integer at run-time
+			GL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxInteger.MAX_VERTEX_ATTRIBS));
+			maxInteger.MAX_VERTEX_ATTRIBS = std::min(int(VA_VertexAttribArrayCount), int(maxInteger.MAX_VERTEX_ATTRIBS));
+
+			GL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxInteger.MAX_TEXTURE_IMAGE_UNITE));
 		}
 	}
 }
