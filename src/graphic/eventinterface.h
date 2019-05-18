@@ -20,6 +20,7 @@ namespace ysl
 			Key_Right
 		};
 
+
 		class IEventListener
 		{
 			friend class RenderContext;
@@ -38,6 +39,10 @@ namespace ysl
 
 			virtual void UpdateEvent() = 0;
 
+			virtual void AddedEvent(RenderContext * context) = 0;
+
+			virtual void DeletedEvent(RenderContext * context) = 0;
+
 			virtual void MousePressEvent(EMouseButton button, int xpos, int ypos) = 0;
 
 			virtual void MouseMoveEvent(EMouseButton button, int xpos, int ypos) = 0;
@@ -51,6 +56,7 @@ namespace ysl
 			virtual void KeyReleaseEvent(EKeyButton key) = 0;
 
 			RenderContext * Context() { return context; }
+
 			const RenderContext * Context()const { return context; }
 
 			virtual ~IEventListener() = default;

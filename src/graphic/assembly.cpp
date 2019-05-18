@@ -38,6 +38,20 @@ namespace ysl
 				Context()->SwapBuffer();
 		}
 
+		void Assembly::AddedEvent(RenderContext* context)
+		{
+			// The object has been added into context
+			// Here, you need to do something depended this event. e.g. Set camera event interface.
+
+
+		}
+
+		void Assembly::DeletedEvent(RenderContext* context)
+		{
+			// Here, you need to do something done at AddedEvent(RenderContext*) in contrary manners
+
+		}
+
 		void Assembly::MousePressEvent(EMouseButton button, int xpos, int ypos)
 		{
 			std::cout << "Assembly::MousePressEvent:" << button << " " << xpos << " " << ypos << std::endl;

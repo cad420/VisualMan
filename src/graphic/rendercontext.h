@@ -122,6 +122,7 @@ namespace ysl
 			void RemoveEventListener(const Ref<IEventListener> & listener);
 
 
+
 			// Event Call
 
 			virtual void DispatchInitEvent();
@@ -143,13 +144,9 @@ namespace ysl
 
 			// glVertexAttribArray
 			void BindVertexArray(const IVertexAttribSet * vas);
-
 			void Bind_VAO(int vbo_handle);
-
 			void ApplyRenderState(const RenderStateSet * rss);
-
 			void ApplyRenderEnable(const EnableStateSet * ess);
-
 
 
 		private:

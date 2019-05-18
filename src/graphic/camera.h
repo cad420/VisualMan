@@ -4,6 +4,7 @@
 #include "graphictype.h"
 #include "../mathematics/geometry.h"
 #include "../mathematics/transformation.h"
+#include "eventinterface.h"
 
 namespace ysl
 {
@@ -84,9 +85,39 @@ namespace ysl
 			void Ratation(float xoffset, float yoffset) { focusCamera.rotation(xoffset, yoffset); }
 
 
+
 		private:
 			Camera_Impl focusCamera;
 			Transform projMatrix;
+		};
+
+		class GRAPHICS_EXPORT_IMPORT CameraManipulator:public IEventListener
+		{
+		public:
+			CameraManipulator(Ref<Camera> camera):camera(std::move(camera)){}
+			void SetCamera(Ref<Camera> camera) { this->camera = std::move(camera); }
+			Ref<Camera> GetCamera() { return camera; }
+			Ref<const Camera> GetCamera()const { return camera; }
+
+			void InitEvent()override{}
+			void DestroyEvent()override{}
+			void ResizeEvent(int w, int h)override {}
+			void UpdateEvent() override{}
+			void AddedEvent(RenderContext * context) override;
+			void DeletedEvent(RenderContext * context) override;
+
+			void MousePressEvent(EMouseButton button, int xpos, int ypos) override;
+
+			void MouseMoveEvent(EMouseButton button, int xpos, int ypos) override;
+
+			void MouseReleaseEvent(EMouseButton button, int xpos, int ypos) override;
+
+			void MouseWheelEvent(int ydegree, int xdegree) = 0;
+			void KeyPressEvent(EKeyButton key) = 0;
+			void KeyReleaseEvent(EKeyButton key) = 0;
+
+		private:
+			Ref<Camera> camera;
 		};
 	}
 }

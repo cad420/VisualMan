@@ -20,6 +20,8 @@ namespace ysl
 			void InitEvent() override;
 			void DestroyEvent() override;
 			void UpdateEvent()override;
+			void AddedEvent(RenderContext* context) override;
+			void DeletedEvent(RenderContext* context) override;
 			void MousePressEvent(EMouseButton button, int xpos, int ypos) override;
 			void MouseReleaseEvent(EMouseButton button, int xpos, int ypos) override;
 			void MouseMoveEvent(EMouseButton button, int xpos, int ypos) override;
@@ -36,7 +38,6 @@ namespace ysl
 		protected:
 			Ref<Frame> studio;
 			Ref<Camera> camera;
-
 			double FPS;
 		};
 	}

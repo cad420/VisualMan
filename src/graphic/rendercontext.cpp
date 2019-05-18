@@ -215,6 +215,7 @@ namespace ysl {
 
 		void RenderContext::BindVertexArray(const IVertexAttribSet* vas)
 		{
+			assert(false);
 			//if (vas)
 			//{
 			//	for (auto i = 0; i < maxInteger.MAX_VERTEX_ATTRIBS; i++)
@@ -286,7 +287,6 @@ namespace ysl {
 			// Get max integer at run-time
 			GL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxInteger.MAX_VERTEX_ATTRIBS));
 			maxInteger.MAX_VERTEX_ATTRIBS = std::min(int(VA_VertexAttribArrayCount), int(maxInteger.MAX_VERTEX_ATTRIBS));
-
 			GL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxInteger.MAX_TEXTURE_IMAGE_UNITE));
 		}
 	}
