@@ -192,14 +192,14 @@ namespace ysl {
 
 
 			auto  vertShader = MakeRef<graphics::GLSLVertexShader>();
-			vertShader->SetFromSource(vertexShaderSource);
+			vertShader->SetFromFile(R"(D:\code\MRE\resource\glsl\trivial_vs.glsl)");
 			assert(vertShader->Compile());
 			auto fragShader = MakeRef<graphics::GLSLFragmentShader>();
-			fragShader->SetFromSource(fragmentShaderSource);
+			fragShader->SetFromFile(R"(D:\code\MRE\resource\glsl\trivial_fs.glsl)");
 			assert(fragShader->Compile());
 
 
-			 primitive = MakeRef<graphics::Primitive>();
+			primitive = MakeRef<graphics::Primitive>();
 			auto vert = MakeRef<graphics::ArrayFloat3>();
 			vert->GetBufferObject()->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
 			primitive->SetVertexArray(vert);
@@ -213,7 +213,30 @@ namespace ysl {
 			auto shading = MakeRef<graphics::Shading>();
 			shading->CreateGetProgram()->AttachShader(vertShader);
 			shading->CreateGetProgram()->AttachShader(fragShader);
+			//shading->SetUniform(MakeRef<graphics::Uniform>("aColor"));
+			Vec4f color{ 1.0,0.3,0.2,1.0 };
+			shading->CreateGetUniform("aColor")->SetUniform4f(1, color.Data());
+
+
+			// Create a test texture
+			auto testTex = MakeRef<graphics::Texture>();
+			auto setupParams = MakeRef<graphics::TexCreateParams>();
+			setupParams->SetSize(5, 5, 5);
+			setupParams->SetTextureFormat(TF_RGBA32F);
+			setupParams->SetTextureTarget(TD_TEXTURE_3D);
+			testTex->SetSetupParams(setupParams);
+			assert(testTex->CreateTexture());
+			float data[125 * 4];
+			testTex->SetSubTextureData(data, IF_RGBA, IT_FLOAT,0,0,0,5,5,5);
+
+			auto texUnit = 0;
+			shading->CreateGetUniform("testTex")->SetUniform1i(1,&texUnit);
+
+			shading->CreateGetTextureSampler(0)->SetTexture(testTex);
+
+
 			artist->CreateGetLOD(0)->push_back(shading);
+
 
 			//auto shader = artist->GetShader(0);
 			//shader->CreateGetProgram();

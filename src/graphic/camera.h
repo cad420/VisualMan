@@ -84,7 +84,10 @@ namespace ysl
 			Point3f Position()const { return focusCamera.position(); }
 			void Ratation(float xoffset, float yoffset) { focusCamera.rotation(xoffset, yoffset); }
 
-
+			Vec3f Up()const { return focusCamera.up(); }
+			Vec3f Front()const { return focusCamera.front(); }
+			Vec3f Right()const { return focusCamera.right(); }
+			void Movement(const Vec3f& dir, float deltaTime) { focusCamera.movement(dir, deltaTime); }
 
 		private:
 			Camera_Impl focusCamera;
@@ -94,30 +97,42 @@ namespace ysl
 		class GRAPHICS_EXPORT_IMPORT CameraManipulator:public IEventListener
 		{
 		public:
-			CameraManipulator(Ref<Camera> camera):camera(std::move(camera)){}
+			CameraManipulator(Ref<Camera> camera = nullptr):camera(std::move(camera)){}
+
 			void SetCamera(Ref<Camera> camera) { this->camera = std::move(camera); }
+
 			Ref<Camera> GetCamera() { return camera; }
+
 			Ref<const Camera> GetCamera()const { return camera; }
 
 			void InitEvent()override{}
+
 			void DestroyEvent()override{}
-			void ResizeEvent(int w, int h)override {}
+
+			void ResizeEvent(int w, int h)override{}
+
 			void UpdateEvent() override{}
+
 			void AddedEvent(RenderContext * context) override;
+
 			void DeletedEvent(RenderContext * context) override;
 
 			void MousePressEvent(EMouseButton button, int xpos, int ypos) override;
 
 			void MouseMoveEvent(EMouseButton button, int xpos, int ypos) override;
 
-			void MouseReleaseEvent(EMouseButton button, int xpos, int ypos) override;
+			void MouseReleaseEvent(EMouseButton button, int xpos, int ypos) override{};
 
-			void MouseWheelEvent(int ydegree, int xdegree) = 0;
-			void KeyPressEvent(EKeyButton key) = 0;
-			void KeyReleaseEvent(EKeyButton key) = 0;
+			void MouseWheelEvent(int ydegree, int xdegree) override{}
+
+			void KeyPressEvent(EKeyButton key) override{}
+
+			void KeyReleaseEvent(EKeyButton key) override{}
 
 		private:
 			Ref<Camera> camera;
+			Vec2i lastMousePos;
+
 		};
 	}
 }

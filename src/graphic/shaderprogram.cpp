@@ -21,9 +21,20 @@ namespace ysl
 
 		void GLSLShader::SetFromFile(const std::string& fileName)
 		{
-			assert(false);
-			CreateShader();
-			Compile();
+			std::ifstream sourceFile(fileName);
+			if (!sourceFile.is_open())
+			{
+				Warning("Can not open shader source file.\n");
+				return;
+			}
+
+			const std::string prog{ std::istreambuf_iterator<char>{sourceFile},
+				std::istreambuf_iterator<char>{} };
+
+			SetFromSource(prog);
+
+			//CreateShader();
+			//Compile();
 		}
 
 		void GLSLShader::CreateShader()
@@ -32,8 +43,8 @@ namespace ysl
 			{
 				GL(handle = glCreateShader(Type()))
 
-				// Check Create Shader Errors
-				compiled = false;
+					// Check Create Shader Errors
+					compiled = false;
 			}
 		}
 
@@ -46,7 +57,7 @@ namespace ysl
 				GL(glShaderSource(handle, 1, &p, nullptr));
 				GL(glCompileShader(handle))
 
-				int success;
+					int success;
 				char infoLog[512];
 				GL(glGetShaderiv(handle, GL_COMPILE_STATUS, &success));
 				if (!success)
@@ -74,10 +85,6 @@ namespace ysl
 		{
 			DestroyShader();
 		}
-
-
-
-
 
 		GLSLProgram::~GLSLProgram()
 		{
@@ -110,19 +117,20 @@ namespace ysl
 			{
 				if (linked == false)
 				{
+					PreLink();
 					GL(glLinkProgram(handle));
 
 					// check for link errors
 					int success;
 					char infoLog[512];
 					GL(glGetProgramiv(handle, GL_LINK_STATUS, &success));
-					if (!success) 
+					if (!success)
 					{
 						glGetProgramInfoLog(handle, 512, NULL, infoLog);
 						Log("ERROR::SHADER::PROGRAM::LINKING_FAILED\n:%s", infoLog);
 						return false;
 					}
-
+					PostLink();
 					linked = true;
 				}
 			}
@@ -170,7 +178,8 @@ namespace ysl
 					GL(glDetachShader(handle, shader->Handle()));
 					it = shaders.erase(it);
 					//return;
-				}else
+				}
+				else
 				{
 					++it;
 				}
@@ -189,8 +198,153 @@ namespace ysl
 		}
 
 		void GLSLProgram::ApplyUniformSet(Ref<UniformSet> uset)
+
 		{
 
+			if (!uset)
+				return;
+			if (!linked)
+				return;
+			if (!handle)
+				return;
+#ifndef NDEBUG
+			{
+				int curProg = -1;
+				glGetIntegerv(GL_CURRENT_PROGRAM, &curProg);
+				assert(curProg == handle);
+			}
+#endif
+
+			const auto & arr = uset->Uniforms();
+
+			for(const auto & uniform:arr)
+			{
+				const int loc = glGetUniformLocation(handle, uniform->GetName().c_str());
+
+				if (loc == -1)continue;
+
+				switch (uniform->Type())
+				{
+				case UT_INT:      glUniform1iv(loc, uniform->Count(), uniform->Data<int>());  break;
+				case UT_INT_VEC2: glUniform2iv(loc, uniform->Count(), uniform->Data<int>());  break;
+				case UT_INT_VEC3: glUniform3iv(loc, uniform->Count(), uniform->Data<int>());  break;
+				case UT_INT_VEC4: glUniform4iv(loc, uniform->Count(), uniform->Data<int>());  break;
+
+				case UT_UNSIGNED_INT:      glUniform1uiv(loc, uniform->Count(), uniform->Data<unsigned int>());  break;
+				case UT_UNSIGNED_INT_VEC2: glUniform2uiv(loc, uniform->Count(), uniform->Data<unsigned int>());
+				case UT_UNSIGNED_INT_VEC3: glUniform3uiv(loc, uniform->Count(), uniform->Data<unsigned int>()); break;
+				case UT_UNSIGNED_INT_VEC4: glUniform4uiv(loc, uniform->Count(), uniform->Data<unsigned int>()); break;
+
+				case UT_FLOAT:      glUniform1fv(loc, uniform->Count(), uniform->Data<float>());  break;
+				case UT_FLOAT_VEC2: glUniform2fv(loc, uniform->Count(), uniform->Data<float>());  break;
+				case UT_FLOAT_VEC3: glUniform3fv(loc, uniform->Count(), uniform->Data<float>());  break;
+				case UT_FLOAT_VEC4: glUniform4fv(loc, uniform->Count(), uniform->Data<float>());  break;
+
+				case UT_FLOAT_MAT2: glUniformMatrix2fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+				case UT_FLOAT_MAT3: glUniformMatrix3fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+				case UT_FLOAT_MAT4: glUniformMatrix4fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+
+				case UT_FLOAT_MAT2x3: glUniformMatrix2x3fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+				case UT_FLOAT_MAT3x2: glUniformMatrix3x2fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+				case UT_FLOAT_MAT2x4: glUniformMatrix2x4fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+				case UT_FLOAT_MAT4x2: glUniformMatrix4x2fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+				case UT_FLOAT_MAT3x4: glUniformMatrix3x4fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+				case UT_FLOAT_MAT4x3: glUniformMatrix4x3fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+
+				case UT_DOUBLE:      glUniform1dv(loc, uniform->Count(), uniform->Data<double>()); break;
+				case UT_DOUBLE_VEC2: glUniform2dv(loc, uniform->Count(), uniform->Data<double>()); break;
+				case UT_DOUBLE_VEC3: glUniform3dv(loc, uniform->Count(), uniform->Data<double>()); break;
+				case UT_DOUBLE_VEC4: glUniform4dv(loc, uniform->Count(), uniform->Data<double>()); break;
+
+				case UT_DOUBLE_MAT2: glUniformMatrix2dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>());  break;
+				case UT_DOUBLE_MAT3: glUniformMatrix3dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>());  break;
+				case UT_DOUBLE_MAT4: glUniformMatrix4dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
+
+				case UT_DOUBLE_MAT2x3: glUniformMatrix2x3dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
+				case UT_DOUBLE_MAT3x2: glUniformMatrix3x2dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
+				case UT_DOUBLE_MAT2x4: glUniformMatrix2x4dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
+				case UT_DOUBLE_MAT4x2: glUniformMatrix4x2dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
+				case UT_DOUBLE_MAT3x4: glUniformMatrix3x4dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
+				case UT_DOUBLE_MAT4x3: glUniformMatrix4x3dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
+
+				default:
+					assert(false);
+					break;
+				}
+			}
+		}
+
+		int GLSLProgram::GetGenericUniformLocation(const char* name) const
+		{
+			int location = -1;
+			if (handle != 0)
+			{
+				GL(location = glGetUniformLocation(handle, name));
+			}
+			return location;
+		}
+
+		int GLSLProgram::GetWorldMatrixUniformLocation() const
+		{
+			return uniformLocations.vpl_ModelMatrix;
+		}
+
+		int GLSLProgram::GetViewMatrixUniformLocation() const
+		{
+			return uniformLocations.vpl_ViewMatrix;
+		}
+
+		int GLSLProgram::GetProjectionMatrixUniformLocation() const
+		{
+			return uniformLocations.vpl_ProjectionMatrix;
+		}
+
+		int GLSLProgram::GetNormalMatrixUniformLocation() const
+		{
+			return uniformLocations.vpl_NormalMatrix;
+		}
+
+		int GLSLProgram::GetVertexPositionAttribLocation() const
+		{
+			return attribLocations.vpl_VertexPosition;
+		}
+
+		int GLSLProgram::VertexNormalAttribLocation() const
+		{
+			return attribLocations.vpl_VertexNormal;
+		}
+
+		int GLSLProgram::VertexTexCoordAttriLocation(int index) const
+		{
+			assert(index >= 0 && index < 5);
+			return attribLocations.vpl_VertexTexCoord[index];
+		}
+
+		int GLSLProgram::VertexColorAttribLocation() const
+		{
+			return attribLocations.vpl_VertexColor;
+		}
+
+		Ref<Uniform> GLSLProgram::GetUniform(const char * name)
+		{
+			return CreateGetUniformSet()->GetUniform(name);
+		}
+
+		Ref<Uniform> GLSLProgram::CreateGetUniform(const char* name)
+		{
+			return CreateGetUniformSet()->CreateGetUniform(name);
+		}
+
+		void GLSLProgram::RemoveUniform(const char* name)
+		{
+			if (uniformSet)
+				uniformSet->RemoveUniform(name);
+		}
+
+		void GLSLProgram::RemoveUniform(const Ref<Uniform>& uniform)
+		{
+			if (uniform)
+				uniformSet->RemoveUniform(uniform);
 		}
 
 		void GLSLProgram::Apply(int index, const Camera * camera, RenderContext* context) const
@@ -198,6 +352,50 @@ namespace ysl
 			assert(context);
 			context->UseProgram(this);
 			GL_CHECK
+		}
+
+		void GLSLProgram::PreLink()
+		{
+			assert(handle);
+
+			// bind pre-defined vertex attributes to pre-defined locations
+
+			// return -1 if the attribute is not active
+
+			GL(glBindAttribLocation(handle, VA_VertexPositionAttribLocation, "vpl_VertexPosition"));
+			GL(glBindAttribLocation(handle, VA_VertexColorAttribLocation, "vpl_VertexColor"));
+			GL(glBindAttribLocation(handle, VA_VertexNormalAttribLocation, "vpl_VertexNormal"));
+
+			GL(glBindAttribLocation(handle, VA_VertexTexCoord0AttribLocation, "vpl_VertexTexCoord0"));
+			GL(glBindAttribLocation(handle, VA_VertexTexCoord1AttribLocation, "vpl_VertexTexCoord1"));
+			GL(glBindAttribLocation(handle, VA_VertexTexCoord2AttribLocation, "vpl_VertexTexCoord2"));
+			GL(glBindAttribLocation(handle, VA_VertexTexCoord3AttribLocation, "vpl_VertexTexCoord3"));
+			GL(glBindAttribLocation(handle, VA_VertexTexCoord4AttribLocation, "vpl_VertexTexCoord4"));
+
+		}
+
+		void GLSLProgram::PostLink()
+		{
+			assert(handle);
+			// Get pre-defined uniforms' locations
+
+			// return -1 if the uniform is not active
+			GL(uniformLocations.vpl_ModelMatrix = glGetUniformLocation(handle, "vpl_ModelMatrix"));
+			GL(uniformLocations.vpl_ViewMatrix = glGetUniformLocation(handle, "vpl_ViewMatrix"));
+			GL(uniformLocations.vpl_ProjectionMatrix = glGetUniformLocation(handle, "vpl_ProjectionMatrix"));
+			GL(uniformLocations.vpl_MVPMatrix = glGetUniformLocation(handle, "vpl_MVPMatrix"));
+			GL(uniformLocations.vpl_NormalMatrix = glGetUniformLocation(handle, "vpl_NormalMatrix"));
+
+			GL(attribLocations.vpl_VertexPosition = glGetAttribLocation(handle, "vpl_VertexPosition"));
+			GL(attribLocations.vpl_VertexColor = glGetAttribLocation(handle, "vpl_VertexTexColor"));
+			GL(attribLocations.vpl_VertexNormal = glGetAttribLocation(handle, "vpl_VertexNormal"));
+
+			GL(attribLocations.vpl_VertexTexCoord[0] = glGetAttribLocation(handle, "vpl_VertexTexCoord1"));
+			GL(attribLocations.vpl_VertexTexCoord[1] = glGetAttribLocation(handle, "vpl_VertexTexCoord2"));
+			GL(attribLocations.vpl_VertexTexCoord[2] = glGetAttribLocation(handle, "vpl_VertexTexCoord3"));
+			GL(attribLocations.vpl_VertexTexCoord[3] = glGetAttribLocation(handle, "vpl_VertexTexCoord4"));
+			GL(attribLocations.vpl_VertexTexCoord[4] = glGetAttribLocation(handle, "vpl_VertexTexCoord5"));
+
 		}
 	}
 }

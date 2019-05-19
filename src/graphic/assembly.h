@@ -16,7 +16,7 @@ namespace ysl
 		public:
 
 			// IEventListener interfaces
-			Assembly() = default;
+			Assembly();
 			void InitEvent() override;
 			void DestroyEvent() override;
 			void UpdateEvent()override;
@@ -31,13 +31,11 @@ namespace ysl
 			void ResizeEvent(int w, int h) override;
 
 			virtual void UpdateScene(){}
-
-
-			Ref<Frame> Rendering()const { return studio; }
+			Ref<Frame> Rendering()const { return frame; }
 
 		protected:
-			Ref<Frame> studio;
-			Ref<Camera> camera;
+			Ref<Frame> frame;
+			Ref<CameraManipulator> manipulator;
 			double FPS;
 		};
 	}

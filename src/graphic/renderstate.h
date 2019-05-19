@@ -28,10 +28,12 @@ namespace ysl
 			TextureSampler() :RenderStateIndexed(RS_TextureSampler) {}
 			void Apply(int index, const Camera * camera, RenderContext* context) const override;
 			void SetTexture(Ref<Texture> texture) { this->texture = std::move(texture); }
-			Ref<Texture> GetTexture()const { return texture; }
+			Ref<Texture> GetTexture() { return texture; }
+			Ref<const Texture> GetTexture()const { return texture; }
 		private:
 			Ref<Texture> texture;
 		};
+
 
 	}
 }

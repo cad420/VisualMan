@@ -12,7 +12,7 @@ namespace ysl
 		class EnableStateSet
 		{
 		public:
-			void SetEnable(EnableState enable)
+			void Enable(EnableState enable)
 			{
 				if (enable == EN_BLEND)
 				{
@@ -26,7 +26,7 @@ namespace ysl
 				}
 				enableSet.push_back(enable);
 			}
-			void SetDisable(EnableState enable)
+			void Disable(EnableState enable)
 			{
 				if (enable == EN_BLEND)
 				{

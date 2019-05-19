@@ -26,9 +26,9 @@ namespace ysl
 			std::vector<Ref<AbstrDrawCall>> & DrawCalls(){ return drawCalls; }
 			void AddDrawCall(Ref<AbstraDrawCall> dc);
 			// IVertexAttribSet
-			void SetVertexArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexPointAttrib] = std::move(data); bind2VAO(VA_VertexPointAttrib); }
-			Ref<AbstraArray> GetVertexArray()override { return vertexAttribArrays[VA_VertexPointAttrib]; }
-			Ref<const AbstraArray> GetVertexArray() const override { return vertexAttribArrays[VA_VertexPointAttrib]; }
+			void SetVertexArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexPositionAttrib] = std::move(data); bind2VAO(VA_VertexPositionAttrib); }
+			Ref<AbstraArray> GetVertexArray()override { return vertexAttribArrays[VA_VertexPositionAttrib]; }
+			Ref<const AbstraArray> GetVertexArray() const override { return vertexAttribArrays[VA_VertexPositionAttrib]; }
 
 
 			void SetNormalArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexNormalAttrib] = std::move(data); bind2VAO(VA_VertexNormalAttrib); }
@@ -58,8 +58,8 @@ namespace ysl
 			unsigned int vaoHandle = 0;
 
 			std::vector<Ref<AbstrDrawCall>> drawCalls;
-			std::array<Ref<AbstraArray>, VA_VertexAttribArrayCount> vertexAttribArrays;
-			std::array<bool, VA_VertexAttribArrayCount> boundToVAO = { false ,false,false,false};
+			std::array<Ref<AbstraArray>, VA_VertexAttribArray_Count> vertexAttribArrays;
+			std::array<bool, VA_VertexAttribArray_Count> boundToVAO = { false ,false,false,false};
 		};
 	}
 }

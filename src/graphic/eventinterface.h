@@ -39,8 +39,14 @@ namespace ysl
 
 			virtual void UpdateEvent() = 0;
 
+			/**
+			 * \brief Invoked after it was added into a context
+			 */
 			virtual void AddedEvent(RenderContext * context) = 0;
 
+			/**
+			 * \brief Invoked after it was deleted from a context
+			 */
 			virtual void DeletedEvent(RenderContext * context) = 0;
 
 			virtual void MousePressEvent(EMouseButton button, int xpos, int ypos) = 0;
@@ -58,6 +64,8 @@ namespace ysl
 			RenderContext * Context() { return context; }
 
 			const RenderContext * Context()const { return context; }
+
+			void SetContext(RenderContext * context) { this->context = context; }
 
 			virtual ~IEventListener() = default;
 		private:

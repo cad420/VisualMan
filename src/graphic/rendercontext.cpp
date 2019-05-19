@@ -36,6 +36,7 @@ namespace ysl {
 		{
 			// Destroy all gl resources
 
+
 		}
 
 		void RenderContext::SetContextFormat(const RenderContextFormat& fmt)
@@ -63,29 +64,32 @@ namespace ysl {
 		}
 
 
-		void RenderContext::AddEventListener(const Ref<IEventListener> & listener)
+		void RenderContext::AddEventListener(Ref<IEventListener> listener)
 		{
-			if (listener->context == nullptr)
+			if (listener->context == nullptr && listener)
 			{
 				listener->context = this;
-				listeners.push_back(listener);
 				if (IsInitialized())
-				{
 					listener->InitEvent();
-				}
+				listener->AddedEvent(this);
+				listeners.push_back(std::move(listener));
 			}
 		}
 
-		void RenderContext::RemoveEventListener(const Ref<IEventListener> & listener)
+		void RenderContext::RemoveEventListener(Ref<IEventListener> listener)
 		{
-			if (listener->context == this)
+			if (listener && listener->context == this)
 			{
-				for (auto it = listeners.begin(); it != listeners.end(); ++it)
+				for (auto it = listeners.begin(); it != listeners.end();)
 				{
 					if (*it == listener)
 					{
-						listeners.erase(it);
-						break;
+						it = listeners.erase(it);
+						listener->DeletedEvent(this);
+					}
+					else
+					{
+						++it;
 					}
 				}
 			}
@@ -286,7 +290,7 @@ namespace ysl {
 		{
 			// Get max integer at run-time
 			GL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxInteger.MAX_VERTEX_ATTRIBS));
-			maxInteger.MAX_VERTEX_ATTRIBS = std::min(int(VA_VertexAttribArrayCount), int(maxInteger.MAX_VERTEX_ATTRIBS));
+			maxInteger.MAX_VERTEX_ATTRIBS = std::min(int(VA_VertexAttribArray_Count), int(maxInteger.MAX_VERTEX_ATTRIBS));
 			GL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxInteger.MAX_TEXTURE_IMAGE_UNITE));
 		}
 	}

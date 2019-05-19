@@ -9,11 +9,18 @@ namespace ysl
 {
 	namespace graphics
 	{
+		Assembly::Assembly()
+		{
+			manipulator = MakeRef<CameraManipulator>();
+		}
+
 		void Assembly::InitEvent()
 		{
-			std::cout << "Assembly::InitEvent\n";
-			studio = MakeRef<Frame>();
-			ysl::Log("Render Studio has been created\n");
+			frame = MakeRef<Frame>();
+			// A frame has created a camera, 
+			//We just need to bind it to the manipulator
+			manipulator->SetCamera(frame->GetCamera());
+			
 		}
 
 		void Assembly::DestroyEvent()
@@ -28,10 +35,9 @@ namespace ysl
 			//Update Scene
 
 			//UpdateScene();
-
 			// execute rendering
-			assert(studio);
-			studio->Render();
+			assert(frame);
+			frame->Render();
 
 			// swap buffer
 			if (Context()->HasDoubleBuffer())
@@ -42,14 +48,17 @@ namespace ysl
 		{
 			// The object has been added into context
 			// Here, you need to do something depended this event. e.g. Set camera event interface.
-
-
+			assert(context);
+			context->AddEventListener(manipulator);
 		}
 
 		void Assembly::DeletedEvent(RenderContext* context)
 		{
 			// Here, you need to do something done at AddedEvent(RenderContext*) in contrary manners
 
+			assert(context);
+			assert(manipulator);
+			context->RemoveEventListener(manipulator);
 		}
 
 		void Assembly::MousePressEvent(EMouseButton button, int xpos, int ypos)

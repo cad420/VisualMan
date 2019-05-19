@@ -43,7 +43,7 @@ namespace ysl
 		{
 			if(vaoHandle == 0)
 			{
-				GL(glBindVertexArray(0));
+				GL(glGenVertexArrays(1,&vaoHandle));
 				assert(vaoHandle);
 			}
 			GL(glBindVertexArray(vaoHandle));

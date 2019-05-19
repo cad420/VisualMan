@@ -340,6 +340,29 @@ namespace ysl
 			Clear();
 		}
 	};
+
+
+	using Volumeb = Linear3DArray<unsigned char>;
+	using Volume2b = Linear3DArray<Vector2<unsigned char>>;
+	using Volume3b = Linear3DArray<Vector3<unsigned char>>;
+	using Volume4b = Linear3DArray<Vector4<unsigned char>>;
+
+	using Volumef = Linear3DArray<float>;
+	using Volume2f = Linear3DArray<Vector2f>;
+	using Volume3f = Linear3DArray<Vector3f>;
+	using Volume4f = Linear3DArray<Vector4f>;
+
+	using Volumei = Linear3DArray<int>;
+	using Volume2i = Linear3DArray<Vector2i>;
+	using Volume3i = Linear3DArray<Vector3i>;
+	using Volume4i = Linear3DArray<Vector4i>;
+
+	using Volumeui = Linear3DArray<unsigned int>;
+	using Volume2ui = Linear3DArray<Vector2<unsigned int>>;
+	using Volume3ui = Linear3DArray<Vector3<unsigned int>>;
+	using Volume4ui = Linear3DArray<Vector4<unsigned int>>;
+
+
 }
 
 #endif /*_LINEARARRAY_H_*/

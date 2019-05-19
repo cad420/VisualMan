@@ -55,11 +55,13 @@
 #include <set>
 
 
-#if defined(MRE_EXPORT_DLL)
-#define GRAPHICS_EXPORT_IMPORT __declspec(dllexport)
-#else
-#define GRAPHICS_EXPORT_IMPORT __declspec(dllimport)
-#endif
+//#if defined(MRE_EXPORT_DLL)
+//#define GRAPHICS_EXPORT_IMPORT __declspec(dllexport)
+//#else
+//#define GRAPHICS_EXPORT_IMPORT __declspec(dllimport)
+//#endif
+
+#define GRAPHICS_EXPORT_IMPORT 
 
 
 
@@ -247,7 +249,7 @@ enum DepthStencilBufferFormat
 	DSBT_DEPTH32F_STENCIL8 = GL_DEPTH32F_STENCIL8
 };
 
-enum TextureDim
+enum TextureTarget
 {
 	TD_TEXTURE_NONE = 0,
 	TD_TEXTURE_1D = GL_TEXTURE_1D,
@@ -279,6 +281,9 @@ enum Texture2DTarget
 enum TextureFormat
 {
 
+	TF_UNKNOWN = 0,
+
+	TF_R3_G3_B2 = GL_R3_G3_B2,
 	TF_RGB = GL_RGB,
 	TF_RGB4 = GL_RGB4,
 	TF_RGB5 = GL_RGB5,
@@ -295,6 +300,29 @@ enum TextureFormat
 	TF_RGBA12 = GL_RGBA12,
 	TF_RGBA16 = GL_RGBA16,
 
+	// ARB_texture_float / OpenGL 3
+	TF_RGBA32F = GL_RGBA32F,
+	TF_RGB32F = GL_RGB32F,
+	TF_RGBA16F = GL_RGBA16F,
+	TF_RGB16F = GL_RGB16F,
+
+
+	// EXT_packed_depth_stencil / GL_ARB_framebuffer_object
+	TF_DEPTH_STENCIL = GL_DEPTH_STENCIL,
+	TF_DEPTH24_STENCIL8 = GL_DEPTH24_STENCIL8,
+
+	// ARB_depth_buffer_float
+	TF_DEPTH_COMPONENT32F = GL_DEPTH_COMPONENT32F,
+	TF_DEPTH32F_STENCIL8 = GL_DEPTH32F_STENCIL8,
+
+	// ARB_depth_texture
+	TF_DEPTH_COMPONENT = GL_DEPTH_COMPONENT,
+	TF_DEPTH_COMPONENT16 = GL_DEPTH_COMPONENT16,
+	TF_DEPTH_COMPONENT24 = GL_DEPTH_COMPONENT24,
+	TF_DEPTH_COMPONENT32 = GL_DEPTH_COMPONENT32,
+
+
+	// GL_ARB_texture_rg
 	TF_RED = GL_RED,
 	TF_COMPRESSED_RED = GL_COMPRESSED_RED,
 	TF_COMPRESSED_RG = GL_COMPRESSED_RG,
@@ -320,6 +348,24 @@ enum TextureFormat
 	TF_RG32I = GL_RG32I,
 	TF_RG32UI = GL_RG32UI,
 
+	// sRGB OpenGL 2.1
+	//TF_SLUMINANCE_ALPHA = GL_SLUMINANCE_ALPHA,
+	//TF_SLUMINANCE8_ALPHA8 = GL_SLUMINANCE8_ALPHA8,
+	//TF_SLUMINANCE = GL_SLUMINANCE,
+	//TF_SLUMINANCE8 = GL_SLUMINANCE8,
+	//TF_COMPRESSED_SLUMINANCE = GL_COMPRESSED_SLUMINANCE,
+	//TF_COMPRESSED_SLUMINANCE_ALPHA = GL_COMPRESSED_SLUMINANCE_ALPHA,
+
+	// sRGB OpenGL 2.1 / 3.x
+	TF_SRGB = GL_SRGB,
+	TF_SRGB8 = GL_SRGB8,
+	TF_SRGB_ALPHA = GL_SRGB_ALPHA,
+	TF_SRGB8_ALPHA8 = GL_SRGB8_ALPHA8,
+	TF_COMPRESSED_SRGB = GL_COMPRESSED_SRGB,
+	TF_COMPRESSED_SRGB_ALPHA = GL_COMPRESSED_SRGB_ALPHA,
+
+
+	// from table 3.12 opengl api specs 4.1
 	TF_R8_SNORM = GL_R8_SNORM,
 	TF_R16_SNORM = GL_R16_SNORM,
 	TF_RG8_SNORM = GL_RG8_SNORM,
@@ -379,6 +425,55 @@ enum ImageFormat
 	IF_ALPHA = GL_ALPHA,
 	IF_DEPTH_COMPONENT = GL_DEPTH_COMPONENT,
 	IF_STENCIL_INDEX = GL_STENCIL_INDEX,
+
+	// EXT_packed_depth_stencil / GL_ARB_framebuffer_object
+	IF_DEPTH_STENCIL = GL_DEPTH_STENCIL,
+
+	// compressed formats
+	// note: with these format the type must be IT_IMPLICIT_TYPE
+
+	IF_COMPRESSED_RGB_S3TC_DXT1 = GL_COMPRESSED_RGB_S3TC_DXT1_EXT,
+	IF_COMPRESSED_RGBA_S3TC_DXT1 = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,
+	IF_COMPRESSED_RGBA_S3TC_DXT3 = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,
+	IF_COMPRESSED_RGBA_S3TC_DXT5 = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,
+
+	// GL 3.0 (EXT_texture_integer)
+	IF_RED_INTEGER = GL_RED_INTEGER,
+	IF_GREEN_INTEGER = GL_GREEN_INTEGER,
+	IF_BLUE_INTEGER = GL_BLUE_INTEGER,
+	IF_RGB_INTEGER = GL_RGB_INTEGER,
+	IF_RGBA_INTEGER = GL_RGBA_INTEGER,
+	IF_BGR_INTEGER = GL_BGR_INTEGER,
+	IF_BGRA_INTEGER = GL_BGRA_INTEGER,
+};
+
+enum ImageType
+{
+	IT_IMPLICIT_TYPE = 0, //!< The type is implicitly defined by the EImageFormat value, for ex. IF_COMPRESSED_RGB_S3TC_DXT1.
+
+	IT_UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
+	IT_BYTE = GL_BYTE,
+	IT_UNSIGNED_SHORT = GL_UNSIGNED_SHORT,
+	IT_SHORT = GL_SHORT,
+	IT_UNSIGNED_INT = GL_UNSIGNED_INT,
+	IT_INT = GL_INT,
+	IT_FLOAT = GL_FLOAT,
+	IT_UNSIGNED_BYTE_3_3_2 = GL_UNSIGNED_BYTE_3_3_2,
+	IT_UNSIGNED_BYTE_2_3_3_REV = GL_UNSIGNED_BYTE_2_3_3_REV,
+	IT_UNSIGNED_SHORT_5_6_5 = GL_UNSIGNED_SHORT_5_6_5,
+	IT_UNSIGNED_SHORT_5_6_5_REV = GL_UNSIGNED_SHORT_5_6_5_REV,
+	IT_UNSIGNED_SHORT_4_4_4_4 = GL_UNSIGNED_SHORT_4_4_4_4,
+	IT_UNSIGNED_SHORT_4_4_4_4_REV = GL_UNSIGNED_SHORT_4_4_4_4_REV,
+	IT_UNSIGNED_SHORT_5_5_5_1 = GL_UNSIGNED_SHORT_5_5_5_1,
+	IT_UNSIGNED_SHORT_1_5_5_5_REV = GL_UNSIGNED_SHORT_1_5_5_5_REV,
+	IT_UNSIGNED_INT_8_8_8_8 = GL_UNSIGNED_INT_8_8_8_8,
+	IT_UNSIGNED_INT_8_8_8_8_REV = GL_UNSIGNED_INT_8_8_8_8_REV,
+	IT_UNSIGNED_INT_10_10_10_2 = GL_UNSIGNED_INT_10_10_10_2,
+	IT_UNSIGNED_INT_2_10_10_10_REV = GL_UNSIGNED_INT_2_10_10_10_REV,
+
+	IT_UNSIGNED_INT_24_8 = GL_UNSIGNED_INT_24_8,                /* EXT_packed_depth_stencil/GL_ARB_framebuffer_object */
+	IT_FLOAT_32_UNSIGNED_INT_24_8_REV = GL_FLOAT_32_UNSIGNED_INT_24_8_REV    /* ARB_depth_buffer_float */
+
 };
 
 enum PrimitiveType
@@ -452,7 +547,7 @@ enum RenderStateType
 	RS_TextureSampler14 = RS_TextureSampler + 14,
 	RS_TextureSampler15 = RS_TextureSampler + 15,
 
-	RS_RenderStateCount,
+	RS_RenderState_Count,
 
 	RS_NONE,
 };
@@ -468,14 +563,28 @@ enum GLSLShaderType
 };
 
 
-enum VertexAttribType
+enum VertexAttribArrayIndexType
 {
-	VA_VertexPointAttrib,
+	VA_VertexPositionAttrib,
 	VA_VertexColorAttrib,
 	VA_VertexNormalAttrib,
 	VA_VertexTexCoordAttrib,
 
-	VA_VertexAttribArrayCount
+	VA_VertexAttribArray_Count
+};
+
+enum VertexAttribPosition
+{
+	VA_VertexPositionAttribLocation = 0,
+	VA_VertexColorAttribLocation=1,
+	VA_VertexNormalAttribLocation=2,
+	VA_VertexTexCoord0AttribLocation=3,
+	VA_VertexTexCoord1AttribLocation=4,
+	VA_VertexTexCoord2AttribLocation=5,
+	VA_VertexTexCoord3AttribLocation=6,
+	VA_VertexTexCoord4AttribLocation=7,
+
+	vA_VertexAttribPosition_Count
 };
 
 #endif

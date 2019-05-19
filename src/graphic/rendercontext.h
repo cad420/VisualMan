@@ -118,9 +118,8 @@ namespace ysl
 			virtual void DestroyGLResources();
 			
 
-			void AddEventListener(const Ref<IEventListener> & listener);
-			void RemoveEventListener(const Ref<IEventListener> & listener);
-
+			void AddEventListener(Ref<IEventListener> listener);
+			void RemoveEventListener(Ref<IEventListener> listener);
 
 
 			// Event Call
@@ -182,15 +181,15 @@ namespace ysl
 
 			// Current GLSLProgram
 			Ref<GLSLProgram> curProgram;
-			std::array<RenderStateBox, RS_RenderStateCount> defaultRenderStates;
+			std::array<RenderStateBox, RS_RenderState_Count> defaultRenderStates;
 
 
-			struct VertexArrayInfo
-			{
-				unsigned vertexBufferHandle = 0;
-				bool enabled = false;
-			};
-			std::array<VertexArrayInfo, VA_VertexAttribArrayCount> vertexAttributeInfo;
+			//struct VertexArrayInfo
+			//{
+			//	unsigned vertexBufferHandle = 0;
+			//	bool enabled = false;
+			//};
+			//std::array<VertexArrayInfo, VA_VertexAttribArrayCount> vertexAttributeInfo;
 
 		};
 

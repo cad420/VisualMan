@@ -11,7 +11,15 @@ add_definitions(-DNOMINMAX)
 #---------------------------------------------------
 # Build Type
 #---------------------------------------------------
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
+
+if (MSVC_VERSION GREATER_EQUAL "1900")
+    include(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("/std:c++latest" _cpp_latest_flag_supported)
+    if (_cpp_latest_flag_supported)
+        add_compile_options("/std:c++latest")
+    endif()
+endif()
 
 #---------------------------------------------------
 # Dependency Module
@@ -172,6 +180,7 @@ add_executable("graphicsapi"
 "test/newgraphicapi_test.cpp" 
 "src/application/glfwapplication2.cpp"
 "src/utility/error.cpp"
+"src/graphic/graphicsbooster.cpp"
 )
 target_link_libraries("graphicsapi" rasterizer glfw)
 

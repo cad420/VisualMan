@@ -87,34 +87,66 @@ namespace ysl
 			void DetachAllShaders();
 			void ApplyUniformSet(Ref<UniformSet> set);
 
-			int GetUniformLocation(const char * name)const;
 
-			int WorldMatrixLocation()const;
-			int ViewMatrixLocation()const;
-			int ProjectionMatrixLocation()const;
-			int NormalMatrixLocation()const;
+			int GetWorldMatrixUniformLocation()const;
+			int GetViewMatrixUniformLocation()const;
+			int GetProjectionMatrixUniformLocation()const;
+			int GetNormalMatrixUniformLocation()const;
+			int GetGenericUniformLocation(const char * name)const;
 
 
 			// Vertex Attribute 
 
-			int VertexPositionLocation()const;
-			int VertexNormalLocation()const;
-			int VertexTexCoordLocation()const;
-			int VertexColorLocation()const;
+			int GetVertexPositionAttribLocation()const;
+			int VertexNormalAttribLocation()const;
+			int VertexTexCoordAttriLocation(int index)const;
+			int VertexColorAttribLocation()const;
+			void GetGenericAttribLocation(const char *name);
 
-			Ref<Uniform> GetUniform();
-			Ref<Uniform> CreateUniform(const char * name);
-			void RemoveUniform(const char *name);
+			Ref<Uniform> GetUniform(const char * name);
+
+			Ref<Uniform> CreateGetUniform(const char * name);
+			Ref<UniformSet> CreateGetUniformSet() { return uniformSet ? uniformSet : uniformSet = MakeRef<UniformSet>(); }
+
+			void RemoveUniform(const char * name);
 			void RemoveUniform(const Ref<Uniform> & uniform);
 
-			void GetAttribLocation(const char *name);
 			int Handle()const { return handle; }
-
-
 			// RenderStateNonIndexed
 
 			void Apply(int index, const Camera * camera, RenderContext * context)const override;
 		private:
+
+			void PreLink();
+			void PostLink();
+
+			struct PredefinedUniformLocation
+			{
+				int vpl_ModelMatrix = -1;
+				int vpl_ViewMatrix = -1;
+				int vpl_ProjectionMatrix = -1;
+				int vpl_MVPMatrix = -1;
+				int vpl_NormalMatrix = -1;
+			}uniformLocations;
+
+			struct PredefinedAttributeLocation
+			{
+				int vpl_VertexPosition = VA_VertexPositionAttribLocation;
+				int vpl_VertexColor = VA_VertexColorAttribLocation;
+				int vpl_VertexNormal = VA_VertexNormalAttribLocation;
+				int vpl_VertexTexCoord[5] = 
+				{
+					VA_VertexTexCoord0AttribLocation,
+					VA_VertexTexCoord1AttribLocation,
+					VA_VertexTexCoord2AttribLocation,
+					VA_VertexTexCoord3AttribLocation,
+					VA_VertexTexCoord4AttribLocation,
+				};
+
+			}attribLocations;
+
+
+
 			std::vector<Ref<GLSLShader>> shaders;
 			std::map<std::string, int> dataLocation;
 			Ref<UniformSet> uniformSet;

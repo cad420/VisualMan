@@ -15,7 +15,6 @@ namespace ysl
 			GLFWApplication2(const std::string& title, const graphics::RenderContextFormat& format, int width,
 				int height);
 
-
 			~GLFWApplication2();
 
 			bool InitWindow(const std::string & title, const graphics::RenderContextFormat & format,int width,int height);
@@ -40,6 +39,7 @@ namespace ysl
 			static void glfwWindowSizeCallback(GLFWwindow * window, int width, int height);
 			static void glfwMouseScrollCallback(GLFWwindow * window, double xoffset, double yoffset);
 			static void glfw_error_callback(int error, const char* description);
+
 			void InitSingleton();
 			void Init();
 

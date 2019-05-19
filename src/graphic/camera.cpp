@@ -68,5 +68,50 @@ namespace ysl
 			m_up.Normalize();
 		}
 
+		void CameraManipulator::AddedEvent(RenderContext* context)
+		{
+			SetContext(context);
+		}
+
+		void CameraManipulator::DeletedEvent(RenderContext* context)
+		{
+			SetContext(nullptr);
+		}
+
+		void CameraManipulator::MousePressEvent(EMouseButton button, int xpos, int ypos)
+		{
+			lastMousePos.x = xpos;
+			lastMousePos.y = ypos;
+		}
+
+		void CameraManipulator::MouseMoveEvent(EMouseButton button, int xpos, int ypos)
+		{
+			if (camera != nullptr)
+			{
+				// Update Camera
+				const float dx = xpos - lastMousePos.x;
+				const float dy = lastMousePos.y - ypos;
+				if (dx == 0.0 && dy == 0.0)
+					return;
+				if ((button & Mouse_Left) && (button & Mouse_Right))
+				{
+					const auto directionEx = camera->Up()*dy + dx * camera->Right();
+					camera->Movement(directionEx, 0.002);
+				}
+				else if (button == Mouse_Left)
+				{
+					camera->Ratation(dx, dy);
+				}
+				else if (button == Mouse_Right)
+				{
+					const auto directionEx = camera->Front()*dy;
+					camera->Movement(directionEx, 0.01);
+				}
+				lastMousePos.x = xpos;
+				lastMousePos.y = ypos;
+			}
+		}
+
 	}
+
 }
