@@ -11,7 +11,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		class GRAPHICS_EXPORT_IMPORT Frame:public AbstraFrame
 		{

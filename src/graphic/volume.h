@@ -7,7 +7,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		enum VoxelFormat
 		{

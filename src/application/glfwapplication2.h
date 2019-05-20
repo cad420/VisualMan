@@ -9,15 +9,15 @@ namespace ysl
 {
 	namespace app
 	{
-		class GLFWApplication2:public graphics::RenderContext
+		class GLFWApplication2:public vpl::RenderContext
 		{
 		public:
-			GLFWApplication2(const std::string& title, const graphics::RenderContextFormat& format, int width,
+			GLFWApplication2(const std::string& title, const vpl::RenderContextFormat& format, int width,
 				int height);
 
 			~GLFWApplication2();
 
-			bool InitWindow(const std::string & title, const graphics::RenderContextFormat & format,int width,int height);
+			bool InitWindow(const std::string & title, const vpl::RenderContextFormat & format,int width,int height);
 
 			void DestroyWindow();
 

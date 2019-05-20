@@ -5,7 +5,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		int GetBaseFormatBySizedFormat(TextureFormat sizedFormat)
 		{

@@ -7,7 +7,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		class GRAPHICS_EXPORT_IMPORT BufferObject:public Linear1DArray<char>,
 											      public std::enable_shared_from_this<BufferObject>

@@ -8,7 +8,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 
 		class Camera_Impl

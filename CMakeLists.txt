@@ -180,8 +180,7 @@ add_executable("graphicsapi"
 "test/newgraphicapi_test.cpp" 
 "src/application/glfwapplication2.cpp"
 "src/utility/error.cpp"
-"src/graphic/graphicsbooster.cpp"
-)
+"src/graphic/graphicsbooster.cpp")
 target_link_libraries("graphicsapi" rasterizer glfw)
 
 #---------------------------------------------------

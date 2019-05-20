@@ -2,7 +2,7 @@
 #include "shading.h"
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		Ref<TextureSampler> Shading::CreateGetTextureSampler(int unitIndex)
 		{

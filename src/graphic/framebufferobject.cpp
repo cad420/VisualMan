@@ -5,7 +5,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		void AbstraFBOAttachment::DetachFromAllFBO()
 		{

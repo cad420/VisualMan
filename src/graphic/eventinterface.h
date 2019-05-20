@@ -4,7 +4,7 @@
 #include "graphictype.h"
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		class RenderContext;
 		enum  EMouseButton

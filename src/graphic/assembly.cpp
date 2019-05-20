@@ -7,20 +7,19 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
-		Assembly::Assembly()
-		{
-			manipulator = MakeRef<CameraManipulator>();
-		}
-
-		void Assembly::InitEvent()
+		void Assembly::InitDefault()
 		{
 			frame = MakeRef<Frame>();
 			// A frame has created a camera, 
 			//We just need to bind it to the manipulator
 			manipulator->SetCamera(frame->GetCamera());
-			
+		}
+
+		Assembly::Assembly()
+		{
+			manipulator = MakeRef<CameraManipulator>();
 		}
 
 		void Assembly::DestroyEvent()
@@ -34,7 +33,7 @@ namespace ysl
 
 			//Update Scene
 
-			//UpdateScene();
+			UpdateScene();
 			// execute rendering
 			assert(frame);
 			frame->Render();

@@ -24,10 +24,10 @@ namespace ysl {
 		//unsigned VAO;
 		//Ref<graphics::GLSLProgram> glslProgram;
 		//Ref<graphics::ArrayFloat3> triangle;
-		Ref<graphics::Primitive> primitive;
-		Ref<graphics::Frame> frame;
+		Ref<vpl::Primitive> primitive;
+		Ref<vpl::Frame> frame;
 
-		bool GLFWApplication2::InitWindow(const std::string& title, const graphics::RenderContextFormat& format, int width,
+		bool GLFWApplication2::InitWindow(const std::string& title, const vpl::RenderContextFormat& format, int width,
 			int height)
 		{
 			DestroyWindow();
@@ -64,7 +64,7 @@ namespace ysl {
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
 
 
-			if (format.Profile() != graphics::ContextProfile::Core)
+			if (format.Profile() != vpl::ContextProfile::Core)
 			{
 				throw std::runtime_error("Only support OpenGL Core Profile\n");
 			}
@@ -94,184 +94,72 @@ namespace ysl {
 			DispatchInitEvent();
 
 
-			// ---------TEST CODE---------------------------------
-
-			const unsigned int SCR_WIDTH = 800;
-			const unsigned int SCR_HEIGHT = 600;
-
-			const char *vertexShaderSource = "#version 330 core\n"
-				"layout (location = 0) in vec3 aPos;\n"
-				"void main()\n"
-				"{\n"
-				"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-				"}\0";
-			const char *fragmentShaderSource = "#version 330 core\n"
-				"out vec4 FragColor;\n"
-				"void main()\n"
-				"{\n"
-				"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-				"}\n\0";
-
-			// build and compile our shader program
-			// ------------------------------------
-			// vertex shader
 
 
-			
-
-
-			Ref<graphics::GLSLProgram> program;
-
-
-
-			//glslProgram = MakeRef<graphics::GLSLProgram>();
-			//glslProgram->AttachShader(vertShader);
-			//glslProgram->AttachShader(fragShader);
-
-			//glslProgram->DetachShader(fragShader);
-			//glslProgram->Link();
-			//assert(glslProgram->Linked());
-
-
-
-			//int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-			//glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-			//glCompileShader(vertexShader);
-			//// check for shader compile errors
-			//int success;
-			//char infoLog[512];
-			//glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-			//if (!success)
-			//{
-			//	glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-			//	std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-			//}
-			//// fragment shader
-			//int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-			//glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-			//glCompileShader(fragmentShader);
-			//// check for shader compile errors
-			//glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-			//if (!success)
-			//{
-			//	glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-			//	std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-			//}
-			//// link shaders
-			//shaderProgram = glCreateProgram();
-			//glAttachShader(shaderProgram, vertexShader);
-			//glAttachShader(shaderProgram, fragmentShader);
-			//glLinkProgram(shaderProgram);
-			//// check for linking errors
-			//glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-			//if (!success) {
-			//	glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-			//	std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-			//}
-			//glDeleteShader(vertexShader);
-			//glDeleteShader(fragmentShader);
-
-			// set up vertex data (and buffer(s)) and configure vertex attributes
+			//Ref<vpl::GLSLProgram> program;
+		
 			// ------------------------------------------------------------------
-			float vertices[] = {
-				 0.5f,  0.5f, 0.0f,  // top right
-				 0.5f, -0.5f, 0.0f,  // bottom right
-				-0.5f, -0.5f, 0.0f,  // bottom left
-				-0.5f,  0.5f, 0.0f   // top left 
-			};
-			unsigned int indices[] = {  // note that we start from 0!
-				0, 1, 3,  // first Triangle
-				1, 2, 3   // second Triangle
-			};
+			//float vertices[] = {
+			//	 0.5f,  0.5f, 0.0f,  // top right
+			//	 0.5f, -0.5f, 0.0f,  // bottom right
+			//	-0.5f, -0.5f, 0.0f,  // bottom left
+			//	-0.5f,  0.5f, 0.0f   // top left 
+			//};
+			//unsigned int indices[] = {  // note that we start from 0!
+			//	0, 1, 3,  // first Triangle
+			//	1, 2, 3   // second Triangle
+			//};
+
+			//auto  vertShader = MakeRef<vpl::GLSLVertexShader>();
+			//vertShader->SetFromFile(R"(D:\code\MRE\resource\glsl\trivial_vs.glsl)");
+			//assert(vertShader->Compile());
+			//auto fragShader = MakeRef<vpl::GLSLFragmentShader>();
+			//fragShader->SetFromFile(R"(D:\code\MRE\resource\glsl\trivial_fs.glsl)");
+			//assert(fragShader->Compile());
 
 
-			//graphics::ArrayFloat3 triangle;
-
-			//triangle = MakeRef<graphics::ArrayFloat3>();
-			//triangle->GetBufferObject()->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
-
-
-			auto  vertShader = MakeRef<graphics::GLSLVertexShader>();
-			vertShader->SetFromFile(R"(D:\code\MRE\resource\glsl\trivial_vs.glsl)");
-			assert(vertShader->Compile());
-			auto fragShader = MakeRef<graphics::GLSLFragmentShader>();
-			fragShader->SetFromFile(R"(D:\code\MRE\resource\glsl\trivial_fs.glsl)");
-			assert(fragShader->Compile());
+			//primitive = MakeRef<vpl::Primitive>();
+			//auto vert = MakeRef<vpl::ArrayFloat3>();
+			//vert->GetBufferObject()->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
+			//primitive->SetVertexArray(vert);
+			//primitive->DrawCalls().push_back(MakeRef<vpl::DrawArray>(0, 6));
 
 
-			primitive = MakeRef<graphics::Primitive>();
-			auto vert = MakeRef<graphics::ArrayFloat3>();
-			vert->GetBufferObject()->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
-			primitive->SetVertexArray(vert);
-			primitive->DrawCalls().push_back(MakeRef<graphics::DrawArray>(0, 6));
+			//frame = MakeRef<vpl::Frame>();
+			//auto triSceneMnger = MakeRef<vpl::TrivialSceneManager>();
+			//frame->SceneManager().push_back(triSceneMnger);
+			//auto artist = MakeRef<vpl::Artist>();
+			//auto shading = MakeRef<vpl::Shading>();
+			//shading->CreateGetProgram()->AttachShader(vertShader);
+			//shading->CreateGetProgram()->AttachShader(fragShader);
+			////shading->SetUniform(MakeRef<graphics::Uniform>("aColor"));
+			//Vec4f color{ 1.0,0.3,0.2,1.0 };
+			//shading->CreateGetUniform("aColor")->SetUniform4f(1, color.Data());
 
 
-			frame = MakeRef<graphics::Frame>();
-			auto triSceneMnger = MakeRef<graphics::TrivialSceneManager>();
-			frame->SceneManager().push_back(triSceneMnger);
-			auto artist = MakeRef<graphics::Artist>();
-			auto shading = MakeRef<graphics::Shading>();
-			shading->CreateGetProgram()->AttachShader(vertShader);
-			shading->CreateGetProgram()->AttachShader(fragShader);
-			//shading->SetUniform(MakeRef<graphics::Uniform>("aColor"));
-			Vec4f color{ 1.0,0.3,0.2,1.0 };
-			shading->CreateGetUniform("aColor")->SetUniform4f(1, color.Data());
+			//// Create a test texture
+			//auto testTex = MakeRef<vpl::Texture>();
+			//auto setupParams = MakeRef<vpl::TexCreateParams>();
+			//setupParams->SetSize(5, 5, 5);
+			//setupParams->SetTextureFormat(TF_RGBA32F);
+			//setupParams->SetTextureTarget(TD_TEXTURE_3D);
+			//testTex->SetSetupParams(setupParams);
+			//assert(testTex->CreateTexture());
+			//float data[125 * 4];
+			//testTex->SetSubTextureData(data, IF_RGBA, IT_FLOAT,0,0,0,5,5,5);
+
+			//auto texUnit = 0;
+			//shading->CreateGetUniform("testTex")->SetUniform1i(1,&texUnit);
+			//shading->CreateGetTextureSampler(0)->SetTexture(testTex);
+			//artist->GetLOD(0)->push_back(shading);
+
+			//auto actor = MakeRef<vpl::Actor>(primitive, artist, nullptr);
 
 
-			// Create a test texture
-			auto testTex = MakeRef<graphics::Texture>();
-			auto setupParams = MakeRef<graphics::TexCreateParams>();
-			setupParams->SetSize(5, 5, 5);
-			setupParams->SetTextureFormat(TF_RGBA32F);
-			setupParams->SetTextureTarget(TD_TEXTURE_3D);
-			testTex->SetSetupParams(setupParams);
-			assert(testTex->CreateTexture());
-			float data[125 * 4];
-			testTex->SetSubTextureData(data, IF_RGBA, IT_FLOAT,0,0,0,5,5,5);
-
-			auto texUnit = 0;
-			shading->CreateGetUniform("testTex")->SetUniform1i(1,&texUnit);
-
-			shading->CreateGetTextureSampler(0)->SetTexture(testTex);
+			//triSceneMnger->AddActor(actor);
+			//frame->SceneManager().push_back(triSceneMnger);
 
 
-			artist->GetLOD(0)->push_back(shading);
-
-
-			//auto shader = artist->GetShader(0);
-			//shader->CreateGetProgram();
-			//auto glsl = artist->GetShader(0)->CreateGetProgram();
-			//glsl->AttachShader(vertShader);
-			//glsl->AttachShader(fragShader);
-
-			auto actor = MakeRef<graphics::Actor>(primitive, artist, nullptr);
-
-
-			triSceneMnger->AddActor(actor);
-			frame->SceneManager().push_back(triSceneMnger);
-
-
-			//unsigned int VAO;
-			//unsigned int  VBO, EBO;
-			//glGenVertexArrays(1, &VAO);
-			//GL(glGenBuffers(1, &VBO));
-			//glGenBuffers(1, &EBO);
-			//glBindVertexArray(VAO);
-
-			//GL(glBindBuffer(GL_ARRAY_BUFFER,VBO));
-			//GL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
-
-
-			//GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
-			//GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
-			//GL(glBindVertexArray(0));
-			//GL(glBindVertexArray(VAO));
-			//GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0));
-			//GL(glEnableVertexAttribArray(0));
-			//GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-			//GL(glBindVertexArray(0));
-
-			// ----------------TEST CODE END--------------------------
 
 		}
 
@@ -286,7 +174,7 @@ namespace ysl {
 		}
 
 		GLFWApplication2::GLFWApplication2(const std::string& title,
-			const graphics::RenderContextFormat& format,
+			const vpl::RenderContextFormat& format,
 			int width,
 			int height)
 		{
@@ -318,49 +206,30 @@ namespace ysl {
 
 			// -----------TEST CODE ---------------------------
 
-			graphics::DrawArray drawArrayCall(0,6);
+			//vpl::DrawArray drawArrayCall(0,6);
 
-			GL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
-			GL(glClear(GL_COLOR_BUFFER_BIT));
+			//GL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
+			//GL(glClear(GL_COLOR_BUFFER_BIT));
 
-			// draw our first triangle
-			//glUseProgram(shaderProgram);
+			//// draw our first triangle
+			////glUseProgram(shaderProgram);
 
-			assert(frame->SceneManager().size());
-			auto actors = frame->SceneManager()[0]->Actors();
-			assert(actors.size());
+			//assert(frame->SceneManager().size());
+			//auto actors = frame->SceneManager()[0]->Actors();
+			//assert(actors.size());
 
-			auto renderable = actors[0]->GetRenderableFromLod(0);
+			//auto renderable = actors[0]->GetRenderableFromLod(0);
 
-			auto glslProgram = actors[0]->GetArtist()->GetShader(0)->CreateGetProgram();
-
-
-			//GL(glBindVertexArray(VAO)); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-
-			//Debug("Buffer Handle:%d\n", primitive->GetVertexArray()->GetBufferObject()->Handle());
-			//GL(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+			//auto glslProgram = actors[0]->GetArtist()->GetShader(0)->CreateGetProgram();
 
 
-			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-			//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-			//GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0));
-			//GL(glEnableVertexAttribArray(0));
-			//auto pri = std::dynamic_pointer_cast<graphics::Primitive>(renderable);
+		
 
-			//assert(pri);
-			//BindVertexArray(pri.get());
-
-			glslProgram->Apply(-1, nullptr, this);
+			//glslProgram->Apply(-1, nullptr, this);
 
 
-			renderable->Render(nullptr, nullptr, nullptr, this);
+			//renderable->Render(nullptr, nullptr, nullptr, this);
 
-			//GL(glDrawArrays(GL_TRIANGLES, 0, 6));
-			//drawArrayCall.Render();
-			//GL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
-
-
-			// ------------TEST CODE--------------------------
 
 
 
@@ -395,7 +264,7 @@ namespace ysl {
 			if (ins->mouseRightButtonPressed)
 				e.m_buttons |= MouseEvent::RightButton;
 			if (e.m_buttons)
-				ins->DispatchMouseMoveEvent(graphics::Mouse_Left, xpos, ypos);
+				ins->DispatchMouseMoveEvent(vpl::Mouse_Left, xpos, ypos);
 		}
 
 
@@ -430,9 +299,9 @@ namespace ysl {
 			if (e.buttons())
 			{
 				if (action == GLFW_PRESS)
-					app->DispatchMousePressedEvent(graphics::EMouseButton(graphics::Mouse_Left | graphics::Mouse_Right), xpos, ypos);
+					app->DispatchMousePressedEvent(vpl::EMouseButton(vpl::Mouse_Left | vpl::Mouse_Right), xpos, ypos);
 				else if (action == GLFW_RELEASE)
-					app->DispatchMouseReleasedEvent(graphics::EMouseButton(graphics::Mouse_Left | graphics::Mouse_Right), xpos, ypos);
+					app->DispatchMouseReleasedEvent(vpl::EMouseButton(vpl::Mouse_Left | vpl::Mouse_Right), xpos, ypos);
 			}
 		}
 

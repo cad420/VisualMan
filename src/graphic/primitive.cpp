@@ -6,7 +6,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		Primitive::~Primitive()
 		{

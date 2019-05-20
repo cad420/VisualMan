@@ -6,7 +6,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		Booster* Booster::booster = nullptr;
 		std::mutex Booster::mutex;

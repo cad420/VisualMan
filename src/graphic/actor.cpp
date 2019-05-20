@@ -4,7 +4,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		Actor::Actor(Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform):
 			transform(std::move(transform)),

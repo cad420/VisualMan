@@ -12,7 +12,7 @@
 #include "ogl.h"
 
 namespace ysl {
-	namespace graphics
+	namespace vpl
 	{
 		RenderContext::RenderContext() :
 			framebuffer(MakeRef<Framebuffer>(this, 800, 600, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0))
@@ -319,7 +319,7 @@ namespace ysl {
 		{
 			// Set the new enable state and reset all enable state that
 			// don't exist in the new enable state list as disabled
-			assert(ess);
+			if (!ess)return;
 			std::unordered_set<EnableState> newEnableStates;
 
 			for(const auto & each:ess->enableSet)
@@ -355,7 +355,11 @@ namespace ysl {
 
 		void RenderContext::InitDefaultRenderState()
 		{
+			// Init some base render states
 
+			//
+
+			defaultRenderStates[RS_VertexAttrib]
 		}
 	}
 }

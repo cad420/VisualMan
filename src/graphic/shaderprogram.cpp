@@ -10,7 +10,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		void GLSLShader::SetFromSource(const std::string& source)
 		{

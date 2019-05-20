@@ -4,7 +4,7 @@
 #include "../opengl/openglutils.h"
 
 namespace ysl {
-	namespace graphics
+	namespace vpl
 	{
 		DrawArray::DrawArray(int start, int count): start(start), count(count)
 		{

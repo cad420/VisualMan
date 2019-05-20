@@ -3,7 +3,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		void RenderStateSet::SetRenderState(Ref<RenderState> state, int index)
 		{

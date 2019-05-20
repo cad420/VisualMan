@@ -3,7 +3,7 @@
 #include "../memory/lineararray.h"
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 
 	}

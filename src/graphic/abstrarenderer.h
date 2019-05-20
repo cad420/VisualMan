@@ -10,7 +10,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 
 		class IRenderEvent;

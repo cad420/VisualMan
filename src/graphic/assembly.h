@@ -7,7 +7,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		class AbstraSceneManager;
 
@@ -15,9 +15,11 @@ namespace ysl
 		{
 		public:
 
+			void InitDefault();
+
 			// IEventListener interfaces
 			Assembly();
-			void InitEvent() override;
+			void InitEvent() override{}
 			void DestroyEvent() override;
 			void UpdateEvent()override;
 			void AddedEvent(RenderContext* context) override;

@@ -8,7 +8,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 		void Renderer::Render(const RenderQueue & renderQueue,
 			const Ref<Camera>& camera)

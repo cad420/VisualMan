@@ -22,6 +22,12 @@ aux_source_directory(. GRAPHIC_SRC)
 aux_source_directory("../mathematics" MATH_SRC)
 aux_source_directory("../memory" MEMORY_SRC)
 
+set(GRAPHIC_INCLUDE)
+
+file(GLOB GRAPHIC_INCLUDE "*.h")
+
+
+
 #message(STATUS  ${GRAPHIC_SRC})
 
 add_library("rasterizer" STATIC ${GRAPHIC_SRC} ${MATH_SRC} ${GL3W_SRC} ${MEMORY_SRC} "../utility/error.cpp")

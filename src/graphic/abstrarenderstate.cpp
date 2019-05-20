@@ -3,7 +3,7 @@
 
 namespace ysl
 {
-	namespace graphics
+	namespace vpl
 	{
 
 
