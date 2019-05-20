@@ -6,10 +6,9 @@ namespace ysl
 {
 	namespace graphics
 	{
-		void Renderable::Render(const Actor* actor, const RenderState * state, const Camera * camera, RenderContext * context)
+		void Renderable::Render(const Actor* actor, const Shading * shading,  const Camera * camera, RenderContext * context)
 		{
-			std::cout << "Renderable::Render\n";
-			Render_Implement(actor,state,camera,context);
+			Render_Implement(actor,shading,camera,context);
 		}
 	}
 }

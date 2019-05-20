@@ -12,6 +12,8 @@
 #include "eventinterface.h"
 #include "framebufferobject.h"
 #include "shaderprogram.h"
+#include <unordered_map>
+#include <unordered_set>
 
 namespace ysl
 {
@@ -181,7 +183,13 @@ namespace ysl
 
 			// Current GLSLProgram
 			Ref<GLSLProgram> curProgram;
+
 			std::array<RenderStateBox, RS_RenderState_Count> defaultRenderStates;
+			std::unordered_map<RenderStateType, RenderStateBox> currentRenderStates;
+
+			std::unordered_set<EnableState> currentEnableStates;
+
+			//std::array<EnableState,EN_EnableState_Count> 
 
 
 			//struct VertexArrayInfo

@@ -6,6 +6,7 @@ namespace ysl
 {
 	namespace graphics
 	{
+		class Shading;
 		class RenderContext;
 		class Camera;
 		class RenderState;
@@ -15,10 +16,10 @@ namespace ysl
 		{
 		public:
 			Renderable() = default;
-			virtual void Render(const Actor * actor, const RenderState* state, const Camera* camera, RenderContext * context);
+			virtual void Render(const Actor * actor, const Shading * shading, const Camera* camera, RenderContext * context);
 			virtual ~Renderable() = default;
 		protected:
-			virtual void Render_Implement(const Actor * actor, const RenderState* state, const Camera* camera, RenderContext * context)const = 0; // like a callback
+			virtual void Render_Implement(const Actor * actor, const Shading * shading, const Camera* camera, RenderContext * context)const = 0; // like a callback
 		};
 	}
 }

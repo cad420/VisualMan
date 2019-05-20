@@ -49,7 +49,7 @@ namespace ysl
 			Ref<const AbstraArray> GetVertexAttribArray(int attribLocation) const override { return vertexAttribArrays[attribLocation]; }
 
 		protected:
-			void Render_Implement(const Actor * actor, const RenderState* state, const Camera* camera, RenderContext * context)const override;
+			void Render_Implement(const Actor * actor, const Shading * shading, const Camera* camera, RenderContext * context)const override;
 
 			void bind2VAO(int attribLocation);
 		private:

@@ -11,6 +11,7 @@ namespace ysl
 	{
 		class EnableStateSet
 		{
+			friend class RenderContext;
 		public:
 			void Enable(EnableState enable)
 			{

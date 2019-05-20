@@ -85,7 +85,7 @@ namespace ysl
 			void AttachShader(Ref<GLSLShader> shader);
 			void DetachShader(Ref<GLSLShader> shader);
 			void DetachAllShaders();
-			void ApplyUniformSet(Ref<UniformSet> set);
+			void ApplyUniformSet(Ref<const UniformSet> set)const;
 
 
 			int GetWorldMatrixUniformLocation()const;
@@ -107,6 +107,8 @@ namespace ysl
 
 			Ref<Uniform> CreateGetUniform(const char * name);
 			Ref<UniformSet> CreateGetUniformSet() { return uniformSet ? uniformSet : uniformSet = MakeRef<UniformSet>(); }
+			Ref<const UniformSet> GetUniformSet()const { return uniformSet; }
+			Ref<UniformSet> GetUniformSet() { return uniformSet; }
 
 			void RemoveUniform(const char * name);
 			void RemoveUniform(const Ref<Uniform> & uniform);

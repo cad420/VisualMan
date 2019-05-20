@@ -46,19 +46,19 @@ namespace ysl
 		{
 		public:
 			RenderStateBox() = default;
-			RenderStateBox(Ref<RenderState> state,int i):renderState(std::move(state)),index(i){}
-			RenderStateType StateType()
+			RenderStateBox(Ref<RenderState> state,int i):rawRenderState(std::move(state)),index(i){}
+			RenderStateType StateType()const
 			{
 				if (index < 0)
-					return renderState->Type();
-				return RenderStateType(renderState->Type() + index);
+					return rawRenderState->Type();
+				return RenderStateType(rawRenderState->Type() + index);
 			}
 
-			virtual void Apply(const Camera * camera,RenderContext * context)
+			virtual void Apply(const Camera * camera,RenderContext * context)const
 			{
-				renderState->Apply(index, camera, context);
+				rawRenderState->Apply(index, camera, context);
 			}
-			Ref<RenderState> renderState;
+			Ref<RenderState> rawRenderState;
 			int index = -1;
 		};
 

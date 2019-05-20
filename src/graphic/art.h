@@ -20,19 +20,23 @@ namespace ysl
 			{
 				LodShadingPasses[0] = MakeRef<ShadingPasses>();  // Lod of 0 is default.
 			}
-			int EvalLOD(const Actor * actor, const Camera * camera){if (lodEvaluator == nullptr)return 0;}
+
+			int EvalLOD(const Actor* actor, const Camera* camera);
 
 			Ref<Shading> GetShader(int lod, int pass = 0);
 			
-			Ref<ShadingPasses> & CreateGetLOD(int lod);
+			//Ref<ShadingPasses> CreateGetLOD(int lod);
+
+			Ref<ShadingPasses> GetLOD(int lod);
 
 			void SetLODEvaluator(Ref<LODEvaluator> evaluator) { lodEvaluator = std::move(evaluator); }
 
-			auto GetLODEvaluator() { return lodEvaluator; }
+			Ref<LODEvaluator> GetLODEvaluator() { return lodEvaluator; }
 
 			void SetActiveLOD(int alod) { activeLOD = alod; }
 
 			int GetActiveLOD()const { return activeLOD; }
+			
 			//Ref<LODEvaluator> GetLODEvaluator() { return lodEvaluator; }
 		private:
 			static constexpr int MaxLodLevel = 8;

@@ -235,7 +235,7 @@ namespace ysl {
 			shading->CreateGetTextureSampler(0)->SetTexture(testTex);
 
 
-			artist->CreateGetLOD(0)->push_back(shading);
+			artist->GetLOD(0)->push_back(shading);
 
 
 			//auto shader = artist->GetShader(0);
@@ -332,7 +332,7 @@ namespace ysl {
 
 			auto renderable = actors[0]->GetRenderableFromLod(0);
 
-			auto glslProgram = actors[0]->GetArt()->GetShader(0)->CreateGetProgram();
+			auto glslProgram = actors[0]->GetArtist()->GetShader(0)->CreateGetProgram();
 
 
 			//GL(glBindVertexArray(VAO)); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
@@ -368,7 +368,7 @@ namespace ysl {
 			glfwSwapBuffers(glfwWindow);
 		}
 
-		int GLFWApplication2::Exec()
+		int GLFWApplication2::Show()
 		{
 			//DispatchResizeEvent(800, 600);
 			while (!glfwWindowShouldClose(glfwWindow))

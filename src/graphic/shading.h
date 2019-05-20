@@ -21,11 +21,14 @@ namespace ysl
 			virtual ~Shading() = default;
 			// Shading Program getter and setter
 			Ref<GLSLProgram> CreateGetProgram() { return CreateGetRenderStateSet()->CreateGetProgram(); }
-			void SetProgram(Ref<GLSLProgram> program) { CreateGetRenderStateSet()->SetProgram(program); }
+			Ref<GLSLProgram> GetProgram() { assert(GetRenderStateSet()); return GetRenderStateSet()->GetProgram(); }
+			Ref<const GLSLProgram> GetProgram()const { assert(GetRenderStateSet()); return GetRenderStateSet()->GetProgram(); }
+			void SetProgram(Ref<GLSLProgram> program) { assert(GetRenderStateSet()); GetRenderStateSet()->SetProgram(program); }
 
 
 			// RenderState getter and setter 
 			Ref<RenderStateSet> CreateGetRenderStateSet() { return renderStateSet ? renderStateSet : (renderStateSet = MakeRef<RenderStateSet>()); }
+			Ref<RenderStateSet> GetRenderStateSet()const { return renderStateSet; }
 			void SetRenderState(Ref<RenderState> state) { CreateGetRenderStateSet()->SetRenderState(state,-1); }
 			Ref<DepthFuncState> GetDepthFuncState(RenderStateType type) { return std::static_pointer_cast<DepthFuncState>(CreateGetRenderStateSet()->GetRenderState(type,-1)); }
 
@@ -34,10 +37,16 @@ namespace ysl
 
 			// EnableState getter and setter
 			Ref<EnableStateSet> CreateGetEnableStateSet() { return enableSet ? enableSet : (enableSet = MakeRef<EnableStateSet>()); }
+			Ref<EnableStateSet> GetEnableStateSet() { return enableSet; }
+			Ref<const EnableStateSet> GetEnableStateSet()const { return enableSet; }
+
 			void SetDisableState(EnableState enable) { CreateGetEnableStateSet()->Enable(enable); }
 			void SetEnableState(EnableState enable) { CreateGetEnableStateSet()->Disable(enable); }
 
 			Ref<UniformSet> CreateGetUniformSet() { return uniformSet ? uniformSet : (uniformSet = MakeRef<UniformSet>()); }
+			Ref<UniformSet> GetUniformSet() { return uniformSet; }
+			Ref<const UniformSet> GetUniformSet()const { return uniformSet; }
+
 
 			// Uniform getter and setter
 			void SetUniform(Ref<Uniform> uniform) { uniformSet->SetUniform(std::move(uniform)); }

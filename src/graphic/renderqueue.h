@@ -15,6 +15,8 @@ namespace ysl
 		{
 		public:
 			RenderNode() = default;
+			RenderNode(Actor * actor,Renderable * renderable,const Shading * shading,RenderNode * nextPass):
+			actor(actor),renderable(renderable),shading(shading),nextPass(nextPass){}
 			Actor * actor = nullptr;
 			Renderable * renderable = nullptr;
 			const Shading * shading = nullptr;
@@ -25,18 +27,22 @@ namespace ysl
 		{
 		public:
 			RenderQueue() = default;
-			RenderNode * CreateRenderNode()
+			RenderNode * CreateRenderNode(Actor * actor,Renderable * renderable,const Shading * shading)
 		    {
-				const auto node = arena.Alloc<RenderNode>(1);
+				const auto node = arena.AllocConstruct<RenderNode>(actor,renderable,shading,nullptr);
 				nodes.push_back(node);
 				return node;
 		    }
 
-			RenderNode * CreateMultiPass()
+			RenderNode * CreateMultiPass(RenderNode * prePass,Actor * actor,Renderable * renderable,const Shading * shading)
 			{
-				return arena.Alloc<RenderNode>(1);
+				auto pass = arena.AllocConstruct<RenderNode>(actor,renderable,shading,nullptr);
+				assert(prePass);
+				prePass->nextPass = pass;
+				return pass;
 			}
 			RenderNode * operator[](size_t i) { return nodes[i]; }
+			const RenderNode * operator[](size_t i)const { return nodes[i]; }
 			void Clear() { nodes.clear(); }
 			bool Empty()const { return nodes.empty(); }
 			size_t Size()const { return nodes.size(); }

@@ -6,6 +6,10 @@
 #include "../opengl/openglutils.h"
 
 #include "abstraarray.h"
+#include "renderstateset.h"
+#include "enableset.h"
+#include "abstrarenderstate.h"
+#include "ogl.h"
 
 namespace ysl {
 	namespace graphics
@@ -59,7 +63,7 @@ namespace ysl {
 			ReadDrawBuffer drawBuffer)
 		{
 			framebufferObjects.push_back(MakeRef<FramebufferObject>(this, width, height, readBuffer, drawBuffer));
-			framebufferObjects.back()->Create();
+			framebufferObjects.back()->CreateFrambufferObject();
 			return framebufferObjects.back();
 		}
 
@@ -278,11 +282,66 @@ namespace ysl {
 
 		void RenderContext::ApplyRenderState(const RenderStateSet* rss)
 		{
+			// Set the new render state and reset all states that 
+			// don't exist in the new render state list as default
+			assert(rss);
 
+			std::unordered_map<RenderStateType, RenderStateBox> newStates;
+
+			for(const auto & each: rss->renderStates)
+			{
+				const auto type = each.StateType();
+
+				auto it = currentRenderStates.find(type);
+				if(it == currentRenderStates.end())
+				{
+					each.Apply(nullptr, this);
+					newStates[type] = each;
+				}
+			}
+
+			for(const auto & each:currentRenderStates)
+			{
+				const auto type = each.first;
+
+				auto it = newStates.find(type);
+				if(it == newStates.end())
+				{
+					//apply default states;
+					defaultRenderStates[type].Apply(nullptr, this);
+				}
+			}
+
+			std::swap(currentRenderStates, newStates);
 		}
 
 		void RenderContext::ApplyRenderEnable(const EnableStateSet* ess)
 		{
+			// Set the new enable state and reset all enable state that
+			// don't exist in the new enable state list as disabled
+			assert(ess);
+			std::unordered_set<EnableState> newEnableStates;
+
+			for(const auto & each:ess->enableSet)
+			{
+				auto it = currentEnableStates.find(each);
+				if(it == currentEnableStates.end())
+				{
+					GL(glEnable(EnableEnum2GLEnum[*it]));
+					newEnableStates.insert(*it);
+				}
+			}
+
+			for(const auto & each:currentEnableStates)
+			{
+				auto it = newEnableStates.find(each);
+				if(it == newEnableStates.end())
+				{
+					GL(glDisable(EnableEnum2GLEnum[*it]));
+				}
+			}
+
+			std::swap(currentEnableStates, newEnableStates);
 
 		}
 
@@ -292,6 +351,11 @@ namespace ysl {
 			GL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxInteger.MAX_VERTEX_ATTRIBS));
 			maxInteger.MAX_VERTEX_ATTRIBS = std::min(int(VA_VertexAttribArray_Count), int(maxInteger.MAX_VERTEX_ATTRIBS));
 			GL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxInteger.MAX_TEXTURE_IMAGE_UNITE));
+		}
+
+		void RenderContext::InitDefaultRenderState()
+		{
+
 		}
 	}
 }

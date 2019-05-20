@@ -12,6 +12,8 @@ namespace ysl
 
 		class RenderStateSet
 		{
+			friend class Frame;
+			friend class RenderContext;
 		public:
 			RenderStateSet() = default;
 			void SetRenderState(Ref<RenderState> state, int index);
@@ -19,6 +21,9 @@ namespace ysl
 			void RemoveRenderState(RenderStateType type, int index);
 			void SetProgram(Ref<GLSLProgram> program);
 			Ref<GLSLProgram> CreateGetProgram();
+			Ref<GLSLProgram> GetProgram();
+			//const auto & RenderStateBox()const { return renderStates; }
+			//std::vector<RenderStateBox> RenderStateBox() { return renderStates; }
 		private:
 			std::vector<RenderStateBox> renderStates;
 			Ref<GLSLProgram> program;

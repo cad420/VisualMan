@@ -17,6 +17,11 @@ namespace ysl
 			virtual ~LODEvaluator() = 0;
 		private:
 		};
+
+		inline int LODEvaluator::Eval(const Actor* actor, const Camera* camera)
+		{
+			return 0;
+		}
 	}
 }
 #endif

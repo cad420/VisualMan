@@ -19,7 +19,7 @@ namespace ysl
 			{
 				if (each.StateType() == state->Type() && each.index == index)
 				{
-					each.renderState = std::move(state);
+					each.rawRenderState = std::move(state);
 					return;
 				}
 			}
@@ -60,6 +60,11 @@ namespace ysl
 			return program;
 		}
 
+		Ref<GLSLProgram> RenderStateSet::GetProgram()
+		{
+			return program;
+		}
+
 		Ref<RenderState> RenderStateSet::GetRenderState(RenderStateType type, int index)
 		{
 			if (type == RenderStateType::RS_GLSLProgram)
@@ -67,9 +72,11 @@ namespace ysl
 			for (auto & each : renderStates)
 			{
 				if (each.StateType() == type && each.index == index)
-					return each.renderState;
+					return each.rawRenderState;
 			}
 			return nullptr;
 		}
+
+
 	}
 }

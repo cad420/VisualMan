@@ -501,6 +501,8 @@ enum EnableState
 	EN_CULL_FACE, 
 	EN_DEPTH_TEST, 
 	EN_STENCIL_TEST, 
+
+	EN_EnableState_Count
 };
 
 enum RenderStateType

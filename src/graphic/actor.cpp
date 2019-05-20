@@ -6,26 +6,27 @@ namespace ysl
 {
 	namespace graphics
 	{
-		Actor::Actor(Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform) :
-			art(std::move(art)), transform(std::move(transform))
+		Actor::Actor(Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform):
+			transform(std::move(transform)),
+			artist(std::move(art))
 		{
 			renderables[0] = std::move(renderable);
 		}
 
-		void Actor::DispatchOnActorRenderStartedEvent(const Camera * camera, Renderable * renderable, const Artist * art, int pass)
+		void Actor::DispatchOnActorRenderStartedEvent(const Camera * camera, Renderable * renderable, const Shading * shading, int pass)
 		{
 			for (auto & each : actorEvents)
 			{
 				if (each->IsEventEnable())
-					each->OnActorRenderStartedEvent(this, camera, renderable, art, pass);
+					each->OnActorRenderStartedEvent(this, camera, renderable, shading, pass);
 			}
 		}
 
-		void Actor::DispatchOnActorDeletingEvent(const Camera * camera, Renderable * renderable, const Artist * art, int pass)
+		void Actor::DispatchOnActorDeletingEvent(const Camera * camera, Renderable * renderable, const Shading * shading, int pass)
 		{
 			for (auto & each : actorEvents)
 			{
-				each->OnActorDeletingEvent(this, camera, renderable, art, pass);
+				each->OnActorDeletingEvent(this, camera, renderable, shading, pass);
 			}
 		}
 
@@ -38,6 +39,15 @@ namespace ysl
 		{
 			assert(lod >= 0 && lod < 8);
 			return renderables[lod];
+		}
+
+		int Actor::EvalLod(const Camera* camera)
+		{
+			if(lodEvaluator)
+			{
+				return lodEvaluator->Eval(this, camera);
+			}
+			return 0;
 		}
 	}
 }

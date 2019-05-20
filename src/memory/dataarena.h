@@ -34,11 +34,11 @@ class DataArena
 	std::list<std::pair<uint8_t*, int>> m_used;
 	std::list<std::pair<uint8_t*, int>> m_available;
 public:
-	explicit DataArena(size_t size = 1024 * 1024) :m_blockSize(size), 
-	m_currentAllocBlockSize(0), 
-	m_currentBlock(nullptr), 
-	m_currentBlockPos(0), 
-	m_fragmentSize(0)
+	explicit DataArena(size_t size = 1024 * 1024) :m_blockSize(size),
+		m_currentAllocBlockSize(0),
+		m_currentBlock(nullptr),
+		m_currentBlockPos(0),
+		m_fragmentSize(0)
 	{
 		// Default block is 1MB
 	}
@@ -55,11 +55,13 @@ public:
 		, m_used(std::move(arena.m_used))
 		, m_available(std::move(arena.m_available))
 	{
+
 		arena.m_currentBlock = nullptr;
 	}
 
 	DataArena & operator=(DataArena && arena)noexcept
 	{
+		Release();		// Release memory
 		m_blockSize = arena.m_blockSize;
 		m_currentBlockPos = arena.m_currentBlockPos;
 		m_currentAllocBlockSize = arena.m_currentAllocBlockSize;
@@ -131,10 +133,19 @@ public:
 	template<typename T> T * Alloc(size_t n, bool construct = true)
 	{
 		const auto ptr = static_cast<T*>(Alloc(n * sizeof(T)));
-		if (ptr == nullptr)return nullptr;
+		if (ptr == nullptr)
+			return nullptr;
 		if (construct)
 			for (auto i = 0; i < n; i++)
 				new (&ptr[i]) T();
+		return ptr;
+	}
+
+	template<typename T, typename ...Args> T * AllocConstruct(Args&&... args)
+	{
+		const auto ptr = static_cast<T*>(Alloc(sizeof(T)));
+		if (ptr == nullptr)return nullptr;
+		new (ptr) T(std::forward<Args>(args)...);
 		return ptr;
 	}
 

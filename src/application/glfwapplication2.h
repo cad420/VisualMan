@@ -27,7 +27,7 @@ namespace ysl
 
 			void Update()override;
 
-			int Exec();
+			int Show();
 
 			const GLFWwindow * Handle() const { return glfwWindow; }
 

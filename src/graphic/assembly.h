@@ -31,6 +31,7 @@ namespace ysl
 			void ResizeEvent(int w, int h) override;
 
 			virtual void UpdateScene(){}
+
 			Ref<Frame> Rendering()const { return frame; }
 
 		protected:

@@ -4,21 +4,30 @@ namespace ysl
 {
 	namespace graphics
 	{
+		int Artist::EvalLOD(const Actor* actor, const Camera* camera)
+		{
+			if (lodEvaluator)
+			{
+				return activeLOD = lodEvaluator->Eval(actor, camera);
+			}
+			return 0;
+		}
+
 		Ref<Shading> Artist::GetShader(int lod, int pass)
 		{
-			auto ptr = CreateGetLOD(lod);
+			const auto ptr = GetLOD(lod);
 			if (ptr)
 			{
-				if (pass >= 0 && pass < ptr->size())
-					return (*ptr)[pass];
+				pass = Clamp(pass, 0, ptr->size());
+				return (*ptr)[pass];
 			}
 			return nullptr;
 		}
 
-		Ref<ShadingPasses>& Artist::CreateGetLOD(int lod)
+		Ref<ShadingPasses> Artist::GetLOD(int lod)
 		{
-			if (lod >= 0 && lod < MaxLodLevel)
-				return LodShadingPasses[lod] ? LodShadingPasses[lod] : LodShadingPasses[lod] = MakeRef<ShadingPasses>();
+			lod = Clamp(lod, 0, MaxLodLevel);
+			return LodShadingPasses[lod];
 		}
 	}
 }

@@ -12,7 +12,6 @@ namespace ysl
 	{
 		void Frame::Render()
 		{
-			std::cout << "Render Loop\n";
 
 			// calls for a renderer
 			assert(!renderers.empty());
@@ -70,7 +69,7 @@ namespace ysl
 			}
 
 			// construct render queue from actor queue
-			auto renderQueue = MakeRenderQueue(actorQueue);
+			const auto renderQueue = MakeRenderQueue(actorQueue);
 
 
 
@@ -87,7 +86,6 @@ namespace ysl
 
 		RenderQueue Frame::MakeRenderQueue(const std::vector<Ref<Actor>>& queue)
 		{
-			std::cout << "RenderStudio::MakeRenderQueue\n";
 
 			// For every actor
 
@@ -95,15 +93,83 @@ namespace ysl
 
 			// Multi passing
 
-			// for each program, link it
-
-			// texture creation
+			
 
 
+			RenderQueue renderQueue;
+			for(const auto & actor:queue)
+			{
+				const auto artist = actor->GetArtist();
+				assert(artist);
+				if(artist)
+				{
+					const auto primitiveLOD = actor->EvalLod(camera.get());
+					const auto renderable = actor->GetRenderableFromLod(primitiveLOD);
+					const auto shadingLOD = artist->EvalLOD(actor.get(), camera.get());
 
-			return RenderQueue{};
+					Ref<ShadingPasses> shadingPasses = artist->GetLOD(shadingLOD);
+
+					RenderNode * node = nullptr;
+
+					for(int i = 0 ; i< shadingPasses->size();i++)
+					{
+						auto shading = (*shadingPasses)[i];
+						if(node)
+						{
+							assert(i > 0);
 
 
+							auto nextNode = renderQueue.CreateMultiPass(node, 
+								actor.get(), 
+								renderable.get(), 
+								shading.get());
+
+							node = nextNode;
+						}else
+						{
+							assert(i == 0);
+							node = renderQueue.CreateRenderNode(actor.get(),
+								renderable.get(),
+								shading.get());
+
+							
+						}
+
+
+						// for each render node, check its resources status. e.g. 
+						// texture create, program link
+
+						auto program = shading->GetProgram();
+						assert(program);
+
+						if (!program->Linked())
+							program->Linked();
+
+						Ref<RenderStateSet> stateSet = shading->GetRenderStateSet();
+						assert(stateSet);
+						if (stateSet)
+						{
+							// find texture
+							for (auto & each : stateSet->renderStates)
+							{
+								if (each.rawRenderState->Type() == RS_TextureSampler)
+								{
+									auto sampler = std::static_pointer_cast<TextureSampler>(each.rawRenderState);
+									assert(sampler);
+									auto tex = sampler->GetTexture();
+									if (tex && !tex->Handle())
+									{
+										tex->CreateTexture();
+									}
+								}
+							}
+
+						}
+					}
+				}
+
+			}
+			return renderQueue;
 		}
 	}
 }

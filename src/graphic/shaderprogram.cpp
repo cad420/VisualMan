@@ -197,7 +197,7 @@ namespace ysl
 			}
 		}
 
-		void GLSLProgram::ApplyUniformSet(Ref<UniformSet> uset)
+		void GLSLProgram::ApplyUniformSet(Ref<const UniformSet> uset)const
 
 		{
 
@@ -210,16 +210,17 @@ namespace ysl
 #ifndef NDEBUG
 			{
 				int curProg = -1;
-				glGetIntegerv(GL_CURRENT_PROGRAM, &curProg);
+				GL(glGetIntegerv(GL_CURRENT_PROGRAM, &curProg));
 				assert(curProg == handle);
 			}
 #endif
 
 			const auto & arr = uset->Uniforms();
 
-			for(const auto & uniform:arr)
+			for (const auto & uniform : arr)
 			{
-				const int loc = glGetUniformLocation(handle, uniform->GetName().c_str());
+				int loc;
+				GL(loc = glGetUniformLocation(handle, uniform->GetName().c_str()));
 
 				if (loc == -1)continue;
 
@@ -271,6 +272,7 @@ namespace ysl
 					assert(false);
 					break;
 				}
+				GL_CHECK;
 			}
 		}
 

@@ -15,12 +15,13 @@ int main(int argc,char ** argv)
 	auto app = MakeRef<Assembly>();
 
 	assert(window.GetFramebuffer());
-	//window.AddEventListener(app);
+
+	window.AddEventListener(app);
 
 	//assert(app->Rendering()->Renderers().size());
-	//app->Rendering()->Renderers()[0]->SetFramebuffer(window.GetFramebuffer());
+	app->Rendering()->Renderers()[0]->SetFramebuffer(window.GetFramebuffer());
 
-	auto ret = window.Exec();
+	auto ret = window.Show();
 
 	system("pause");
 	return ret;
