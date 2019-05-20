@@ -36,10 +36,10 @@ namespace ysl
 		{
 		public:
 			RenderStateIndexed(RenderStateType type):RenderState(type){}
-			int Index()const { return index; }
-			void SetIndex(int index) { this->index = index; }
+			//int Index()const { return index; }
+			//void SetIndex(int index) { this->index = index; }
 		private:
-			int index = -1;
+			//int index = -1;
 		};
 
 		class RenderStateBox

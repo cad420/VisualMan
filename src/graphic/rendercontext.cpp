@@ -10,6 +10,7 @@
 #include "enableset.h"
 #include "abstrarenderstate.h"
 #include "ogl.h"
+#include "renderstate.h"
 
 namespace ysl {
 	namespace vpl
@@ -32,6 +33,7 @@ namespace ysl {
 			/// TODO:: Lot of works to do here for robust.
 
 			GetMaxInteger();
+			InitDefaultRenderState();
 
 			initialized = true;
 		}
@@ -351,6 +353,7 @@ namespace ysl {
 			GL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxInteger.MAX_VERTEX_ATTRIBS));
 			maxInteger.MAX_VERTEX_ATTRIBS = std::min(int(VA_VertexAttribArray_Count), int(maxInteger.MAX_VERTEX_ATTRIBS));
 			GL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxInteger.MAX_TEXTURE_IMAGE_UNITE));
+			maxInteger.MAX_TEXTURE_IMAGE_UNITE = std::min(int(RS_TextureSampler15- RS_TextureSampler0 + 1), int(maxInteger.MAX_TEXTURE_IMAGE_UNITE));
 		}
 
 		void RenderContext::InitDefaultRenderState()
@@ -358,8 +361,29 @@ namespace ysl {
 			// Init some base render states
 
 			//
+			// Non-index state
+			//defaultRenderStates[RS_AlphaFunc] = RenderStateBox(MakeRef<DepthFuncState>(FU_LESS), 0);
 
-			defaultRenderStates[RS_VertexAttrib]
+			defaultRenderStates[RS_BlendFunc] = RenderStateBox(MakeRef<BlendFuncState>(BF_SRC_COLOR, BF_SRC_ALPHA, BF_ONE_MINUS_SRC_COLOR, BF_ONE_MINUS_DST_ALPHA), 0);
+			defaultRenderStates[RS_CullFace] = RenderStateBox(MakeRef<CullFaceState>(PF_BACK), 0);
+			defaultRenderStates[RS_DepthFunc] = RenderStateBox(MakeRef<DepthFuncState>(FU_LESS), 0);
+			defaultRenderStates[RS_BlendEquation] = RenderStateBox(MakeRef<BlendEquationState>(BE_FUNC_ADD, BE_FUNC_ADD), 0);
+			defaultRenderStates[RS_PolygonMode] = RenderStateBox(MakeRef<PolygonModeState>(PM_FILL,PM_FILL), 0);
+			//defaultRenderStates[RS_FrontFace] = RenderStateBox(MakeRef<FrontFace>(), 0);
+			defaultRenderStates[RS_LineWidth] = RenderStateBox(MakeRef<LineWidthState>(1.0), 0);
+
+			//defaultRenderStates[RS_StencilFunc] = RenderStateBox(new StencilFunc, 0);
+			//defaultRenderStates[RS_StencilMask] = RenderStateBox(new StencilMask, 0);
+			//defaultRenderStates[RS_StencilOp] = RenderStateBox(new StencilOp, 0);
+			defaultRenderStates[RS_GLSLProgram] = RenderStateBox(MakeRef<GLSLProgram>(), 0);
+
+			// indexed state
+			for(int i = 0 ; i < maxInteger.MAX_TEXTURE_IMAGE_UNITE;i++)
+			{
+				defaultRenderStates[RS_TextureSampler + i] = RenderStateBox(MakeRef<TextureSampler>(), i);
+			}
+
+
 		}
 	}
 }
