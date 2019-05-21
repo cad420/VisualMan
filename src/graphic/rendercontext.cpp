@@ -72,7 +72,7 @@ namespace ysl {
 
 		void RenderContext::AddEventListener(Ref<IEventListener> listener)
 		{
-			if (listener->context == nullptr && listener)
+			if (listener && listener->context == nullptr)
 			{
 				listener->context = this;
 				if (IsInitialized())
@@ -295,10 +295,11 @@ namespace ysl {
 				const auto type = each.StateType();
 
 				auto it = currentRenderStates.find(type);
+				newStates[type] = each;
 				if(it == currentRenderStates.end())
 				{
 					each.Apply(nullptr, this);
-					newStates[type] = each;
+					
 				}
 			}
 
@@ -327,10 +328,11 @@ namespace ysl {
 			for(const auto & each:ess->enableSet)
 			{
 				auto it = currentEnableStates.find(each);
+				newEnableStates.insert(*it);
 				if(it == currentEnableStates.end())
 				{
 					GL(glEnable(EnableEnum2GLEnum[*it]));
-					newEnableStates.insert(*it);
+				
 				}
 			}
 

@@ -6,10 +6,15 @@ namespace ysl
 {
 	namespace vpl
 	{
+
+
 		Actor::Actor(Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform):
-			transform(std::move(transform)),
 			artist(std::move(art))
 		{
+			if (transform == nullptr)
+				this->transform = MakeRef<Transform>();
+			else
+				this->transform = std::move(transform);
 			renderables[0] = std::move(renderable);
 		}
 

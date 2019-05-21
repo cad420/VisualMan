@@ -162,7 +162,7 @@ namespace ysl
 			GL(glAttachShader(handle, shader->Handle()));
 			shaders.push_back(std::move(shader));
 			linked = false;
-			Link();
+			//Link();
 		}
 
 		void GLSLProgram::DetachShader(Ref<GLSLShader> shader)
@@ -299,6 +299,11 @@ namespace ysl
 		int GLSLProgram::GetProjectionMatrixUniformLocation() const
 		{
 			return uniformLocations.vpl_ProjectionMatrix;
+		}
+
+		int GLSLProgram::GetMVPUniformLocation() const
+		{
+			return uniformLocations.vpl_MVPMatrix;
 		}
 
 		int GLSLProgram::GetNormalMatrixUniformLocation() const

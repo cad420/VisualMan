@@ -63,6 +63,7 @@ namespace ysl
 			if (!camera) return;
 
 			// construct actor queue from scene manager
+			actorQueue.clear();
 			for(const auto & scene:sceneManagers)
 			{
 				scene->ExtractActors(actorQueue);
@@ -92,8 +93,6 @@ namespace ysl
 			// evaluate the LOD
 
 			// Multi passing
-
-			
 
 
 			RenderQueue renderQueue;
@@ -143,7 +142,7 @@ namespace ysl
 						assert(program);
 
 						if (!program->Linked())
-							program->Linked();
+							program->Link();
 
 						Ref<RenderStateSet> stateSet = shading->GetRenderStateSet();
 						assert(stateSet);

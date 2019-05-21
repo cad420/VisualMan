@@ -9,7 +9,7 @@ namespace ysl
 	{
 		void AbstraFrame::DispatchRenderStartedEvent()
 		{
-			Debug("AbstraRenderStudio::DispatchRenderStartedEvent()");
+			//Debug("AbstraRenderStudio::DispatchRenderStartedEvent()");
 			for (auto it = renderStartedcallbacks.begin(); it != renderStartedcallbacks.end(); )
 			{
 				auto & item = *it;
@@ -22,7 +22,7 @@ namespace ysl
 
 		void AbstraFrame::DispatchRenderFinishedEvent()
 		{
-			Debug("AbstraRenderStudio::DispatchRenderFinishedEvent()");
+			//Debug("AbstraRenderStudio::DispatchRenderFinishedEvent()");
 			for (auto it = renderFinishedCallbacks.begin(); it != renderFinishedCallbacks.end(); )
 			{
 				auto & item = *it;

@@ -202,51 +202,16 @@ namespace ysl {
 		void GLFWApplication2::Update()
 		{
 			DispatchUpdateEvent();
-
-
-			// -----------TEST CODE ---------------------------
-
-			//vpl::DrawArray drawArrayCall(0,6);
-
-			//GL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
-			//GL(glClear(GL_COLOR_BUFFER_BIT));
-
-			//// draw our first triangle
-			////glUseProgram(shaderProgram);
-
-			//assert(frame->SceneManager().size());
-			//auto actors = frame->SceneManager()[0]->Actors();
-			//assert(actors.size());
-
-			//auto renderable = actors[0]->GetRenderableFromLod(0);
-
-			//auto glslProgram = actors[0]->GetArtist()->GetShader(0)->CreateGetProgram();
-
-
-		
-
-			//glslProgram->Apply(-1, nullptr, this);
-
-
-			//renderable->Render(nullptr, nullptr, nullptr, this);
-
-
-
-
-
-			glfwSwapBuffers(glfwWindow);
 		}
 
 		int GLFWApplication2::Show()
 		{
-			//DispatchResizeEvent(800, 600);
+			DispatchResizeEvent(800, 600);
 			while (!glfwWindowShouldClose(glfwWindow))
 			{
-				//glfwGetFramebufferSize(glfwWindow.get(), &display_w, &display_h);
 				if (EnableUpdate())
 					Update();
 				glfwPollEvents();
-				//glfwSwapBuffers(glfwWindow.get());
 			}
 			DestroyWindow();
 			return 0;

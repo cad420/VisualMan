@@ -9,7 +9,7 @@ namespace ysl
 	{
 		void AbstraRenderer::DispatchOnRenderStartedEvent()
 		{
-			Debug("AbstraRenderer::DispatchOnRenderStartedEvent\n");
+			//Debug("AbstraRenderer::DispatchOnRenderStartedEvent\n");
 
 			for(auto it = startedCallbacks.begin();it != startedCallbacks.end();)
 			{
@@ -23,7 +23,7 @@ namespace ysl
 
 		void AbstraRenderer::DispatchOnRenderFinishedEvent()
 		{
-			Debug("AbstraRenderer::DispatchOnRenderFinishedEent\n");
+			//Debug("AbstraRenderer::DispatchOnRenderFinishedEent\n");
 
 			for (auto it = finishedCallbacks.begin(); it != finishedCallbacks.end();)
 			{

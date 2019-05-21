@@ -29,15 +29,11 @@ namespace ysl
 
 		void Assembly::UpdateEvent()
 		{
-			std::cout << "Assembly::UpdateEvent\n";
-
 			//Update Scene
-
 			UpdateScene();
 			// execute rendering
 			assert(frame);
 			frame->Render();
-
 			// swap buffer
 			if (Context()->HasDoubleBuffer())
 				Context()->SwapBuffer();
@@ -62,37 +58,41 @@ namespace ysl
 
 		void Assembly::MousePressEvent(EMouseButton button, int xpos, int ypos)
 		{
-			std::cout << "Assembly::MousePressEvent:" << button << " " << xpos << " " << ypos << std::endl;
+			//std::cout << "Assembly::MousePressEvent:" << button << " " << xpos << " " << ypos << std::endl;
 		}
 
 		void Assembly::MouseReleaseEvent(EMouseButton button, int xpos, int ypos)
 		{
-			std::cout << "Assembly::MouseReleaseEvent:"<<button<<" "<<xpos<<" "<<ypos<< std::endl;
+			//std::cout << "Assembly::MouseReleaseEvent:"<<button<<" "<<xpos<<" "<<ypos<< std::endl;
 		}
 
 		void Assembly::MouseMoveEvent(EMouseButton button, int xpos, int ypos)
 		{
-			std::cout << "Assembly::MouseMoveEvent:" << button << " " << xpos << " " << ypos << std::endl;
+			//std::cout << "Assembly::MouseMoveEvent:" << button << " " << xpos << " " << ypos << std::endl;
 		}
 
 		void Assembly::MouseWheelEvent(int ydegree, int xdegree)
 		{
-			std::cout << "Assembly::MouseWheelEvent:" << xdegree << " " << ydegree << std::endl;
+			//std::cout << "Assembly::MouseWheelEvent:" << xdegree << " " << ydegree << std::endl;
 		}
 
 		void Assembly::KeyPressEvent(EKeyButton key)
 		{
-			std::cout << "Assembly::MouseReleaseEvent:"<<key << std::endl;
+			//std::cout << "Assembly::MouseReleaseEvent:"<<key << std::endl;
 		}
 
 		void Assembly::KeyReleaseEvent(EKeyButton key)
 		{
-			std::cout << "Assembly::KeyReleaseEvent:"<< key<<  std::endl;
+			//std::cout << "Assembly::KeyReleaseEvent:"<< key<<  std::endl;
 		}
 
 		void Assembly::ResizeEvent(int w, int h)
 		{
 			std::cout << "Assembly::ResizeEvent:"<<w<<" "<<h << std::endl;
+			//if(frame->GetCamera())
+			//	frame->GetCamera()->GetViewport()->SetViewportSize(w, h);
+			//frame->GetCamera()->GetViewport()->Activate();
+
 		}
 	}
 }

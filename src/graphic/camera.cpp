@@ -1,5 +1,8 @@
 
 #include "camera.h"
+#include "viewport.h"
+#include "../utility/error.h"
+
 namespace ysl
 {
 	namespace  vpl
@@ -68,6 +71,25 @@ namespace ysl
 			m_up.Normalize();
 		}
 
+
+		void CameraManipulator::ResizeEvent(int w, int h)
+		{
+			//assert(camera);
+			if (camera) 
+			{
+				auto viewport = camera->GetViewport();
+				assert(viewport);
+				if (viewport)
+				{
+					viewport->SetViewportSize(w, h);
+					Transform proj;
+					proj.SetGLPerspective(45.f, float(w) / float(h), 0.01, 100);
+					camera->SetProjectionMatrix(proj);
+				}
+			}
+
+		}
+
 		void CameraManipulator::AddedEvent(RenderContext* context)
 		{
 			SetContext(context);
@@ -88,6 +110,7 @@ namespace ysl
 		{
 			if (camera != nullptr)
 			{
+				//Debug("CameraManipulator::MouseMoveEvent");
 				// Update Camera
 				const float dx = xpos - lastMousePos.x;
 				const float dy = lastMousePos.y - ypos;
@@ -109,6 +132,10 @@ namespace ysl
 				}
 				lastMousePos.x = xpos;
 				lastMousePos.y = ypos;
+
+
+				//std::cout << camera->ViewMatrix() << std::endl;
+
 			}
 		}
 

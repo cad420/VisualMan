@@ -91,6 +91,7 @@ namespace ysl
 			int GetWorldMatrixUniformLocation()const;
 			int GetViewMatrixUniformLocation()const;
 			int GetProjectionMatrixUniformLocation()const;
+			int GetMVPUniformLocation()const;
 			int GetNormalMatrixUniformLocation()const;
 			int GetGenericUniformLocation(const char * name)const;
 

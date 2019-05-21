@@ -4,12 +4,17 @@
 #include "../opengl/openglutils.h"
 #include "rendercontext.h"
 #include "renderable.h"
-#include "renderstateset.h"
+#include "transformchangecallback.h"
 
 namespace ysl
 {
 	namespace vpl
 	{
+		Renderer::Renderer()
+		{
+			transformCallback = MakeRef<TransformChangeCallback>();
+		}
+
 		void Renderer::Render(const RenderQueue & renderQueue,
 			const Ref<Camera>& camera)
 		{
@@ -43,6 +48,8 @@ namespace ysl
 				Raii(Renderer * renderer, Camera * camera) :renderer(renderer)
 				{
 					renderer->DispatchOnRenderStartedEvent();
+					assert(camera);
+					camera->GetViewport()->Activate();
 					GL_CHECK
 				}
 				~Raii()
@@ -68,6 +75,10 @@ namespace ysl
 					assert(node->shading);
 
 					// Set Render State
+					// program also be used here.
+
+					//auto program = node->shading->GetProgram();
+
 					auto renderStateSet = node->shading->GetRenderStateSet();
 					context->ApplyRenderState(renderStateSet.get());
 					GL_CHECK;
@@ -79,19 +90,23 @@ namespace ysl
 
 					// Set Program and Uniforms
 
-
 					// Actor's Uniforms can also be set by user before rendering
 					node->actor->DispatchOnActorRenderStartedEvent(camera.get(), node->renderable, node->shading, pass);
-
-
 					auto program = node->shading->GetProgram();
 					assert(node->actor);
 					if (program)
 					{
+						//context->UseProgram(program.get());
 
 						auto actorUniformSet = node->actor->GetUniformSet();
 						auto programUniformSet = program->GetUniformSet();
 						auto shadingUniformSet = node->shading->GetUniformSet();
+
+						///TODO:: the uniforms of the three sets must not be overlapped. A check should be applied here
+
+						// Apply transform uniforms
+
+						transformCallback->UpdateTransform(program.get(), camera.get(), node->actor->GetTransform().get());
 
 						// Apply Uniforms
 						program->ApplyUniformSet(actorUniformSet);

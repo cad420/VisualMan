@@ -24,7 +24,8 @@ namespace ysl
 			void SetCamera(const Ref<Camera> & camera)
 			{
 				this->camera = camera;
-			};
+			}
+
 			Ref<Camera> GetCamera()const { return camera; };
 			void Render() override;
 			

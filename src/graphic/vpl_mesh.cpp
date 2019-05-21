@@ -18,13 +18,15 @@ namespace ysl
 		{
 			//InitDefault();
 
-			float vertices[] = {
-	 0.5f,  0.5f, 0.0f,  // top right
-	 0.5f, -0.5f, 0.0f,  // bottom right
-	-0.5f, -0.5f, 0.0f,  // bottom left
-	-0.5f,  0.5f, 0.0f   // top left 
+			float vertices[] = 
+			{
+				0.5f,  0.5f, 0.0f,  // top right
+				 0.5f, -0.5f, 0.0f,  // bottom right
+				-0.5f, -0.5f, 0.0f,  // bottom left
+				-0.5f,  0.5f, 0.0f   // top left 
 			};
-			unsigned int indices[] = {  // note that we start from 0!
+			unsigned int indices[] = 
+			{  // note that we start from 0!
 				0, 1, 3,  // first Triangle
 				1, 2, 3   // second Triangle
 			};
@@ -53,50 +55,36 @@ namespace ysl
 			shading->CreateGetProgram()->AttachShader(vertShader);
 			shading->CreateGetProgram()->AttachShader(fragShader);
 			//shading->SetUniform(MakeRef<graphics::Uniform>("aColor"));
-			Vec4f color{ 1.0,0.3,0.2,1.0 };
+
+			Vec4f color{ 1.0,1.0,0.2,1.0 };
 			shading->CreateGetUniform("aColor")->SetUniform4f(1, color.Data());
 
+			 //Create a test texture
+			//auto testTex = MakeRef<vpl::Texture>();
+			//auto setupParams = MakeRef<vpl::TexCreateParams>();
+			//setupParams->SetSize(5, 5, 5);
+			//setupParams->SetTextureFormat(TF_RGBA32F);
+			//setupParams->SetTextureTarget(TD_TEXTURE_3D);
+			//testTex->SetSetupParams(setupParams);
+			//assert(testTex->CreateTexture());
+			//float data[125 * 4];
+			//testTex->SetSubTextureData(data, IF_RGBA, IT_FLOAT, 0, 0, 0, 5, 5, 5);
+			//auto texUnit = 0;
+			//shading->CreateGetUniform("testTex")->SetUniform1i(1, &texUnit);
+			//shading->CreateGetTextureSampler(0)->SetTexture(testTex);
 
-			// Create a test texture
-			auto testTex = MakeRef<vpl::Texture>();
-			auto setupParams = MakeRef<vpl::TexCreateParams>();
-			setupParams->SetSize(5, 5, 5);
-			setupParams->SetTextureFormat(TF_RGBA32F);
-			setupParams->SetTextureTarget(TD_TEXTURE_3D);
-			testTex->SetSetupParams(setupParams);
-			assert(testTex->CreateTexture());
-			float data[125 * 4];
-			testTex->SetSubTextureData(data, IF_RGBA, IT_FLOAT, 0, 0, 0, 5, 5, 5);
-
-			auto texUnit = 0;
-			shading->CreateGetUniform("testTex")->SetUniform1i(1, &texUnit);
-
-			shading->CreateGetTextureSampler(0)->SetTexture(testTex);
+			manipulator->SetCamera(frame->GetCamera());
 
 
 			artist->GetLOD(0)->push_back(shading);
 
-
-			//auto shader = artist->GetShader(0);
-			//shader->CreateGetProgram();
-			//auto glsl = artist->GetShader(0)->CreateGetProgram();
-			//glsl->AttachShader(vertShader);
-			//glsl->AttachShader(fragShader);
-
-			auto actor = MakeRef<vpl::Actor>(primitive, artist, nullptr);
-
+			auto actor = MakeRef<vpl::Actor>(primitive, artist,nullptr);
 			triSceneMnger->AddActor(actor);
-
-			frame->SceneManager().push_back(triSceneMnger);
-
-
-			ysl::Debug("VPL_Mesh");
-
 		}
 
 		void VPL_Mesh::UpdateScene()
 		{
-			ysl::Debug("VPL_Mesh::UpdateScene()");
+			//ysl::Debug("VPL_Mesh::UpdateScene()");
 		}
 	}
 }

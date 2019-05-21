@@ -4,7 +4,7 @@ uniform mat4 vpl_ModelMatrix;
 uniform mat4 vpl_ViewMatrix;
 uniform mat4 vpl_ProjectionMatrix;
 uniform mat4 vpl_MVPMatrix;
-uniform mat4 vpl_NormalMatrix;
+uniform mat3 vpl_NormalMatrix;
 
 in vec4 vpl_VertexPosition;
 in vec4 vpl_VertexNormal;
@@ -18,5 +18,5 @@ in vec4 vpl_VertexTexCoord4;
 
 void main()
 {
-    gl_Position = vpl_VertexPosition;
+    gl_Position = vpl_MVPMatrix*vpl_VertexPosition;
 }

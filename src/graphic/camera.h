@@ -5,11 +5,14 @@
 #include "../mathematics/geometry.h"
 #include "../mathematics/transformation.h"
 #include "eventinterface.h"
+#include "viewport.h"
 
 namespace ysl
 {
 	namespace vpl
 	{
+
+		class Viewport;
 
 		class Camera_Impl
 		{
@@ -71,10 +74,11 @@ namespace ysl
 		class GRAPHICS_EXPORT_IMPORT Camera
 		{
 		public:
-			Camera(const Point3f& position = { 0.0f, 0.0f, 0.0f }, Vector3f up = { 0.0f, 1.0f, 0.0f },
+			Camera(int w = 800,int h = 600,const Point3f& position = { 0.0f, 0.0f, 5.0f }, 
+				Vector3f up = { 0.0f, 1.0f, 0.0f },
 				const Point3f& center = { 0, 0, 0 }):focusCamera(position,up,center)
 			{
-				
+				viewport = MakeRef<Viewport>(w, h);
 			}
 
 			Transform ViewMatrix()const { return focusCamera.view(); }
@@ -84,6 +88,14 @@ namespace ysl
 			Point3f Position()const { return focusCamera.position(); }
 			void Ratation(float xoffset, float yoffset) { focusCamera.rotation(xoffset, yoffset); }
 
+			void SetViewport(Ref<Viewport> vp) { viewport = std::move(vp); }
+
+			Ref<Viewport> GetViewport() { return viewport; }
+
+			Ref<const Viewport> GetViewport()const { return viewport; }
+
+			//Ref<Viewport> CreateGetViewport() { return viewport ? viewport : viewport = MakeRef<Viewport>(800,600); }
+
 			Vec3f Up()const { return focusCamera.up(); }
 			Vec3f Front()const { return focusCamera.front(); }
 			Vec3f Right()const { return focusCamera.right(); }
@@ -92,6 +104,7 @@ namespace ysl
 		private:
 			Camera_Impl focusCamera;
 			Transform projMatrix;
+			Ref<Viewport> viewport;
 		};
 
 		class GRAPHICS_EXPORT_IMPORT CameraManipulator:public IEventListener
@@ -109,7 +122,10 @@ namespace ysl
 
 			void DestroyEvent()override{}
 
-			void ResizeEvent(int w, int h)override{}
+			/**
+			 * \brief Change the viewport and the projection matrix
+			 */
+			void ResizeEvent(int w, int h)override;
 
 			void UpdateEvent() override{}
 

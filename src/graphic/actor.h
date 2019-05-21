@@ -26,7 +26,7 @@ namespace ysl
 		class  Actor
 		{
 		public:
-			Actor(Ref<Renderable> renderable,Ref<Artist> art, Ref<Transform> transform);
+			Actor(Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform);
 			void SetTransform(Ref<Transform> transform){this->transform = std::move(transform);}
 			Ref<Transform> GetTransform() { return transform; }
 			void DispatchOnActorRenderStartedEvent(const Camera * camera,Renderable * renderable,const Shading * shading,int pass);
@@ -57,7 +57,6 @@ namespace ysl
 			std::vector<Ref<IActorEvent>> actorEvents;
 			std::array<Ref<Renderable>, 8> renderables;
 		};
-
 	}
 }
 
