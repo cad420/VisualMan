@@ -56,25 +56,10 @@ namespace ysl
 			shading->CreateGetProgram()->AttachShader(fragShader);
 			//shading->SetUniform(MakeRef<graphics::Uniform>("aColor"));
 
-			Vec4f color{ 1.0,1.0,0.2,1.0 };
+			Vec4f color{ 1.0, 0.0,0.2,1.0 };
 			shading->CreateGetUniform("aColor")->SetUniform4f(1, color.Data());
 
-			 //Create a test texture
-			//auto testTex = MakeRef<vpl::Texture>();
-			//auto setupParams = MakeRef<vpl::TexCreateParams>();
-			//setupParams->SetSize(5, 5, 5);
-			//setupParams->SetTextureFormat(TF_RGBA32F);
-			//setupParams->SetTextureTarget(TD_TEXTURE_3D);
-			//testTex->SetSetupParams(setupParams);
-			//assert(testTex->CreateTexture());
-			//float data[125 * 4];
-			//testTex->SetSubTextureData(data, IF_RGBA, IT_FLOAT, 0, 0, 0, 5, 5, 5);
-			//auto texUnit = 0;
-			//shading->CreateGetUniform("testTex")->SetUniform1i(1, &texUnit);
-			//shading->CreateGetTextureSampler(0)->SetTexture(testTex);
-
 			manipulator->SetCamera(frame->GetCamera());
-
 
 			artist->GetLOD(0)->push_back(shading);
 

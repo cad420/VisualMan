@@ -11,14 +11,14 @@ namespace ysl
 	{
 		class AbstraSceneManager;
 
-		class GRAPHICS_EXPORT_IMPORT Assembly :public IEventListener
+		class GRAPHICS_EXPORT_IMPORT Visass :public IEventListener
 		{
 		public:
 
 			void InitDefault();
 
 			// IEventListener interfaces
-			Assembly();
+			Visass();
 			void InitEvent() override{}
 			void DestroyEvent() override;
 			void UpdateEvent()override;
@@ -36,7 +36,8 @@ namespace ysl
 
 			Ref<Frame> Rendering()const { return frame; }
 
-		protected:
+
+		private:
 			Ref<Frame> frame;
 			Ref<CameraManipulator> manipulator;
 			double FPS;
