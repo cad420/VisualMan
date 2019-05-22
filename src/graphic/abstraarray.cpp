@@ -3,7 +3,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		AbstraArray::AbstraArray()
 		{

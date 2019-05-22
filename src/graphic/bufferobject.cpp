@@ -5,7 +5,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		void BufferObject::CreateBufferObject()
 		{
@@ -36,7 +36,7 @@ namespace ysl
 				Resize(bufferSize);
 				void * ptr = nullptr;
 				GL(ptr = MapBuffer(BA_READ_ONLY));
-				memcpy(Data(), ptr, BufferSize());
+				memcpy(Data(), ptr, Size());
 				UnmapBuffer();
 			}
 		}

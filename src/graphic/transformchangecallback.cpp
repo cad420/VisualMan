@@ -7,7 +7,7 @@
 
 namespace ysl
 {
-	namespace  vpl
+	namespace  vm
 	{
 		void TransformChangeCallback::UpdateTransform(const GLSLProgram * program,
 			const Camera * camera,

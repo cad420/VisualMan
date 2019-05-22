@@ -3,10 +3,13 @@
 #include "rendercontext.h"
 #include "abstraarray.h"
 #include "../opengl/openglutils.h"
+#include "../utility/objreader.h"
+#include "drawelements.h"
+#include "abstrdraw.h"
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		Primitive::~Primitive()
 		{
@@ -17,9 +20,6 @@ namespace ysl
 			}
 		}
 
-		void Primitive::AddDrawCall(Ref<AbstraDrawCall> dc)
-		{
-		}
 
 		void Primitive::Render_Implement(const Actor * actor, const Shading * shading, const Camera* camera, RenderContext * context)const
 		{
@@ -56,6 +56,43 @@ namespace ysl
 			GL(glEnableVertexAttribArray(attribLocation));
 			GL(glBindVertexArray(0));
 			//Debug("%d\n", vaoHandle);
+		}
+
+		Ref<Primitive> MakePrimitive(const std::string& fileName)
+		{
+			ObjReader objReader(fileName);
+
+			if (objReader.IsLoaded() == false)
+			{
+				throw std::runtime_error("can not load .obj file");
+			}
+
+			auto vertex = MakeRef<ArrayFloat3>();
+			vertex->GetBufferObject()->SetBufferData(objReader.GetVertexBytes(),
+				objReader.GetVertices().data(), 
+				BU_STATIC_DRAW);
+
+			auto normals = MakeRef<ArrayFloat3>();
+			normals->GetBufferObject()->SetBufferData(objReader.GetNormalBytes(), 
+				objReader.GetNormals().data(),
+				BU_STATIC_DRAW);
+
+			auto vertexIndex = MakeRef<ArrayUInt>();
+			vertexIndex->GetBufferObject()->SetBufferData(objReader.GetVertexIndicesBytes(), 
+				objReader.GetFaceIndices().data(), 
+				BU_STATIC_DRAW);
+
+
+			auto primitive = MakeRef<Primitive>();
+			primitive->SetVertexArray(vertex);
+			primitive->SetNormalArray(normals);
+
+			auto drawElemUi = MakeRef<DrawElementsUInt>(1);
+			drawElemUi->SetIndexBuffer(vertexIndex);
+			
+			primitive->DrawCalls().push_back(drawElemUi);
+
+			return primitive;
 		}
 	}
 }

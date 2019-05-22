@@ -8,7 +8,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		void Frame::Render()
 		{

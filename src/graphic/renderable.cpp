@@ -4,7 +4,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		void Renderable::Render(const Actor* actor, const Shading * shading,  const Camera * camera, RenderContext * context)
 		{

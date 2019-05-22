@@ -21,6 +21,10 @@ if (MSVC_VERSION GREATER_EQUAL "1900")
     endif()
 endif()
 
+set(CAMEK_AUTOMOC ON)
+find_package(Qt5Widgets)
+
+
 #---------------------------------------------------
 # Dependency Module
 #---------------------------------------------------

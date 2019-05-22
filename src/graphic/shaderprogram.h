@@ -12,7 +12,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		class UniformSet;
 

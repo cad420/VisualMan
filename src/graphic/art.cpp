@@ -2,7 +2,7 @@
 #include "art.h"
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		int Artist::EvalLOD(const Actor* actor, const Camera* camera)
 		{

@@ -4,7 +4,7 @@
 #include "graphictype.h"
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		class Shading;
 		class RenderContext;

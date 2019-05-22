@@ -1,5 +1,5 @@
 //#include "assembly.h"
-#include "assembly.h"
+#include "visualman.h"
 #include <iostream>
 
 #include "rendercontext.h"
@@ -7,9 +7,9 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
-		void Assembly::InitDefault()
+		void VisualMan::InitDefault()
 		{
 			frame = MakeRef<Frame>();
 			// A frame has created a camera, 
@@ -17,17 +17,17 @@ namespace ysl
 			manipulator->SetCamera(frame->GetCamera());
 		}
 
-		Assembly::Assembly()
+		VisualMan::VisualMan()
 		{
 			manipulator = MakeRef<CameraManipulator>();
 		}
 
-		void Assembly::DestroyEvent()
+		void VisualMan::DestroyEvent()
 		{
 			std::cout << "Assembly::DestroyEvent\n";
 		}
 
-		void Assembly::UpdateEvent()
+		void VisualMan::UpdateEvent()
 		{
 			//Update Scene
 			UpdateScene();
@@ -39,7 +39,7 @@ namespace ysl
 				Context()->SwapBuffer();
 		}
 
-		void Assembly::AddedEvent(RenderContext* context)
+		void VisualMan::AddedEvent(RenderContext* context)
 		{
 			// The object has been added into context
 			// Here, you need to do something depended this event. e.g. Set camera event interface.
@@ -47,7 +47,7 @@ namespace ysl
 			context->AddEventListener(manipulator);
 		}
 
-		void Assembly::DeletedEvent(RenderContext* context)
+		void VisualMan::DeletedEvent(RenderContext* context)
 		{
 			// Here, you need to do something done at AddedEvent(RenderContext*) in contrary manners
 
@@ -56,37 +56,37 @@ namespace ysl
 			context->RemoveEventListener(manipulator);
 		}
 
-		void Assembly::MousePressEvent(EMouseButton button, int xpos, int ypos)
+		void VisualMan::MousePressEvent(EMouseButton button, int xpos, int ypos)
 		{
 			//std::cout << "Assembly::MousePressEvent:" << button << " " << xpos << " " << ypos << std::endl;
 		}
 
-		void Assembly::MouseReleaseEvent(EMouseButton button, int xpos, int ypos)
+		void VisualMan::MouseReleaseEvent(EMouseButton button, int xpos, int ypos)
 		{
 			//std::cout << "Assembly::MouseReleaseEvent:"<<button<<" "<<xpos<<" "<<ypos<< std::endl;
 		}
 
-		void Assembly::MouseMoveEvent(EMouseButton button, int xpos, int ypos)
+		void VisualMan::MouseMoveEvent(EMouseButton button, int xpos, int ypos)
 		{
 			//std::cout << "Assembly::MouseMoveEvent:" << button << " " << xpos << " " << ypos << std::endl;
 		}
 
-		void Assembly::MouseWheelEvent(int ydegree, int xdegree)
+		void VisualMan::MouseWheelEvent(int ydegree, int xdegree)
 		{
 			//std::cout << "Assembly::MouseWheelEvent:" << xdegree << " " << ydegree << std::endl;
 		}
 
-		void Assembly::KeyPressEvent(EKeyButton key)
+		void VisualMan::KeyPressEvent(EKeyButton key)
 		{
 			//std::cout << "Assembly::MouseReleaseEvent:"<<key << std::endl;
 		}
 
-		void Assembly::KeyReleaseEvent(EKeyButton key)
+		void VisualMan::KeyReleaseEvent(EKeyButton key)
 		{
 			//std::cout << "Assembly::KeyReleaseEvent:"<< key<<  std::endl;
 		}
 
-		void Assembly::ResizeEvent(int w, int h)
+		void VisualMan::ResizeEvent(int w, int h)
 		{
 			std::cout << "Assembly::ResizeEvent:"<<w<<" "<<h << std::endl;
 			//if(frame->GetCamera())

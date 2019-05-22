@@ -17,7 +17,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		class EnableStateSet;
 		class IVertexAttribSet;

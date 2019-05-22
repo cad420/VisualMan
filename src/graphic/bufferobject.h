@@ -7,7 +7,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		class GRAPHICS_EXPORT_IMPORT BufferObject:public Linear1DArray<char>,
 											      public std::enable_shared_from_this<BufferObject>
@@ -76,13 +76,14 @@ namespace ysl
 
 
 			unsigned int Handle()const { return handle; }
-			uint64_t BufferSize()const { return Size(); }
 
 			void CreateBufferObject();
 
 			void DestroyBufferObject();
 
 			void Download();
+
+			uint64_t BufferObjectSize()const { return bufferSize; }
 
 			void SetBufferData(size_t bytes,const void * data,BufferObjectUsage usage);
 

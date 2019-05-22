@@ -5,7 +5,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		void AbstraRenderer::DispatchOnRenderStartedEvent()
 		{

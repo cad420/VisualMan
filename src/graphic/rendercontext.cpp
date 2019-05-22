@@ -13,7 +13,7 @@
 #include "renderstate.h"
 
 namespace ysl {
-	namespace vpl
+	namespace vm
 	{
 		RenderContext::RenderContext() :
 			framebuffer(MakeRef<Framebuffer>(this, 800, 600, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0))
@@ -328,11 +328,11 @@ namespace ysl {
 			for(const auto & each:ess->enableSet)
 			{
 				auto it = currentEnableStates.find(each);
-				newEnableStates.insert(*it);
+				newEnableStates.insert(each);
 				if(it == currentEnableStates.end())
 				{
-					GL(glEnable(EnableEnum2GLEnum[*it]));
-				
+					assert(each >= 0 && each < sizeof(EnableEnum2GLEnum) / sizeof(GLenum));
+					GL(glEnable(EnableEnum2GLEnum[each]));
 				}
 			}
 
@@ -341,7 +341,8 @@ namespace ysl {
 				auto it = newEnableStates.find(each);
 				if(it == newEnableStates.end())
 				{
-					GL(glDisable(EnableEnum2GLEnum[*it]));
+					assert(each >= 0 && each < sizeof(EnableEnum2GLEnum) / sizeof(GLenum));
+					GL(glDisable(EnableEnum2GLEnum[each]));
 				}
 			}
 

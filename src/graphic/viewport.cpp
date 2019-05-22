@@ -5,7 +5,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		void Viewport::Activate() const
 		{

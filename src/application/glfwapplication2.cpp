@@ -24,10 +24,10 @@ namespace ysl {
 		//unsigned VAO;
 		//Ref<graphics::GLSLProgram> glslProgram;
 		//Ref<graphics::ArrayFloat3> triangle;
-		Ref<vpl::Primitive> primitive;
-		Ref<vpl::Frame> frame;
+		Ref<vm::Primitive> primitive;
+		Ref<vm::Frame> frame;
 
-		bool GLFWApplication2::InitWindow(const std::string& title, const vpl::RenderContextFormat& format, int width,
+		bool GLFWApplication2::InitWindow(const std::string& title, const vm::RenderContextFormat& format, int width,
 			int height)
 		{
 			DestroyWindow();
@@ -64,7 +64,7 @@ namespace ysl {
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
 
 
-			if (format.Profile() != vpl::ContextProfile::Core)
+			if (format.Profile() != vm::ContextProfile::Core)
 			{
 				throw std::runtime_error("Only support OpenGL Core Profile\n");
 			}
@@ -174,7 +174,7 @@ namespace ysl {
 		}
 
 		GLFWApplication2::GLFWApplication2(const std::string& title,
-			const vpl::RenderContextFormat& format,
+			const vm::RenderContextFormat& format,
 			int width,
 			int height)
 		{
@@ -229,7 +229,7 @@ namespace ysl {
 			if (ins->mouseRightButtonPressed)
 				e.m_buttons |= MouseEvent::RightButton;
 			if (e.m_buttons)
-				ins->DispatchMouseMoveEvent(vpl::Mouse_Left, xpos, ypos);
+				ins->DispatchMouseMoveEvent(vm::Mouse_Left, xpos, ypos);
 		}
 
 
@@ -264,9 +264,9 @@ namespace ysl {
 			if (e.buttons())
 			{
 				if (action == GLFW_PRESS)
-					app->DispatchMousePressedEvent(vpl::EMouseButton(vpl::Mouse_Left | vpl::Mouse_Right), xpos, ypos);
+					app->DispatchMousePressedEvent(vm::EMouseButton(vm::Mouse_Left | vm::Mouse_Right), xpos, ypos);
 				else if (action == GLFW_RELEASE)
-					app->DispatchMouseReleasedEvent(vpl::EMouseButton(vpl::Mouse_Left | vpl::Mouse_Right), xpos, ypos);
+					app->DispatchMouseReleasedEvent(vm::EMouseButton(vm::Mouse_Left | vm::Mouse_Right), xpos, ypos);
 			}
 		}
 

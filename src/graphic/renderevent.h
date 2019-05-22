@@ -6,7 +6,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		class AbstraFrame;
 		class AbstraRenderer;
@@ -14,8 +14,8 @@ namespace ysl
 		class GRAPHICS_EXPORT_IMPORT IRenderEvent
 		{
 		public:
-			virtual bool OnRenderingStartedEvent(const vpl::AbstraFrame * studio) = 0;
-			virtual bool OnRenderingFinishedEvent(const vpl::AbstraFrame * studio) = 0;
+			virtual bool OnRenderingStartedEvent(const vm::AbstraFrame * studio) = 0;
+			virtual bool OnRenderingFinishedEvent(const vm::AbstraFrame * studio) = 0;
 			virtual bool OnRendererStartedEvent(const AbstraRenderer * renderer) = 0;
 			virtual bool OnRendererFinishedEvent(const AbstraRenderer * renderer) = 0;
 			void SetRemoveAfterCall(bool remove) { removeAfterCall = remove; }

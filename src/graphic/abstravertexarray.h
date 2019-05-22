@@ -5,7 +5,7 @@
 
 namespace ysl
 {
-	namespace vpl 
+	namespace vm 
 	{
 
 		class GRAPHICS_EXPORT_IMPORT AbstraVertexArray

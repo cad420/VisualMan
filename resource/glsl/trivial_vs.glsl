@@ -15,8 +15,13 @@ in vec4 vpl_VertexTexCoord2;
 in vec4 vpl_VertexTexCoord3;
 in vec4 vpl_VertexTexCoord4;
 
+out vec3 frag_normal;
+out vec3 frag_pos;
+
 
 void main()
 {
     gl_Position = vpl_MVPMatrix*vpl_VertexPosition;
+    frag_pos = vec3(vpl_ModelMatrix*vpl_VertexPosition);
+    frag_normal = vpl_NormalMatrix*vec3(vpl_VertexNormal);
 }

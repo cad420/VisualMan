@@ -5,7 +5,7 @@
 
 namespace ysl
 {
-	namespace  vpl
+	namespace  vm
 	{
 		Camera_Impl::Camera_Impl(const ysl::Point3f& position, ysl::Vector3f up, const ysl::Point3f& center) :
 			m_position(position),

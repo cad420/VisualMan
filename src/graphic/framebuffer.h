@@ -7,7 +7,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		class GRAPHICS_EXPORT_IMPORT Framebuffer:public std::enable_shared_from_this<Framebuffer>
 		{

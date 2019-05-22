@@ -219,16 +219,16 @@ namespace ysl
 
 			aMesh.vbo = std::make_shared<OpenGLBuffer>(OpenGLBuffer::BufferTarget::VertexArrayBuffer);
 
-			const auto vertexSize = reader.vertexBytes();
-			const auto normalSize = reader.normalBytes();
-			const auto textureSize = reader.textureBytes();
+			const auto vertexSize = reader.GetVertexBytes();
+			const auto normalSize = reader.GetNormalBytes();
+			const auto textureSize = reader.GetTexCoordBytes();
 
 
 			aMesh.vbo->Bind();
 			aMesh.vbo->AllocateFor(nullptr, vertexSize + normalSize + textureSize);
-			aMesh.vbo->SetSubData(reader.getVertices().data(),vertexSize, 0);
-			aMesh.vbo->SetSubData(reader.getNormals().data(), normalSize, vertexSize);
-			aMesh.vbo->SetSubData(reader.getTextureCoord().data(), textureSize, vertexSize + normalSize);
+			aMesh.vbo->SetSubData(reader.GetVertices().data(),vertexSize, 0);
+			aMesh.vbo->SetSubData(reader.GetNormals().data(), normalSize, vertexSize);
+			aMesh.vbo->SetSubData(reader.GetTexCoord().data(), textureSize, vertexSize + normalSize);
 
 			// Vertex Attribute
 			aMesh.vbo->VertexAttribPointer(0, 3, OpenGLBuffer::Float, false, sizeof(Point3f), nullptr);
@@ -240,8 +240,8 @@ namespace ysl
 
 			aMesh.ebo = std::make_shared<OpenGLBuffer>(OpenGLBuffer::BufferTarget::ElementArrayBuffer);
 			aMesh.ebo->Bind();
-			aMesh.indexCount = reader.getFaceIndices().size();
-			aMesh.ebo->AllocateFor(reader.getFaceIndices().data(), reader.vertexIndicesBytes());
+			aMesh.indexCount = reader.GetFaceIndices().size();
+			aMesh.ebo->AllocateFor(reader.GetFaceIndices().data(), reader.GetVertexIndicesBytes());
 			meshes.push_back(aMesh);
 
 		}

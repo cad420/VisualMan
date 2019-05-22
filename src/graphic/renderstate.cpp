@@ -8,7 +8,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		void DepthFuncState::Apply(int index, const Camera * camera, RenderContext* context) const
 		{

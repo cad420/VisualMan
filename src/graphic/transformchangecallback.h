@@ -10,7 +10,7 @@ namespace ysl
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		class GLSLProgram;
 		class Camera;

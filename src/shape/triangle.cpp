@@ -2,6 +2,7 @@
 #include "triangle.h"
 #include "../gui/transferfunctionwidget.h"
 #include "objreader.h"
+#include "error.h"
 
 namespace ysl
 {
@@ -16,16 +17,13 @@ namespace ysl
 		}
 
 		return std::make_shared<TriangleMesh>(objectToWorld,
-			reader.getVertices().data(),
-			reader.getNormals().data(),
-			reader.getTextureCoord().data(),
-			reader.getVertexCount(),
-			reader.getFaceIndices().data(),
-			reader.getFaceIndices().size() / 3);
-
+			reader.GetVertices().data(),
+			reader.GetNormals().data(),
+			reader.GetTexCoord().data(),
+			reader.GetVertexCount(),
+			reader.GetFaceIndices().data(),
+			reader.GetFaceIndices().size() / 3);
 	}
-
-
 
 	bool ysl::Triangle::intersect(const Ray & ray, Float * t, Interaction * interac)const
 	{

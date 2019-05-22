@@ -10,7 +10,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 
 		class AbstraArray;
@@ -24,7 +24,7 @@ namespace ysl
 			virtual ~Primitive();
 			const std::vector<Ref<AbstrDrawCall>> & DrawCalls()const { return drawCalls; }
 			std::vector<Ref<AbstrDrawCall>> & DrawCalls(){ return drawCalls; }
-			void AddDrawCall(Ref<AbstraDrawCall> dc);
+			//void AddDrawCall(Ref<AbstraDrawCall> dc);
 			// IVertexAttribSet
 			void SetVertexArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexPositionAttrib] = std::move(data); bind2VAO(VA_VertexPositionAttrib); }
 			Ref<AbstraArray> GetVertexArray()override { return vertexAttribArrays[VA_VertexPositionAttrib]; }
@@ -61,6 +61,11 @@ namespace ysl
 			std::array<Ref<AbstraArray>, VA_VertexAttribArray_Count> vertexAttribArrays;
 			std::array<bool, VA_VertexAttribArray_Count> boundToVAO = { false ,false,false,false};
 		};
+
+
+		Ref<Primitive> GRAPHICS_EXPORT_IMPORT MakePrimitive(const std::string & fileName);
+
+
 	}
 }
 

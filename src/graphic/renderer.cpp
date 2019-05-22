@@ -8,7 +8,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		Renderer::Renderer()
 		{
@@ -97,28 +97,19 @@ namespace ysl
 					if (program)
 					{
 						//context->UseProgram(program.get());
-
 						auto actorUniformSet = node->actor->GetUniformSet();
 						auto programUniformSet = program->GetUniformSet();
 						auto shadingUniformSet = node->shading->GetUniformSet();
-
 						///TODO:: the uniforms of the three sets must not be overlapped. A check should be applied here
-
 						// Apply transform uniforms
-
 						transformCallback->UpdateTransform(program.get(), camera.get(), node->actor->GetTransform().get());
-
 						// Apply Uniforms
 						program->ApplyUniformSet(actorUniformSet);
 						program->ApplyUniformSet(programUniformSet);
 						program->ApplyUniformSet(shadingUniformSet);
-
 					}
-
 					assert(node->renderable);
-
 					node->renderable->Render(node->actor, node->shading, camera.get(), context);
-
 				}
 
 			}

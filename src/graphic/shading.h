@@ -10,7 +10,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 
 
@@ -34,7 +34,6 @@ namespace ysl
 
 			Ref<TextureSampler> CreateGetTextureSampler(int unitIndex);
 
-
 			// EnableState getter and setter
 			Ref<EnableStateSet> CreateGetEnableStateSet() { return enableSet ? enableSet : (enableSet = MakeRef<EnableStateSet>()); }
 			Ref<EnableStateSet> GetEnableStateSet() { return enableSet; }
@@ -47,18 +46,15 @@ namespace ysl
 			Ref<UniformSet> GetUniformSet() { return uniformSet; }
 			Ref<const UniformSet> GetUniformSet()const { return uniformSet; }
 
-
 			// Uniform getter and setter
 			void SetUniform(Ref<Uniform> uniform) { uniformSet->SetUniform(std::move(uniform)); }
 			Ref<Uniform> GetUniform(const char * name) { return uniformSet->GetUniform(name); }
 			Ref<Uniform> CreateGetUniform(const char * name) { return CreateGetUniformSet()->CreateGetUniform(name); }
 			// texture unit
-
 		private:
 			Ref<RenderStateSet> renderStateSet; // shading program is in it
 			Ref<UniformSet> uniformSet;
 			Ref<EnableStateSet> enableSet;
-			
 		};
 
 	}

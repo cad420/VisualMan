@@ -17,7 +17,7 @@ namespace ysl {
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 
 		enum UniformType

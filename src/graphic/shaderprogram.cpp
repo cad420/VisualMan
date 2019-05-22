@@ -10,7 +10,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		void GLSLShader::SetFromSource(const std::string& source)
 		{
@@ -226,50 +226,50 @@ namespace ysl
 
 				switch (uniform->Type())
 				{
-				case UT_INT:      glUniform1iv(loc, uniform->Count(), uniform->Data<int>());  break;
-				case UT_INT_VEC2: glUniform2iv(loc, uniform->Count(), uniform->Data<int>());  break;
-				case UT_INT_VEC3: glUniform3iv(loc, uniform->Count(), uniform->Data<int>());  break;
-				case UT_INT_VEC4: glUniform4iv(loc, uniform->Count(), uniform->Data<int>());  break;
+				case UT_INT:      GL(glUniform1iv(loc, uniform->Count(), uniform->Data<int>()));  break;
+				case UT_INT_VEC2: GL(glUniform2iv(loc, uniform->Count(), uniform->Data<int>()));  break;
+				case UT_INT_VEC3: GL(glUniform3iv(loc, uniform->Count(), uniform->Data<int>()));  break;
+				case UT_INT_VEC4: GL(glUniform4iv(loc, uniform->Count(), uniform->Data<int>()));  break;
 
-				case UT_UNSIGNED_INT:      glUniform1uiv(loc, uniform->Count(), uniform->Data<unsigned int>());  break;
-				case UT_UNSIGNED_INT_VEC2: glUniform2uiv(loc, uniform->Count(), uniform->Data<unsigned int>());
-				case UT_UNSIGNED_INT_VEC3: glUniform3uiv(loc, uniform->Count(), uniform->Data<unsigned int>()); break;
-				case UT_UNSIGNED_INT_VEC4: glUniform4uiv(loc, uniform->Count(), uniform->Data<unsigned int>()); break;
+				case UT_UNSIGNED_INT:      GL(glUniform1uiv(loc, uniform->Count(), uniform->Data<unsigned int>()));  break;
+				case UT_UNSIGNED_INT_VEC2: GL(glUniform2uiv(loc, uniform->Count(), uniform->Data<unsigned int>()));
+				case UT_UNSIGNED_INT_VEC3: GL(glUniform3uiv(loc, uniform->Count(), uniform->Data<unsigned int>())); break;
+				case UT_UNSIGNED_INT_VEC4: GL(glUniform4uiv(loc, uniform->Count(), uniform->Data<unsigned int>())); break;
 
-				case UT_FLOAT:      glUniform1fv(loc, uniform->Count(), uniform->Data<float>());  break;
-				case UT_FLOAT_VEC2: glUniform2fv(loc, uniform->Count(), uniform->Data<float>());  break;
-				case UT_FLOAT_VEC3: glUniform3fv(loc, uniform->Count(), uniform->Data<float>());  break;
-				case UT_FLOAT_VEC4: glUniform4fv(loc, uniform->Count(), uniform->Data<float>());  break;
+				case UT_FLOAT:      GL(glUniform1fv(loc, uniform->Count(), uniform->Data<float>()));  break;
+				case UT_FLOAT_VEC2: GL(glUniform2fv(loc, uniform->Count(), uniform->Data<float>()));  break;
+				case UT_FLOAT_VEC3: GL(glUniform3fv(loc, uniform->Count(), uniform->Data<float>()));  break;
+				case UT_FLOAT_VEC4: GL(glUniform4fv(loc, uniform->Count(), uniform->Data<float>()));  break;
 
-				case UT_FLOAT_MAT2: glUniformMatrix2fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
-				case UT_FLOAT_MAT3: glUniformMatrix3fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
-				case UT_FLOAT_MAT4: glUniformMatrix4fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+				case UT_FLOAT_MAT2: GL(glUniformMatrix2fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>()));  break;
+				case UT_FLOAT_MAT3: GL(glUniformMatrix3fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>()));  break;
+				case UT_FLOAT_MAT4: GL(glUniformMatrix4fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>()));  break;
 
-				case UT_FLOAT_MAT2x3: glUniformMatrix2x3fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
-				case UT_FLOAT_MAT3x2: glUniformMatrix3x2fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
-				case UT_FLOAT_MAT2x4: glUniformMatrix2x4fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
-				case UT_FLOAT_MAT4x2: glUniformMatrix4x2fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
-				case UT_FLOAT_MAT3x4: glUniformMatrix3x4fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
-				case UT_FLOAT_MAT4x3: glUniformMatrix4x3fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>());  break;
+				case UT_FLOAT_MAT2x3: GL(glUniformMatrix2x3fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>()));  break;
+				case UT_FLOAT_MAT3x2: GL(glUniformMatrix3x2fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>()));  break;
+				case UT_FLOAT_MAT2x4: GL(glUniformMatrix2x4fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>()));  break;
+				case UT_FLOAT_MAT4x2: GL(glUniformMatrix4x2fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>()));  break;
+				case UT_FLOAT_MAT3x4: GL(glUniformMatrix3x4fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>()));  break;
+				case UT_FLOAT_MAT4x3: GL(glUniformMatrix4x3fv(loc, uniform->Count(), GL_TRUE, uniform->Data<float>()));  break;
 
-				case UT_DOUBLE:      glUniform1dv(loc, uniform->Count(), uniform->Data<double>()); break;
-				case UT_DOUBLE_VEC2: glUniform2dv(loc, uniform->Count(), uniform->Data<double>()); break;
-				case UT_DOUBLE_VEC3: glUniform3dv(loc, uniform->Count(), uniform->Data<double>()); break;
-				case UT_DOUBLE_VEC4: glUniform4dv(loc, uniform->Count(), uniform->Data<double>()); break;
+				case UT_DOUBLE:      GL(glUniform1dv(loc, uniform->Count(), uniform->Data<double>())); break;
+				case UT_DOUBLE_VEC2: GL(glUniform2dv(loc, uniform->Count(), uniform->Data<double>())); break;
+				case UT_DOUBLE_VEC3: GL(glUniform3dv(loc, uniform->Count(), uniform->Data<double>())); break;
+				case UT_DOUBLE_VEC4: GL(glUniform4dv(loc, uniform->Count(), uniform->Data<double>())); break;
 
-				case UT_DOUBLE_MAT2: glUniformMatrix2dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>());  break;
-				case UT_DOUBLE_MAT3: glUniformMatrix3dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>());  break;
-				case UT_DOUBLE_MAT4: glUniformMatrix4dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
+				case UT_DOUBLE_MAT2: GL(glUniformMatrix2dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()));  break;
+				case UT_DOUBLE_MAT3: GL(glUniformMatrix3dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()));  break;
+				case UT_DOUBLE_MAT4: GL(glUniformMatrix4dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>())); break;
 
-				case UT_DOUBLE_MAT2x3: glUniformMatrix2x3dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
-				case UT_DOUBLE_MAT3x2: glUniformMatrix3x2dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
-				case UT_DOUBLE_MAT2x4: glUniformMatrix2x4dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
-				case UT_DOUBLE_MAT4x2: glUniformMatrix4x2dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
-				case UT_DOUBLE_MAT3x4: glUniformMatrix3x4dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
-				case UT_DOUBLE_MAT4x3: glUniformMatrix4x3dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>()); break;
+				case UT_DOUBLE_MAT2x3: GL(glUniformMatrix2x3dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>())); break;
+				case UT_DOUBLE_MAT3x2: GL(glUniformMatrix3x2dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>())); break;
+				case UT_DOUBLE_MAT2x4: GL(glUniformMatrix2x4dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>())); break;
+				case UT_DOUBLE_MAT4x2: GL(glUniformMatrix4x2dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>())); break;
+				case UT_DOUBLE_MAT3x4: GL(glUniformMatrix3x4dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>())); break;
+				case UT_DOUBLE_MAT4x3: GL(glUniformMatrix4x3dv(loc, uniform->Count(), GL_TRUE, uniform->Data<double>())); break;
 
 				default:
-					assert(false);
+					//assert(false);
 					break;
 				}
 				GL_CHECK;

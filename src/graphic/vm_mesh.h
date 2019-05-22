@@ -1,13 +1,13 @@
 
-#ifndef _VPL_MESH_H_
-#define _VPL_MESH_H_
-#include "assembly.h"
+#ifndef _VM_MESH_H_
+#define _VM_MESH_H_
+#include "visualman.h"
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
-		class VPL_Mesh :public Assembly
+		class VM_Mesh :public VisualMan
 		{
 		public:
 			void InitEvent() override;

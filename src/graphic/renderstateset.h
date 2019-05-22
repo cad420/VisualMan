@@ -6,7 +6,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		class GLSLProgram;
 

@@ -2,7 +2,7 @@
 #include "uniform.h"
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		void Uniform::SetUniform1i(int count, const int* value)
 		{

@@ -8,7 +8,7 @@
 
 namespace ysl
 {
-	namespace vpl
+	namespace vm
 	{
 		class /*GRAPHICS_EXPORT_IMPORT*/ AbstraArray
 		{
@@ -27,6 +27,10 @@ namespace ysl
 
 			Ref<const BufferObject> GetBufferObject()const { return bufferObject; }
 
+			/**
+			 * \brief  Returns the data pointer pointing to local memory. Nullptr is returned if
+			 *  the data is not resident in local memory.
+			 */
 			char * RawData() { return bufferObject ? bufferObject->Data() : nullptr; }
 
 			const char * RawData()const { return bufferObject ? bufferObject->Data() : nullptr; }
@@ -54,12 +58,13 @@ namespace ysl
 			Ref<BufferObject> bufferObject;
 		};
 
-		template<typename Vec_Ty, typename Sca_Ty, size_t CompNum, unsigned TypeFlag>
+		template<typename Vec_Ty, typename Sca_Ty, size_t CompNum, unsigned Type_Fl>
 		class Array :public AbstraArray
 		{
 		public:
 			using ScalarType = Sca_Ty;
 			using VectorType = Vec_Ty;
+			static constexpr unsigned int TypeFlag = Type_Fl;
 
 			size_t ComponentNum()const override { return CompNum; }
 
@@ -95,6 +100,8 @@ namespace ysl
 		class ArrayFloat1 :public Array<float, float, 1, GL_FLOAT> {};
 		class ArrayFloat2 :public Array<Vec2f, float, 2, GL_FLOAT> {};
 		class ArrayFloat3 :public Array<Vec3f, float, 3, GL_FLOAT> {};
+
+		class ArrayUInt :public Array<unsigned int,unsigned int,1,GL_UNSIGNED_INT>{};
 	}
 }
 
