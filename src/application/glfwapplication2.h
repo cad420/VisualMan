@@ -23,7 +23,7 @@ namespace ysl
 
 			void MakeCurrent()override;
 
-			void SwapBuffer() override;
+			void SwapBuffer()override;
 
 			void Update()override;
 
@@ -42,7 +42,6 @@ namespace ysl
 
 			void InitSingleton();
 			void Init();
-
 
 			static GLFWApplication2* singleton;
 			static std::thread::id threadId;

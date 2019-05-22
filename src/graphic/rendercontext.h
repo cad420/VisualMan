@@ -88,21 +88,12 @@ namespace ysl
 			virtual ~RenderContext() = default;
 			RenderContext(const RenderContext &) = delete;
 			RenderContext & operator=(const RenderContext&) = delete;
-			RenderContext(RenderContext && other)noexcept:listeners(std::move(other.listeners))
-			{
-				
-			}
-			RenderContext & operator=(RenderContext&&)noexcept
-			{
-				return *this;
-			}
 			virtual void SwapBuffer() = 0;
 			virtual void MakeCurrent() = 0;
 			virtual void Update() = 0;
 
 
 			bool InitContext();			// We use gl3w
-
 			bool EnableUpdate()const { return enableUpdate; }
 			void SetEnableUpdate(bool update) { enableUpdate = update; }
 			void SetContextFormat(const RenderContextFormat& fmt);
@@ -153,12 +144,9 @@ namespace ysl
 		private:
 
 			void GetMaxInteger();
-
 			void InitDefaultRenderState();
 			void InitDefaultRenderEnable();
 
-
-		private:
 
 			struct MAXINTEGER
 			{
@@ -166,13 +154,10 @@ namespace ysl
 				int MAX_TEXTURE_IMAGE_UNITE = 0;
 			}maxInteger;
 
-
-
 			//GLFWwindow * windowContext;
 			std::vector<Ref<IEventListener>> listeners;
 			std::vector<Ref<FramebufferObject>> framebufferObjects;
 			Ref<Framebuffer> framebuffer;
-
 
 			RenderContextFormat format;
 			bool enableUpdate = true;
@@ -182,23 +167,12 @@ namespace ysl
 			// Render State
 
 			// Current GLSLProgram
+
 			Ref<GLSLProgram> curProgram;
 
 			std::array<RenderStateBox, RS_RenderState_Count> defaultRenderStates;
 			std::unordered_map<RenderStateType, RenderStateBox> currentRenderStates;
-
 			std::unordered_set<EnableState> currentEnableStates;
-
-			//std::array<EnableState,EN_EnableState_Count> 
-
-
-			//struct VertexArrayInfo
-			//{
-			//	unsigned vertexBufferHandle = 0;
-			//	bool enabled = false;
-			//};
-			//std::array<VertexArrayInfo, VA_VertexAttribArrayCount> vertexAttributeInfo;
-
 		};
 
 	}

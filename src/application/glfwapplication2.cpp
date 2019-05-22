@@ -93,74 +93,6 @@ namespace ysl {
 
 			DispatchInitEvent();
 
-
-
-
-			//Ref<vpl::GLSLProgram> program;
-		
-			// ------------------------------------------------------------------
-			//float vertices[] = {
-			//	 0.5f,  0.5f, 0.0f,  // top right
-			//	 0.5f, -0.5f, 0.0f,  // bottom right
-			//	-0.5f, -0.5f, 0.0f,  // bottom left
-			//	-0.5f,  0.5f, 0.0f   // top left 
-			//};
-			//unsigned int indices[] = {  // note that we start from 0!
-			//	0, 1, 3,  // first Triangle
-			//	1, 2, 3   // second Triangle
-			//};
-
-			//auto  vertShader = MakeRef<vpl::GLSLVertexShader>();
-			//vertShader->SetFromFile(R"(D:\code\MRE\resource\glsl\trivial_vs.glsl)");
-			//assert(vertShader->Compile());
-			//auto fragShader = MakeRef<vpl::GLSLFragmentShader>();
-			//fragShader->SetFromFile(R"(D:\code\MRE\resource\glsl\trivial_fs.glsl)");
-			//assert(fragShader->Compile());
-
-
-			//primitive = MakeRef<vpl::Primitive>();
-			//auto vert = MakeRef<vpl::ArrayFloat3>();
-			//vert->GetBufferObject()->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
-			//primitive->SetVertexArray(vert);
-			//primitive->DrawCalls().push_back(MakeRef<vpl::DrawArray>(0, 6));
-
-
-			//frame = MakeRef<vpl::Frame>();
-			//auto triSceneMnger = MakeRef<vpl::TrivialSceneManager>();
-			//frame->SceneManager().push_back(triSceneMnger);
-			//auto artist = MakeRef<vpl::Artist>();
-			//auto shading = MakeRef<vpl::Shading>();
-			//shading->CreateGetProgram()->AttachShader(vertShader);
-			//shading->CreateGetProgram()->AttachShader(fragShader);
-			////shading->SetUniform(MakeRef<graphics::Uniform>("aColor"));
-			//Vec4f color{ 1.0,0.3,0.2,1.0 };
-			//shading->CreateGetUniform("aColor")->SetUniform4f(1, color.Data());
-
-
-			//// Create a test texture
-			//auto testTex = MakeRef<vpl::Texture>();
-			//auto setupParams = MakeRef<vpl::TexCreateParams>();
-			//setupParams->SetSize(5, 5, 5);
-			//setupParams->SetTextureFormat(TF_RGBA32F);
-			//setupParams->SetTextureTarget(TD_TEXTURE_3D);
-			//testTex->SetSetupParams(setupParams);
-			//assert(testTex->CreateTexture());
-			//float data[125 * 4];
-			//testTex->SetSubTextureData(data, IF_RGBA, IT_FLOAT,0,0,0,5,5,5);
-
-			//auto texUnit = 0;
-			//shading->CreateGetUniform("testTex")->SetUniform1i(1,&texUnit);
-			//shading->CreateGetTextureSampler(0)->SetTexture(testTex);
-			//artist->GetLOD(0)->push_back(shading);
-
-			//auto actor = MakeRef<vpl::Actor>(primitive, artist, nullptr);
-
-
-			//triSceneMnger->AddActor(actor);
-			//frame->SceneManager().push_back(triSceneMnger);
-
-
-
 		}
 
 		void GLFWApplication2::DestroyWindow()
@@ -223,13 +155,14 @@ namespace ysl {
 			const auto ins = Instance();
 
 			ins->glfwWindow == window;
-			MouseEvent e({ int(xpos),int(ypos) }, 0);
+			
+			int button = 0;
 			if (ins->mouseLeftButtonPressed)
-				e.m_buttons |= MouseEvent::LeftButton;
+				button |= vm::Mouse_Left;
 			if (ins->mouseRightButtonPressed)
-				e.m_buttons |= MouseEvent::RightButton;
-			if (e.m_buttons)
-				ins->DispatchMouseMoveEvent(vm::Mouse_Left, xpos, ypos);
+				button |= vm::Mouse_Right;
+			if (button)
+				ins->DispatchMouseMoveEvent((vm::EMouseButton)button, xpos, ypos);
 		}
 
 
@@ -240,33 +173,33 @@ namespace ysl {
 			assert(app->glfwWindow == window);
 			double xpos, ypos;
 			glfwGetCursorPos(window, &xpos, &ypos);
-			MouseEvent e{ { int(xpos),int(ypos) }, 0 };
+			int buttons = 0;
 			if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
 			{
 				app->mouseRightButtonPressed = true;
-				e.m_buttons |= MouseEvent::RightButton;
+				buttons |= vm::Mouse_Right;
 			}
 			if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
 			{
 				app->mouseRightButtonPressed = false;
-				e.m_buttons |= MouseEvent::RightButton;
+				buttons |= vm::Mouse_Right;
 			}
 			if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 			{
 				app->mouseLeftButtonPressed = true;
-				e.m_buttons |= MouseEvent::LeftButton;
+				buttons |= vm::Mouse_Left;
 			}
 			if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 			{
 				app->mouseLeftButtonPressed = false;
-				e.m_buttons |= MouseEvent::LeftButton;
+				buttons |= vm::Mouse_Left;
 			}
-			if (e.buttons())
+			if (buttons)
 			{
 				if (action == GLFW_PRESS)
-					app->DispatchMousePressedEvent(vm::EMouseButton(vm::Mouse_Left | vm::Mouse_Right), xpos, ypos);
+					app->DispatchMousePressedEvent((vm::EMouseButton)buttons, xpos, ypos);
 				else if (action == GLFW_RELEASE)
-					app->DispatchMouseReleasedEvent(vm::EMouseButton(vm::Mouse_Left | vm::Mouse_Right), xpos, ypos);
+					app->DispatchMouseReleasedEvent((vm::EMouseButton)buttons, xpos, ypos);
 			}
 		}
 

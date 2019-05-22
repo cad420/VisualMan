@@ -23,5 +23,5 @@ void main()
 {
     gl_Position = vpl_MVPMatrix*vpl_VertexPosition;
     frag_pos = vec3(vpl_ModelMatrix*vpl_VertexPosition);
-    frag_normal = vpl_NormalMatrix*vec3(vpl_VertexNormal);
+    frag_normal = vec3(vpl_ViewMatrix*vec4(vpl_VertexNormal));
 }

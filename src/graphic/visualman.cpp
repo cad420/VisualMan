@@ -88,11 +88,10 @@ namespace ysl
 
 		void VisualMan::ResizeEvent(int w, int h)
 		{
-			std::cout << "Assembly::ResizeEvent:"<<w<<" "<<h << std::endl;
+			//std::cout << "Assembly::ResizeEvent:"<<w<<" "<<h << std::endl;
 			//if(frame->GetCamera())
-			//	frame->GetCamera()->GetViewport()->SetViewportSize(w, h);
+			//frame->GetCamera()->GetViewport()->SetViewportSize(w, h);
 			//frame->GetCamera()->GetViewport()->Activate();
-
 		}
 	}
 }

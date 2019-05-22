@@ -12,12 +12,10 @@ namespace ysl
 {
 	namespace vm
 	{
-
-
 		class Shading
 		{
 		public:
-			Shading()=default;
+			Shading() = default;
 			virtual ~Shading() = default;
 			// Shading Program getter and setter
 			Ref<GLSLProgram> CreateGetProgram() { return CreateGetRenderStateSet()->CreateGetProgram(); }
@@ -25,12 +23,11 @@ namespace ysl
 			Ref<const GLSLProgram> GetProgram()const { assert(GetRenderStateSet()); return GetRenderStateSet()->GetProgram(); }
 			void SetProgram(Ref<GLSLProgram> program) { assert(GetRenderStateSet()); GetRenderStateSet()->SetProgram(program); }
 
-
 			// RenderState getter and setter 
 			Ref<RenderStateSet> CreateGetRenderStateSet() { return renderStateSet ? renderStateSet : (renderStateSet = MakeRef<RenderStateSet>()); }
 			Ref<RenderStateSet> GetRenderStateSet()const { return renderStateSet; }
-			void SetRenderState(Ref<RenderState> state) { CreateGetRenderStateSet()->SetRenderState(state,-1); }
-			Ref<DepthFuncState> GetDepthFuncState(RenderStateType type) { return std::static_pointer_cast<DepthFuncState>(CreateGetRenderStateSet()->GetRenderState(type,-1)); }
+			void SetRenderState(Ref<RenderState> state) { CreateGetRenderStateSet()->SetRenderState(state, -1); }
+			Ref<DepthFuncState> GetDepthFuncState(RenderStateType type) { return std::static_pointer_cast<DepthFuncState>(CreateGetRenderStateSet()->GetRenderState(type, -1)); }
 
 			Ref<TextureSampler> CreateGetTextureSampler(int unitIndex);
 

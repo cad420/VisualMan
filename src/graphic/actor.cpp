@@ -6,7 +6,26 @@ namespace ysl
 {
 	namespace vm
 	{
+		void IActorEvent::OnActorRenderStartedEvent(Actor* actor, const Camera* camera, Renderable* renderable,
+			const Shading* shading, int pass)
+		{
+			(void)actor;
+			(void)camera;
+			(void)renderable;
+			(void)shading;
+			(void)pass;
+			
+		}
 
+		void IActorEvent::OnActorDeletingEvent(Actor* actor, const Camera* camera, Renderable* renderable,
+			const Shading* shading, int pass)
+		{
+			(void)actor;
+			(void)camera;
+			(void)renderable;
+			(void)shading;
+			(void)pass;
+		}
 
 		Actor::Actor(Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform):
 			artist(std::move(art))
@@ -20,7 +39,7 @@ namespace ysl
 
 		void Actor::DispatchOnActorRenderStartedEvent(const Camera * camera, Renderable * renderable, const Shading * shading, int pass)
 		{
-			for (auto & each : actorEvents)
+			for (const auto & each : actorEvents)
 			{
 				if (each->IsEventEnable())
 					each->OnActorRenderStartedEvent(this, camera, renderable, shading, pass);
@@ -29,7 +48,7 @@ namespace ysl
 
 		void Actor::DispatchOnActorDeletingEvent(const Camera * camera, Renderable * renderable, const Shading * shading, int pass)
 		{
-			for (auto & each : actorEvents)
+			for (const auto & each : actorEvents)
 			{
 				each->OnActorDeletingEvent(this, camera, renderable, shading, pass);
 			}

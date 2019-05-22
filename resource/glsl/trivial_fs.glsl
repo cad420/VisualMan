@@ -10,11 +10,11 @@ uniform vec3 view_pos;
 
 void main()
 {
-    vec3 frag_norm = normalize(vec3(1,1,1));
+    vec3 frag_norm = normalize(vec3(-frag_normal));
 
-    frag_color = vec4(frag_norm,1.0);
+    //frag_color = vec4(frag_norm,1.0);
 	
-   // the light normalized vector points to light
+  // the light normalized vector points to light
     vec3 light_norm = normalize(light_pos-frag_pos);
 
     //ambient
@@ -33,5 +33,4 @@ void main()
     vec4 result = (ambient+diffuse+specular)*object_color;
     //fragment output
 	frag_color = result;
-
 }
