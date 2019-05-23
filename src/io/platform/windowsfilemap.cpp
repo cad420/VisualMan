@@ -116,8 +116,12 @@ namespace ysl
 
 	void WindowsFileMapping::DestroyFileMemPointer(unsigned char* addr)
 	{
-		mappedPointers.erase(addr);
-		UnmapViewOfFile((LPVOID)addr);
+		auto it = mappedPointers.find(addr);
+		if(it != mappedPointers.end())
+		{
+			UnmapViewOfFile((LPVOID)addr);
+			mappedPointers.erase(it);
+		}
 	}
 
 	bool WindowsFileMapping::WriteCommit()
@@ -127,8 +131,8 @@ namespace ysl
 
 	bool WindowsFileMapping::Close()
 	{
-		for (auto addr : mappedPointers)
-			WindowsFileMapping::DestroyFileMemPointer(addr);
+		//for (auto & addr : mappedPointers)
+		//	WindowsFileMapping::DestroyFileMemPointer(addr);
 		CloseHandle(f);
 		CloseHandle(mapping);
 		return true;

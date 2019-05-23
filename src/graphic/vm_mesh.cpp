@@ -66,8 +66,6 @@ namespace ysl
 			//elemDraw->SetIndexBuffer(indexArray);
 			//primitive->DrawCalls().push_back(elemDraw);
 
-			
-
 			auto primitive = MakePrimitive(R"(D:\Desktop\teapot.obj)");
 
 			frame = MakeRef<vm::Frame>();
@@ -94,10 +92,10 @@ namespace ysl
 
 			const auto actor = MakeRef<vm::Actor>(primitive, artist, nullptr);
 
-
-
 			actor->CreateGetUniformSet()->CreateGetUniform("light_pos")->SetUniform3f(1, lightPos.Data());
+
 			actor->CreateGetUniformSet()->CreateGetUniform("light_color")->SetUniform3f(1, lightColor.Data());
+
 			actor->CreateGetUniformSet()->CreateGetUniform("object_color")->SetUniform4f(1, objectColor.Data());
 
 			shading->CreateGetEnableStateSet()->Enable(EN_DEPTH_TEST);
@@ -120,6 +118,9 @@ namespace ysl
 
 		void VM_Mesh::UpdateScene()
 		{
+
 		}
+
+
 	}
 }

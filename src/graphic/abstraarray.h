@@ -35,9 +35,19 @@ namespace ysl
 
 			const char * RawData()const { return bufferObject ? bufferObject->Data() : nullptr; }
 
+			/**
+			 * \brief Clear the Local memory buffer
+			 */
 			void Clear() { if (bufferObject)bufferObject->Clear(); }
 
-			std::size_t Bytes()const { return bufferObject ? bufferObject->Size() : 0; }
+			bool IsBufferObjectDataDirty()const { return dirtyData; }
+
+			void SetbufferObjectDataDirty(bool dirty) { dirtyData = dirty; }
+
+			/**
+			 * \brief  Returns the bytes used by local memory
+			 */
+			std::size_t Bytes()const { return bufferObject ? bufferObject->Bytes() : 0; }
 
 			virtual Bound3f GetBoundingBox()const = 0;
 
@@ -56,6 +66,7 @@ namespace ysl
 			virtual ~AbstraArray() {}
 		private:
 			Ref<BufferObject> bufferObject;
+			bool dirtyData = true;		// indicates whether the GPU data is dirty
 		};
 
 		template<typename Vec_Ty, typename Sca_Ty, size_t CompNum, unsigned Type_Fl>
@@ -63,7 +74,9 @@ namespace ysl
 		{
 		public:
 			using ScalarType = Sca_Ty;
+
 			using VectorType = Vec_Ty;
+
 			static constexpr unsigned int TypeFlag = Type_Fl;
 
 			size_t ComponentNum()const override { return CompNum; }

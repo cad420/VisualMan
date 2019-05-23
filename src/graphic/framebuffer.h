@@ -18,7 +18,11 @@ namespace ysl
 				int width,
 				int height,
 				ReadDrawBuffer readBuffer,
-				ReadDrawBuffer drawBuffer) :context(context), width(width), height(height),readBuffer(readBuffer)
+				ReadDrawBuffer drawBuffer) :
+			context(context), 
+			width(width), 
+			height(height),
+			readBuffer(readBuffer)
 			{
 				drawBuffers.push_back(drawBuffer);
 			}

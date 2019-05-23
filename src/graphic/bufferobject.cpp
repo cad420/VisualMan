@@ -35,8 +35,8 @@ namespace ysl
 			{
 				Resize(bufferSize);
 				void * ptr = nullptr;
-				GL(ptr = MapBuffer(BA_READ_ONLY));
-				memcpy(Data(), ptr, Size());
+				ptr = MapBuffer(BA_READ_ONLY);
+				memcpy(Data(), ptr, Bytes());
 				UnmapBuffer();
 			}
 		}
@@ -52,7 +52,14 @@ namespace ysl
 			this->bufferUsage = usage;
 		}
 
-		void BufferObject::SetBuferSubData(size_t offset, size_t bytes, const void* data)
+		void BufferObject::SetBufferData(BufferObjectUsage usage, bool discard)
+		{
+			SetBufferData(Bytes(),Data(), usage);
+			if (discard)
+				Resize(0);
+		}
+
+		void BufferObject::SetBufferSubData(size_t offset, size_t bytes, const void* data)
 		{
 			assert(handle);
 			if(handle && data)

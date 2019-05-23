@@ -103,7 +103,7 @@ namespace ysl
 				if(artist)
 				{
 					const auto primitiveLOD = actor->EvalLod(camera.get());
-					const auto renderable = actor->GetRenderableFromLod(primitiveLOD);
+					const auto renderable = actor->GetRenderable(primitiveLOD);
 					const auto shadingLOD = artist->EvalLOD(actor.get(), camera.get());
 
 					Ref<ShadingPasses> shadingPasses = artist->GetLOD(shadingLOD);

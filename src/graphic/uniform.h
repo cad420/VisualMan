@@ -121,6 +121,7 @@ namespace ysl
 			const Ty * Data()const { return reinterpret_cast<const Ty*>(data.data()); }
 
 			// massive variable setters
+
 			void SetUniform1i(int count, const int* value);
 
 			void SetUniform2i(int count, const int* value);
@@ -212,6 +213,7 @@ namespace ysl
 			void SetUniformValue(int value) { SetUniform1i(1, &value); }
 
 			void SetUniformValue(float value) { SetUniform1f(1, &value); }
+
 
 			int Count() const;
 

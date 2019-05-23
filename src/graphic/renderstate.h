@@ -90,7 +90,7 @@ namespace ysl
 			void SetFace(PolygonFace face) { this->face = face; }
 			PolygonFace GetFace()const { return this->face; }
 		private:
-			PolygonFace face = PF_BACK;
+			PolygonFace face = PF_FRONT;
 		};
 
 		class GRAPHICS_EXPORT_IMPORT LineWidthState :public RenderStateNonIndexed

@@ -1,5 +1,4 @@
 #version 330 core
-
 uniform mat4 vpl_ModelMatrix;
 uniform mat4 vpl_ViewMatrix;
 uniform mat4 vpl_ProjectionMatrix;
@@ -15,14 +14,9 @@ in vec4 vpl_VertexTexCoord2;
 in vec4 vpl_VertexTexCoord3;
 in vec4 vpl_VertexTexCoord4;
 
-out vec3 frag_normal;
-out vec3 frag_pos;
+out vec3 texCoor;
 
-
-void main()
-{
-    gl_Position = vpl_MVPMatrix*vpl_VertexPosition;
-    frag_pos = vec3(vpl_ModelMatrix*vpl_VertexPosition);
-    //frag_normal = vec3(vpl_ViewMatrix*vec4(vpl_VertexNormal));
-    frag_normal = vec3(vpl_NormalMatrix*vec3(vpl_VertexNormal));
+void main() {
+	texCoord = vpl_VertexPosition;
+	gl_Position = vpl_MVPMatrix * vpl_VertexPosition;
 }

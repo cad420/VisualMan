@@ -10,7 +10,7 @@ uniform vec3 view_pos;
 
 void main()
 {
-    vec3 frag_norm = normalize(vec3(-frag_normal));
+    vec3 frag_norm = normalize(vec3(frag_normal));
 
     //frag_color = vec4(frag_norm,1.0);
 	

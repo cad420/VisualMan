@@ -89,6 +89,12 @@ namespace ysl
 		return *this;
 	}
 
+	void Matrix3x3::SetToIdentity()
+	{
+		m[0][0] = m[1][1] = m[2][2] = 1;
+		m[0][1] = m[0][2] = m[1][0] = m[1][2] = m[2][0] = m[2][1] = 0;
+	}
+
 	void Matrix3x3::Transpose()
 	{
 		for (auto i = 0; i < 3; i++)
@@ -147,7 +153,7 @@ namespace ysl
 	{
 		m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.f;
 		m[0][1] = m[0][2] = m[0][3] = m[1][0] = m[1][2] = m[1][3] = m[2][0] =
-		m[2][1] = m[2][3] = m[3][0] = m[3][1] = m[3][2] = 0.f;
+			m[2][1] = m[2][3] = m[3][0] = m[3][1] = m[3][2] = 0.f;
 	}
 
 	Matrix4x4::Matrix4x4(const Matrix3x3& mat33)
@@ -214,6 +220,13 @@ namespace ysl
 			for (int j = 0; j < 4; ++j)
 				if (m[i][j] != m2.m[i][j]) return true;
 		return false;
+	}
+
+	void Matrix4x4::SetToIdentity()
+	{
+
+		m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1;
+		m[0][1] = m[0][2] = m[0][3] = m[1][0] = m[1][2] = m[1][3] = m[2][0] = m[2][1] = m[2][3] = m[3][0]=m[3][1]=m[3][2] = 0;
 	}
 
 	void Matrix4x4::Transpose()
@@ -364,7 +377,7 @@ namespace ysl
 		Transform::Transpose()
 	{
 		m_inv.Transpose();
-		m_m.Transposed();
+		m_m.Transpose();
 	}
 
 
@@ -382,7 +395,7 @@ namespace ysl
 	}
 
 	Ray
-	Transform::operator*(const Ray& ray) const
+		Transform::operator*(const Ray& ray) const
 	{
 		return { (*this)*ray.Direction() ,(*this)*ray.Original() };
 	}
@@ -643,6 +656,12 @@ namespace ysl
 		};
 
 		m_inv = m_m.Inversed();
+	}
+
+	void Transform::SetIdentity()
+	{
+		m_m.SetToIdentity();
+		m_inv.SetToIdentity();
 	}
 
 	Matrix4x4

@@ -12,7 +12,7 @@ namespace ysl
 	{
 		class Renderable;
 
-		class GRAPHICS_EXPORT_IMPORT IActorEvent
+		class GRAPHICS_EXPORT_IMPORT IActorEvent:public std::enable_shared_from_this<IActorEvent>
 		{
 		public:
 			virtual void OnActorRenderStartedEvent(Actor * actor,
@@ -25,6 +25,7 @@ namespace ysl
 				Renderable * renderable,
 				const Shading * shading,
 				int pass);
+
 			void SetEventEnable(bool enable) { eventEnable = enable; }
 			bool IsEventEnable()const { return eventEnable; }
 			virtual ~IActorEvent() = default;
@@ -42,6 +43,7 @@ namespace ysl
 			void DispatchOnActorRenderStartedEvent(const Camera * camera,Renderable * renderable,const Shading * shading,int pass);
 			void DispatchOnActorDeletingEvent(const Camera * camera, Renderable * renderable, const Shading * shading, int pass);
 			void AddActorRenderEventCallback(Ref<IActorEvent> callback);
+			void RemoveActorRenderEventCallback(Ref<IActorEvent> callback);
 			void SetLODEvaluator(Ref<LODEvaluator> evaluator) { lodEvaluator = std::move(evaluator); }
 
 			Ref<LODEvaluator> GetLODEvaluator() { return lodEvaluator; }
@@ -58,7 +60,8 @@ namespace ysl
 			Ref<const Artist> GetArtist()const { return artist; }
 
 
-			Ref<Renderable> GetRenderableFromLod(int lod);
+			Ref<Renderable> GetRenderable(int lod);
+			void SetRenderable(Ref<Renderable> renderable, int lod);
 
 
 			int EvalLod(const Camera * camera);

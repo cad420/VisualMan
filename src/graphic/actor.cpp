@@ -59,10 +59,27 @@ namespace ysl
 			actorEvents.push_back(std::move(callback));
 		}
 
-		Ref<Renderable> Actor::GetRenderableFromLod(int lod)
+		void Actor::RemoveActorRenderEventCallback(Ref<IActorEvent> callback)
+		{
+			for(auto it = actorEvents.begin();it != actorEvents.end();)
+			{
+				if (*it == callback)
+					it = actorEvents.erase(it);
+				else
+					++it;
+			}
+		}
+
+		Ref<Renderable> Actor::GetRenderable(int lod)
 		{
 			assert(lod >= 0 && lod < 8);
 			return renderables[lod];
+		}
+
+		void Actor::SetRenderable(Ref<Renderable> renderable, int lod)
+		{
+			assert(lod >= 0 && lod < 8);
+			renderables[lod] = std::move(renderable);
 		}
 
 		int Actor::EvalLod(const Camera* camera)

@@ -112,7 +112,8 @@ namespace ysl
 
 			Ref<TexCreateParams> GetSetupParams() { return createParams; }
 			Ref<const TexCreateParams> GetSetupParams()const { return createParams; }
-			void SetSetupParams(Ref<TexCreateParams> params) { createParams = std::move(params); }
+
+			void SetSetupParams(Ref<TexCreateParams> params);
 
 			Ref<BufferObject> GetBufferObject() { return bufferObject; }
 			Ref<const BufferObject> GetBufferObject() const { return bufferObject; }
@@ -141,8 +142,8 @@ namespace ysl
 
 			// std::unique_ptr<BufferObject> pixelBufferObject; this is used to swap data between texture and memory
 			Ref<BufferObject> bufferObject;
-			Ref<TexCreateParams> createParams;
-			Ref<TexParams> texParams;
+			Ref<TexCreateParams> createParams = nullptr;
+			Ref<TexParams> texParams = nullptr;
 
 			TextureTarget target = TD_TEXTURE_2D;
 			TextureFormat format = TF_RGBA;
@@ -156,6 +157,10 @@ namespace ysl
 			unsigned int handle = 0;
 
 		};
+
+		Ref<Texture> MakeVolumeTexture(const std::string & fileName, size_t x, size_t y, size_t z);
+		Ref<Texture> MakeImageTexuture(const std::string & fileName);
+		Ref<Texture> MakeTransferFunction1D(const std::string & fileName);
 	}
 }
 

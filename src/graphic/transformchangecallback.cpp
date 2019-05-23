@@ -17,18 +17,9 @@ namespace ysl
 			// in a uniform set. we just set them by using the OpenGL api
 
 			// NOTE: program is already be used before this call
-
-
 			if (program)
 			{
 				assert(program->Handle());
-
-				//GL(glUseProgram(program->Handle()));
-				//int activeUniforms = 0;
-				//GL(glGetProgramiv(program->Handle(), GL_ACTIVE_UNIFORMS, &activeUniforms));
-				//Debug("Number of active uniforms: %d\n",activeUniforms);
-
-
 				//Debug("%s %d\n", __FILE__, __LINE__);
 
 				const int modelLoc = program->GetWorldMatrixUniformLocation();
@@ -60,7 +51,7 @@ namespace ysl
 					if (camera)
 					{
 						//Debug("%s %d\n", __FILE__, __LINE__);
-						GL(glUniformMatrix4fv(viewLoc, 1, GL_TRUE, camera->ProjectionMatrix().Matrix().m[0]));
+						GL(glUniformMatrix4fv(projLoc, 1, GL_TRUE, camera->ProjectionMatrix().Matrix().m[0]));
 					}
 				}
 
@@ -70,10 +61,7 @@ namespace ysl
 					if (camera)
 					{
 						//Debug("%s %d\n", __FILE__, __LINE__);
-						Matrix3x3 normalMatrix(camera->ViewMatrix().Matrix());
-						normalMatrix.Inverse();
-						normalMatrix.Transpose();
-						GL(glUniformMatrix3fv(viewLoc, 1, GL_TRUE, normalMatrix.m[0]));
+						GL(glUniformMatrix3fv(normalLoc, 1, GL_TRUE, camera->ViewMatrix().Matrix().NormalMatrix().FlatData()));
 					}
 				}
 

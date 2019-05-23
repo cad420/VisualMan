@@ -69,7 +69,7 @@ namespace ysl
 			return *this;
 		}
 
-		size_type Size()const { return size; }
+		size_type Bytes()const { return size*sizeof(T); }
 		std::size_t Count()const { return size; }
 
 		T & operator()(int x)

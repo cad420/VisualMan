@@ -9,10 +9,19 @@
 namespace  ysl
 {
 	struct Matrix4x4;
+
 	struct Matrix3x3;
+
+	//template<typename Ty, int Col,int Row>
+	//struct GenericMatrix
+	//{
+	//	Float m[Row][Col];
+
+	//};
 
 	struct Matrix3x3
 	{
+		typedef	Float(*Matrix3x3DataType)[3];
 		Float m[3][3];
 		Matrix3x3();
 		Matrix3x3(Float mat[3][3]);
@@ -23,33 +32,48 @@ namespace  ysl
 		bool operator!=(const Matrix3x3& m2) const;
 		Matrix3x3& operator/=(const Float& s);
 		Matrix3x3& operator*=(const Float& s);
+
+		void SetToIdentity();
+
 		void Transpose();
 		Matrix3x3 Transposed() const;
 		Float Det() const;
+		Float * FlatData() { return *m; }
+		const Float * FlatData()const { return *m; }
+		Matrix3x3DataType MatrixData() { return m; }
 		void Inverse() { *this = Inversed(); }
 		Matrix3x3 Inversed() const;
 	};
 
 	struct Matrix4x4 
 	{
-		typedef	Float(*MatrixDataType)[4];
+		typedef	Float(*Matrix4x4DataType)[4];
 		Matrix4x4();
 		Matrix4x4(const Matrix3x3 & mat33);
 		Matrix4x4(Float mat[4][4]);
 		Matrix4x4(Float t00, Float t01, Float t02, Float t03, Float t10, Float t11,
 			Float t12, Float t13, Float t20, Float t21, Float t22, Float t23,
 			Float t30, Float t31, Float t32, Float t33);
+
+
 		bool operator==(const Matrix4x4& m2) const;
 		bool operator!=(const Matrix4x4& m2) const;
+
+		void SetToIdentity();
+
 		void Transpose();
 		Matrix4x4 Transposed() const;
+
 		Matrix3x3 NormalMatrix() const;
 		void Inverse() { *this = Inversed(); }
 		Matrix4x4 Inversed() const;
+
 		static Matrix4x4 Mul(const Matrix4x4& m1, const Matrix4x4& m2);
 		friend std::ostream& operator<<(std::ostream& os, const Matrix4x4& m);
+
 		Float * FlatData() { return *m; }
-		MatrixDataType MatrixData() { return m; }
+		const Float * FlatData()const { return *m; }
+		Matrix4x4DataType MatrixData() { return m; }
 		Float m[4][4];
 	};
 
@@ -67,6 +91,7 @@ namespace  ysl
 	public:
 		// Transform Public Methods
 		Transform() = default;
+
 		explicit Transform(const Float mat[4][4]);
 		Transform(const Matrix4x4& m, const Matrix4x4& inv);
 		explicit Transform(const Matrix4x4& m);
@@ -78,6 +103,7 @@ namespace  ysl
 		Transform Inversed()const { return Transform{ m_inv,m_m }; }
 		const Matrix4x4& Matrix() const;
 		const Matrix4x4& InverseMatrix() const;
+
 		void SetLookAt(const Point3f & eye, const Point3f & center, const Vector3f & up);
 		void SetGLOrtho(Float left, Float right, Float bottom, Float top, Float nearPlane, Float farPlane);
 		void SetGLPerspective(Float vertcialAngle, Float aspectRation, Float nearPlane, Float farPlane);
@@ -94,6 +120,7 @@ namespace  ysl
 		void SetRotateX(Float degrees);
 		void SetRotateY(Float degrees);
 		void SetRotateZ(Float degrees);
+		void SetIdentity();
 
 		//const Float * ConstMatrixData()const;
 		//Float * MatrixData();
@@ -266,6 +293,7 @@ namespace  ysl
 		Float cot = 1 / (std::tan(DegreesToRadians(fov) / 2));
 		return Scale(cot, cot, 1.0)*Transform(persp);
 	}
+
 
 
 

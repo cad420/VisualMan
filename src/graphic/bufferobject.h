@@ -74,20 +74,33 @@ namespace ysl
 				return *this;
 			}
 
-
 			unsigned int Handle()const { return handle; }
 
 			void CreateBufferObject();
 
 			void DestroyBufferObject();
 
+			/**
+			 * \brief Download data from GPU to local memory
+			 */
 			void Download();
 
 			uint64_t BufferObjectSize()const { return bufferSize; }
 
+			/**
+			 * \brief  Upload data directly to GPU provided by \a data
+			 */
 			void SetBufferData(size_t bytes,const void * data,BufferObjectUsage usage);
 
-			void SetBuferSubData(size_t offset,size_t bytes,const void * data);
+			/**
+			 * \brief  Upload data to GPU using the local buffer
+			 */
+			void SetBufferData(BufferObjectUsage usage,bool discard);
+
+			/**
+			 * \brief  Upload data directly to GPU provided by \a data
+			 */
+			void SetBufferSubData(size_t offset,size_t bytes,const void * data);
 
 			//void Upload();
 

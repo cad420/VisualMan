@@ -18,6 +18,7 @@ namespace ysl
 		public:
 			Frame()
 			{
+				
 				camera = MakeRef<Camera>();  // A default camera
 				renderers.push_back(MakeRef<Renderer>());
 			}

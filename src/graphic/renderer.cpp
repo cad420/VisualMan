@@ -78,7 +78,6 @@ namespace ysl
 					// program also be used here.
 
 					//auto program = node->shading->GetProgram();
-
 					auto renderStateSet = node->shading->GetRenderStateSet();
 					context->ApplyRenderState(renderStateSet.get());
 					GL_CHECK;

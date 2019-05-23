@@ -14,6 +14,7 @@ namespace ysl
 		: fileName(fileName), dimensions(dimensions), voxelSize(voxelSize)//,file(fileName,std::ios::binary),
 		 ,offset(0),ptr(nullptr)
 	{
+
 		//if (!file)
 		//{
 		//	throw std::runtime_error("ImportRAW: Unable to open file " + fileName);

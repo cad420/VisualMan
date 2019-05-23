@@ -2,6 +2,8 @@
 #include "texture.h"
 #include "GL/gl3w.h"
 #include "../opengl/openglutils.h"
+#include "../io/rawreader.h"
+#include "../utility/interpulator.h"
 
 namespace ysl
 {
@@ -311,6 +313,11 @@ namespace ysl
 			}
 		}
 
+		void Texture::SetSetupParams(Ref<TexCreateParams> params)
+		{
+			createParams = std::move(params);
+		}
+
 		void Texture::SetSubTextureData(void* data, ImageFormat imageFormat, ImageType imageType, int xoffset, int yoffset, int zoffset, int w, int h, int d)
 		{
 			if (handle == 0)
@@ -339,6 +346,57 @@ namespace ysl
 			{
 				Debug("Unsuported format. %s %d", __FILE__, __LINE__);
 			}
+		}
+
+		Ref<Texture> MakeVolumeTexture(const std::string& fileName, size_t x, size_t y, size_t z)
+		{
+			Ref<TexCreateParams> params = MakeRef<TexCreateParams>();
+
+			params->EnableMipMap(false);
+			params->EnableBorder(false);
+			params->SetSize(x, y, z);
+			params->SetTextureFormat(TF_R8);
+			params->SetTextureTarget(TD_TEXTURE_3D);
+
+			auto volumeTex = MakeRef<Texture>();
+			volumeTex->SetSetupParams(params);
+			if (!volumeTex->CreateTexture()) 
+			{
+				return nullptr;
+			}
+			RawReader rawReader(fileName, { x,y,z }, sizeof(char));
+			std::unique_ptr<char[]> buffer(new char[x*y*z * sizeof(char)]);
+			if (x*y*z != rawReader.readRegion({ 0,0,0 }, { x,y,z },(unsigned char*) buffer.get()))
+			{
+				throw std::runtime_error("Size read error");
+			}
+			volumeTex->SetSubTextureData(buffer.get(), IF_RED, IT_BYTE, 0, 0, 0, x, y, z);
+			return volumeTex;
+		}
+
+		Ref<Texture> MakeTransferFunction1D(const std::string& fileName)
+		{
+			Ref<TexCreateParams> params = MakeRef<TexCreateParams>();
+			params->EnableMipMap(false);
+			params->EnableBorder(false);
+			params->SetSize(256,0,0);
+			params->SetTextureFormat(TF_RGBA32F);
+			params->SetTextureTarget(TD_TEXTURE_1D);
+			auto tfTex = MakeRef<Texture>();
+			tfTex->SetSetupParams(params);
+			if(!tfTex->CreateTexture())
+			{
+				return nullptr;
+			}
+			ColorInterpulator interpulator(fileName);
+			if(interpulator.valid() == false)
+			{
+				throw std::runtime_error("Return Color Table error");
+			}
+			std::unique_ptr<float[]> buffer(new float[256 * 4]);
+			interpulator.FetchData((float*)(buffer.get()), 256);
+			tfTex->SetSubTextureData(buffer.get(), IF_RGBA, IT_FLOAT, 0, 0, 0, 256, 0, 0 );
+			return tfTex;
 		}
 	}
 }

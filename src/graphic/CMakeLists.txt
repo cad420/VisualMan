@@ -23,6 +23,7 @@ aux_source_directory("../mathematics" MATH_SRC)
 aux_source_directory("../memory" MEMORY_SRC)
 aux_source_directory("../utility" UTILITY_SRC)
 
+
 set(GRAPHIC_INCLUDE)
 
 file(GLOB GRAPHIC_INCLUDE "*.h")
@@ -36,6 +37,9 @@ ${GRAPHIC_SRC}
 ${MATH_SRC} 
 ${GL3W_SRC} 
 ${MEMORY_SRC} 
-${UTILITY_SRC})
+${UTILITY_SRC}
+"../io/rawreader.cpp"
+"../io/rawio.cpp"
+"../io/platform/windowsfilemap.cpp")
 
 target_link_libraries("rasterizer" ${OPENGL_LIBRARIES})

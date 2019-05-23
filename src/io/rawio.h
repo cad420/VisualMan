@@ -3,7 +3,7 @@
 #include "../mathematics/geometry.h"
 #include <unordered_map>
 #include <unordered_set>
-#include "reflection.h"
+//#include "reflection.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -13,7 +13,7 @@
 namespace ysl
 {
 
-	class AbstraFileMap:public Reflectable
+	class AbstraFileMap//:public Reflectable
 	{
 	protected:
 		std::string fileName;

@@ -2,6 +2,7 @@
 #include "../src/graphic/visualman.h"
 #include "../src/graphic/graphicsbooster.h"
 #include "../src/graphic/vm_mesh.h"
+#include "../src/graphic/vm_volumeraycast.h"
 
 int main(int argc,char ** argv)
 {
@@ -10,7 +11,8 @@ int main(int argc,char ** argv)
 
 	Booster booster(argc, argv);
 	GLFWApplication2 window("Test GLFW Window", RenderContextFormat(), 800, 600);
-	auto appMesh = MakeRef<VM_Mesh>();
+
+	auto appMesh = MakeRef<VM_VolumeRayCast>();
 	//assert(window.GetFramebuffer());
 	window.AddEventListener(appMesh);
 	//app->InitDefault();
