@@ -44,12 +44,29 @@ namespace ysl
 			void SetIndexBuffer(Ref<ArrayType> array) { indexBuffer = std::move(array); }
 			Ref<ArrayType> GetIndexBuffer() { return indexBuffer; }
 			Ref<const ArrayType> GetIndexBuffer()const { return indexBuffer; }
+			void UpdateDirtyBufferObject(BufferObjectUpdateMode mode) override;
+			void DestroyBufferObject() override;
 			void Render() const override;
 		private:
 			Ref<ArrayType> indexBuffer;
 			int count = -1;
 			unsigned int offset=0;
 		};
+
+		template <typename ArrayType>
+		void DrawElements<ArrayType>::UpdateDirtyBufferObject(BufferObjectUpdateMode mode)
+		{
+			if (indexBuffer && indexBuffer->GetBufferObject())
+				indexBuffer->GetBufferObject()->SetBufferData(BU_STATIC_DRAW,mode & VM_UM_DiscardRAM);		// upload data to GPU
+
+		}
+
+		template <typename ArrayType>
+		void DrawElements<ArrayType>::DestroyBufferObject()
+		{
+			if (indexBuffer && indexBuffer->GetBufferObject())
+				indexBuffer->GetBufferObject()->DestroyBufferObject();
+		}
 
 		template <typename ArrayType>
 		void DrawElements<ArrayType>::Render() const

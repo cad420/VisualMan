@@ -26,40 +26,59 @@ namespace ysl
 			std::vector<Ref<AbstrDrawCall>> & DrawCalls(){ return drawCalls; }
 			//void AddDrawCall(Ref<AbstraDrawCall> dc);
 			// IVertexAttribSet
-			void SetVertexArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexPositionAttrib] = std::move(data); bind2VAO(VA_VertexPositionAttrib); }
+			void SetVertexPositionArray(Ref<AbstraArray> data) override;
+
 			Ref<AbstraArray> GetVertexArray()override { return vertexAttribArrays[VA_VertexPositionAttrib]; }
 			Ref<const AbstraArray> GetVertexArray() const override { return vertexAttribArrays[VA_VertexPositionAttrib]; }
 
 
-			void SetNormalArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexNormalAttrib] = std::move(data); bind2VAO(VA_VertexNormalAttrib); }
+			void SetVertexNormalArray(Ref<AbstraArray> data) override;
+
 			Ref<AbstraArray> GetNormalArray()override { return vertexAttribArrays[VA_VertexNormalAttrib]; }
 			Ref<const AbstraArray> GetNormalArray() const override { return vertexAttribArrays[VA_VertexNormalAttrib]; }
 
-			void SetColorArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexColorAttrib] = std::move(data); bind2VAO(VA_VertexColorAttrib); }
+			void SetVertexColorArray(Ref<AbstraArray> data) override;
+
 			Ref<AbstraArray> GetColorArray()override { return vertexAttribArrays[VA_VertexColorAttrib]; }
 			Ref<const AbstraArray> GetColorArray() const override { return vertexAttribArrays[VA_VertexColorAttrib]; }
 
-			void SetTexCoordArray(Ref<AbstraArray> data)override { vertexAttribArrays[VA_VertexTexCoordAttrib] = std::move(data); bind2VAO(VA_VertexTexCoordAttrib); }
+			void SetVertexTexCoordArray(Ref<AbstraArray> data) override;
+
 			Ref<AbstraArray> GetTexCoordArray()override { return vertexAttribArrays[VA_VertexTexCoordAttrib]; }
 			Ref<const AbstraArray> GetTexCoordArray() const override { return vertexAttribArrays[VA_VertexTexCoordAttrib]; }
+			void SetVertexAttribArray(VertexAttribArrayIndexType attribLocation, Ref<AbstraArray> data) override;
 
-
-			void SetVertexAttribArray(int attribLocation, Ref<AbstraArray> data)override { vertexAttribArrays[attribLocation] = std::move(data); bind2VAO(attribLocation); }
 			Ref<AbstraArray> GetVertexAttribArray(int attribLocation)override { return vertexAttribArrays[attribLocation]; }
 			Ref<const AbstraArray> GetVertexAttribArray(int attribLocation) const override { return vertexAttribArrays[attribLocation]; }
+
+			void UpdateDirtyBufferObject(BufferObjectUpdateMode mode) override;
 
 		protected:
 			void Render_Implement(const Actor * actor, const Shading * shading, const Camera* camera, RenderContext * context)const override;
 
-			void bind2VAO(int attribLocation);
-		private:
-			//static constexpr int MaxVertexAttribArray = 8;
+			void DestroyVAO();
 
+			void bind2VAO(int attribLocation);
+
+			/**
+			 * \brief This function will bind vertex attribute arrays to a vao object. If there is no vao object, it will create one.
+			 *	\a vaoCompletion will be set as true after call.
+			 */
+			void rebind2VAO();
+
+			/**
+			 * \brief  Indicates whether the vao is completed. Completion is broken when new vertex attribute array is set.
+			 */
+			bool IsVAOCompletion()const { return vaoCompletion; }
+
+		private:
 			unsigned int vaoHandle = 0;
 
 			std::vector<Ref<AbstrDrawCall>> drawCalls;
 			std::array<Ref<AbstraArray>, VA_VertexAttribArray_Count> vertexAttribArrays;
-			std::array<bool, VA_VertexAttribArray_Count> boundToVAO = { false ,false,false,false};
+
+			std::array<bool, VA_VertexAttribArray_Count> boundToVAO = {false,false,false,false};
+			bool vaoCompletion = false;
 		};
 
 

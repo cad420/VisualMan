@@ -12,12 +12,12 @@ int main(int argc,char ** argv)
 	Booster booster(argc, argv);
 	GLFWApplication2 window("Test GLFW Window", RenderContextFormat(), 800, 600);
 
-	auto appMesh = MakeRef<VM_VolumeRayCast>();
+	auto appMesh = MakeRef<VM_Mesh>();
 	//assert(window.GetFramebuffer());
 	window.AddEventListener(appMesh);
 	//app->InitDefault();
 
-	appMesh->Rendering()->Renderers()[0]->SetFramebuffer(window.GetFramebuffer());
+	appMesh->GetAggregate()->Renderers()[0]->SetFramebuffer(window.GetFramebuffer());
 
 	auto ret = window.Show();
 	system("pause");

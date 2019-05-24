@@ -10,7 +10,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		void Frame::Render()
+		void Aggregate::Render()
 		{
 
 			// calls for a renderer
@@ -18,10 +18,10 @@ namespace ysl
 
 			class Raii
 			{
-				Frame * const studio;
+				Aggregate * const studio;
 				RenderContext * context;
 			public:
-				Raii(Frame * studio):studio(studio)
+				Raii(Aggregate * studio):studio(studio)
 				{
 					
 					assert(!studio->renderers.empty());
@@ -85,7 +85,7 @@ namespace ysl
 
 		}
 
-		RenderQueue Frame::MakeRenderQueue(const std::vector<Ref<Actor>>& queue)
+		RenderQueue Aggregate::MakeRenderQueue(const std::vector<Ref<Actor>>& queue)
 		{
 
 			// For every actor

@@ -14,7 +14,8 @@ namespace ysl
 			DrawArray(int start, int count);
 
 			void Render() const override;
-
+			void UpdateDirtyBufferObject(BufferObjectUpdateMode mode) override{}
+			void DestroyBufferObject() override{}
 			int Start()const { return start; }
 			int Count()const { return count; }
 		private:

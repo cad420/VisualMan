@@ -68,11 +68,11 @@ namespace ysl
 
 			auto primitive = MakePrimitive(R"(D:\Desktop\teapot.obj)");
 
-			frame = MakeRef<vm::Frame>();
+			aggregate = MakeRef<vm::Aggregate>();
 
 			auto triSceneMnger = MakeRef<vm::TrivialSceneManager>();
 
-			frame->SceneManager().push_back(triSceneMnger);
+			aggregate->SceneManager().push_back(triSceneMnger);
 
 			auto artist = MakeRef<vm::Artist>();
 
@@ -104,10 +104,10 @@ namespace ysl
 
 			actor->AddActorRenderEventCallback(actorEvent);
 
-			frame->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			aggregate->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
 
 
-			manipulator->SetCamera(frame->GetCamera());
+			manipulator->SetCamera(aggregate->GetCamera());
 
 			artist->GetLOD(0)->push_back(shading);		//single pass
 

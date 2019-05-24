@@ -9,7 +9,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT BufferObject:public Linear1DArray<char>,
+		class GRAPHICS_EXPORT_IMPORT BufferObject:public LocalBuffer,
 											      public std::enable_shared_from_this<BufferObject>
 		{
 		public:
@@ -20,7 +20,7 @@ namespace ysl
 			 * 
 			 * \note The copy constructor don't create a buffer object on gpu, it creates a default gpu-part instead.
 			 */
-			BufferObject(const BufferObject & other):Linear1DArray<char>(other)
+			BufferObject(const BufferObject & other):LocalBuffer(other)
 			{
 				handle = 0;
 				bufferSize = 0;
@@ -36,7 +36,7 @@ namespace ysl
 			BufferObject& operator=(const BufferObject & other)
 			{
 				DestroyBufferObject();
-				Linear1DArray<char>::operator=(other);
+				LocalBuffer::operator=(other);
 				handle = other.handle;
 				bufferSize = other.bufferSize;
 				bufferUsage = other.bufferUsage;
@@ -48,7 +48,7 @@ namespace ysl
 			 * 
 			 * \note The move constructor also move the gpu-part
 			 */
-			BufferObject(BufferObject && other)noexcept:Linear1DArray<char, 64>(std::move(other))
+			BufferObject(BufferObject && other)noexcept:LocalBuffer(std::move(other))
 			{
 				handle = other.handle;
 				bufferSize = other.bufferSize;
@@ -65,7 +65,7 @@ namespace ysl
 			BufferObject & operator=(BufferObject && other)noexcept
 			{
 				DestroyBufferObject();
-				Linear1DArray<char>::operator=(std::move(other));
+				LocalBuffer::operator=(std::move(other));
 				handle = other.handle;
 				bufferSize = other.bufferSize;
 				bufferUsage = other.bufferUsage;

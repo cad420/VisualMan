@@ -21,7 +21,7 @@ namespace ysl
 
 			void DestroyEvent() override;
 
-			void UpdateEvent()override;
+			void UpdateEvent() override;
 
 			void AddedEvent(RenderContext* context) override;
 
@@ -43,10 +43,14 @@ namespace ysl
 
 			virtual void UpdateScene(){}
 
-			Ref<Frame> Rendering()const { return frame; }
+			Ref<Aggregate> GetAggregate()const { return aggregate; }
+
+			void SetAggregation(Ref<Aggregate> aggregate) { this->aggregate = std::move(aggregate); }
+
+			void BindCameraEvent(Ref<Camera> camera);
 
 		protected:
-			Ref<Frame> frame;
+			Ref<Aggregate> aggregate;
 			Ref<CameraManipulator> manipulator;
 			double FPS;
 		};

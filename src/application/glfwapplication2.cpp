@@ -25,7 +25,7 @@ namespace ysl {
 		//Ref<graphics::GLSLProgram> glslProgram;
 		//Ref<graphics::ArrayFloat3> triangle;
 		Ref<vm::Primitive> primitive;
-		Ref<vm::Frame> frame;
+		Ref<vm::Aggregate> frame;
 
 		bool GLFWApplication2::InitWindow(const std::string& title, const vm::RenderContextFormat& format, int width,
 			int height)

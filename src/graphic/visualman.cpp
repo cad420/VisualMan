@@ -11,10 +11,10 @@ namespace ysl
 	{
 		void VisualMan::InitDefault()
 		{
-			frame = MakeRef<Frame>();
+			aggregate = MakeRef<Aggregate>();
 			// A frame has created a camera, 
 			//We just need to bind it to the manipulator
-			manipulator->SetCamera(frame->GetCamera());
+			manipulator->SetCamera(aggregate->GetCamera());
 		}
 
 		VisualMan::VisualMan()
@@ -24,7 +24,8 @@ namespace ysl
 
 		void VisualMan::DestroyEvent()
 		{
-			std::cout << "Assembly::DestroyEvent\n";
+			manipulator.reset();
+			aggregate.reset();
 		}
 
 		void VisualMan::UpdateEvent()
@@ -32,8 +33,9 @@ namespace ysl
 			//Update Scene
 			UpdateScene();
 			// execute rendering
-			assert(frame);
-			frame->Render();
+			assert(aggregate);
+
+			aggregate->Render();
 			// swap buffer
 			if (Context()->HasDoubleBuffer())
 				Context()->SwapBuffer();
@@ -92,6 +94,11 @@ namespace ysl
 			//if(frame->GetCamera())
 			//frame->GetCamera()->GetViewport()->SetViewportSize(w, h);
 			//frame->GetCamera()->GetViewport()->Activate();
+		}
+
+		void VisualMan::BindCameraEvent(Ref<Camera> camera)
+		{
+			manipulator->SetCamera(camera);
 		}
 	}
 }

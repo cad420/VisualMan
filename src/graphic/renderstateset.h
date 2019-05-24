@@ -12,7 +12,7 @@ namespace ysl
 
 		class RenderStateSet
 		{
-			friend class Frame;
+			friend class Aggregate;
 			friend class RenderContext;
 		public:
 			RenderStateSet() = default;

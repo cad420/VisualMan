@@ -1,6 +1,6 @@
 
-#ifndef _RENDERSTUDIO_H_
-#define _RENDERSTUDIO_H_
+#ifndef _AGGREGATE_H_
+#define _AGGREGATE_H_
 #include <vector>
 #include <memory>
 #include "abstrascenemanager.h"
@@ -13,10 +13,10 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT Frame:public AbstraFrame
+		class GRAPHICS_EXPORT_IMPORT Aggregate:public AbstraAggregate
 		{
 		public:
-			Frame()
+			Aggregate()
 			{
 				
 				camera = MakeRef<Camera>();  // A default camera

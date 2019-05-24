@@ -31,9 +31,9 @@ namespace ysl
 			 * \brief  Returns the data pointer pointing to local memory. Nullptr is returned if
 			 *  the data is not resident in local memory.
 			 */
-			char * RawData() { return bufferObject ? bufferObject->Data() : nullptr; }
+			char * RawData() { return bufferObject ? (char*)bufferObject->Data() : nullptr; }
 
-			const char * RawData()const { return bufferObject ? bufferObject->Data() : nullptr; }
+			const char * RawData()const { return bufferObject ? (char*)bufferObject->Data() : nullptr; }
 
 			/**
 			 * \brief Clear the Local memory buffer

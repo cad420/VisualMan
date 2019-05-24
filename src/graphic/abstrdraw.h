@@ -16,6 +16,9 @@ namespace ysl
 
 			virtual void Render()const = 0;
 
+			virtual void UpdateDirtyBufferObject(BufferObjectUpdateMode mode) = 0;
+			virtual void DestroyBufferObject() = 0;
+
 			void SetPrimitiveType(PrimitiveType type) { drawType = type; }
 			PrimitiveType GetPrimitiveType()const { return drawType; }
 			virtual ~AbstrDrawCall() = default;

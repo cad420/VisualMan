@@ -74,20 +74,23 @@ using WeakRef = std::weak_ptr<Ty>;
 template<typename Ty>
 using ExclRef = std::unique_ptr<Ty>;
 
-template<typename Ty1,typename Ty2>
+template<typename Ty1, typename Ty2>
 using Map = std::map<Ty1, Ty2>;
 
 template<typename Ty>
 using Set = std::set<Ty>;
 
-template<typename Ty,typename ...Args>
+template<typename Ty, typename ...Args>
 inline
 Ref<Ty> MakeRef(Args && ... args)
 {
 	return std::make_shared<Ty>(std::forward<Args>(args)...);
 }
 
+namespace vm
+{
 
+}
 
 
 // Enum for OpenGL
@@ -106,15 +109,15 @@ enum Function
 
 enum BufferObjectUsage
 {
-	BU_STREAM_DRAW = GL_STREAM_DRAW, 
-	BU_STREAM_READ = GL_STREAM_READ,  
-	BU_STREAM_COPY = GL_STREAM_COPY, 
-	BU_STATIC_DRAW = GL_STATIC_DRAW, 
-	BU_STATIC_READ = GL_STATIC_READ,  
-	BU_STATIC_COPY = GL_STATIC_COPY, 
+	BU_STREAM_DRAW = GL_STREAM_DRAW,
+	BU_STREAM_READ = GL_STREAM_READ,
+	BU_STREAM_COPY = GL_STREAM_COPY,
+	BU_STATIC_DRAW = GL_STATIC_DRAW,
+	BU_STATIC_READ = GL_STATIC_READ,
+	BU_STATIC_COPY = GL_STATIC_COPY,
 	BU_DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
 	BU_DYNAMIC_READ = GL_DYNAMIC_READ,
-	BU_DYNAMIC_COPY = GL_DYNAMIC_COPY 
+	BU_DYNAMIC_COPY = GL_DYNAMIC_COPY
 };
 
 enum BufferObjectAccess
@@ -159,7 +162,7 @@ enum ReadDrawBuffer
 enum AttachmentBindPoint
 {
 	AP_NO_ATTACHMENT = 0,
-	
+
 	AP_COLOR_ATTACHMENT0 = GL_COLOR_ATTACHMENT0,
 	AP_COLOR_ATTACHMENT1 = GL_COLOR_ATTACHMENT1,
 	AP_COLOR_ATTACHMENT2 = GL_COLOR_ATTACHMENT2,
@@ -476,7 +479,7 @@ enum ImageType
 
 };
 
-enum ClearFlag 
+enum ClearFlag
 {
 	CF_DO_NOT_CLEAR = 0,
 	CF_CLEAR_COLOR = GL_COLOR_BUFFER_BIT,
@@ -509,7 +512,7 @@ enum PolygonMode
 
 enum PolygonFace
 {
-	PF_FRONT=GL_FRONT,
+	PF_FRONT = GL_FRONT,
 	PF_BACK = GL_BACK,
 	PF_FONRT_AND_BACK = GL_FRONT_AND_BACK
 };
@@ -562,10 +565,10 @@ enum StencilOperator
 
 enum EnableState
 {
-	EN_BLEND, 
-	EN_CULL_FACE, 
-	EN_DEPTH_TEST, 
-	EN_STENCIL_TEST, 
+	EN_BLEND,
+	EN_CULL_FACE,
+	EN_DEPTH_TEST,
+	EN_STENCIL_TEST,
 
 	EN_EnableState_Count
 };
@@ -632,6 +635,19 @@ enum GLSLShaderType
 	ST_FRAGMENT_SHADER = GL_FRAGMENT_SHADER
 };
 
+enum VertexAttribPosition
+{
+	VA_VertexPositionAttribLocation = 0,
+	VA_VertexColorAttribLocation = 1,
+	VA_VertexNormalAttribLocation = 2,
+	VA_VertexTexCoord0AttribLocation = 3,
+	VA_VertexTexCoord1AttribLocation = 4,
+	VA_VertexTexCoord2AttribLocation = 5,
+	VA_VertexTexCoord3AttribLocation = 6,
+	VA_VertexTexCoord4AttribLocation = 7,
+
+	VA_VertexAttribPosition_Count
+};
 
 enum VertexAttribArrayIndexType
 {
@@ -639,22 +655,25 @@ enum VertexAttribArrayIndexType
 	VA_VertexColorAttrib,
 	VA_VertexNormalAttrib,
 	VA_VertexTexCoordAttrib,
-
 	VA_VertexAttribArray_Count
 };
 
-enum VertexAttribPosition
-{
-	VA_VertexPositionAttribLocation = 0,
-	VA_VertexColorAttribLocation=1,
-	VA_VertexNormalAttribLocation=2,
-	VA_VertexTexCoord0AttribLocation=3,
-	VA_VertexTexCoord1AttribLocation=4,
-	VA_VertexTexCoord2AttribLocation=5,
-	VA_VertexTexCoord3AttribLocation=6,
-	VA_VertexTexCoord4AttribLocation=7,
 
-	vA_VertexAttribPosition_Count
+
+enum BufferObjectUpdateFlag
+{
+	VM_BUF_Force = 1,
+	VM_BUF_DiscardRAM = 2,
 };
+
+enum BufferObjectUpdateMode
+{
+	VM_UM_KeepRAM,
+	VM_UM_ForceKeepRAM = VM_BUF_Force,
+	VM_UM_DiscardRAM = VM_BUF_DiscardRAM,
+	VM_UM_ForceDiscardRAM = VM_BUF_Force | VM_BUF_DiscardRAM,
+};
+
+
 
 #endif

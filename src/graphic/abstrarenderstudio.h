@@ -10,10 +10,10 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT AbstraFrame
+		class GRAPHICS_EXPORT_IMPORT AbstraAggregate
 		{
 		public:
-			virtual ~AbstraFrame()=default;
+			virtual ~AbstraAggregate()=default;
 			virtual void Render() = 0;
 			void DispatchRenderStartedEvent();
 			void DispatchRenderFinishedEvent();

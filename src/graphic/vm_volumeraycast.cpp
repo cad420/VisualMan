@@ -21,7 +21,7 @@ namespace ysl
 				std::cout << points[i];
 			}
 
-			unsigned int vertices[] = {0,2,1,1,2,3,
+			unsigned int indices[] = {0,2,1,1,2,3,
 				4,5,6,5,7,6,
 				0,1,4,1,5,4,
 				2,6,3,3,6,7,
@@ -29,14 +29,26 @@ namespace ysl
 				1,3,5,3,7,5};
 
 			auto vertexIndex = MakeRef<ArrayUInt>();
-			vertexIndex->GetBufferObject()->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
+			//vertexIndex->GetBufferObject()->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
+			//vertexIndex->GetBufferObject()->Resize(sizeof(indices));
+			//memcpy(vertexIndex->GetBufferObject()->Data(), indices, sizeof(indices));
+			vertexIndex->GetBufferObject()->SetLocalData(indices, sizeof(indices));
+			
 			vertexArray = MakeRef<ArrayFloat3>();
 			texCoordArray = MakeRef<ArrayFloat3>();
-			vertexArray->GetBufferObject()->SetBufferData(sizeof(points), points, BU_STATIC_DRAW);
-			texCoordArray->GetBufferObject()->SetBufferData(sizeof(points), points, BU_STATIC_DRAW);
 
-			proxyGeometry->SetVertexArray(vertexArray);
-			proxyGeometry->SetTexCoordArray(texCoordArray);
+			//vertexArray->GetBufferObject()->SetBufferData(sizeof(points), points, BU_STATIC_DRAW);
+			//texCoordArray->GetBufferObject()->SetBufferData(sizeof(points), points, BU_STATIC_DRAW);
+			//vertexArray->GetBufferObject()->Resize(sizeof(points));
+			//texCoordArray->GetBufferObject()->Resize(sizeof(points));
+			//memcpy(vertexArray->GetBufferObject()->Data(), points, sizeof(points));
+			//memcpy(texCoordArray->GetBufferObject()->Data(), points, sizeof(points));
+
+			vertexArray->GetBufferObject()->SetLocalData(points, sizeof(points));
+			texCoordArray->GetBufferObject()->SetLocalData(points, sizeof(points));
+
+			proxyGeometry->SetVertexPositionArray(vertexArray);
+			proxyGeometry->SetVertexTexCoordArray(texCoordArray);
 
 			auto drawCall = MakeRef<DrawElementsUInt>();
 
@@ -86,19 +98,17 @@ namespace ysl
 			//
 			auto shading = MakeRef<Shading>();
 			auto glsl = shading->CreateGetProgram();
-
 			auto fragShader = MakeRef<GLSLFragmentShader>();
 			fragShader->SetFromFile(R"(D:\code\MRE\resource\glsl\singlepassraycast_fs.glsl)");
 			auto vertShader = MakeRef<GLSLVertexShader>();
 			vertShader->SetFromFile(R"(D:\code\MRE\resource\glsl\singlepassraycast_vs.glsl)");
 			glsl->AttachShader(fragShader);
 			glsl->AttachShader(vertShader);
-
 			// Read volume data
 			Size3 volSize{ 480,720,120 };
 			auto volumeTex = MakeVolumeTexture(R"(D:\scidata\combustion\mixfrac.raw)", volSize.x,volSize.y,volSize.z);
 			// Read transfer function
-			auto tfTex = MakeTransferFunction1D(R"(D:\temp.txt)");
+			auto tfTex = MakeTransferFunction1D(R"(D:\tf1.tfi)");
 
 			auto effect = MakeRef<Artist>();
 			effect->GetLOD(0)->push_back(shading);
@@ -114,20 +124,24 @@ namespace ysl
 			shading->CreateGetTextureSampler(0)->SetTexture(volumeTex);
 			shading->CreateGetTextureSampler(1)->SetTexture(tfTex);
 			shading->CreateGetRenderStateSet()->SetRenderState(MakeRef<CullFaceState>(), -1);
+
+			// Enable
 			shading->CreateGetEnableStateSet()->Enable(EN_CULL_FACE);
 			shading->CreateGetEnableStateSet()->Enable(EN_DEPTH_TEST);
 
 			auto rayCast = MakeRef<RayCastActorEventCallback>();
 			rayCast->BindToActor(actor);
 			// Create a frame and a scene manager
-			frame = MakeRef<Frame>();
+			//aggregate = MakeRef<Aggregate>();
+			SetAggregation(MakeRef<Aggregate>());
 			auto sceneManager = MakeRef<TrivialSceneManager>();
 			sceneManager->AddActor(actor);
-			frame->SceneManager().push_back(sceneManager);
+			GetAggregate()->SceneManager().push_back(sceneManager);
 			// Set Clear flags
-			frame->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			GetAggregate()->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
 			// Set camera under control
-			manipulator->SetCamera(frame->GetCamera());
+			//manipulator->SetCamera(aggregate->GetCamera());
+			BindCameraEvent(GetAggregate()->GetCamera());
 
 		}
 	}

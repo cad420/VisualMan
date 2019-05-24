@@ -7,7 +7,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		void AbstraFrame::DispatchRenderStartedEvent()
+		void AbstraAggregate::DispatchRenderStartedEvent()
 		{
 			//Debug("AbstraRenderStudio::DispatchRenderStartedEvent()");
 			for (auto it = renderStartedcallbacks.begin(); it != renderStartedcallbacks.end(); )
@@ -20,7 +20,7 @@ namespace ysl
 			}
 		}
 
-		void AbstraFrame::DispatchRenderFinishedEvent()
+		void AbstraAggregate::DispatchRenderFinishedEvent()
 		{
 			//Debug("AbstraRenderStudio::DispatchRenderFinishedEvent()");
 			for (auto it = renderFinishedCallbacks.begin(); it != renderFinishedCallbacks.end(); )
@@ -33,12 +33,12 @@ namespace ysl
 			}
 		}
 
-		void AbstraFrame::AddRenderStartedEventCallback(Ref<IRenderEvent> callback)
+		void AbstraAggregate::AddRenderStartedEventCallback(Ref<IRenderEvent> callback)
 		{
 			renderStartedcallbacks.push_back(std::move(callback));
 		}
 
-		void AbstraFrame::AddRenderFinishedEventCallback(Ref<IRenderEvent> callback)
+		void AbstraAggregate::AddRenderFinishedEventCallback(Ref<IRenderEvent> callback)
 		{
 			renderFinishedCallbacks.push_back(std::move(callback));
 		}

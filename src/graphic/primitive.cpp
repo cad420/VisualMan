@@ -13,49 +13,163 @@ namespace ysl
 	{
 		Primitive::~Primitive()
 		{
-			if(vaoHandle)
-			{
-				GL(glDeleteVertexArrays(1, &vaoHandle));
-				vaoHandle = 0;
-			}
+			DestroyVAO();
+		}
+
+		void Primitive::SetVertexPositionArray(Ref<AbstraArray> data)
+		{
+			//if (vertexAttribArrays[VA_VertexPositionAttrib] == data)
+			//	return;
+			//vertexAttribArrays[VA_VertexPositionAttrib] = std::move(data);
+			//bind2VAO(VA_VertexPositionAttrib);
+			//boundToVAO[VA_VertexPositionAttrib] = false;
+			SetVertexAttribArray(VA_VertexPositionAttrib, std::move(data));
+		}
+
+		void Primitive::SetVertexNormalArray(Ref<AbstraArray> data)
+		{
+			//if (vertexAttribArrays[VA_VertexNormalAttrib] == data)
+			//	return;
+			//vertexAttribArrays[VA_VertexNormalAttrib] = std::move(data);
+			//bind2VAO(VA_VertexNormalAttrib);
+			//boundToVAO[VA_VertexNormalAttrib] = false;
+			SetVertexAttribArray(VA_VertexNormalAttrib, std::move(data));
+		}
+
+		void Primitive::SetVertexColorArray(Ref<AbstraArray> data)
+		{
+			//if (vertexAttribArrays[VA_VertexColorAttrib] == data)
+			//	return;
+			//vertexAttribArrays[VA_VertexColorAttrib] = std::move(data);
+			//bind2VAO(VA_VertexColorAttrib);
+			//boundToVAO[VA_VertexColorAttrib] = false;
+			SetVertexAttribArray(VA_VertexColorAttrib, std::move(data));
+		}
+
+		void Primitive::SetVertexTexCoordArray(Ref<AbstraArray> data)
+		{
+			//if (vertexAttribArrays[VA_VertexTexCoordAttrib] == data)
+			//	return;
+			//vertexAttribArrays[VA_VertexTexCoordAttrib] = std::move(data);
+			//bind2VAO(VA_VertexTexCoordAttrib);
+			//boundToVAO[VA_VertexTexCoordAttrib] = false;
+			SetVertexAttribArray(VA_VertexTexCoordAttrib,std::move(data));
+		}
+
+		void Primitive::SetVertexAttribArray(VertexAttribArrayIndexType attribLocation, Ref<AbstraArray> data)
+		{
+			if (vertexAttribArrays[attribLocation] == data)
+				return;
+			vertexAttribArrays[attribLocation] = std::move(data);
+			//bind2VAO(attribLocation);
+			boundToVAO[attribLocation] = false;			 // delayed binding
+			vaoCompletion = false;  // vao need to be rebound because vertex buffer has changed
 		}
 
 
+		void Primitive::UpdateDirtyBufferObject(BufferObjectUpdateMode mode)
+		{
+			// check any buffer object that need to be update
+			const bool discard = mode & VM_BUF_DiscardRAM;
+			for (int i = 0; i < VA_VertexAttribArray_Count;i++)
+			{
+				if(vertexAttribArrays[i] && vertexAttribArrays[i]->IsBufferObjectDataDirty())
+				{
+					// Is it possible that a vertex attribute array don't have a buffer object?
+					// and what it mean?
+					assert(vertexAttribArrays[i]->GetBufferObject());
+					vertexAttribArrays[i]->GetBufferObject()->SetBufferData(BU_STATIC_DRAW, discard);
+					vertexAttribArrays[i]->SetbufferObjectDataDirty(false);
+				}
+			}
+
+			// Update Draw Call
+			for (const auto & dc : drawCalls) 
+			{
+				dc->UpdateDirtyBufferObject(mode);
+			}
+		}
+
 		void Primitive::Render_Implement(const Actor * actor, const Shading * shading, const Camera* camera, RenderContext * context)const
 		{
-			//std::cout << "Primitive::Render_Implement";
 			// Bind vbo interface to context
 			// A primitive is an implementation of the VertexArray Interface 
 			// call draw command
 
 			assert(context);
-			assert(vaoHandle != 0);
+
+			// Warning: This will modified some record field of vao dirty state
+			if(!IsVAOCompletion())
+				const_cast<Primitive*>(this)->rebind2VAO();			
+
 			context->Bind_VAO(vaoHandle);
+
 			//context->BindVertexArray(this);
 
-			for(const auto & dc:drawCalls)
+			for (const auto & dc : drawCalls)
 			{
 				dc->Render();
 			}
 		}
 
+		void Primitive::DestroyVAO()
+		{
+			if (vaoHandle)
+			{
+				GL(glDeleteVertexArrays(1, &vaoHandle));
+				vaoHandle = 0;
+				vaoCompletion = false;
+				for(int i = 0;i<VA_VertexAttribArray_Count;i++)
+				{
+					boundToVAO[i] = false;
+				}
+			}
+		}
+
 		void Primitive::bind2VAO(int attribLocation)
 		{
-			if(vaoHandle == 0)
+			if (vaoHandle == 0)
 			{
-				GL(glGenVertexArrays(1,&vaoHandle));
+				GL(glGenVertexArrays(1, &vaoHandle));
 				assert(vaoHandle);
 			}
+			assert(vertexAttribArrays[attribLocation]);
+
 			GL(glBindVertexArray(vaoHandle));
 			GL(glBindBuffer(GL_ARRAY_BUFFER, vertexAttribArrays[attribLocation]->GetBufferObject()->Handle()));
 			GL(glVertexAttribPointer(attribLocation,
 				vertexAttribArrays[attribLocation]->ComponentNum(),
 				vertexAttribArrays[attribLocation]->Type(),
 				GL_FALSE,
-				0,(void*)0));
+				0, (void*)0));
 			GL(glEnableVertexAttribArray(attribLocation));
 			GL(glBindVertexArray(0));
-			//Debug("%d\n", vaoHandle);
+		}
+
+		void Primitive::rebind2VAO()
+		{
+			if (vaoHandle == 0)
+			{
+				GL(glGenVertexArrays(1, &vaoHandle));
+				assert(vaoHandle);
+			}
+			GL(glBindVertexArray(vaoHandle));
+			for(int i = 0 ; i < VA_VertexAttribArray_Count;i++)
+			{
+				if(boundToVAO[i] == false && vertexAttribArrays[i])
+				{
+					GL(glBindBuffer(GL_ARRAY_BUFFER, vertexAttribArrays[i]->GetBufferObject()->Handle()));
+					GL(glVertexAttribPointer(i,
+						vertexAttribArrays[i]->ComponentNum(),
+						vertexAttribArrays[i]->Type(),
+						GL_FALSE,
+						0, reinterpret_cast<void*>(0)));
+					GL(glEnableVertexAttribArray(i));
+					boundToVAO[i] = true;
+				}
+			}
+			GL(glBindVertexArray(0));
+			vaoCompletion = true;
 		}
 
 		Ref<Primitive> MakePrimitive(const std::string& fileName)
@@ -68,28 +182,39 @@ namespace ysl
 			}
 
 			auto vertex = MakeRef<ArrayFloat3>();
-			vertex->GetBufferObject()->SetBufferData(objReader.GetVertexBytes(),
-				objReader.GetVertices().data(), 
-				BU_STATIC_DRAW);
+			//vertex->GetBufferObject()->SetBufferData(objReader.GetVertexBytes(),
+			//	objReader.GetVertices().data(),
+			//	BU_STATIC_DRAW);
+
+			vertex->GetBufferObject()->SetLocalData((char*)objReader.GetVertices().data(), objReader.GetVertexBytes());
+
+			//vertex->SetbufferObjectDataDirty(false);
 
 			auto normals = MakeRef<ArrayFloat3>();
-			normals->GetBufferObject()->SetBufferData(objReader.GetNormalBytes(), 
-				objReader.GetNormals().data(),
-				BU_STATIC_DRAW);
+			//normals->GetBufferObject()->SetBufferData(objReader.GetNormalBytes(),
+			//	objReader.GetNormals().data(),
+			//	BU_STATIC_DRAW);
+
+			normals->GetBufferObject()->SetLocalData((char*)objReader.GetNormals().data(), objReader.GetNormalBytes());
+
+			//normals->SetbufferObjectDataDirty(false);
 
 			auto vertexIndex = MakeRef<ArrayUInt>();
-			vertexIndex->GetBufferObject()->SetBufferData(objReader.GetVertexIndicesBytes(), 
-				objReader.GetFaceIndices().data(), 
-				BU_STATIC_DRAW);
+			//vertexIndex->GetBufferObject()->SetBufferData(objReader.GetVertexIndicesBytes(),
+			//	objReader.GetFaceIndices().data(),
+			//	BU_STATIC_DRAW);
+
+			vertexIndex->GetBufferObject()->SetLocalData((char*)objReader.GetFaceIndices().data(), objReader.GetVertexIndicesBytes());
+			//vertexIndex->SetbufferObjectDataDirty(false);
 
 
 			auto primitive = MakeRef<Primitive>();
-			primitive->SetVertexArray(vertex);
-			primitive->SetNormalArray(normals);
+			primitive->SetVertexPositionArray(vertex);
+			primitive->SetVertexNormalArray(normals);
 
 			auto drawElemUi = MakeRef<DrawElementsUInt>(1);
 			drawElemUi->SetIndexBuffer(vertexIndex);
-			
+
 			primitive->DrawCalls().push_back(drawElemUi);
 
 			return primitive;
