@@ -1,6 +1,7 @@
 
 #include "lvdreader.h"
 #include <iostream>
+#include <fstream>
 #include "platform/windowsfilemap.h"
 
 namespace ysl

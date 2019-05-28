@@ -1,7 +1,7 @@
 
 #include "framebuffer.h"
 #include "GL/gl3w.h"
-#include "error.h"
+#include "../utility/error.h"
 #include "openglutils.h"
 
 OpenGLFramebufferObject::OpenGLFramebufferObject():currentContext(OpenGLCurrentContext::GetCurrentOpenGLContext())

@@ -1,9 +1,9 @@
 #ifndef _VOLUME_H_
 #define _VOLUME_H_
 #include "../mathematics/geometry.h"
-#include "../memory/any.h"
 #include "../../lib/gl3w/GL/glcorearb.h"
 #include "../memory/lineararray.h"
+#include <typeindex>
 
 namespace ysl
 {

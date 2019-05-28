@@ -6,7 +6,7 @@
 
 #include "texture.h"
 #include "openglutils.h"
-#include "error.h"
+#include "../utility/error.h"
 #include "openglcontext.h"
 
 OpenGLTexture::OpenGLTexture(TextureTarget target_, 

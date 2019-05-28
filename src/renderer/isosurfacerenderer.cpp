@@ -4,7 +4,7 @@
 #include "../utility/error.h"
 
 #include "../../lib/gl3w/GL/gl3w.h"
-#include "openglutils.h"
+#include "../opengl/openglutils.h"
 
 namespace ysl
 {

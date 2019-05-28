@@ -5,6 +5,7 @@
 #include "../src/gui/transferfunctionwidget.h"
 
 #include "../src/application/largevolumeraycasterapplication.h"
+#include <iostream>
 
 
 class TestGLFWApp :public ysl::app::GLFWApplication

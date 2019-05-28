@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "shape.h"
-#include "geometry.h"
+#include "../mathematics/geometry.h"
 
 namespace ysl {
 #include <memory>

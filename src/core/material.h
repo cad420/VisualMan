@@ -1,7 +1,7 @@
 
 #ifndef _MATERIAL_H_
 #define _MATERIAL_H_
-#include "basetype.h"
+#include "../mathematics/basetype.h"
 #include "spectrum.h"
 
 

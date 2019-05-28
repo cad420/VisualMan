@@ -3,8 +3,8 @@
 
 #include "dataarena.h"
 #include <cstring>
-#include "geometry.h"
-#include "numeric.h"
+#include "../mathematics/geometry.h"
+#include "../mathematics/numeric.h"
 
 namespace ysl
 {

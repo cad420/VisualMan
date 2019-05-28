@@ -10,6 +10,7 @@ namespace ysl
 	namespace vm
 	{
 		class AbstraSceneManager;
+
 		class GRAPHICS_EXPORT_IMPORT VisualMan :public IEventListener
 		{
 		public:

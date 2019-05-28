@@ -2,12 +2,14 @@
 cmake_minimum_required (VERSION 3.3)
 
 
-project ("rasterizer")
+project ("vm")
 
 add_definitions(-DMRE_EXPORT_DLL)
 set(_GL3W_INCLUDE_DIR "lib/gl3w")											 #gl3w headers
 include_directories(${_GL3W_INCLUDE_DIR})
 set(GL3W_SRC "../../lib/gl3w/GL/gl3w.c")
+
+# GL3W module shoule be moved into this folder later
 
 
 find_package(OpenGL REQUIRED)
@@ -32,7 +34,7 @@ file(GLOB GRAPHIC_INCLUDE "*.h")
 
 #message(STATUS  ${GRAPHIC_SRC})
 
-add_library("rasterizer" STATIC 
+add_library("vm" STATIC 
 ${GRAPHIC_SRC} 
 ${MATH_SRC} 
 ${GL3W_SRC} 
@@ -42,4 +44,4 @@ ${UTILITY_SRC}
 "../io/rawio.cpp"
 "../io/platform/windowsfilemap.cpp")
 
-target_link_libraries("rasterizer" ${OPENGL_LIBRARIES})
+target_link_libraries("vm" ${OPENGL_LIBRARIES})

@@ -2,7 +2,7 @@
 #include "openglbuffer.h"
 
 #include "../../lib/gl3w/GL/gl3w.h"
-#include "error.h"
+#include "../utility/error.h"
 #include "openglutils.h"
 
 OpenGLBuffer::OpenGLBuffer(BufferTarget type,BufferUsage usage,BufferType typ):

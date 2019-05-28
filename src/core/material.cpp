@@ -1,7 +1,7 @@
 
 #include "material.h"
-#include "bvh.h"
-#include <appearance.h>
+#include "../accelerator/bvh.h"
+#include "appearance.h"
 
 
 namespace ysl

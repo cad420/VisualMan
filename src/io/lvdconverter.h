@@ -7,7 +7,7 @@
 #include "../mathematics/geometry.h"
 #include "../mathematics/numeric.h"
 
-#include "../src/io/platform/windowsfilemap.h"
+#include "platform/windowsfilemap.h"
 #include "lvdheader.h"
 
 

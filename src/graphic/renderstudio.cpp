@@ -12,7 +12,6 @@ namespace ysl
 	{
 		void Aggregate::Render()
 		{
-
 			// calls for a renderer
 			assert(!renderers.empty());
 
@@ -68,23 +67,16 @@ namespace ysl
 			{
 				scene->ExtractActors(actorQueue);
 			}
-
 			// construct render queue from actor queue
 			const auto renderQueue = MakeRenderQueue(actorQueue);
-
-
-
 			// rendering the queue with all renderers
-
 			for(auto & renderer:renderers)
 			{
 
 				// Check framebuffer and context for every renderer
 				renderer->Render(renderQueue, camera);
 			}
-
 		}
-
 		RenderQueue Aggregate::MakeRenderQueue(const std::vector<Ref<Actor>>& queue)
 		{
 

@@ -1,8 +1,8 @@
 
 #include "triangle.h"
 #include "../gui/transferfunctionwidget.h"
-#include "objreader.h"
-#include "error.h"
+#include "../utility/objreader.h"
+#include "../graphic/drawelements.h"
 
 namespace ysl
 {

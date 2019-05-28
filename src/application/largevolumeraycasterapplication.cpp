@@ -10,9 +10,9 @@
 
 //const std::string tfName = R"(D:\scidata\tf1.tfi)";
 //const std::string tfName = R"(D:\\subregion.1dt)";
-//const std::string tfName = R"(d:\temp.txt)";
+const std::string tfName = R"(d:\temp.txt)";
 //const std::string tfName = R"(D:\ctl.tfi)";
-const std::string tfName = "D:\\Desktop\\tf.TF1D";
+//const std::string tfName = "D:\\Desktop\\tf.TF1D";
 namespace ysl
 {
 	namespace app
@@ -193,7 +193,7 @@ namespace ysl
 			currentLod = lod;
 
 			const auto s = aggregates[currentLod]->OriginalDataSize();
-			const auto worldMatrix = Scale(ysl::Vector3f(1, 1, 0.1));
+			const auto worldMatrix = Scale(ysl::Vector3f(0.16,0.16,1));
 
 			glClear(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
@@ -370,7 +370,7 @@ namespace ysl
 			Size3 blockSize[] = { {10,10,10},{5,5,5},{5,5,5},{2,2,2} };
 			for (auto i = 0; i < fileNames.size() && i < 4; i++)
 			{
-				aggregates.push_back(std::make_shared<LODAggregate>(fileNames[i], blockSize[0]));
+				aggregates.push_back(std::make_shared<LODAggregate>(fileNames[i], blockSize[i]));
 			}
 		}
 
@@ -528,9 +528,9 @@ namespace ysl
 			//pingpongTransferManager = std::make_shared<PingPongTransferManager>(pageTableManager, cacheFaultHandler);
 			//GL_ERROR_REPORT;
 
-			//InitializeLODs({ "C:\\data\\subregion_9000_10700_2_128.lvd","D:\\Desktop\\sub_992.lvd","D:\\Desktop\\sub_496.lvd" });
-			InitializeLODs({ "D:\\scidata\\mrc\\ctl.lvd" });
-			lodCount = 1;
+			InitializeLODs({ "C:\\data\\subregion_9000_10700_2_128.lvd","D:\\Desktop\\sub_992.lvd","D:\\Desktop\\sub_496.lvd" });
+			//InitializeLODs({ R"(C:\data\s1_1984_1984_1984_2_128.lvd)" });
+			lodCount = 3;
 			//SetShaderUniforms();
 		}
 

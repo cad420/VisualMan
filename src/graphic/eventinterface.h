@@ -36,7 +36,6 @@ namespace ysl
 			virtual void DestroyEvent() = 0;
 
 			virtual void ResizeEvent(int w, int h) = 0;
-
 			virtual void UpdateEvent() = 0;
 
 			/**

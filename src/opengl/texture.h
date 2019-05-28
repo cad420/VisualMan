@@ -2,7 +2,7 @@
 #define _TEXTURE_H_
 
 #include "../../lib/gl3w/GL/glcorearb.h"
-#include "transformation.h"
+#include "../mathematics/transformation.h"
 #include "openglcontext.h"
 #include "../io/cachepolicy.h"
 

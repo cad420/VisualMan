@@ -1,6 +1,7 @@
 
 #include "gpucachefaulthandler.h"
 #include "openglutils.h"
+#include <vector>
 
 namespace ysl
 {
@@ -73,6 +74,7 @@ namespace ysl
 		//atomicCounter->Bind();
 		const auto counters = static_cast<int*>(atomicCounter->Map(OpenGLBuffer::ReadOnly));
 		const int count = counters[0];
+		//std::cout << count << std::endl;
 
 		//atomicCounter->Unmap();
 		//atomicCounter->Unbind();

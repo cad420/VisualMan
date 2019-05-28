@@ -14,7 +14,7 @@
 #include "../opengl/gpuvolumedatacache.h"
 #include "../opengl/gpucacheblockmanager.h"
 #include "../opengl/gpupagetable.h"
-#include "lodaggregate.h"
+#include "../opengl/lodaggregate.h"
 
 //#define COUNT_VALID_BLOCK
 

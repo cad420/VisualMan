@@ -1,5 +1,6 @@
 #ifndef __gl_glcorearb_h_
 #define __gl_glcorearb_h_ 1
+#include "../../glfw/deps/KHR/khrplatform.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,7 +80,7 @@ extern "C" {
 #define GL_VERSION_1_0 1
 typedef void GLvoid;
 typedef unsigned int GLenum;
-#include <KHR/khrplatform.h>
+#include "../KHR/khrplatform.h"
 typedef khronos_float_t GLfloat;
 typedef int GLint;
 typedef int GLsizei;

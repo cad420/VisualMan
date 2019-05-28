@@ -1,7 +1,7 @@
 #ifndef _TRIANGLE_H_
 #define _TRIANGLE_H_
 
-#include "shape.h"
+#include "../core/shape.h"
 #include "../mathematics/transformation.h"
 #include <vector>
 #include <unordered_map>

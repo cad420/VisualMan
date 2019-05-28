@@ -20,30 +20,16 @@ namespace ysl
 				points[i] = bound.Corner(i);
 				std::cout << points[i];
 			}
-
 			unsigned int indices[] = {0,2,1,1,2,3,
 				4,5,6,5,7,6,
 				0,1,4,1,5,4,
 				2,6,3,3,6,7,
 				0,4,2,2,4,6,
 				1,3,5,3,7,5};
-
 			auto vertexIndex = MakeRef<ArrayUInt>();
-			//vertexIndex->GetBufferObject()->SetBufferData(sizeof(vertices), vertices, BU_STATIC_DRAW);
-			//vertexIndex->GetBufferObject()->Resize(sizeof(indices));
-			//memcpy(vertexIndex->GetBufferObject()->Data(), indices, sizeof(indices));
 			vertexIndex->GetBufferObject()->SetLocalData(indices, sizeof(indices));
-			
 			vertexArray = MakeRef<ArrayFloat3>();
 			texCoordArray = MakeRef<ArrayFloat3>();
-
-			//vertexArray->GetBufferObject()->SetBufferData(sizeof(points), points, BU_STATIC_DRAW);
-			//texCoordArray->GetBufferObject()->SetBufferData(sizeof(points), points, BU_STATIC_DRAW);
-			//vertexArray->GetBufferObject()->Resize(sizeof(points));
-			//texCoordArray->GetBufferObject()->Resize(sizeof(points));
-			//memcpy(vertexArray->GetBufferObject()->Data(), points, sizeof(points));
-			//memcpy(texCoordArray->GetBufferObject()->Data(), points, sizeof(points));
-
 			vertexArray->GetBufferObject()->SetLocalData(points, sizeof(points));
 			texCoordArray->GetBufferObject()->SetLocalData(points, sizeof(points));
 
@@ -68,12 +54,9 @@ namespace ysl
 			{
 				auto const program = shading->GetProgram();
 				const auto eyePos = camera->Position();
-				//assert(program->GetGenericUniformLocation("eye_position") != -1);
 				const auto eye_position = program->GetGenericUniformLocation("eye_position");
 				if(eye_position != -1)
 				actor->CreateGetUniformSet()->CreateGetUniform("eye_position")->SetUniform3f(1, eyePos.ConstData());;
-				//assert(program->GetGenericUniformLocation("light_position") != -1);
-				//actor->CreateGetUniformSet()->CreateGetUniform("light_position")->SetUniform3f(1, eyePos.ConstData());
 				// update light dir and halfway 
 			}
 		}
@@ -128,6 +111,8 @@ namespace ysl
 			// Enable
 			shading->CreateGetEnableStateSet()->Enable(EN_CULL_FACE);
 			shading->CreateGetEnableStateSet()->Enable(EN_DEPTH_TEST);
+			shading->CreateGetEnableStateSet()->Enable(EN_BLEND);
+			shading->CreateGetRenderStateSet()->SetRenderState(MakeRef<BlendFuncState>(BF_SRC_COLOR,BF_SRC_ALPHA,BF_ONE_MINUS_SRC_COLOR,BF_ONE_MINUS_SRC_ALPHA), -1);
 
 			auto rayCast = MakeRef<RayCastActorEventCallback>();
 			rayCast->BindToActor(actor);

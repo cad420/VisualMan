@@ -11,7 +11,22 @@
       "installRoot": "D:\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "Qt5_DIR",
+          "value": "D:\\Qt\\5.12.1\\msvc2017_64\\lib\\cmake\\Qt5"
+        },
+        {
+          "name": "VM_USE_QT_BINDING",
+          "value": ""
+        },
+        {
+          "name": "VM_BUILD_TEST",
+          "value": "ON"
+        }
+       
+      ]
     },
     {
       "name": "x64-Release",

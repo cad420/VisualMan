@@ -1,15 +1,11 @@
 
-#include "glfwapplication2.h"
+#include "vmglfwwindow.h"
 #include "../../lib/gl3w/GL/gl3w.h"
 #include "../utility/error.h"
-#include "event.h"
 #include "../graphic/abstraarray.h"
-#include "../graphic/drawarray.h"
 #include "../graphic/primitive.h"
-#include "openglutils.h"
 #include "../graphic/renderstudio.h"
 #include "../graphic/trivialscenemanager.h"
-#include "../graphic/actor.h"
 
 
 namespace ysl {
@@ -205,7 +201,7 @@ namespace ysl {
 
 		void GLFWApplication2::glfwWindowSizeCallback(GLFWwindow* window, int width, int height)
 		{
-			ResizeEvent e{ {width,height} };
+			//ResizeEvent e{ {width,height} };
 			const auto app = Instance();
 			assert(app->glfwWindow == window);
 			app->DispatchResizeEvent(width, height);
@@ -215,7 +211,7 @@ namespace ysl {
 		{
 			const auto app = Instance();
 			assert(app->glfwWindow == window);	// Check if the context receiving the event is current context
-			WheelEvent e(xoffset, yoffset);
+			//WheelEvent e(xoffset, yoffset);
 			app->DispatchMouseWheelEvent(yoffset, xoffset);
 		}
 
