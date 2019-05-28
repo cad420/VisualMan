@@ -1,6 +1,8 @@
 
 project(largevolumerenderer)
 
+find_package(GLFW3 REQUIRED)
+
 find_package(OpenGL REQUIRED)
 if(OPENGL_FOUND)
 	message(STATUS "OpenGL Found:" ${OPENGL_INCLUDE_DIR} ${OPENGL_LIBRARIES})
@@ -8,9 +10,10 @@ if(OPENGL_FOUND)
 endif(OPENGL_FOUND)
 
 #add_definitions(-DMRE_EXPORT_DLL)
-set(___GL3W_INCLUDE_DIR "D:\\code\\MRE\\lib\\gl3w")
-#gl3w headers
-set(LVD_GL3W_SRC "../../lib/gl3w/GL/gl3w.c")
+set(GL3W_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/gl3w")
+set(LVD_GL3W_SRC "${CMAKE_SOURCE_DIR}/lib/gl3w/GL/gl3w.c")
+
+message(STATUS "Project current dir:" ${CMAKE_SOURCE_DIR})
 
 #include_directories()
 #include_directories("../../lib/glfw/include")
@@ -55,5 +58,4 @@ ${LVD_ABSTRGPUOBJ_SRC_LIST} ${LVD_IO_PLATFORM_SRC_LIST} ${VD_3RDPARTY_SRC_LIST} 
 
 
 target_link_libraries(largetvolumerenderer glfw ${OPENGL_LIBRARIES})
-message(STATUS "---asdfsadfsadfasdf" ${___GL3W_INCLUDE_DIR})
-target_include_directories(largetvolumerenderer PRIVATE ${___GL3W_INCLUDE_DIR} "../../lib/glfw/include")
+target_include_directories(largetvolumerenderer PRIVATE ${GL3W_INCLUDE_DIR})

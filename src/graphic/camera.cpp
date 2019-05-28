@@ -2,6 +2,7 @@
 #include "camera.h"
 #include "viewport.h"
 #include "../utility/error.h"
+#include <iostream>
 
 namespace ysl
 {

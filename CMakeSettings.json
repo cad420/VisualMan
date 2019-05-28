@@ -24,6 +24,10 @@
         {
           "name": "VM_BUILD_TEST",
           "value": "ON"
+        },
+        {
+          "name": "GLFW3_DIR",
+          "value": "C:\\Program Files\\GLFW\\lib\\cmake\\glfw3"
         }
        
       ]

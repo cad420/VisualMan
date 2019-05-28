@@ -1,7 +1,7 @@
 
 #include "bufferobject.h"
 #include "../opengl/openglutils.h"
-#include <GLFW/glfw3.h>
+//#include <GLFW/glfw3.h>
 
 namespace ysl
 {

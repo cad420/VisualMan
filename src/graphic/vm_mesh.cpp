@@ -9,6 +9,7 @@
 #include "trivialscenemanager.h"
 #include "actor.h"
 #include "texture.h"
+#include "rendercontext.h"
 #include "drawelements.h"
 
 namespace ysl
@@ -28,7 +29,6 @@ namespace ysl
 					auto view_pos = camera->Position();
 					actor->CreateGetUniformSet()->CreateGetUniform("view_pos")->SetUniform3f(1,view_pos.Data());
 				}
-
 			}
 		}
 		void VM_Mesh::InitEvent()
@@ -61,9 +61,12 @@ namespace ysl
 			actor->AddActorRenderEventCallback(actorEvent);
 			aggregate->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
 			manipulator->SetCamera(aggregate->GetCamera());
+
 			artist->GetLOD(0)->push_back(shading);		//single pass
 			triSceneMnger->AddActor(actor);
 
+			assert(Context());
+			GetAggregate()->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
 		}
 
 		void VM_Mesh::UpdateScene()

@@ -1,6 +1,6 @@
 
 #include "vm_volumeraycast.h"
-
+#include "rendercontext.h"
 #include "shaderprogram.h"
 #include "texture.h"
 #include "trivialscenemanager.h"
@@ -128,6 +128,9 @@ namespace ysl
 			//manipulator->SetCamera(aggregate->GetCamera());
 			BindCameraEvent(GetAggregate()->GetCamera());
 
+
+			assert(Context());
+			GetAggregate()->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
 		}
 	}
 }

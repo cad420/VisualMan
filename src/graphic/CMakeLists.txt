@@ -1,13 +1,11 @@
 
 cmake_minimum_required (VERSION 3.3)
-
-
 project ("vm")
 
 add_definitions(-DMRE_EXPORT_DLL)
-set(_GL3W_INCLUDE_DIR "lib/gl3w")											 #gl3w headers
-include_directories(${_GL3W_INCLUDE_DIR})
-set(GL3W_SRC "../../lib/gl3w/GL/gl3w.c")
+
+set(GL3W_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/gl3w")											 #gl3w headers
+set(GL3W_SRC "${CMAKE_SOURCE_DIR}/lib/gl3w/GL/gl3w.c")
 
 # GL3W module shoule be moved into this folder later
 
@@ -45,3 +43,4 @@ ${UTILITY_SRC}
 "../io/platform/windowsfilemap.cpp")
 
 target_link_libraries("vm" ${OPENGL_LIBRARIES})
+target_include_directories("vm" PUBLIC ${GL3W_INCLUDE_DIR})

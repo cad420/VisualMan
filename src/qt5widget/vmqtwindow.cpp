@@ -1,6 +1,0 @@
-
-#include "vmqtwindow.h"
-
-
-
-
