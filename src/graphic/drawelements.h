@@ -33,7 +33,7 @@ namespace ysl
 
 			using IndexType = typename ArrayType::ScalarType;
 
-			DrawElements(int instances = 1):indexBuffer(MakeRef<ArrayType>())
+			DrawElements(int instances = 1):indexArray(MakeRef<ArrayType>())
 			{
 			}
 
@@ -41,14 +41,14 @@ namespace ysl
 			int GetCount()const { return count; }
 			void SetOffset(unsigned int offset) { this->offset = offset; }
 			unsigned int GetOffset()const { return this->offset; }
-			void SetIndexBuffer(Ref<ArrayType> array) { indexBuffer = std::move(array); }
-			Ref<ArrayType> GetIndexBuffer() { return indexBuffer; }
-			Ref<const ArrayType> GetIndexBuffer()const { return indexBuffer; }
+			void SetIndexBuffer(Ref<ArrayType> array) { indexArray = std::move(array); }
+			Ref<ArrayType> GetIndexArray() { return indexArray; }
+			Ref<const ArrayType> GetIndexArray()const { return indexArray; }
 			void UpdateDirtyBufferObject(BufferObjectUpdateMode mode) override;
 			void DestroyBufferObject() override;
 			void Render() const override;
 		private:
-			Ref<ArrayType> indexBuffer;
+			Ref<ArrayType> indexArray;
 			int count = -1;
 			unsigned int offset=0;
 		};
@@ -56,23 +56,26 @@ namespace ysl
 		template <typename ArrayType>
 		void DrawElements<ArrayType>::UpdateDirtyBufferObject(BufferObjectUpdateMode mode)
 		{
-			if (indexBuffer && indexBuffer->GetBufferObject())
-				indexBuffer->GetBufferObject()->SetBufferData(BU_STATIC_DRAW,mode & VM_UM_DiscardRAM);		// upload data to GPU
-
+			if (indexArray && indexArray->GetBufferObject() && indexArray->IsBufferObjectDataDirty())
+			{
+				//indexArray->GetBufferObject()->SetBufferData(BU_STATIC_DRAW, mode & VM_UM_DiscardRAM);		// upload data to GPU
+				//indexArray->SetBufferObjectDataDirty(false);
+				indexArray->UpdateBufferObject(mode);
+			}
 		}
 
 		template <typename ArrayType>
 		void DrawElements<ArrayType>::DestroyBufferObject()
 		{
-			if (indexBuffer && indexBuffer->GetBufferObject())
-				indexBuffer->GetBufferObject()->DestroyBufferObject();
+			if (indexArray && indexArray->GetBufferObject())
+				indexArray->GetBufferObject()->DestroyBufferObject();
 		}
 
 		template <typename ArrayType>
 		void DrawElements<ArrayType>::Render() const
 		{
 
-			const auto bufferObject = indexBuffer->GetBufferObject();
+			const auto bufferObject = indexArray->GetBufferObject();
 
 			if (bufferObject == nullptr)
 			{
@@ -81,7 +84,7 @@ namespace ysl
 				return;
 			}
 
-			const void* beginPtr = bufferObject->Data();
+			const void* beginPtr = bufferObject->LocalData();
 			const void * endPtr = nullptr;
 			const unsigned int handle = bufferObject->Handle();
 
@@ -99,7 +102,7 @@ namespace ysl
 			if(count < 0)		// use all vertex indices
 			{
 				beginPtr = reinterpret_cast<const char*>(beginPtr) + offset;
-				endPtr = reinterpret_cast<const char *>(beginPtr) + sizeof(IndexType)*bufferObject->BufferObjectSize();
+				endPtr = reinterpret_cast<const char *>(beginPtr) + bufferObject->BufferObjectSize() / sizeof(IndexType);
 			}else
 			{
 				beginPtr = reinterpret_cast<const char*>(beginPtr) + offset;

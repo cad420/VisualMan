@@ -57,13 +57,13 @@ namespace ysl
 				GL(glShaderSource(handle, 1, &p, nullptr));
 				GL(glCompileShader(handle))
 
-					int success;
+				int success = 1;
 				char infoLog[512];
 				GL(glGetShaderiv(handle, GL_COMPILE_STATUS, &success));
 				if (!success)
 				{
 					GL(glGetShaderInfoLog(handle, 512, NULL, infoLog));
-					Log("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED, %s\n", infoLog);
+					Log("ERROR::SHADER::COMPILATION_FAILED, %s\n", infoLog);
 					return compiled = false;
 				}
 				compiled = true;

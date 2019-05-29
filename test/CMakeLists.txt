@@ -17,7 +17,7 @@ target_include_directories(vmqtwindow_test PRIVATE ${PROJECT_SOURCE_DIR}/guibind
 
 add_executable(vmglfwwindow_test)
 target_sources(vmglfwwindow_test PRIVATE "vmglfwwindow_test.cpp")
-target_link_libraries(vmglfwwindow_test vmglfwwindow)
+target_link_libraries(vmglfwwindow_test vmglfwwindow vm)
 target_include_directories(vmglfwwindow_test PRIVATE ${PROJECT_SOURCE_DIR}/guibinding/glfwwindow ${PROJECT_SOURCE_DIR}/guibinding/graphic)
 
 # Large Volume Renderer Test

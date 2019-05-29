@@ -133,17 +133,17 @@ namespace ysl
 
 			void DeletedEvent(RenderContext * context) override;
 
-			void MousePressEvent(EMouseButton button, int xpos, int ypos) override;
+			void MousePressEvent(MouseButton button, int xpos, int ypos) override;
 
-			void MouseMoveEvent(EMouseButton button, int xpos, int ypos) override;
+			void MouseMoveEvent(MouseButton button, int xpos, int ypos) override;
 
-			void MouseReleaseEvent(EMouseButton button, int xpos, int ypos) override{};
+			void MouseReleaseEvent(MouseButton button, int xpos, int ypos) override{};
 
 			void MouseWheelEvent(int ydegree, int xdegree) override{}
 
-			void KeyPressEvent(EKeyButton key) override{}
+			void KeyPressEvent(KeyButton key) override{}
 
-			void KeyReleaseEvent(EKeyButton key) override{}
+			void KeyReleaseEvent(KeyButton key) override{}
 
 		private:
 			Ref<Camera> camera;

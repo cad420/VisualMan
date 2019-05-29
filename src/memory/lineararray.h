@@ -81,10 +81,10 @@ namespace ysl
 			return data[x];
 		}
 
-		void SetLocalData(void * data, size_t bytes)
+		void SetLocalData(const void* data, size_t bytes)
 		{
 			Resize(bytes / sizeof(char));
-			memcpy(Data(), data, bytes);
+			memcpy(LocalData(), data, bytes);
 		}
 
 		/**
@@ -130,8 +130,8 @@ namespace ysl
 			Clear();
 		}
 
-		const uint8_t * Data()const { return data; }
-		uint8_t * Data() { return data; }
+		const uint8_t * LocalData()const { return data; }
+		uint8_t * LocalData() { return data; }
 	};
 
 	template<typename T,int nCacheLine = 64>

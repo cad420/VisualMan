@@ -4,6 +4,7 @@
 #include "shaderprogram.h"
 #include "../../lib/gl3w/GL/gl3w.h"
 #include "../opengl/openglutils.h"
+#include <cassert>
 
 namespace ysl
 {
@@ -16,11 +17,19 @@ namespace ysl
 			// Because there uniforms are volatile every loop. They should not be saved 
 			// in a uniform set. we just set them by using the OpenGL api
 
+
+
+
 			// NOTE: program is already be used before this call
 			if (program)
 			{
 				assert(program->Handle());
-				//Debug("%s %d\n", __FILE__, __LINE__);
+#ifndef NDEBUG
+				GLint prog;
+				GL(glGetIntegerv(GL_CURRENT_PROGRAM, &prog));
+				//Debug("%d %d\n", program->Handle(), prog);
+				assert(prog == program->Handle());
+#endif
 
 				const int modelLoc = program->GetWorldMatrixUniformLocation();
 

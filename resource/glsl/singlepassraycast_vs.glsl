@@ -21,6 +21,6 @@ in vec4 vpl_VertexTexCoord4;
 void main(void)
 {
     gl_Position = vpl_MVPMatrix * vpl_VertexPosition;
-    tex_coord = vpl_VertexTexCoord0;
-    frag_position = vpl_VertexPosition.xyz;
+    //tex_coord = vpl_VertexTexCoord0;
+    frag_position = (vpl_ModelMatrix*vpl_VertexTexCoord0).xyz;
 }

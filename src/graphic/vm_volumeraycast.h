@@ -5,6 +5,7 @@
 #include "graphictype.h"
 #include "primitive.h"
 #include "abstraarray.h"
+#include "trivialscenemanager.h"
 
 namespace ysl
 {
@@ -17,6 +18,7 @@ namespace ysl
 			RayCastActorEventCallback();
 			void OnActorRenderStartedEvent(Actor* actor, const Camera* camera, Renderable* renderable, const Shading* shading, int pass) override;
 			void BindToActor(Ref<Actor> actor);
+			Ref<Primitive> ProxyGeometry() { return proxyGeometry; }
 		private:
 			Ref<Primitive> proxyGeometry;
 			Ref<ArrayFloat3> vertexArray;
@@ -31,6 +33,10 @@ namespace ysl
 			void UpdateScene() override;
 			void InitEvent() override;
 		private:
+			void AddBoundingBox();
+
+			Ref<RayCastActorEventCallback> rayCastCallback;
+			Ref<TrivialSceneManager> sceneManager;
 		};
 	}
 }

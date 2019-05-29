@@ -85,6 +85,7 @@ namespace ysl {
 			glfwSetCursorPosCallback(glfwWindow, glfwCursorPosCallback);
 			glfwSetMouseButtonCallback(glfwWindow, glfwMouseButtonCallback);
 			glfwSetScrollCallback(glfwWindow, glfwMouseScrollCallback);
+			glfwSetKeyCallback(glfwWindow,glfwKeyCallback);
 
 			DispatchInitEvent();
 
@@ -150,14 +151,14 @@ namespace ysl {
 			const auto ins = Instance();
 
 			ins->glfwWindow == window;
-			
+
 			int button = 0;
 			if (ins->mouseLeftButtonPressed)
 				button |= vm::Mouse_Left;
 			if (ins->mouseRightButtonPressed)
 				button |= vm::Mouse_Right;
 			if (button)
-				ins->DispatchMouseMoveEvent((vm::EMouseButton)button, xpos, ypos);
+				ins->DispatchMouseMoveEvent((vm::MouseButton)button, xpos, ypos);
 		}
 
 
@@ -192,9 +193,9 @@ namespace ysl {
 			if (buttons)
 			{
 				if (action == GLFW_PRESS)
-					app->DispatchMousePressedEvent((vm::EMouseButton)buttons, xpos, ypos);
+					app->DispatchMousePressedEvent((vm::MouseButton)buttons, xpos, ypos);
 				else if (action == GLFW_RELEASE)
-					app->DispatchMouseReleasedEvent((vm::EMouseButton)buttons, xpos, ypos);
+					app->DispatchMouseReleasedEvent((vm::MouseButton)buttons, xpos, ypos);
 			}
 		}
 
@@ -214,9 +215,83 @@ namespace ysl {
 			app->DispatchMouseWheelEvent(yoffset, xoffset);
 		}
 
+		void VMGLFWWindow::glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+		{
+			const auto app = Instance();
+			assert(app->glfwWindow == window);
+			switch (action)
+			{
+			case GLFW_PRESS:app->DispatchKeyPressedEvent(TranslateKey(key, scancode, mods)); break;
+			case GLFW_RELEASE:app->DispatchKeyReleasedEvent(TranslateKey(key, scancode, mods)); break;
+			default:Debug("Unsupported callback"); break;
+			}
+		}
+
 		void VMGLFWWindow::glfw_error_callback(int error, const char* description)
 		{
 			fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+		}
+
+		vm::KeyButton VMGLFWWindow::TranslateKey(int key, int scancode, int mods)
+		{
+			switch (key) {
+			case GLFW_KEY_0: return vm::Key_0;
+			case GLFW_KEY_1: return vm::Key_1;
+			case GLFW_KEY_2: return vm::Key_2;
+			case GLFW_KEY_3: return vm::Key_3;
+			case GLFW_KEY_4: return vm::Key_4;
+			case GLFW_KEY_5: return vm::Key_5;
+			case GLFW_KEY_6: return vm::Key_6;
+			case GLFW_KEY_7: return vm::Key_7;
+			case GLFW_KEY_8: return vm::Key_8;
+			case GLFW_KEY_9: return vm::Key_9;
+			case GLFW_KEY_A: return vm::Key_A;
+			case GLFW_KEY_B: return vm::Key_B;
+			case GLFW_KEY_C: return vm::Key_C;
+			case GLFW_KEY_D: return vm::Key_D;
+			case GLFW_KEY_E: return vm::Key_E;
+			case GLFW_KEY_F: return vm::Key_F;
+			case GLFW_KEY_G: return vm::Key_G;
+			case GLFW_KEY_H: return vm::Key_H;
+			case GLFW_KEY_I: return vm::Key_I;
+			case GLFW_KEY_J: return vm::Key_J;
+			case GLFW_KEY_K: return vm::Key_K;
+			case GLFW_KEY_L: return vm::Key_L;
+			case GLFW_KEY_M: return vm::Key_M;
+			case GLFW_KEY_N: return vm::Key_N;
+			case GLFW_KEY_O: return vm::Key_O;
+			case GLFW_KEY_P: return vm::Key_P;
+			case GLFW_KEY_Q: return vm::Key_Q;
+			case GLFW_KEY_R: return vm::Key_R;
+			case GLFW_KEY_S: return vm::Key_S;
+			case GLFW_KEY_T: return vm::Key_T;
+			case GLFW_KEY_U: return vm::Key_U;
+			case GLFW_KEY_V: return vm::Key_V;
+			case GLFW_KEY_W: return vm::Key_W;
+			case GLFW_KEY_X: return vm::Key_X;
+			case GLFW_KEY_Y: return vm::Key_Y;
+			case GLFW_KEY_Z: return vm::Key_Z;
+
+			case GLFW_KEY_RIGHT: return vm::Key_Right;
+			case GLFW_KEY_LEFT: return vm::Key_Left;
+			case GLFW_KEY_DOWN: return vm::Key_Down;
+			case GLFW_KEY_UP: return vm::Key_Up;
+
+			case GLFW_KEY_KP_0: return vm::Key_0;
+			case GLFW_KEY_KP_1: return vm::Key_1;
+			case GLFW_KEY_KP_2: return vm::Key_2;
+			case GLFW_KEY_KP_3: return vm::Key_3;
+			case GLFW_KEY_KP_4: return vm::Key_4;
+			case GLFW_KEY_KP_5: return vm::Key_5;
+			case GLFW_KEY_KP_6: return vm::Key_6;
+			case GLFW_KEY_KP_7: return vm::Key_7;
+			case GLFW_KEY_KP_8: return vm::Key_8;
+			case GLFW_KEY_KP_9: return vm::Key_9;
+			default:Debug("Unsupported key\n");
+			}
+
+			//case GLFW_KEY_RIGHT_SUPER:
+			// case GLFW_KEY_MENU:
 		}
 
 		void VMGLFWWindow::InitSingleton()

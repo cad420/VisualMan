@@ -33,4 +33,5 @@ void main()
     vec4 result = (ambient+diffuse+specular)*object_color;
     //fragment output
 	frag_color = result;
+	//frag_color = vec4(frag_pos,1.0);
 }

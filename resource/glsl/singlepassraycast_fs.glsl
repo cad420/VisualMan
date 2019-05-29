@@ -7,6 +7,7 @@ uniform sampler3D texVolume;
 //
 uniform vec3 eye_position;
 uniform vec3 light_position;
+uniform mat4 vpl_ModelMatrix;
 
 
 // illumination
@@ -20,6 +21,7 @@ uniform vec3 halfway;
 
 //in vec2 textureRectCoord;
 in vec3 frag_position;
+//in vec4 tex_coord;
 
 out vec4 fragColor;
 
@@ -56,21 +58,18 @@ void main()
 	vec3 rayStart = eye_position;
 	vec3 rayEnd = frag_position;
 	vec3 start2end = rayEnd - rayStart;
-	vec4 bg = vec4(0,0,0, 1.0);
+	vec4 bg = vec4(1, 1 , 1, 1.0);
 	vec4 color = vec4(0, 0, 0, 0);
 	vec3 direction = normalize(start2end);
 	vec3 samplePoint = frag_position;
+	vec3 bound = (vpl_ModelMatrix*vec4(1,1,1,1)).xyz;
 	for (int i = 0;;++i) 
 	{
-		samplePoint +=  direction * step ;
-		//fragColor = vec4(samplePoint,1.0);
-		if (any(greaterThan(samplePoint,vec3(1,1,1))))break;
-		if (any(lessThan(samplePoint,vec3(0,0,0))))break;
-
-		if(samplePoint.x >= 1.0f || samplePoint.y >=1.0f || samplePoint.z >= 1.0f)
-			break;
-
-		vec4 scalar = texture(texVolume, samplePoint);
+		samplePoint +=  direction * step;
+		vec3 normalizedSamplePos = vec3(samplePoint.x/bound.x,samplePoint.y/bound.y,samplePoint.z/bound.z);
+		if (any(greaterThan(normalizedSamplePos,vec3(1.0,1.0,1.0))))break;
+		if (any(lessThan(normalizedSamplePos,vec3(0.0,0.0,0.0))))break;
+		vec4 scalar = texture(texVolume, normalizedSamplePos);
 		vec4 sampledColor = texture(texTransfunc, scalar.r);
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)

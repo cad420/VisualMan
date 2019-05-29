@@ -49,7 +49,8 @@ namespace ysl
 				{
 					renderer->DispatchOnRenderStartedEvent();
 					assert(camera);
-					camera->GetViewport()->Activate();
+					camera->GetViewport()->Activate();	// Clear
+
 					GL_CHECK
 				}
 				~Raii()

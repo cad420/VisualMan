@@ -7,6 +7,7 @@
 #include "renderstate.h"
 
 #include "renderstateset.h"
+#include <cassert>
 
 namespace ysl
 {
@@ -54,6 +55,8 @@ namespace ysl
 			Ref<EnableStateSet> enableSet;
 		};
 
+
+		Ref<Shading> GRAPHICS_EXPORT_IMPORT MakePhongShading();
 	}
 }
 

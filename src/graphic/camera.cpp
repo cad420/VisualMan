@@ -101,13 +101,13 @@ namespace ysl
 			SetContext(nullptr);
 		}
 
-		void CameraManipulator::MousePressEvent(EMouseButton button, int xpos, int ypos)
+		void CameraManipulator::MousePressEvent(MouseButton button, int xpos, int ypos)
 		{
 			lastMousePos.x = xpos;
 			lastMousePos.y = ypos;
 		}
 
-		void CameraManipulator::MouseMoveEvent(EMouseButton button, int xpos, int ypos)
+		void CameraManipulator::MouseMoveEvent(MouseButton button, int xpos, int ypos)
 		{
 			if (camera != nullptr)
 			{

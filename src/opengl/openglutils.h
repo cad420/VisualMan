@@ -74,7 +74,7 @@ GLenum PrintGLErrorMsg(const char * file, int line)
 #ifdef NDEBUG
 #define GL_ERROR_REPORT void(0);
 #define GL_ERROR_ASSERT	void(0);
-#define GL(stmt) void(0);
+#define GL(stmt) stmt;
 #define GL_CHECK void(0);
 #else
 #define GL_ERROR_REPORT								PrintGLErrorMsg(__FILE__, __LINE__);

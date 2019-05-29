@@ -22,6 +22,7 @@ aux_source_directory(. GRAPHIC_SRC)
 aux_source_directory("../mathematics" MATH_SRC)
 aux_source_directory("../memory" MEMORY_SRC)
 aux_source_directory("../utility" UTILITY_SRC)
+aux_source_directory("../algorithm" ALG_SRC)
 
 
 set(GRAPHIC_INCLUDE)
@@ -38,6 +39,7 @@ ${MATH_SRC}
 ${GL3W_SRC} 
 ${MEMORY_SRC} 
 ${UTILITY_SRC}
+${ALG_SRC}
 "../io/rawreader.cpp"
 "../io/rawio.cpp"
 "../io/platform/windowsfilemap.cpp")

@@ -6,6 +6,7 @@
 #include "../utility/objreader.h"
 #include "drawelements.h"
 #include "abstrdraw.h"
+#include <cassert>
 
 namespace ysl
 {
@@ -218,6 +219,99 @@ namespace ysl
 			primitive->DrawCalls().push_back(drawElemUi);
 
 			return primitive;
+		}
+
+		Ref<Primitive> MakePrimitive(const float* position, size_t positionCount, const float* normal,
+			size_t normalCount, const unsigned * index, size_t indexCount)
+		{
+			auto vertex = MakeRef<ArrayFloat3>();
+			//vertex->GetBufferObject()->SetBufferData(objReader.GetVertexBytes(),
+			//	objReader.GetVertices().data(),
+			//	BU_STATIC_DRAW);
+
+			vertex->GetBufferObject()->SetLocalData((char*)position, positionCount*sizeof(float)*3);
+
+			//vertex->SetbufferObjectDataDirty(false);
+
+			auto normals = MakeRef<ArrayFloat3>();
+			//normals->GetBufferObject()->SetBufferData(objReader.GetNormalBytes(),
+			//	objReader.GetNormals().data(),
+			//	BU_STATIC_DRAW);
+
+			normals->GetBufferObject()->SetLocalData(normal,normalCount*sizeof(float)*3);
+
+			//normals->SetbufferObjectDataDirty(false);
+
+			auto vertexIndex = MakeRef<ArrayUInt>();
+			//vertexIndex->GetBufferObject()->SetBufferData(objReader.GetVertexIndicesBytes(),
+			//	objReader.GetFaceIndices().data(),
+			//	BU_STATIC_DRAW);
+
+			vertexIndex->GetBufferObject()->SetLocalData(index,indexCount*sizeof(float)*3);
+			//vertexIndex->SetbufferObjectDataDirty(false);
+
+			auto primitive = MakeRef<Primitive>();
+			primitive->SetVertexPositionArray(vertex);
+			primitive->SetVertexNormalArray(normals);
+
+			auto drawElemUi = MakeRef<DrawElementsUInt>(1);
+			drawElemUi->SetIndexBuffer(vertexIndex);
+
+			primitive->DrawCalls().push_back(drawElemUi);
+
+			return primitive;
+		}
+
+		Ref<Primitive> MakeCube(const Bound3f &bound)
+		{
+			auto proxyGeometry = MakeRef<Primitive>();
+			
+			Point3f points[8];
+
+			for (int i = 0; i < 8; i++)
+			{
+				points[i] = bound.Corner(i);
+				std::cout << points[i];
+			}
+			unsigned int indices[] = { 0,2,1,1,2,3,
+				4,5,6,5,7,6,
+				0,1,4,1,5,4,
+				2,6,3,3,6,7,
+				0,4,2,2,4,6,
+				1,3,5,3,7,5 };
+
+			float normals[] = {-1,-1,-1,
+				1,-1,-1,
+				-1,1,-1,
+				1,1,-1,
+				-1,-1,1,
+				1,-1,1,
+				-1,1,1,
+				1,1,1};
+
+			auto vertexIndex = MakeRef<ArrayUInt>();
+			vertexIndex->GetBufferObject()->SetLocalData(indices, sizeof(indices));
+			auto vertexArray = MakeRef<ArrayFloat3>();
+			auto texCoordArray = MakeRef<ArrayFloat3>();
+			auto normalArray = MakeRef<ArrayFloat3>();
+
+			vertexArray->GetBufferObject()->SetLocalData(points, sizeof(points));
+
+			texCoordArray->GetBufferObject()->SetLocalData(points, sizeof(points));
+
+			normalArray->GetBufferObject()->SetLocalData(normals,sizeof(normals));
+
+			proxyGeometry->SetVertexPositionArray(vertexArray);
+
+			proxyGeometry->SetVertexTexCoordArray(texCoordArray);
+
+			proxyGeometry->SetVertexNormalArray(normalArray);
+
+			auto drawCall = MakeRef<DrawElementsUInt>();
+
+			drawCall->SetIndexBuffer(vertexIndex);
+			proxyGeometry->DrawCalls().push_back(drawCall);
+			return proxyGeometry;
 		}
 	}
 }

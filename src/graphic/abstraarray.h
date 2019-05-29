@@ -31,9 +31,9 @@ namespace ysl
 			 * \brief  Returns the data pointer pointing to local memory. Nullptr is returned if
 			 *  the data is not resident in local memory.
 			 */
-			char * RawData() { return bufferObject ? (char*)bufferObject->Data() : nullptr; }
+			char * RawData() { return bufferObject ? (char*)bufferObject->LocalData() : nullptr; }
 
-			const char * RawData()const { return bufferObject ? (char*)bufferObject->Data() : nullptr; }
+			const char * RawData()const { return bufferObject ? (char*)bufferObject->LocalData() : nullptr; }
 
 			/**
 			 * \brief Clear the Local memory buffer
@@ -43,6 +43,12 @@ namespace ysl
 			bool IsBufferObjectDataDirty()const { return dirtyData; }
 
 			void SetbufferObjectDataDirty(bool dirty) { dirtyData = dirty; }
+
+			void SetBufferUsage(BufferObjectUsage usage) { this->usage = usage; }
+
+			BufferObjectUsage GetBufferObjectUsage()const { return this->usage; }
+
+			void UpdateBufferObject(BufferObjectUpdateMode mode);
 
 			/**
 			 * \brief  Returns the bytes used by local memory
@@ -66,6 +72,7 @@ namespace ysl
 			virtual ~AbstraArray() {}
 		private:
 			Ref<BufferObject> bufferObject;
+			BufferObjectUsage usage = BU_STATIC_DRAW;
 			bool dirtyData = true;		// indicates whether the GPU data is dirty
 		};
 

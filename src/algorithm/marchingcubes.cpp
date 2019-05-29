@@ -5,18 +5,22 @@
 #include "marchingcubes.h"
 #include "../mathematics/geometry.h"
 #include "../mathematics/numeric.h"
-
 #include <algorithm>
+#include <cassert>
 
 
-
-MeshGenerator::MeshGenerator(const unsigned char *d, ysl::Size3 size) :
+MeshGenerator::MeshGenerator(const unsigned char * d, ysl::Size3 size) :
 	data(d),
 	dataSize(size),
 	dataXSpace(1.0),
 	dataYSpace(1.0),
 	dataZSpace(1.0),
 	root(nullptr)
+{
+	Preprocess();
+}
+
+MeshGenerator::MeshGenerator(const unsigned char * d, ysl::Size3 size, ysl::Vec3f space) :data(d), dataSize(size), dataXSpace(space.x), dataYSpace(space.y), dataZSpace(space.z)
 {
 	Preprocess();
 }
@@ -63,6 +67,7 @@ MeshGenerator& MeshGenerator::operator=(MeshGenerator&& generator)noexcept
 
 std::shared_ptr<ysl::TriangleMesh> MeshGenerator::GenerateMesh(int value) const
 {
+
 	std::vector<ysl::Point3f> triangles;
 	std::vector<ysl::Vector3f> normals;
 
@@ -71,7 +76,7 @@ std::shared_ptr<ysl::TriangleMesh> MeshGenerator::GenerateMesh(int value) const
 	for (int z = 0; z < dataSize.z - step; z += step) {
 		for (int y = 0; y < dataSize.y - step; y += step) {
 			for (int x = 0; x < dataSize.x - step; x += step) {
-
+				//std::cout << "??\n";
 				int id = 0;
 				id += data[ysl::Linear({ x, y + step, z + step }, { dataSize.x,dataSize.y })] > value ? (1 << 0) : (0);
 				id += data[ysl::Linear({ x, y + step, z }, { dataSize.x,dataSize.y })] > value ? (1 << 1) : (0);

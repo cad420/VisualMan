@@ -55,7 +55,7 @@ namespace ysl
 		void SetLocalData(void * data, size_t bytes)
 		{
 			Resize(bytes / sizeof(char));
-			memcpy(Data(), data, bytes);
+			memcpy(LocalData(), data, bytes);
 		}
 		/**
 		 * \brief
@@ -71,8 +71,8 @@ namespace ysl
 			Clear();
 		}
 
-		const uint8_t * Data()const { return data; }
-		uint8_t * Data() { return data; }
+		const uint8_t * LocalData()const { return data; }
+		uint8_t * LocalData() { return data; }
 	};
 }
 #endif

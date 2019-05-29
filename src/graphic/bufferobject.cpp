@@ -1,6 +1,8 @@
 
 #include "bufferobject.h"
 #include "../opengl/openglutils.h"
+#include <cassert>
+
 //#include <GLFW/glfw3.h>
 
 namespace ysl
@@ -36,7 +38,7 @@ namespace ysl
 				Resize(bufferSize);
 				void * ptr = nullptr;
 				ptr = MapBuffer(BA_READ_ONLY);
-				memcpy(Data(), ptr, Bytes());
+				memcpy(LocalData(), ptr, Bytes());
 				UnmapBuffer();
 			}
 		}
@@ -54,7 +56,7 @@ namespace ysl
 
 		void BufferObject::SetBufferData(BufferObjectUsage usage, bool discard)
 		{
-			SetBufferData(Bytes(),Data(), usage);
+			SetBufferData(Bytes(),LocalData(), usage);
 			if (discard)
 				Resize(0);
 		}

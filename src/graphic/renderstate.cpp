@@ -21,10 +21,15 @@ namespace ysl
 		void TextureSampler::Apply(int index, const Camera * camera, RenderContext* context) const
 		{
 			assert(index >= 0);
-			assert(texture);
-			assert(texture->Handle());
-			GL(glBindTextureUnit(index, texture->Handle()))
+			unsigned int handle = 0;
+			if (texture)
+			{
+				handle = texture->Handle();
+				assert(handle);		// if texture exists but its handle is 0, failed.
+			}
+			GL(glBindTextureUnit(index, handle))
 		}
+
 
 		void BlendFuncState::Apply(int index, const Camera* camera, RenderContext* context) const
 		{

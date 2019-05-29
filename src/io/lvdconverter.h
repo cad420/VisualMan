@@ -3,6 +3,7 @@
 #define _LVDCONVERTER_H_
 
 #include <cstring>
+#include <fstream>
 
 #include "../mathematics/geometry.h"
 #include "../mathematics/numeric.h"

@@ -1,6 +1,7 @@
 
 #include "actor.h"
 #include "renderable.h"
+#include "shaderprogram.h"
 
 namespace ysl
 {
@@ -25,6 +26,22 @@ namespace ysl
 			(void)renderable;
 			(void)shading;
 			(void)pass;
+		}
+
+		void MarchingCubeActorCallback::OnActorRenderStartedEvent(Actor* actor, const Camera* camera,
+			Renderable* renderable, const Shading* shading, int pass)
+		{
+			if (shading)
+			{
+				auto program = shading->GetProgram();
+
+				const int loc = program->GetGenericUniformLocation("view_pos");
+				if (loc != -1)
+				{
+					auto view_pos = camera->Position();
+					actor->CreateGetUniformSet()->CreateGetUniform("view_pos")->SetUniform3f(1, view_pos.Data());
+				}
+			}
 		}
 
 		Actor::Actor(Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform):

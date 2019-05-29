@@ -15,11 +15,11 @@ namespace ysl
 		public:
 			void Enable(EnableState enable)
 			{
-				if (enable == EN_BLEND)
-				{
-					blendingEnable = true;
-					return;
-				}
+				//if (enable == EN_BLEND)
+				//{
+				//	blendingEnable = true;
+				//	return;
+				//}
 				for (auto it = enableSet.begin(); it != enableSet.end(); ++it)
 				{
 					if (*it == enable)
@@ -29,11 +29,11 @@ namespace ysl
 			}
 			void Disable(EnableState enable)
 			{
-				if (enable == EN_BLEND)
-				{
-					blendingEnable = false;
-					return;
-				}
+				//if (enable == EN_BLEND)
+				//{
+				//	blendingEnable = false;
+				//	return;
+				//}
 				for (auto it = enableSet.begin(); it != enableSet.end(); ++it)
 				{
 					if (*it == enable)
@@ -50,11 +50,11 @@ namespace ysl
 						return true;
 				return false;
 			}
-			bool IsBlendingEnable()const { return blendingEnable; }
-			void EnableBlending(bool enable) { blendingEnable = enable; }
+			//bool IsBlendingEnable()const { return blendingEnable; }
+			//void EnableBlending(bool enable) { blendingEnable = enable; }
 		private:
 			std::vector<EnableState> enableSet;
-			bool blendingEnable = false;
+			//bool blendingEnable = false;
 		};
 	}
 }

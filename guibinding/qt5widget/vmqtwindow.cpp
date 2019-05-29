@@ -51,7 +51,7 @@ namespace ysl
 				buttons |= Mouse_Left;
 			if (event->buttons() & Qt::RightButton)
 				buttons |= Mouse_Right;
-			RenderContext::DispatchMousePressedEvent((EMouseButton)buttons,event->pos().x(),event->pos().y());
+			RenderContext::DispatchMousePressedEvent((MouseButton)buttons,event->pos().x(),event->pos().y());
 			Update();
 		}
 
@@ -64,7 +64,7 @@ namespace ysl
 			if (event->buttons() & Qt::RightButton)
 				buttons |= Mouse_Right;
 			//std::cout << button << std::endl;
-			RenderContext::DispatchMouseMoveEvent((EMouseButton)buttons, event->pos().x(), event->pos().y());
+			RenderContext::DispatchMouseMoveEvent((MouseButton)buttons, event->pos().x(), event->pos().y());
 			Update();
 		}
 
@@ -75,7 +75,7 @@ namespace ysl
 				buttons |= Mouse_Left;
 			if (event->buttons() & Qt::RightButton)
 				buttons |= Mouse_Right;
-			RenderContext::DispatchMouseReleasedEvent((EMouseButton)buttons, event->pos().x(), event->pos().y());
+			RenderContext::DispatchMouseReleasedEvent((MouseButton)buttons, event->pos().x(), event->pos().y());
 			Update();
 		}
 	}

@@ -121,12 +121,12 @@ namespace ysl
 			virtual void DispatchUpdateEvent();
 			virtual void DispatchDestroyEvent();
 			virtual void DispatchResizeEvent(int w, int h);
-			virtual void DispatchMousePressedEvent(EMouseButton button,int xpos,int ypos);
-			virtual void DispatchMouseMoveEvent(EMouseButton button,int xpos,int ypos);
-			virtual void DispatchMouseReleasedEvent(EMouseButton,int xpos,int ypos);
+			virtual void DispatchMousePressedEvent(MouseButton button,int xpos,int ypos);
+			virtual void DispatchMouseMoveEvent(MouseButton button,int xpos,int ypos);
+			virtual void DispatchMouseReleasedEvent(MouseButton,int xpos,int ypos);
 			virtual void DispatchMouseWheelEvent(int ydegree, int xdegree);
-			virtual void DispatchKeyReleasedEvent(EKeyButton key);
-			virtual void DispatchKeyPressedEvent(EKeyButton key);
+			virtual void DispatchKeyReleasedEvent(KeyButton key);
+			virtual void DispatchKeyPressedEvent(KeyButton key);
 
 			//Rendering State 
 

@@ -17,7 +17,7 @@ namespace ysl
 			void Set(Function fun) { func = fun; }
 			Function DepthFunc()const { return func; }
 		private:
-			Function func;
+			Function func = FU_LESS;
 		};
 
 
@@ -45,6 +45,7 @@ namespace ysl
 			{
 				
 			}
+			BlendFuncState():RenderStateNonIndexed(RS_BlendFunc){}
 			void Apply(int index, const Camera* camera, RenderContext* context) const override;
 			void SetRGBSrcFunc(BlendFactor fun) { rgbSrc = fun; }
 			BlendFactor GetRGBSrcFunc()const{return rgbSrc;}
@@ -56,10 +57,10 @@ namespace ysl
 			BlendFactor GetAlphaDestFunc()const { return alphaDest; }
 
 		private:
-			BlendFactor rgbSrc = BF_SRC_COLOR;
-			BlendFactor alphaSrc = BF_SRC_ALPHA;
-			BlendFactor rgbDest = BF_ONE_MINUS_SRC_COLOR;
-			BlendFactor alphaDest = BF_ONE_MINUS_DST_ALPHA;
+			BlendFactor rgbSrc = BF_ONE;
+			BlendFactor alphaSrc = BF_ONE;
+			BlendFactor rgbDest = BF_ZERO;
+			BlendFactor alphaDest = BF_ZERO;
 		};
 
 		class GRAPHICS_EXPORT_IMPORT BlendEquationState :public RenderStateNonIndexed
@@ -90,7 +91,7 @@ namespace ysl
 			void SetFace(PolygonFace face) { this->face = face; }
 			PolygonFace GetFace()const { return this->face; }
 		private:
-			PolygonFace face = PF_FRONT;
+			PolygonFace face = PF_BACK;
 		};
 
 		class GRAPHICS_EXPORT_IMPORT LineWidthState :public RenderStateNonIndexed

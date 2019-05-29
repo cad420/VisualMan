@@ -40,7 +40,7 @@ namespace ysl
 			int height = 0;
 			int xpos = 0;
 			int ypos = 0;
-			Vec4f clearColor = {0.f,0.f,0.f,1.f};
+			Vec4f clearColor = {1.f,1.f,1.f,1.f};
 			ClearFlag clearWhat = CF_DO_NOT_CLEAR;
 			float clearDepth = 1.0f;
 			int clearStencil = 0;

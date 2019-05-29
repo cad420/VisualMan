@@ -33,6 +33,12 @@ namespace ysl
 			bool eventEnable = true;
 		};
 
+		class GRAPHICS_EXPORT_IMPORT MarchingCubeActorCallback :public IActorEvent
+		{
+		public:
+			void OnActorRenderStartedEvent(Actor* actor, const Camera* camera, Renderable* renderable, const Shading* shading, int pass) override;
+		};
+
 		class GRAPHICS_EXPORT_IMPORT Actor
 		{
 		public:

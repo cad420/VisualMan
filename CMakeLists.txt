@@ -1,11 +1,8 @@
-﻿# CMakeList.txt : Top-level CMake project file, do global configuration
-# and include sub-projects here.
-#
+﻿
 cmake_minimum_required (VERSION 3.3)
 
 project ("MRE")
 
-# Handling function-like macros min() and max() defined in windows.h in MSVC
 add_definitions(-DNOMINMAX)
 
 #---------------------------------------------------
@@ -21,9 +18,6 @@ if (MSVC_VERSION GREATER_EQUAL "1900")
         add_compile_options("/std:c++latest")
     endif()
 endif()
-#---------------------------------------------------
-# Dependency Module
-#---------------------------------------------------
 
 # OpenMP
 FIND_PACKAGE(OpenMP)
@@ -40,3 +34,5 @@ add_subdirectory("src")
 add_subdirectory("guibinding")
 
 add_subdirectory("test")
+
+add_subdirectory("tools")

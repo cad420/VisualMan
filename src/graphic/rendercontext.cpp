@@ -11,6 +11,7 @@
 #include "abstrarenderstate.h"
 #include "ogl.h"
 #include "renderstate.h"
+#include <cassert>
 
 namespace ysl {
 	namespace vm
@@ -149,7 +150,7 @@ namespace ysl {
 			}
 		}
 
-		void RenderContext::DispatchMousePressedEvent(EMouseButton button, int xpos, int ypos)
+		void RenderContext::DispatchMousePressedEvent(MouseButton button, int xpos, int ypos)
 		{
 			//std::cout << "DispatchMousePressedEvent:" << button<<" "<<xpos << " " << ypos << std::endl;
 			MakeCurrent();
@@ -160,7 +161,7 @@ namespace ysl {
 			}
 		}
 
-		void RenderContext::DispatchMouseMoveEvent(EMouseButton button, int xpos, int ypos)
+		void RenderContext::DispatchMouseMoveEvent(MouseButton button, int xpos, int ypos)
 		{
 			//std::cout << "RenderContext::DispatchMouseMoveEvent:" << button << " " << xpos << " " << ypos << std::endl;
 			MakeCurrent();
@@ -171,7 +172,7 @@ namespace ysl {
 			}
 		}
 
-		void RenderContext::DispatchMouseReleasedEvent(EMouseButton button, int xpos, int ypos)
+		void RenderContext::DispatchMouseReleasedEvent(MouseButton button, int xpos, int ypos)
 		{
 			//std::cout << "RenderContext::DispatchMouseReleasedEvent:" << button << " " << xpos << " " << ypos << std::endl;
 			MakeCurrent();
@@ -194,7 +195,7 @@ namespace ysl {
 		}
 
 
-		void RenderContext::DispatchKeyReleasedEvent(EKeyButton key)
+		void RenderContext::DispatchKeyReleasedEvent(KeyButton key)
 		{
 
 			//std::cout << "RenderContext::DispatchKeyReleasedEvent:" << key << std::endl;
@@ -206,7 +207,7 @@ namespace ysl {
 			}
 		}
 
-		void RenderContext::DispatchKeyPressedEvent(EKeyButton key)
+		void RenderContext::DispatchKeyPressedEvent(KeyButton key)
 		{
 			//std::cout << "RenderContext::DispatchKeyPressedEvent:" << key << std::endl;
 			MakeCurrent();
@@ -292,26 +293,26 @@ namespace ysl {
 
 			for(const auto & each: rss->renderStates)
 			{
-				const auto type = each.StateType();
-
+				const auto type = each.StateType();			// Indexed or non-indexed
 				auto it = currentRenderStates.find(type);
 				newStates[type] = each;
-				if(it == currentRenderStates.end())
+
+				if(it == currentRenderStates.end() || (it->second.rawRenderState != each.rawRenderState))
 				{
+					//If the state don't exist in current states or the value of new state is not the same as before 
 					each.Apply(nullptr, this);
-					
 				}
 			}
 
 			for(const auto & each:currentRenderStates)
 			{
-				const auto type = each.first;
+				const auto curStateType = each.first;
 
-				auto it = newStates.find(type);
+				auto it = newStates.find(curStateType);
 				if(it == newStates.end())
 				{
-					//apply default states;
-					defaultRenderStates[type].Apply(nullptr, this);
+					// If the state don't exist in new state
+					defaultRenderStates[curStateType].Apply(nullptr, this);
 				}
 			}
 

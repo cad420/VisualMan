@@ -58,17 +58,17 @@ namespace ysl
 			context->RemoveEventListener(manipulator);
 		}
 
-		void VisualMan::MousePressEvent(EMouseButton button, int xpos, int ypos)
+		void VisualMan::MousePressEvent(MouseButton button, int xpos, int ypos)
 		{
 			//std::cout << "Assembly::MousePressEvent:" << button << " " << xpos << " " << ypos << std::endl;
 		}
 
-		void VisualMan::MouseReleaseEvent(EMouseButton button, int xpos, int ypos)
+		void VisualMan::MouseReleaseEvent(MouseButton button, int xpos, int ypos)
 		{
 			//std::cout << "Assembly::MouseReleaseEvent:"<<button<<" "<<xpos<<" "<<ypos<< std::endl;
 		}
 
-		void VisualMan::MouseMoveEvent(EMouseButton button, int xpos, int ypos)
+		void VisualMan::MouseMoveEvent(MouseButton button, int xpos, int ypos)
 		{
 			//std::cout << "Assembly::MouseMoveEvent:" << button << " " << xpos << " " << ypos << std::endl;
 		}
@@ -78,12 +78,12 @@ namespace ysl
 			//std::cout << "Assembly::MouseWheelEvent:" << xdegree << " " << ydegree << std::endl;
 		}
 
-		void VisualMan::KeyPressEvent(EKeyButton key)
+		void VisualMan::KeyPressEvent(KeyButton key)
 		{
 			//std::cout << "Assembly::MouseReleaseEvent:"<<key << std::endl;
 		}
 
-		void VisualMan::KeyReleaseEvent(EKeyButton key)
+		void VisualMan::KeyReleaseEvent(KeyButton key)
 		{
 			//std::cout << "Assembly::KeyReleaseEvent:"<< key<<  std::endl;
 		}

@@ -7,6 +7,7 @@
 #include "abstrdraw.h"
 #include "vertexattribsetinterface.h"
 #include "renderable.h"
+#include "../mathematics/geometry.h"
 
 namespace ysl
 {
@@ -83,7 +84,10 @@ namespace ysl
 
 
 		Ref<Primitive> GRAPHICS_EXPORT_IMPORT MakePrimitive(const std::string & fileName);
+		Ref<Primitive> GRAPHICS_EXPORT_IMPORT MakePrimitive(const float* position, size_t positionCount, const float* normals, size_t normalCount,
+			const unsigned* index, size_t indexCount);
 
+		Ref<Primitive> GRAPHICS_EXPORT_IMPORT MakeCube(const Bound3f& bound);
 
 	}
 }

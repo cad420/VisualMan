@@ -2,6 +2,7 @@
 #define _ABCFLOWGEN_H_
 
 
+#include <cstddef>
 
 class ABCFlowGenerator
 {

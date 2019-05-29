@@ -3,6 +3,8 @@
 #include "../mathematics/numeric.h"
 #include <string>
 #include "../io/platform/windowsfilemap.h"
+#include <iostream>
+
 //#include "../io/rawio.h"
 
 namespace ysl
