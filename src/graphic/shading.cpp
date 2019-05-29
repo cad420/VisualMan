@@ -20,6 +20,18 @@ namespace ysl
 			return texSampler;
 		}
 
+		Ref<TextureImageUnit> Shading::CreateGetTextureImageUnit(int unitIndex)
+		{
+			auto texImageUnit = std::static_pointer_cast<TextureImageUnit>(
+				CreateGetRenderStateSet()->GetRenderState(RS_TextureImageUnit, unitIndex)
+				);
+			if(texImageUnit == nullptr)
+			{
+				texImageUnit = MakeRef<TextureImageUnit>();
+				CreateGetRenderStateSet()->SetRenderState(texImageUnit, unitIndex);
+			}
+			return texImageUnit;
+		}
 
 
 		Ref<Shading> MakePhongShading()

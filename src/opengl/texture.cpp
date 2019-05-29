@@ -8,6 +8,7 @@
 #include "openglutils.h"
 #include "../utility/error.h"
 #include "openglcontext.h"
+#include <string>
 
 OpenGLTexture::OpenGLTexture(TextureTarget target_, 
 	FilterMode min, 

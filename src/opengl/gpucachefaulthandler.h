@@ -4,6 +4,7 @@
 #include "../io/largevolumecache.h"
 #include "openglbuffer.h"
 #include "abstrgpuobject/abstrgpucachefaulthandler.h"
+#include <vector>
 
 namespace ysl
 {

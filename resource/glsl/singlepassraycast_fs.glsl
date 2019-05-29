@@ -1,5 +1,5 @@
-#version 330 core
-
+#version 420 core
+//layout(rgba32f) uniform volatile image3D testImage;
 // texture
 uniform sampler1D texTransfunc;
 uniform sampler3D texVolume;
@@ -75,6 +75,7 @@ void main()
 		if (color.a > 0.99)
 			break;
 	}
+	//imageStore(testImage,ivec3(1,1,1),vec4(1,1,1,1));
 	if (color.a == 0.0) 
 		discard;
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);

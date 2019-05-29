@@ -8,6 +8,7 @@ uniform vec3 light_color;
 uniform vec4 object_color;
 uniform vec3 view_pos;
 
+
 void main()
 {
     vec3 frag_norm = normalize(vec3(frag_normal));

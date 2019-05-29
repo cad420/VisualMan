@@ -13,7 +13,7 @@ namespace ysl
 		class GLSLProgram;
 	
 
-		class GRAPHICS_EXPORT_IMPORT RenderState
+		class GRAPHICS_EXPORT_IMPORT RenderState:public std::enable_shared_from_this<RenderState>
 		{
 		public:
 			RenderState() = delete;
@@ -54,6 +54,9 @@ namespace ysl
 				return RenderStateType(rawRenderState->Type() + index);
 			}
 
+			/**
+			 * \brief  index<0 indicates it is not a indexed render state
+			 */
 			virtual void Apply(const Camera * camera,RenderContext * context)const
 			{
 				rawRenderState->Apply(index, camera, context);

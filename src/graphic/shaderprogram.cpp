@@ -7,6 +7,8 @@
 #include "GL/gl3w.h"
 
 #include "rendercontext.h"
+#include <cassert>
+#include <fstream>
 
 namespace ysl
 {
@@ -357,7 +359,7 @@ namespace ysl
 		void GLSLProgram::Apply(int index, const Camera * camera, RenderContext* context) const
 		{
 			assert(context);
-			context->UseProgram(this);
+			context->UseProgram(std::static_pointer_cast<const GLSLProgram>(shared_from_this()));
 			GL_CHECK
 		}
 

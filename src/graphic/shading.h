@@ -31,6 +31,7 @@ namespace ysl
 			Ref<DepthFuncState> GetDepthFuncState(RenderStateType type) { return std::static_pointer_cast<DepthFuncState>(CreateGetRenderStateSet()->GetRenderState(type, -1)); }
 
 			Ref<TextureSampler> CreateGetTextureSampler(int unitIndex);
+			Ref<TextureImageUnit> CreateGetTextureImageUnit(int unitIndex);
 
 			// EnableState getter and setter
 			Ref<EnableStateSet> CreateGetEnableStateSet() { return enableSet ? enableSet : (enableSet = MakeRef<EnableStateSet>()); }

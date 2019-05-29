@@ -1,6 +1,7 @@
 #ifndef _RENDERSTATE_H_
 #define _RENDERSTATE_H_
 #include "abstrarenderstate.h"
+#include "bufferobject.h"
 
 
 namespace ysl
@@ -20,18 +21,78 @@ namespace ysl
 			Function func = FU_LESS;
 		};
 
+		class GRAPHICS_EXPORT_IMPORT AtomicCounter:public RenderStateIndexed
+		{
+		public:
+			AtomicCounter() :RenderStateIndexed(RS_AtomicCounterBuffer){}
+			AtomicCounter(const std::string & name) :RenderStateIndexed(RS_AtomicCounterBuffer),atomicName(name){}
+			void Apply(int index, const Camera* camera, RenderContext* context) const override;
+			void SetBufferObject(Ref<BufferObject> buffer) { bufferObject = std::move(buffer); }
+			Ref<const BufferObject> GetBufferObject()const { return bufferObject; }
+			Ref<BufferObject> GetBufferObject() { return bufferObject; }
+			std::string GetAtomicCounterName()const { return atomicName; }
+			void SetAtomicCounterName(const std::string & name) { atomicName = name; }
+		private:
+			Ref<BufferObject> bufferObject;
+			std::string atomicName;
+		};
+
+		class GRAPHICS_EXPORT_IMPORT ShaderStorageBufferObject :public RenderStateIndexed
+		{
+		public:
+			ShaderStorageBufferObject() :RenderStateIndexed(RS_ShaderStorageBuffer) {}
+			ShaderStorageBufferObject(const std::string & name) :RenderStateIndexed(RS_ShaderStorageBuffer), storageBufferName(name) {}
+			void Apply(int index, const Camera* camera, RenderContext* context) const override;
+			void SetBufferObject(Ref<BufferObject> buffer) { bufferObject = std::move(buffer); }
+			Ref<const BufferObject> GetBufferObject()const { return bufferObject; }
+			Ref<BufferObject> GetBufferObject() { return bufferObject; }
+			std::string GetShaderStorageBufferName()const { return storageBufferName; }
+			void SetShaderStorageBufferName(const std::string & name) { storageBufferName = name; }
+		private:
+			Ref<BufferObject> bufferObject;
+			std::string storageBufferName;
+			//unsigned int offset = 0;		// reserved field
+		};
 
 		class GRAPHICS_EXPORT_IMPORT TextureSampler :public RenderStateIndexed
 
 		{
 		public:
+
+
+
 			TextureSampler() :RenderStateIndexed(RS_TextureSampler) {}
 			void Apply(int index, const Camera * camera, RenderContext* context) const override;
+			void SetTexture(Ref<Texture> texture) { this->texture = std::move(texture); }
+			//void SetImageUnitName(const std::string & name) { imageUnitName = name; }
+			//std::string GetImageUnitName()const { return imageUnitName; }
+			Ref<Texture> GetTexture() { return texture; }
+			Ref<const Texture> GetTexture()const { return texture; }
+		private:
+			Ref<Texture> texture;
+			//std::string imageUnitName;
+			//ImageUnitInfo unitInfo;
+		};
+
+		class GRAPHICS_EXPORT_IMPORT TextureImageUnit:public RenderStateIndexed
+		{
+		public:
+			struct ImageUnitInfo
+			{
+				std::string unitName;
+				int level = 0;
+				bool layered = false;
+				int layer = 0;
+				ImageUnitAccess access = VM_IA_READ_WRITE;
+			};
+			TextureImageUnit():RenderStateIndexed(RS_TextureImageUnit){}
+			void Apply(int index, const Camera* camera, RenderContext* context) const override;
 			void SetTexture(Ref<Texture> texture) { this->texture = std::move(texture); }
 			Ref<Texture> GetTexture() { return texture; }
 			Ref<const Texture> GetTexture()const { return texture; }
 		private:
 			Ref<Texture> texture;
+			//std::string imageUnitName;
 		};
 
 		class GRAPHICS_EXPORT_IMPORT BlendFuncState :public RenderStateNonIndexed

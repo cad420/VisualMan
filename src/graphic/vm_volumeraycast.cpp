@@ -105,9 +105,12 @@ namespace ysl
 			actor->CreateGetUniformSet()->CreateGetUniform("ks")->SetUniformValue(50.0f);
 			actor->CreateGetUniformSet()->CreateGetUniform("texTransfunc")->SetUniformValue(1);
 			actor->CreateGetUniformSet()->CreateGetUniform("texVolume")->SetUniformValue(0);
+			//actor->CreateGetUniformSet()->CreateGetUniform("testImage")->SetUniformValue(0);
 			// Set texture samplers
 			rayCastShading->CreateGetTextureSampler(0)->SetTexture(volumeTex);
+			//rayCastShading->CreateGetTextureImageUnit(0)->SetTexture(volumeTex);
 			rayCastShading->CreateGetTextureSampler(1)->SetTexture(tfTex);
+
 			rayCastShading->CreateGetEnableStateSet()->Enable(EN_CULL_FACE);
 			rayCastShading->CreateGetRenderStateSet()->SetRenderState(MakeRef<CullFaceState>(PF_FRONT), -1);
 			// Enable

@@ -1,4 +1,4 @@
-#version 330 core
+#version 420 core
 
 // struct LIGHT_SOURCE {
 //     vec3 position_;        // light position in world space
@@ -9,6 +9,7 @@
 // };
 
 // uniform LIGHT_SOURCE lightSource;
+
 
 uniform sampler1D texTransfunc;
 uniform sampler2DRect texStartPos;

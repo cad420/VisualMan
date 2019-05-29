@@ -127,6 +127,13 @@ enum BufferObjectAccess
 	BA_READ_WRITE = GL_READ_WRITE
 };
 
+enum ImageUnitAccess
+{
+	VM_IA_READ_ONLY = GL_READ_ONLY,
+	VM_IA_WRITE_ONLY = GL_WRITE_ONLY,
+	VM_IA_READ_WRITE = GL_READ_WRITE
+};
+
 enum FramebufferBind
 {
 	FBB_FRAMEBUFFER = GL_FRAMEBUFFER,
@@ -596,9 +603,11 @@ enum RenderStateType
 	RS_PolygonMode,
 	RS_LineWidth,
 	RS_GLSLProgram,
+
 	//RS_StencilFunc,
 	//RS_StencilMask,
 	//RS_StencilOp,
+
 
 
 	// Indexed state
@@ -620,8 +629,47 @@ enum RenderStateType
 	RS_TextureSampler14 = RS_TextureSampler + 14,
 	RS_TextureSampler15 = RS_TextureSampler + 15,
 
-	RS_RenderState_Count,
+	RS_TextureImageUnit,
+	RS_TextureImageUnit0 = RS_TextureImageUnit + 0,
+	RS_TextureImageUnit1 = RS_TextureImageUnit + 1,
+	RS_TextureImageUnit2 = RS_TextureImageUnit + 2,
+	RS_TextureImageUnit3 = RS_TextureImageUnit + 3,
+	RS_TextureImageUnit4 = RS_TextureImageUnit + 4,
+	RS_TextureImageUnit5 = RS_TextureImageUnit + 5,
+	RS_TextureImageUnit6 = RS_TextureImageUnit + 6,
+	RS_TextureImageUnit7 = RS_TextureImageUnit + 7,
+	RS_TextureImageUnit8 = RS_TextureImageUnit + 8,
+	RS_TextureImageUnit9 = RS_TextureImageUnit + 9,
+	RS_TextureImageUnit10 = RS_TextureImageUnit + 10,
+	RS_TextureImageUnit11 = RS_TextureImageUnit + 11,
+	RS_TextureImageUnit12 = RS_TextureImageUnit + 12,
+	RS_TextureImageUnit13 = RS_TextureImageUnit + 13,
+	RS_TextureImageUnit14 = RS_TextureImageUnit + 14,
+	RS_TextureImageUnit15 = RS_TextureImageUnit + 15,
 
+	RS_AtomicCounterBuffer,
+	RS_AtomicCounterBuffer0 = RS_AtomicCounterBuffer + 0,
+	RS_AtomicCounterBuffer1 = RS_AtomicCounterBuffer + 1,
+	RS_AtomicCounterBuffer2 = RS_AtomicCounterBuffer + 2,
+	RS_AtomicCounterBuffer3 = RS_AtomicCounterBuffer + 3,
+	RS_AtomicCounterBuffer4 = RS_AtomicCounterBuffer + 4,
+	RS_AtomicCounterBuffer5 = RS_AtomicCounterBuffer + 5,
+	RS_AtomicCounterBuffer6 = RS_AtomicCounterBuffer + 6,
+	RS_AtomicCounterBuffer7 = RS_AtomicCounterBuffer + 7,
+
+	RS_ShaderStorageBuffer,
+	RS_ShaderStorageBuffer0 = RS_ShaderStorageBuffer + 0,
+	RS_ShaderStorageBuffer1 = RS_ShaderStorageBuffer + 1,
+	RS_ShaderStorageBuffer2 = RS_ShaderStorageBuffer + 2,
+	RS_ShaderStorageBuffer3 = RS_ShaderStorageBuffer + 3,
+	RS_ShaderStorageBuffer4 = RS_ShaderStorageBuffer + 4,
+	RS_ShaderStorageBuffer5 = RS_ShaderStorageBuffer + 5,
+	RS_ShaderStorageBuffer6 = RS_ShaderStorageBuffer + 6,
+	RS_ShaderStorageBuffer7 = RS_ShaderStorageBuffer + 7,
+
+
+
+	RS_RenderState_Count,
 	RS_NONE,
 };
 

@@ -3,6 +3,7 @@
 #include "../application/largevolumeraycasterapplication.h"
 #include "../io/largevolumecache.h"
 #include "openglutils.h"
+#include <cassert>
 
 namespace ysl
 {

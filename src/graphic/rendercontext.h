@@ -131,7 +131,8 @@ namespace ysl
 			//Rendering State 
 
 			// glUseProgram
-			void UseProgram(const GLSLProgram * program);
+			void UseProgram(Ref<const GLSLProgram> program);
+			Ref<const GLSLProgram> GetCurrentProgram()const { return curProgram; }
 
 
 			// glVertexAttribArray
@@ -152,6 +153,9 @@ namespace ysl
 			{
 				int MAX_VERTEX_ATTRIBS = 0;
 				int MAX_TEXTURE_IMAGE_UNITE = 0;
+				int MAX_SHADER_STORAGE_BINDINGS = 0;
+				int MAX_ATOMIC_COUNTER_BUFFER_BINDINGS = 0;
+				int MAX_IMAGE_UNITS = 0;
 			}maxInteger;
 
 			//GLFWwindow * windowContext;
@@ -168,7 +172,7 @@ namespace ysl
 
 			// Current GLSLProgram
 
-			Ref<GLSLProgram> curProgram;
+			Ref<const GLSLProgram> curProgram = nullptr;
 
 			std::array<RenderStateBox, RS_RenderState_Count> defaultRenderStates;
 			std::unordered_map<RenderStateType, RenderStateBox> currentRenderStates;

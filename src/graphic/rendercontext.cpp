@@ -218,10 +218,11 @@ namespace ysl {
 			}
 		}
 
-		void RenderContext::UseProgram(const GLSLProgram* program)
+		void RenderContext::UseProgram(Ref<const GLSLProgram> program)
 		{
 			assert(program);
 			GL(glUseProgram(program->Handle()));
+			curProgram = std::move(program);
 		}
 
 		void RenderContext::BindVertexArray(const IVertexAttribSet* vas)
@@ -358,12 +359,24 @@ namespace ysl {
 			maxInteger.MAX_VERTEX_ATTRIBS = std::min(int(VA_VertexAttribArray_Count), int(maxInteger.MAX_VERTEX_ATTRIBS));
 			GL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxInteger.MAX_TEXTURE_IMAGE_UNITE));
 			maxInteger.MAX_TEXTURE_IMAGE_UNITE = std::min(int(RS_TextureSampler15- RS_TextureSampler0 + 1), int(maxInteger.MAX_TEXTURE_IMAGE_UNITE));
+			GL(glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &maxInteger.MAX_SHADER_STORAGE_BINDINGS));
+			maxInteger.MAX_SHADER_STORAGE_BINDINGS = std::min(int(RS_ShaderStorageBuffer7-RS_ShaderStorageBuffer0 + 1), maxInteger.MAX_SHADER_STORAGE_BINDINGS);
+			GL(glGetIntegerv(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS,&maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS));
+			maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS = std::min(int(RS_AtomicCounterBuffer7-RS_AtomicCounterBuffer0 + 1), maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
+			GL(glGetIntegerv(GL_MAX_IMAGE_UNITS, &maxInteger.MAX_IMAGE_UNITS));
+			maxInteger.MAX_IMAGE_UNITS = std::min(int(RS_TextureImageUnit15 - RS_TextureSampler + 1), maxInteger.MAX_IMAGE_UNITS);
+
+
+			Log("MAX_VERTEX_ATTRIBS:%d\n",maxInteger.MAX_VERTEX_ATTRIBS);
+			Log("MAX_TEXTURE_IMAGE_UNITE:%d\n",maxInteger.MAX_TEXTURE_IMAGE_UNITE);
+			Log("MAX_SHADER_STORAGE_BINDINGS:%d\n",maxInteger.MAX_SHADER_STORAGE_BINDINGS);
+			Log("MAX_ATOMIC_COUNTER_BUFFER_BINDINGS:%d\n",maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
+			Log("MAX_IMAGE_UNITS:%d\n",maxInteger.MAX_IMAGE_UNITS);
 		}
 
 		void RenderContext::InitDefaultRenderState()
 		{
 			// Init some base render states
-
 			//
 			// Non-index state
 			//defaultRenderStates[RS_AlphaFunc] = RenderStateBox(MakeRef<DepthFuncState>(FU_LESS), 0);
@@ -379,15 +392,35 @@ namespace ysl {
 			//defaultRenderStates[RS_StencilFunc] = RenderStateBox(new StencilFunc, 0);
 			//defaultRenderStates[RS_StencilMask] = RenderStateBox(new StencilMask, 0);
 			//defaultRenderStates[RS_StencilOp] = RenderStateBox(new StencilOp, 0);
+
 			defaultRenderStates[RS_GLSLProgram] = RenderStateBox(MakeRef<GLSLProgram>(), 0);
 
 			// indexed state
+
+			// Texture Sampler
 			for(int i = 0 ; i < maxInteger.MAX_TEXTURE_IMAGE_UNITE;i++)
 			{
 				defaultRenderStates[RS_TextureSampler + i] = RenderStateBox(MakeRef<TextureSampler>(), i);
 			}
 
+			// SSBO
+			for(int i = 0 ; i < maxInteger.MAX_SHADER_STORAGE_BINDINGS;i++)
+			{
+				defaultRenderStates[RS_ShaderStorageBuffer + i] = RenderStateBox(MakeRef<ShaderStorageBufferObject>(), i);
+			}
 
+			// AtomicCounterBuffer
+			for (int i = 0; i < maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS; i++)
+			{
+				defaultRenderStates[RS_AtomicCounterBuffer + i] = RenderStateBox(MakeRef<AtomicCounter>(), i);
+			}
+
+			// Image Units
+
+			for(int i =0;i<maxInteger.MAX_IMAGE_UNITS;i++)
+			{
+				defaultRenderStates[RS_TextureImageUnit + i] = RenderStateBox(MakeRef<TextureImageUnit>(),i);
+			}
 		}
 	}
 }

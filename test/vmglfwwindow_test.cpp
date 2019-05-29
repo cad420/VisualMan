@@ -14,7 +14,7 @@ int main(int argc, char ** argv)
 
 	VMGLFWWindow window("Test GLFW Window", RenderContextFormat(), 800, 600);
 
-	auto appMesh = MakeRef<VM_ISOSurface>();
+	auto appMesh = MakeRef<VM_VolumeRayCast>();
 
 	window.AddEventListener(appMesh);
 	

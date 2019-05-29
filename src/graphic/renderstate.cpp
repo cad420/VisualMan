@@ -1,10 +1,12 @@
 
 #include "renderstate.h"
+#include "rendercontext.h"
 #include <iostream>
 #include "../opengl/openglutils.h"
 #include "../../lib/gl3w/GL/gl3w.h"
 
 #include "texture.h"
+#include <cassert>
 
 namespace ysl
 {
@@ -18,18 +20,78 @@ namespace ysl
 			GL(glDepthFunc(func));
 		}
 
+		void AtomicCounter::Apply(int index, const Camera* camera, RenderContext* context) const
+		{
+			assert(context);
+			assert(index >= 0 && index < RS_AtomicCounterBuffer7 - RS_AtomicCounterBuffer0);
+			if (bufferObject)	// If there is no bufferobject, apply a empty bufferobject
+			{
+				const unsigned int handle = bufferObject->Handle();
+				assert(handle);
+				GL(glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, index, handle));
+			}
+			else
+			{
+				GL(glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, index, 0));
+			}
+
+			//  GL_INVALID_ENUM is generated if target is not GL_ATOMIC_COUNTER_BUFFER, GL_TRANSFORM_FEEDBACK_BUFFER, GL_UNIFORM_BUFFER or GL_SHADER_STORAGE_BUFFER.
+
+			//	GL_INVALID_VALUE is generated if index is greater than or equal to the number of target - specific indexed binding points.
+
+			//	GL_INVALID_VALUE is generated if buffer does not have an associated data store, or if the size of that store is zero.
+
+		}
+
+		void ShaderStorageBufferObject::Apply(int index, const Camera* camera, RenderContext* context) const
+		{
+			assert(context);
+			assert(index >= 0 && index < RS_ShaderStorageBuffer7 - RS_ShaderStorageBuffer0);
+			if (bufferObject)	// If there is no bufferobject, apply a empty bufferobject
+			{
+				const unsigned int handle = bufferObject->Handle();
+				assert(handle);
+				GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, handle));
+			}
+			else
+			{
+				GL(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, 0));
+			}
+
+		}
+
 		void TextureSampler::Apply(int index, const Camera * camera, RenderContext* context) const
 		{
-			assert(index >= 0);
+			//assert(index >= 0);
 			unsigned int handle = 0;
 			if (texture)
 			{
 				handle = texture->Handle();
 				assert(handle);		// if texture exists but its handle is 0, failed.
+				GL(glBindTextureUnit(index, handle));
 			}
-			GL(glBindTextureUnit(index, handle))
+			else
+			{
+				GL(glBindTextureUnit(index, 0));
+			}
+
 		}
 
+		void TextureImageUnit::Apply(int index, const Camera* camera, RenderContext* context) const
+		{
+			//assert(index >= 0);
+			if (texture)
+			{
+				const unsigned int handle = texture->Handle();
+				assert(handle);		// if texture exists but its handle is 0, failed.
+				GL(glBindImageTexture(index, handle, 0, GL_FALSE, 0, VM_IA_READ_WRITE, texture->GetTextureFormat()));
+			}
+			else
+			{
+				// restore default state
+				GL(glBindImageTexture(index, 0, 0, GL_FALSE, 0, VM_IA_READ_ONLY, GL_R8));
+			}
+		}
 
 		void BlendFuncState::Apply(int index, const Camera* camera, RenderContext* context) const
 		{
