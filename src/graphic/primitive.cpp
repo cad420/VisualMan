@@ -7,6 +7,7 @@
 #include "drawelements.h"
 #include "abstrdraw.h"
 #include <cassert>
+#include <iostream>
 
 namespace ysl
 {

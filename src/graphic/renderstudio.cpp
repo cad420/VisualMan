@@ -17,27 +17,27 @@ namespace ysl
 
 			class Raii
 			{
-				Aggregate * const studio;
+				Aggregate * const aggregate;
 				RenderContext * context;
 			public:
-				Raii(Aggregate * studio):studio(studio)
+				Raii(Aggregate * aggr):aggregate(aggr)
 				{
 					
-					assert(!studio->renderers.empty());
-					assert(studio->renderers[0]->GetFramebuffer());
+					assert(!aggr->renderers.empty());
+					assert(aggr->renderers[0]->GetFramebuffer());
 					assert(context);
 
-					if(studio->renderers.empty())
+					if(aggr->renderers.empty())
 					{
 						ysl::Log("No specified renderer\n");
 						return;
 					}
-					if(!studio->renderers[0]->GetFramebuffer())
+					if(!aggr->renderers[0]->GetFramebuffer())
 					{
 						ysl::Log("The Renderer has no specified framebuffer");
 						return;
 					}
-					context = studio->renderers[0]->GetFramebuffer()->Context();
+					context = aggr->renderers[0]->GetFramebuffer()->Context();
 					if(!context)
 					{
 						ysl::Error("The framebuffer has no corresponding context");
@@ -45,13 +45,13 @@ namespace ysl
 					}
 					context->MakeCurrent(); // Redundant ??
 					context->SetContextState(Context_OnRenderingStarted);
-					studio->DispatchRenderStartedEvent();
+					aggr->DispatchRenderStartedEvent();
 					GL_CHECK
 				}
 				~Raii()
 				{
 					context->SetContextState(Context_OnRenderingFinished);
-					studio->DispatchRenderFinishedEvent();
+					aggregate->DispatchRenderFinishedEvent();
 					GL_CHECK
 				}
 				
@@ -70,9 +70,9 @@ namespace ysl
 			// construct render queue from actor queue
 			const auto renderQueue = MakeRenderQueue(actorQueue);
 			// rendering the queue with all renderers
-			for(auto & renderer:renderers)
+			for(auto & renderer:renderers)		
 			{
-
+				// These renderers are serialized. Their orders are dependent.
 				// Check framebuffer and context for every renderer
 				renderer->Render(renderQueue, camera);
 			}

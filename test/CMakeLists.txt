@@ -25,3 +25,10 @@ add_executable(largevolumerenderer_test)
 target_sources(largevolumerenderer_test PRIVATE "largevolume_test.cpp")
 target_link_libraries(largevolumerenderer_test largetvolumerenderer)
 target_include_directories(largevolumerenderer_test PRIVATE ${PROJECT_SOURCE_DIR}/src/application)
+
+# VM Large Volume Renderer Test
+
+add_executable(vm_largevolumerenderer_test)
+target_sources(vm_largevolumerenderer_test PRIVATE "vmlargevolumeraycast_test.cpp")
+target_link_libraries(vm_largevolumerenderer_test vmglfwwindow vm)
+target_include_directories(vm_largevolumerenderer_test PRIVATE ${PROJECT_SOURCE_DIR}/guibinding/glfwwindow ${PROJECT_SOURCE_DIR}/guibinding/graphic)

@@ -25,6 +25,7 @@ namespace ysl
 				Renderable * renderable,
 				const Shading * shading,
 				int pass);
+			//virtual void OnActorContinueRender(Actor * actor,const Camera * camera,Renderable * renderable,const Shading * shading,int pass,bool & continued);
 
 			void SetEventEnable(bool enable) { eventEnable = enable; }
 			bool IsEventEnable()const { return eventEnable; }
@@ -48,6 +49,7 @@ namespace ysl
 			Ref<const Transform> GetTransform()const { return transform; }
 			void DispatchOnActorRenderStartedEvent(const Camera * camera,Renderable * renderable,const Shading * shading,int pass);
 			void DispatchOnActorDeletingEvent(const Camera * camera, Renderable * renderable, const Shading * shading, int pass);
+			//void DispatchOnActorContinueRenderEvent(const Camera * camera, Renderable * renderable, const Shading * shading, int pass);
 			void AddActorRenderEventCallback(Ref<IActorEvent> callback);
 			void RemoveActorRenderEventCallback(Ref<IActorEvent> callback);
 			void SetLODEvaluator(Ref<LODEvaluator> evaluator) { lodEvaluator = std::move(evaluator); }

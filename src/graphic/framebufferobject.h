@@ -29,8 +29,12 @@ namespace ysl
 		};
 
 
+		/**
+		 * \brief 
+		 */
 		class GRAPHICS_EXPORT_IMPORT FBORenderBufferAttachment:public AbstraFBOAttachment
 		{
+			friend class FramebufferObject;
 		public:
 			~FBORenderBufferAttachment() { DestroyRenderBuffer(); }
 
@@ -54,10 +58,11 @@ namespace ysl
 			int width = 0;
 			int height = 0;
 			int samples = 0;
-			
-
 		};
 
+		/**
+		 * \brief This is a render attachment
+		 */
 		class GRAPHICS_EXPORT_IMPORT FBOColorBufferAttachment:public FBORenderBufferAttachment
 		{
 			friend class FramebufferObject;
@@ -71,33 +76,57 @@ namespace ysl
 			ColorBufferFormat type = CBF_RGBA;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT FBODepthAttachment:public AbstraFBOAttachment
+		/**
+		 * \brief 
+		 */
+		class GRAPHICS_EXPORT_IMPORT FBODepthAttachment:public FBORenderBufferAttachment
 		{
+			friend class FramebufferObject;
 		public:
 		};
 
-		class GRAPHICS_EXPORT_IMPORT FBOStencilAttachment:public AbstraFBOAttachment
+		/**
+		 * \brief 
+		 */
+		class GRAPHICS_EXPORT_IMPORT FBOStencilAttachment:public FBORenderBufferAttachment
 		{
+			friend class FramebufferObject;
 		public:
 			FBOStencilAttachment(StencilBufferFormat type):type(type){}
 			StencilBufferFormat Type()const { return type; }
 			void SetType(StencilBufferFormat type) { this->type = type; }
+		protected:
+			int InternalType() override { return type; }
 		private:
 			StencilBufferFormat type = SBF_STENCIL_INDEX8;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT FBODepthStencilAttachment:public AbstraFBOAttachment
+		/**
+		 * \brief 
+		 */
+		class GRAPHICS_EXPORT_IMPORT FBODepthStencilAttachment:public FBORenderBufferAttachment
 		{
+			friend class FramebufferObject;
 		public:
+			FBODepthStencilAttachment() = default;
 			FBODepthStencilAttachment(DepthStencilBufferFormat type):type(type){}
 			DepthStencilBufferFormat Type()const { return type; }
 			void SetType(DepthStencilBufferFormat type) { this->type = type; }
+		protected:
+			int InternalType()override { return type; }
 		private:
-			DepthStencilBufferFormat type;
+			DepthStencilBufferFormat type = DSBT_DEPTH24_STENCIL8;
 		};
 
+
+
+
+		/**
+		 * \brief 
+		 */
 		class GRAPHICS_EXPORT_IMPORT AbstraFBOTextureAttachment:public AbstraFBOAttachment
 		{
+			friend class FramebufferObject;
 		public:
 			AbstraFBOTextureAttachment(Ref<Texture> texture):texture(std::move(texture)){}
 			void SetTexture(Ref<Texture> texture) { this->texture = std::move(texture); }
@@ -109,8 +138,12 @@ namespace ysl
 			int mipMapLevel = 0;
 		};
 
+		/**
+		 * \brief 
+		 */
 		class GRAPHICS_EXPORT_IMPORT FBOTextureAttachment:public AbstraFBOTextureAttachment
 		{
+			friend class FramebufferObject;
 		public:
 			FBOTextureAttachment(Ref<Texture> texture):AbstraFBOTextureAttachment(std::move(texture))
 			{
@@ -123,6 +156,11 @@ namespace ysl
 			Texture2DTarget target = T2DT_TEXTURE_2D;
 		};
 
+
+
+		/**
+		 * \brief 
+		 */
 		class GRAPHICS_EXPORT_IMPORT FramebufferObject:public Framebuffer
 		{
 		public:
@@ -140,11 +178,13 @@ namespace ysl
 				
 			}
 
+			void BindFramebuffer(FramebufferBind target) override;
+
 			void CreateFrambufferObject();
 
 			void DestroyFramebufferObject();
 
-			void CheckFramebufferStatus();
+			int CheckFramebufferStatus();
 
 			void AddColorAttachment(AttachmentBindPoint point,Ref<FBOColorBufferAttachment> colorAttachment);
 
@@ -162,10 +202,15 @@ namespace ysl
 
 			void RemoveAttachments(const Ref<AbstraFBOAttachment> &attachment);
 
+
+
+			unsigned Handle() const override { return handle; }
+
 			~FramebufferObject() { DestroyFramebufferObject(); }
 
 		private:
 			unsigned int handle = 0;
+
 			std::map<AttachmentBindPoint, Ref<AbstraFBOAttachment>> attachments;
 		};
 	}

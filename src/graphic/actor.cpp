@@ -28,6 +28,17 @@ namespace ysl
 			(void)pass;
 		}
 
+		//void IActorEvent::OnActorContinueRender(Actor* actor, const Camera* camera, Renderable* renderable,
+		//	const Shading* shading, int pass,bool &continued)
+		//{
+		//	(void)actor;
+		//	(void)camera;
+		//	(void)renderable;
+		//	(void)shading;
+		//	(void)pass;
+		//	continued = false;
+		//}
+
 		void MarchingCubeActorCallback::OnActorRenderStartedEvent(Actor* actor, const Camera* camera,
 			Renderable* renderable, const Shading* shading, int pass)
 		{

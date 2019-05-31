@@ -1,5 +1,8 @@
 
 #include "framebuffer.h"
+#include "GL/gl3w.h"
+#include <cassert>
+#include "../opengl/openglutils.h"
 
 namespace ysl
 {
@@ -10,20 +13,41 @@ namespace ysl
 			return true;
 		}
 
-		void Framebuffer::BindFramebuffer()
+		void Framebuffer::BindFramebuffer(FramebufferBind target)
 		{
+			GL(glBindFramebuffer(target,0));			// Bind to default framebuffer
+			if (target == FBB_FRAMEBUFFER || target == FBB_READ_FRAMEBUFFER)
+				BindReadBuffer();
+			if (target == FBB_FRAMEBUFFER || target == FBB_DRAW_FRAMEBUFFER)
+				BindDrawBuffers();
+		}
 
+		void Framebuffer::Activate(FramebufferBind target)
+		{
+			BindFramebuffer(target);
 		}
 
 		void Framebuffer::BindReadBuffer()
 		{
-
+			GL(glReadBuffer(readBuffer));
 		}
 
 		void Framebuffer::BindDrawBuffers()
 		{
-
+			assert(!drawBuffers.empty());
+			if(drawBuffers.size() > 1)
+			{
+				GL(glDrawBuffers(drawBuffers.size(),(GLenum*)drawBuffers.data()));
+			}else if(drawBuffers.size() == 1)
+			{
+				GL(glDrawBuffer(drawBuffers[0]));
+			}
 		}
+
+		//void Framebuffer::BindFramebuffer()
+		//{
+
+		//}
 
 		//void Framebuffer::SetDrawBuffer(ReadDrawBuffer drawBuffer)
 		//{

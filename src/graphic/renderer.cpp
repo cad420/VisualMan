@@ -18,7 +18,6 @@ namespace ysl
 		void Renderer::Render(const RenderQueue & renderQueue,
 			const Ref<Camera>& camera)
 		{
-
 			// active framebuffer and get context from fb
 
 			// set render state for the fb
@@ -47,10 +46,11 @@ namespace ysl
 			public:
 				Raii(Renderer * renderer, Camera * camera) :renderer(renderer)
 				{
-					renderer->DispatchOnRenderStartedEvent();
+					assert(renderer->GetFramebuffer());
+					renderer->GetFramebuffer()->Activate(FBB_FRAMEBUFFER);
 					assert(camera);
 					camera->GetViewport()->Activate();	// Clear
-
+					renderer->DispatchOnRenderStartedEvent();
 					GL_CHECK
 				}
 				~Raii()
@@ -67,11 +67,11 @@ namespace ysl
 
 			RenderContext * context = framebuffer->Context();
 
-			for (int i = 0; i < renderQueue.Size(); i++)
+			for (auto i = 0; i < renderQueue.Size(); i++)
 			{
 				auto node = renderQueue[i];
 
-				for (int pass = 0; node != nullptr; node = node->nextPass, pass++)
+				for (auto pass = 0; node != nullptr; node = node->nextPass, pass++)
 				{
 					assert(node->shading);
 
@@ -93,7 +93,9 @@ namespace ysl
 					// Actor's Uniforms can also be set by user before rendering
 					node->actor->DispatchOnActorRenderStartedEvent(camera.get(), node->renderable, node->shading, pass);
 					auto program = node->shading->GetProgram();
+
 					assert(node->actor);
+
 					if (program)
 					{
 						//context->UseProgram(program.get());
@@ -111,9 +113,7 @@ namespace ysl
 					assert(node->renderable);
 					node->renderable->Render(node->actor, node->shading, camera.get(), context);
 				}
-
 			}
-
 		}
 	}
 }

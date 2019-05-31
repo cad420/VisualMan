@@ -4,6 +4,7 @@
 #include "virtualvolumehierachy.h"
 #include "gpupagetable.h"
 #include "gpuvolumedatacache.h"
+#include <cassert>
 
 namespace ysl
 {

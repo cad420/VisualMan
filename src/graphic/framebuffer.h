@@ -4,6 +4,7 @@
 
 #include "graphictype.h"
 #include <vector>
+#include "GL/gl3w.h"
 
 namespace ysl
 {
@@ -18,7 +19,7 @@ namespace ysl
 				int width,
 				int height,
 				ReadDrawBuffer readBuffer,
-				ReadDrawBuffer drawBuffer) :
+				ReadDrawBuffer drawBuffer):
 			context(context), 
 			width(width), 
 			height(height),
@@ -34,13 +35,16 @@ namespace ysl
 			void SetSize(int w, int h) { width = w; height = h; }
 			void SetHeight(int h) { height = h; }
 			void SetWidth(int w) { width = w; }
-			virtual int Handle()const { return 0; }		// Default framebuffer
+			virtual unsigned Handle() const { return 0; }		// Default framebuffer
 
 			bool CheckBuffer();
 
-			void BindFramebuffer();
+			virtual void BindFramebuffer(FramebufferBind target);
+
+			void Activate(FramebufferBind target);
 			void BindReadBuffer();
 			void BindDrawBuffers();
+			//void BindFramebuffer();
 			//void SetDrawBuffer(ReadDrawBuffer drawBuffer);
 			//void SetDrawBuffers(ReadDrawBuffer drawBuffer0, ReadDrawBuffer drawBuffer1);
 			//void SetDrawBuffers(ReadDrawBuffer drawBuffer0, ReadDrawBuffer drawBuffer1, ReadDrawBuffer drawBuffer2);
@@ -60,7 +64,6 @@ namespace ysl
 			RenderContext * context = nullptr;
 			std::vector<ReadDrawBuffer> drawBuffers;		
 			ReadDrawBuffer readBuffer;		// only one read buffer
-
 		};
 
 		template <typename ... Args>

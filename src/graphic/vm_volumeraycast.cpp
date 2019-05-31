@@ -135,8 +135,26 @@ namespace ysl
 
 
 			assert(Context());
-			GetAggregate()->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
 
+			// Create A FBO
+			auto w = GetAggregate()->GetCamera()->GetViewport()->GetWidth();
+			auto h = GetAggregate()->GetCamera()->GetViewport()->GetHeight();
+			Size2 viewportSize(w,h);
+			auto fbo = Context()->CreateFramebufferObject(w,h, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
+			fbo->AddDepthStencilAttachment(MakeRef<FBODepthStencilAttachment>(DSBT_DEPTH24_STENCIL8));
+
+			// Create a texture by given params
+			auto texture = MakeRef<Texture>();
+			auto texCreateParams = MakeRef<TexCreateParams>();
+			texCreateParams->SetSize(viewportSize.x, viewportSize.y, 0);
+			texCreateParams->SetTextureFormat(TF_RGBA32F);
+			texCreateParams->SetTextureTarget(TD_TEXTURE_RECTANGLE);
+			texture->SetSetupParams(texCreateParams);
+			assert(texture->CreateTexture());
+			//fbo->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(texture));
+			fbo->AddColorAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOColorBufferAttachment>());
+			//GetAggregate()->Renderers()[0]->SetFramebuffer(fbo);
+			GetAggregate()->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
 			//AddBoundingBox();
 		}
 

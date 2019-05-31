@@ -2,6 +2,8 @@
 #include "framebufferobject.h"
 #include "rendercontext.h"
 #include "../opengl/openglutils.h"
+#include <cassert>
+#include <iostream>
 
 namespace ysl
 {
@@ -19,7 +21,7 @@ namespace ysl
 
 		void FBORenderBufferAttachment::CreateRenderBuffer()
 		{
-			if(handle == 0)
+			if (handle == 0)
 			{
 				GL(glCreateRenderbuffers(1, &handle));
 				storageChanged = true;
@@ -31,7 +33,7 @@ namespace ysl
 
 			DetachFromAllFBO();
 
-			if(handle != 0)
+			if (handle != 0)
 			{
 				GL(glDeleteRenderbuffers(1, &handle));
 				storageChanged = true;
@@ -42,7 +44,7 @@ namespace ysl
 		void FBORenderBufferAttachment::InitStorage(int w, int h, int samples)
 		{
 			assert(w > 0 && h > 0 && samples >= 0);
-			if(w != width || h != height)
+			if (w != width || h != height)
 			{
 				storageChanged = true;
 			}
@@ -54,10 +56,11 @@ namespace ysl
 				CreateRenderBuffer();
 
 			// init storage
-			if(samples > 0)
+			if (samples > 0)
 			{
 				GL(glNamedRenderbufferStorageMultisample(handle, samples, InternalType(), width, height));
-			}else
+			}
+			else
 			{
 				// sample = 0;
 				GL(glNamedRenderbufferStorage(handle, InternalType(), width, height));
@@ -67,22 +70,28 @@ namespace ysl
 
 		void FBORenderBufferAttachment::BindAttachment(Ref<FramebufferObject> fbo, AttachmentBindPoint point)
 		{
+			assert(fbo);
 			CreateRenderBuffer();
 
 			// If render buffer is not set, use the fbo's size as default size
 			int w = Width() ? Width() : fbo->Width();
-			int h = Height() ? Height() : fbo->Handle();
+			int h = Height() ? Height() : fbo->Height();
 
 			assert(w >= 0 && h >= 0);
 			InitStorage(w, h, samples);
-
+			std::cout << fbo->Handle() << std::endl;
+			assert(glIsFramebuffer(fbo->Handle()) == GL_TRUE);
 			GL(glNamedFramebufferRenderbuffer(fbo->Handle(), point, GL_RENDERBUFFER, handle));
 		}
 
 
+
 		void FBOTextureAttachment::BindAttachment(Ref<FramebufferObject> fbo, AttachmentBindPoint point)
 		{
+			assert(fbo);
+
 			assert(texture);
+
 			assert(texture->Handle());
 
 			// texture is created
@@ -91,9 +100,31 @@ namespace ysl
 
 		}
 
+		void FramebufferObject::BindFramebuffer(FramebufferBind target)
+		{
+			assert(handle);
+
+			assert((Width() > 0 || Height() > 0));
+
+			assert(!attachments.empty());
+
+			assert(Context());
+
+			Context()->MakeCurrent();
+
+			GL(glBindFramebuffer(target, handle));			// Bind to default framebuffer
+			if (target == FBB_FRAMEBUFFER || target == FBB_READ_FRAMEBUFFER)
+				BindReadBuffer();
+			if (target == FBB_FRAMEBUFFER || target == FBB_DRAW_FRAMEBUFFER)
+				BindDrawBuffers();
+
+			assert(CheckFramebufferStatus() == GL_FRAMEBUFFER_COMPLETE);
+		}
+
 		void FramebufferObject::CreateFrambufferObject()
 		{
 			assert(Context());
+
 			Context()->MakeCurrent();
 
 			if (handle == 0)
@@ -113,7 +144,7 @@ namespace ysl
 			}
 		}
 
-		void FramebufferObject::CheckFramebufferStatus()
+		int FramebufferObject::CheckFramebufferStatus()
 		{
 			int status;
 			GL(status = glCheckNamedFramebufferStatus(handle, GL_FRAMEBUFFER));
@@ -154,6 +185,7 @@ namespace ysl
 					<< "Unknown ERROR\n";
 
 			}
+			return status;
 		}
 
 		void FramebufferObject::AddColorAttachment(AttachmentBindPoint point,

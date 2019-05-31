@@ -103,8 +103,15 @@ namespace ysl
 			void SetContextState(ContextState state) {  contextState = state; }
 			ContextState GetContextState()const { return contextState; }
 
+			/**
+			 * \brief  Returns default framebuffer
+			 */
 			Ref<Framebuffer> GetFramebuffer();
+
 			Ref<FramebufferObject> CreateFramebufferObject();
+			/**
+			 * \brief  Creates and returns a FBO with given parameters
+			 */
 			Ref<FramebufferObject> CreateFramebufferObject(int width,int height,ReadDrawBuffer readBuffer,ReadDrawBuffer drawBuffer);
 
 
@@ -173,10 +180,10 @@ namespace ysl
 			// Current GLSLProgram
 
 			Ref<const GLSLProgram> curProgram = nullptr;
-
 			std::array<RenderStateBox, RS_RenderState_Count> defaultRenderStates;
 			std::unordered_map<RenderStateType, RenderStateBox> currentRenderStates;
 			std::unordered_set<EnableState> currentEnableStates;
+
 		};
 
 	}

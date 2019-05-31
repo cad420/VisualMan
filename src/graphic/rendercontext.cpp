@@ -17,7 +17,7 @@ namespace ysl {
 	namespace vm
 	{
 		RenderContext::RenderContext() :
-			framebuffer(MakeRef<Framebuffer>(this, 800, 600, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0))
+			framebuffer(MakeRef<Framebuffer>(this, 800, 600, RDB_BACK_LEFT, RDB_BACK_LEFT))		// A default frambuffer
 		{
 			int width = 800, height = 600;
 		}
