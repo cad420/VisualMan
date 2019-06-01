@@ -79,7 +79,6 @@ namespace ysl
 
 			assert(w >= 0 && h >= 0);
 			InitStorage(w, h, samples);
-			std::cout << fbo->Handle() << std::endl;
 			assert(glIsFramebuffer(fbo->Handle()) == GL_TRUE);
 			GL(glNamedFramebufferRenderbuffer(fbo->Handle(), point, GL_RENDERBUFFER, handle));
 		}

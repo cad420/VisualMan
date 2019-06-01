@@ -12,19 +12,7 @@ namespace ysl
 	namespace vm
 	{
 
-		class GRAPHICS_EXPORT_IMPORT RayCastActorEventCallback:public IActorEvent
-		{
-		public:
-			RayCastActorEventCallback();
-			void OnActorRenderStartedEvent(Actor* actor, const Camera* camera, Renderable* renderable, const Shading* shading, int pass) override;
-			void BindToActor(Ref<Actor> actor);
-			Ref<Primitive> ProxyGeometry() { return proxyGeometry; }
-		private:
-			Ref<Primitive> proxyGeometry;
-			Ref<ArrayFloat3> vertexArray;
-			Ref<ArrayFloat3> texCoordArray;
-		};
-
+		class RayCastActorEventCallback;
 
 		class GRAPHICS_EXPORT_IMPORT VM_VolumeRayCast:public VisualMan
 		{

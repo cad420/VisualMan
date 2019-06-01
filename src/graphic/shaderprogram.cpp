@@ -59,7 +59,7 @@ namespace ysl
 				GL(glShaderSource(handle, 1, &p, nullptr));
 				GL(glCompileShader(handle))
 
-				int success = 1;
+					int success = 1;
 				char infoLog[512];
 				GL(glGetShaderiv(handle, GL_COMPILE_STATUS, &success));
 				if (!success)
@@ -141,7 +141,7 @@ namespace ysl
 
 		bool GLSLProgram::Linked()
 		{
-			return linked;
+			return handle && linked;
 		}
 
 		bool GLSLProgram::Reload()
@@ -288,6 +288,31 @@ namespace ysl
 			return location;
 		}
 
+		void GLSLProgram::BindFragDataLocation(int location, const char* name)
+		{
+			fragDataLocation[name] = location;
+			linked = false;
+		}
+
+		void GLSLProgram::UnbindFragDataLocation(const char* name)
+		{
+			auto it = fragDataLocation.find(name);
+			if (it != fragDataLocation.end())
+			{
+				fragDataLocation.erase(it);
+			}
+		}
+
+		int GLSLProgram::FragDataLocation(const char* name)
+		{
+			auto it = fragDataLocation.find(name);
+			if (it != fragDataLocation.end())
+			{
+				return it->second;
+			}
+			return -1;
+		}
+
 		int GLSLProgram::GetWorldMatrixUniformLocation() const
 		{
 			return uniformLocations.vpl_ModelMatrix;
@@ -366,6 +391,14 @@ namespace ysl
 		void GLSLProgram::PreLink()
 		{
 			assert(handle);
+
+			// Bind Fragment data location
+
+			for (const auto &each : fragDataLocation)
+			{
+				GL(glBindFragDataLocation(handle,each.second,each.first.c_str()));
+			}
+
 
 			// bind pre-defined vertex attributes to pre-defined locations
 

@@ -4,6 +4,7 @@
 #include "../opengl/openglutils.h"
 #include "../io/rawreader.h"
 #include "../utility/interpulator.h"
+#include <cassert>
 
 namespace ysl
 {

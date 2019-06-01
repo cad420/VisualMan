@@ -1,11 +1,23 @@
-#version 330
-layout (location = 0 ) in vec2 vertex;
-layout (location = 1 ) in vec2 tex;
-out vec2 textureRectCoord;
-uniform mat4 othoMatrix;
-uniform mat4 viewMatrix;
-void main() 
+#version 430 core
+uniform mat4 vpl_ModelMatrix;
+uniform mat4 vpl_ViewMatrix;
+uniform mat4 vpl_ProjectionMatrix;
+uniform mat4 vpl_MVPMatrix;
+uniform mat3 vpl_NormalMatrix;
+
+in vec4 vpl_VertexPosition;
+in vec4 vpl_VertexNormal;
+in vec4 vpl_VertexColor;
+in vec4 vpl_VertexTexCoord0;
+in vec4 vpl_VertexTexCoord1;
+in vec4 vpl_VertexTexCoord2;
+in vec4 vpl_VertexTexCoord3;
+in vec4 vpl_VertexTexCoord4;
+
+out vec2 screenCoord;
+
+void main()
 {
-   textureRectCoord = tex;
-   gl_Position = othoMatrix*vec4(vertex.x,vertex.y,0.0,1.0);
-};
+	gl_Position = vec4(vpl_VertexPosition.x,vpl_VertexPosition.y,0.0,1.0);
+	screenCoord = vec2(vpl_VertexTexCoord0);
+}

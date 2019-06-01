@@ -36,7 +36,6 @@ namespace ysl
 			// clear enables
 			// clear render states
 
-
 			// dispatch after-render events;
 
 			class Raii

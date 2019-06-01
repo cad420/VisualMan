@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 uniform mat4 vpl_ModelMatrix;
 uniform mat4 vpl_ViewMatrix;
 uniform mat4 vpl_ProjectionMatrix;
@@ -14,9 +14,10 @@ in vec4 vpl_VertexTexCoord2;
 in vec4 vpl_VertexTexCoord3;
 in vec4 vpl_VertexTexCoord4;
 
-out vec3 texCoor;
+out vec3 texCoord;
 
-void main() {
-	texCoord = vpl_VertexPosition;
+void main()
+{
 	gl_Position = vpl_MVPMatrix * vpl_VertexPosition;
+	texCoord = vec3(vpl_VertexTexCoord0);
 }

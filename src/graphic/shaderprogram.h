@@ -95,6 +95,10 @@ namespace ysl
 			int GetNormalMatrixUniformLocation()const;
 			int GetGenericUniformLocation(const char * name)const;
 
+			void BindFragDataLocation(int location, const char * name);
+			void UnbindFragDataLocation(const char * name);
+
+			int FragDataLocation(const char* name);
 
 			// Vertex Attribute 
 
@@ -151,7 +155,7 @@ namespace ysl
 
 
 			std::vector<Ref<GLSLShader>> shaders;
-			std::map<std::string, int> dataLocation;
+			std::map<std::string, int> fragDataLocation;
 			Ref<UniformSet> uniformSet;
 			unsigned int handle = 0;
 			bool linked = false;

@@ -42,7 +42,8 @@ ${UTILITY_SRC}
 ${ALG_SRC}
 "../io/rawreader.cpp"
 "../io/rawio.cpp"
-"../io/platform/windowsfilemap.cpp")
+"../io/platform/windowsfilemap.cpp"
+"blitframebuffer.cpp")
 
 target_link_libraries("vm" ${OPENGL_LIBRARIES})
 target_include_directories("vm" PUBLIC ${GL3W_INCLUDE_DIR})

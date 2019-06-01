@@ -1,4 +1,4 @@
-#version 420 core
+#version 430 core
 
 // struct LIGHT_SOURCE {
 //     vec3 position_;        // light position in world space
@@ -12,8 +12,8 @@
 
 
 uniform sampler1D texTransfunc;
-uniform sampler2DRect texStartPos;
-uniform sampler2DRect texEndPos;
+uniform sampler2D texStartPos;
+uniform sampler2D texEndPos;
 uniform sampler3D texVolume;
 
 uniform float step;
@@ -24,8 +24,7 @@ uniform float ks;
 uniform vec3 lightdir;
 uniform vec3 halfway;
 
-in vec2 textureRectCoord;
-
+out vec2 screenCoord;
 
 out vec4 fragColor;
 
@@ -60,8 +59,8 @@ vec3 PhongShading(vec3 samplePos, vec3 diffuseColor)
 void main()
 {
 
-	vec3 rayStart = texture2DRect(texStartPos, textureRectCoord).xyz;
-	vec3 rayEnd = texture2DRect(texEndPos, textureRectCoord).xyz;
+	vec3 rayStart = texture2D(texStartPos, screenCoord).xyz;
+	vec3 rayEnd = texture2D(texEndPos, screenCoord).xyz;
 
 	vec3 start2end = rayEnd - rayStart;
 	vec4 bg = vec4(1.0, 1.0, 1.0, 1.0);

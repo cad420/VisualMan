@@ -5,6 +5,7 @@
 #include "vm_mesh.h"
 #include "vm_isosurface.h"
 #include "../src/io/rawreader.h"
+#include "vm_multipassraycast.h"
 
 int main(int argc, char ** argv)
 {
@@ -14,7 +15,7 @@ int main(int argc, char ** argv)
 
 	VMGLFWWindow window("Test GLFW Window", RenderContextFormat(), 800, 600);
 
-	auto appMesh = MakeRef<VM_VolumeRayCast>();
+	auto appMesh = MakeRef<VM_VolumeRayCast2>();
 
 	window.AddEventListener(appMesh);
 	

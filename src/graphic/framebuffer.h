@@ -69,7 +69,8 @@ namespace ysl
 		template <typename ... Args>
 		void Framebuffer::SetDrawBuffers(Args&&... args)
 		{
-			drawBuffers.emplace_back(std::forward<Args>(args)...);
+			drawBuffers.clear();
+			(drawBuffers.emplace_back(std::forward<Args>(args)), ...);
 		}
 	}
 }

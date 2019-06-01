@@ -17,10 +17,12 @@ namespace ysl
 			void SetViewportSize(int w, int h) { width = w; height = h; }
 			void SetClearColor(const Vec4f & color) { clearColor = color; }
 			void SetPosition(int x, int y) { xpos = x; ypos = y; }
+
 			void SetXPos(int x) { xpos = x; }
 			void SetYPos(int y) { ypos = y; }
 			int GetXPos()const { return xpos; }
 			int GetYPos()const { return ypos; }
+
 			void SetWidth(int w) { width = w; }
 			void SetHeight(int h) { height = h; }
 			int GetWidth()const { return width; }

@@ -15,7 +15,7 @@ namespace ysl
 
 		void Framebuffer::BindFramebuffer(FramebufferBind target)
 		{
-			GL(glBindFramebuffer(target,0));			// Bind to default framebuffer
+			GL(glBindFramebuffer(target, 0));			// Bind to default framebuffer
 			if (target == FBB_FRAMEBUFFER || target == FBB_READ_FRAMEBUFFER)
 				BindReadBuffer();
 			if (target == FBB_FRAMEBUFFER || target == FBB_DRAW_FRAMEBUFFER)
@@ -34,13 +34,9 @@ namespace ysl
 
 		void Framebuffer::BindDrawBuffers()
 		{
-			assert(!drawBuffers.empty());
-			if(drawBuffers.size() > 1)
+			if (!drawBuffers.empty())
 			{
-				GL(glDrawBuffers(drawBuffers.size(),(GLenum*)drawBuffers.data()));
-			}else if(drawBuffers.size() == 1)
-			{
-				GL(glDrawBuffer(drawBuffers[0]));
+				GL(glNamedFramebufferDrawBuffers(Handle(), drawBuffers.size(), (GLenum*)drawBuffers.data()));
 			}
 		}
 
@@ -80,6 +76,5 @@ namespace ysl
 		//	drawBuffers.push_back(drawBuffer2);
 		//	drawBuffers.push_back(drawBuffer3);
 		//}
-
 	}
 }
