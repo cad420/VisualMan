@@ -174,6 +174,27 @@ namespace ysl
 			vaoCompletion = true;
 		}
 
+		//void OutOfCorePrimitive::Render_Implement(const Actor* actor, const Shading* shading, const Camera* camera,
+		//	RenderContext* context) const
+		//{
+		//	assert(context);
+
+		//	// Warning: This will modify some record field of vao dirty state
+		//	if (!IsVAOCompletion())
+		//		const_cast<OutOfCorePrimitive*>(this)->rebind2VAO();
+
+		//	context->Bind_VAO(vaoHandle);
+
+		//	//context->BindVertexArray(this);
+
+		//	for (const auto & dc : drawCalls)
+		//	{
+		//		dc->Render();
+		//	//	callback->OnDrawCallFinishedEvent(dc.get(), actor, shading, camera, context);
+		//	}
+
+		//}
+
 		Ref<Primitive> MakePrimitive(const std::string& fileName)
 		{
 			ObjReader objReader(fileName);

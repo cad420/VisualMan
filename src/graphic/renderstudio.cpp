@@ -68,7 +68,10 @@ namespace ysl
 				scene->ExtractActors(actorQueue);
 			}
 			// construct render queue from actor queue
-			const auto renderQueue = MakeRenderQueue(actorQueue);
+			auto renderQueue = MakeRenderQueue(actorQueue);
+
+			renderQueue.Sort();			// Sorting by the priority of the actor in the render node.
+
 			// rendering the queue with all renderers
 			for(auto & renderer:renderers)		
 			{
@@ -85,7 +88,6 @@ namespace ysl
 			// evaluate the LOD
 
 			// Multi passing
-
 
 			RenderQueue renderQueue;
 			for(const auto & actor:queue)
@@ -161,6 +163,12 @@ namespace ysl
 
 			}
 			return renderQueue;
+		}
+
+		void SerializedAggregates::Render()
+		{
+			for (auto & aggregate : aggregates)
+				aggregate->Render();
 		}
 	}
 }

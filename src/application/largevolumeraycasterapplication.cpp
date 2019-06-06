@@ -529,9 +529,9 @@ namespace ysl
 			//pingpongTransferManager = std::make_shared<PingPongTransferManager>(pageTableManager, cacheFaultHandler);
 			//GL_ERROR_REPORT;
 
-			InitializeLODs({ "C:\\data\\subregion_9000_10700_2_128.lvd","D:\\Desktop\\sub_992.lvd","D:\\Desktop\\sub_496.lvd" });
+			InitializeLODs({ "C:\\data\\subregion_9000_10700_2_128.lvd"});
 			//InitializeLODs({ R"(C:\data\s1_1984_1984_1984_2_128.lvd)" });
-			lodCount = 3;
+			lodCount = 1;
 			//SetShaderUniforms();
 		}
 

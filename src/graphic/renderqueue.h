@@ -6,6 +6,7 @@
 #include "actor.h"
 #include "shading.h"
 #include "../memory/dataarena.h"
+#include "graphictype.h"
 
 namespace ysl
 {
@@ -47,11 +48,33 @@ namespace ysl
 			bool Empty()const { return nodes.empty(); }
 			size_t Size()const { return nodes.size(); }
 
+			void Sort();
+
 
 		private:
 			std::vector<RenderNode*> nodes;
 			DataArena<64> arena;
 		};
+
+
+
+		//class GRAPHICS_EXPORT_IMPORT RenderQueueSorter
+		//{
+		//public:
+		//	RenderQueueSorter() = default;
+		//	virtual bool operator<(const RenderNode * node1, const RenderNode * node2)const = 0;
+		//};
+
+		//class GRAPHICS_EXPORT_IMPORT PriorityRenderQueueSorter
+		//{
+		//public:
+		//	PriorityRenderQueueSorter() = default;
+		//	bool operator<(const RenderNode * node1,const RenderNode * node2)const
+		//	{			
+		//		
+		//	}
+		//};
+
 	}
 }
 

@@ -94,7 +94,8 @@ namespace ysl
 			assert(texture->Handle());
 
 			// texture is created
-
+			//std::cout << "adfsadfsdaf--------------";
+			GL(glIsFramebuffer(texture->Handle()) == GL_TRUE);
 			GL(glNamedFramebufferTexture(fbo->Handle(), point, texture->Handle(), mipMapLevel));
 
 		}

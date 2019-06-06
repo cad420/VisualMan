@@ -135,6 +135,11 @@ namespace ysl
 		//{
 		//}
 
+		void FrontFaceState::Apply(int index, const Camera* camera, RenderContext* context) const
+		{
+			GL(glFrontFace(face));
+		}
+
 		void LineWidthState::Apply(int index, const Camera* camera, RenderContext* context) const
 		{
 			(void)(index);

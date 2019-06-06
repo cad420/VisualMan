@@ -37,18 +37,13 @@ namespace ysl
 			friend class FramebufferObject;
 		public:
 			~FBORenderBufferAttachment() { DestroyRenderBuffer(); }
-
 			void CreateRenderBuffer();
 			void DestroyRenderBuffer();
-
 			void InitStorage(int w, int h, int samples);
-
 			int Width()const { return width; }
 			int Height()const { return height; }
 			int Samples()const { return samples; }
-
 			bool StorageChanged()const { return storageChanged; }
-
 		protected:
 			virtual int InternalType() = 0;
 			void BindAttachment(Ref<FramebufferObject> fbo, AttachmentBindPoint point) override;

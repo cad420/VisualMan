@@ -110,7 +110,7 @@ std::shared_ptr<ysl::TriangleMesh> MeshGenerator::GenerateMesh(int value) const
 							ysl::Point3f(v1x, v1y, v1z),
 							ysl::Point3f(v2x, v2y, v2z));
 						triangles.push_back(tri[j]);
-						normals.push_back(ysl::Vector3f((gradient[ysl::Linear({ v1x,v1y,v1z }, { dataSize.x,dataSize.y })] + gradient[ysl::Linear({ v2x, v2y, v2z }, { dataSize.x,dataSize.y })]) / 2));
+						normals.push_back(-ysl::Vector3f((gradient[ysl::Linear({ v1x,v1y,v1z }, { dataSize.x,dataSize.y })] + gradient[ysl::Linear({ v2x, v2y, v2z }, { dataSize.x,dataSize.y })]) / 2));
 					}
 					//normals.push_back(-ysl::Vector3f::Cross(tri[1]-tri[0],tri[2]-tri[1]));
 				}

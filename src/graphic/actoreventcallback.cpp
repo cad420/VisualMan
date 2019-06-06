@@ -89,7 +89,7 @@ namespace ysl
 			{
 				points[i] = bound.Corner(i);
 				texCoords[i] = bound.Corner(i);
-				std::cout << bound.Corner(i) << std::endl;
+				//std::cout << bound.Corner(i) << std::endl;
 			}
 			unsigned int indices[] =
 			{
@@ -120,20 +120,17 @@ namespace ysl
 			const Shading* shading,
 			int pass)
 		{
-			if (pass == 0)
-				return;
+			//if (shading)
+			//{
+			//	auto const program = shading->GetProgram();
+			//	const auto eyePos = camera->Position();
+			//	const auto eye_position = program->GetGenericUniformLocation("eye_position");
+			//	if (eye_position != -1)
+			//		actor->CreateGetUniformSet()->CreateGetUniform("eye_position")->SetUniform3f(1, eyePos.ConstData());;
 
-			if (shading)
-			{
-				auto const program = shading->GetProgram();
-				const auto eyePos = camera->Position();
-				const auto eye_position = program->GetGenericUniformLocation("eye_position");
-				if (eye_position != -1)
-					actor->CreateGetUniformSet()->CreateGetUniform("eye_position")->SetUniform3f(1, eyePos.ConstData());;
-
-				// update light dir and halfway 
-			}
-
+			//	// update light dir and halfway 
+			//}
+			
 		}
 
 		void RayCast2ActorEventCallback::BindToActor(Ref<Actor> actor)

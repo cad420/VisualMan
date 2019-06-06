@@ -32,11 +32,12 @@ namespace ysl
 
 			//auto teapotPrimitive = MakePrimitive(R"(D:\Desktop\teapot.obj)");
 
-			aggregate = MakeRef<vm::Aggregate>();
+
+			auto abstraAggregate = MakeRef<vm::Aggregate>();
 
 			auto triSceneMnger = MakeRef<vm::TrivialSceneManager>();
 
-			aggregate->SceneManager().push_back(triSceneMnger);
+			abstraAggregate->SceneManager().push_back(triSceneMnger);
 
 			auto artist = MakeRef<vm::Artist>();
 
@@ -77,10 +78,10 @@ namespace ysl
 
 			//actor2->AddActorRenderEventCallback(actorEvent);
 
-			aggregate->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
-			aggregate->GetCamera()->GetViewport()->SetClearColor(Vec4f{ 1,1,1,1 });
+			abstraAggregate->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			abstraAggregate->GetCamera()->GetViewport()->SetClearColor(Vec4f{ 1,1,1,1 });
 
-			manipulator->SetCamera(aggregate->GetCamera());
+			manipulator->SetCamera(abstraAggregate->GetCamera());
 
 			artist->GetLOD(0)->push_back(shading);		//single pass
 
@@ -90,7 +91,9 @@ namespace ysl
 
 
 			assert(Context());
-			GetAggregate()->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
+			abstraAggregate->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
+
+			this->abstraAggregate = abstraAggregate;
 		}
 
 		void VM_Mesh::UpdateScene()

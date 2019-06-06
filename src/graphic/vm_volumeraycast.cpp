@@ -71,19 +71,19 @@ namespace ysl
 			SetAggregation(MakeRef<Aggregate>());
 			sceneManager = MakeRef<TrivialSceneManager>();
 			sceneManager->AddActor(actor);
-			GetAggregate()->SceneManager().push_back(sceneManager);
+			std::static_pointer_cast<Aggregate>(GetAggregate())->SceneManager().push_back(sceneManager);
 			// Set Clear flags
-			GetAggregate()->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
 			// Set camera under control
 			//manipulator->SetCamera(aggregate->GetCamera());
-			BindCameraEvent(GetAggregate()->GetCamera());
+			BindCameraEvent(std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera());
 
 
 			assert(Context());
 
 			// Create A FBO
-			auto w = GetAggregate()->GetCamera()->GetViewport()->GetWidth();
-			auto h = GetAggregate()->GetCamera()->GetViewport()->GetHeight();
+			auto w = std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->GetWidth();
+			auto h = std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->GetHeight();
 			Size2 viewportSize(w,h);
 			auto fbo = Context()->CreateFramebufferObject(w,h, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
 			fbo->AddDepthStencilAttachment(MakeRef<FBODepthStencilAttachment>(DSBT_DEPTH24_STENCIL8));
@@ -98,11 +98,11 @@ namespace ysl
 			assert(texture->CreateTexture());
 			//fbo->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(texture));
 			fbo->AddColorAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOColorBufferAttachment>());
-			GetAggregate()->Renderers()[0]->SetFramebuffer(fbo);
+			std::static_pointer_cast<Aggregate>(GetAggregate())->Renderers()[0]->SetFramebuffer(fbo);
 			//GetAggregate()->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
 
 			auto blit = MakeRef<BlitFramebufferEvent>(fbo, Bound2i{ {0,0},{800,600} }, Context()->GetFramebuffer(),Bound2i{{0,0},{800,600}},VM_BB_COLOR_BUFFER_BIT);
-			GetAggregate()->Renderers()[0]->AddRenderFinishedEventCallback(blit);
+			std::static_pointer_cast<Aggregate>(GetAggregate())->Renderers()[0]->AddRenderFinishedEventCallback(blit);
 
 			//AddBoundingBox();
 		}

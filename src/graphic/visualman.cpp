@@ -11,10 +11,11 @@ namespace ysl
 	{
 		void VisualMan::InitDefault()
 		{
-			aggregate = MakeRef<Aggregate>();
+			auto aggre = MakeRef<Aggregate>();
+			abstraAggregate = aggre;
 			// A frame has created a camera, 
 			//We just need to bind it to the manipulator
-			manipulator->SetCamera(aggregate->GetCamera());
+			manipulator->SetCamera(aggre->GetCamera());
 		}
 
 		VisualMan::VisualMan()
@@ -25,7 +26,7 @@ namespace ysl
 		void VisualMan::DestroyEvent()
 		{
 			manipulator.reset();
-			aggregate.reset();
+			abstraAggregate.reset();
 		}
 
 		void VisualMan::UpdateEvent()
@@ -33,9 +34,9 @@ namespace ysl
 			//Update Scene
 			UpdateScene();
 			// execute rendering
-			assert(aggregate);
+			assert(abstraAggregate);
 
-			aggregate->Render();
+			abstraAggregate->Render();
 			// swap buffer
 			if (Context()->HasDoubleBuffer())
 				Context()->SwapBuffer();

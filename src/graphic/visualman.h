@@ -44,14 +44,14 @@ namespace ysl
 
 			virtual void UpdateScene(){}
 
-			Ref<Aggregate> GetAggregate()const { return aggregate; }
+			Ref<AbstraAggregate> GetAggregate()const { return abstraAggregate; }
 
-			void SetAggregation(Ref<Aggregate> aggregate) { this->aggregate = std::move(aggregate); }
+			void SetAggregation(Ref<AbstraAggregate> aggregate) { this->abstraAggregate = std::move(aggregate); }
 
 			void BindCameraEvent(Ref<Camera> camera);
 
 		protected:
-			Ref<Aggregate> aggregate;
+			Ref<AbstraAggregate> abstraAggregate;
 			Ref<CameraManipulator> manipulator;
 			double FPS;
 		};

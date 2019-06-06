@@ -149,10 +149,22 @@ namespace ysl
 			CullFaceState():RenderStateNonIndexed(RS_CullFace){}
 			CullFaceState(PolygonFace face) :RenderStateNonIndexed(RS_CullFace), face(face) {}
 			void Apply(int index, const Camera* camera, RenderContext* context) const override;
-			void SetFace(PolygonFace face) { this->face = face; }
-			PolygonFace GetFace()const { return this->face; }
+			void SetCullFace(PolygonFace face) { this->face = face; }
+			PolygonFace GetCullFace()const { return this->face; }
 		private:
 			PolygonFace face = PF_BACK;
+		};
+
+		class GRAPHICS_EXPORT_IMPORT FrontFaceState :public RenderStateNonIndexed
+		{
+		public:
+			FrontFaceState():RenderStateNonIndexed(RS_FrontFace) {}
+			FrontFaceState(FrontFace face) :RenderStateNonIndexed(RS_FrontFace), face(face) {}
+			void Apply(int index, const Camera* camera, RenderContext* context) const override;
+			void SetFrontFace(FrontFace face) { this->face = face; }
+			FrontFace GetFrontFace()const { return this->face; }
+		private:
+			FrontFace face = FF_CCW;
 		};
 
 		class GRAPHICS_EXPORT_IMPORT LineWidthState :public RenderStateNonIndexed
@@ -165,6 +177,8 @@ namespace ysl
 		private:
 			float lineWidth = 1.0;
 		};
+
+
 
 
 		class GRAPHICS_EXPORT_IMPORT PolygonModeState :public RenderStateNonIndexed

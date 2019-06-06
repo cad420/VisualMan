@@ -38,6 +38,7 @@ namespace ysl
 			Ref<Primitive> proxyGeometry;
 			Ref<ArrayFloat3> vertexArray;
 			Ref<ArrayFloat3> texCoordArray;
+
 		};
 
 	}

@@ -73,6 +73,9 @@ namespace ysl
 			Ref<Renderable> GetRenderable(int lod);
 			void SetRenderable(Ref<Renderable> renderable, int lod);
 
+			void SetPriority(int p) { priority = p; }
+			int GetPriority()const { return priority; }
+
 
 			int EvalLod(const Camera * camera);
 
@@ -84,6 +87,7 @@ namespace ysl
 			Ref<Transform> transform;
 			Ref<LODEvaluator> lodEvaluator;
 			Ref<Artist> artist;
+			int priority = 0;
 			std::vector<Ref<IActorEvent>> actorEvents;
 			std::array<Ref<Renderable>, 8> renderables;
 		};

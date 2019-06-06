@@ -11,21 +11,26 @@
 // uniform LIGHT_SOURCE lightSource;
 
 
+//
 uniform sampler1D texTransfunc;
 uniform sampler2D texStartPos;
 uniform sampler2D texEndPos;
 uniform sampler3D texVolume;
 
 uniform float step;
+
+// illumination params
+uniform vec3 lightdir;
+uniform vec3 halfway;
 uniform float ka;
 uniform float kd;
 uniform float shininess;
 uniform float ks;
-uniform vec3 lightdir;
-uniform vec3 halfway;
 
-out vec2 screenCoord;
+// 
+in vec2 screenCoord;
 
+//
 out vec4 fragColor;
 
 vec3 PhongShading(vec3 samplePos, vec3 diffuseColor)
@@ -76,11 +81,12 @@ void main()
 		vec3 samplePoint = rayStart + direction * step * (float(i) + 0.5);
 		vec4 scalar = texture(texVolume, samplePoint);
 		vec4 sampledColor = texture(texTransfunc, scalar.r);
-		sampledColor.rgb = PhongShading(samplePoint, sampledColor.rgb);
+		//sampledColor.rgb = PhongShading(samplePoint, sampledColor.rgb);
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)
 			break;
 	}
+
 	if (color.a == 0.0) discard;
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;

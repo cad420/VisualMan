@@ -23,12 +23,12 @@ namespace ysl
 			sceneManager->AddActor(actor);
 
 			SetAggregation(MakeRef<Aggregate>());
-			GetAggregate()->SceneManager().push_back(sceneManager);
-			GetAggregate()->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
-			GetAggregate()->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
-			GetAggregate()->GetCamera()->GetViewport()->SetClearColor(Vec4f{ 1,1,1,1 });
+			std::static_pointer_cast<Aggregate>(GetAggregate())->SceneManager().push_back(sceneManager);
+			std::static_pointer_cast<Aggregate>(GetAggregate())->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
+			std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->SetClearColor(Vec4f{ 0,0,0,1 });
 
-			manipulator->SetCamera(GetAggregate()->GetCamera());
+			manipulator->SetCamera(std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera());
 
 
 			// Open a Test File 

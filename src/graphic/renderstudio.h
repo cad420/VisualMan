@@ -45,6 +45,19 @@ namespace ysl
 		private:
 			RenderQueue MakeRenderQueue(const std::vector<Ref<Actor>> & queue);
 		};
+
+		/**
+		 * \brief This class is used to run aggregates in a serialized order
+		 */
+		class GRAPHICS_EXPORT_IMPORT SerializedAggregates:public AbstraAggregate
+		{
+		public:
+			void Render() override;
+			std::vector<Ref<AbstraAggregate>> & GetAggregates() { return aggregates; }
+			const std::vector<Ref<AbstraAggregate>> & GetAggregates()const { return aggregates; }
+		private:
+			std::vector<Ref<AbstraAggregate>> aggregates;
+		};
 	}
 }
 

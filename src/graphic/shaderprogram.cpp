@@ -397,6 +397,7 @@ namespace ysl
 			for (const auto &each : fragDataLocation)
 			{
 				GL(glBindFragDataLocation(handle,each.second,each.first.c_str()));
+				//GL(glBindFragDataLocationIndexed(handle))
 			}
 
 

@@ -9,6 +9,18 @@ namespace ysl
 	namespace vm
 	{
 
+
+		//class  GRAPHICS_EXPORT_IMPORT IDrawCallEvent 
+		//{
+		//public:
+		//	virtual void OnDrawCallFinishedEvent(
+		//		const AbstraDrawCall* drawcall,
+		//		const Actor* actor,
+		//		const Shading* shading,
+		//		const Camera* camera,
+		//		RenderContext* context) = 0;
+		//};
+
 		class GRAPHICS_EXPORT_IMPORT AbstrDrawCall
 		{
 		public:

@@ -11,11 +11,9 @@ namespace ysl
 		{
 
 			SetAggregation(MakeRef<Aggregate>());
-
-
 			Vec2i viewportSize{ 800,600 };
 
-			GetAggregate()->GetCamera()->GetViewport()->SetViewportSize(viewportSize.x,viewportSize.y);
+			std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->SetViewportSize(viewportSize.x,viewportSize.y);
 
 
 			auto fbo = Context()->CreateFramebufferObject(viewportSize.x,viewportSize.y, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
@@ -30,7 +28,7 @@ namespace ysl
 			texture->SetSetupParams(texCreateParams);
 			assert(texture->CreateTexture());
 			fbo->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(texture));
-			GetAggregate()->Renderers()[0]->SetFramebuffer(fbo);
+			std::static_pointer_cast<Aggregate>(GetAggregate())->Renderers().at(0)->SetFramebuffer(fbo);
 
 		}
 

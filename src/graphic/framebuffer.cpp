@@ -3,6 +3,7 @@
 #include "GL/gl3w.h"
 #include <cassert>
 #include "../opengl/openglutils.h"
+#include <iostream>
 
 namespace ysl
 {
@@ -36,6 +37,7 @@ namespace ysl
 		{
 			if (!drawBuffers.empty())
 			{
+				//assert(Handle());
 				GL(glNamedFramebufferDrawBuffers(Handle(), drawBuffers.size(), (GLenum*)drawBuffers.data()));
 			}
 		}

@@ -181,6 +181,7 @@ namespace ysl
 
 			Ref<const GLSLProgram> curProgram = nullptr;
 			std::array<RenderStateBox, RS_RenderState_Count> defaultRenderStates;
+			std::array<EnableState, EN_EnableState_Count> defaultEnables;
 			std::unordered_map<RenderStateType, RenderStateBox> currentRenderStates;
 			std::unordered_set<EnableState> currentEnableStates;
 

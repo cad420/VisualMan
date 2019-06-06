@@ -15,7 +15,8 @@ namespace ysl
 	{
 
 		class AbstraArray;
-		class AbstraDrawCall;
+	//	class AbstraDrawCall;
+		class IRenderEvent;
 
 		class GRAPHICS_EXPORT_IMPORT Primitive:public Renderable,
 											   public IVertexAttribSet
@@ -54,7 +55,10 @@ namespace ysl
 
 			void UpdateDirtyBufferObject(BufferObjectUpdateMode mode) override;
 
+			
+
 		protected:
+
 			void Render_Implement(const Actor * actor, const Shading * shading, const Camera* camera, RenderContext * context)const override;
 
 			void DestroyVAO();
@@ -72,15 +76,26 @@ namespace ysl
 			 */
 			bool IsVAOCompletion()const { return vaoCompletion; }
 
-		private:
 			unsigned int vaoHandle = 0;
 
 			std::vector<Ref<AbstrDrawCall>> drawCalls;
 			std::array<Ref<AbstraArray>, VA_VertexAttribArray_Count> vertexAttribArrays;
 
-			std::array<bool, VA_VertexAttribArray_Count> boundToVAO = {false,false,false,false};
+			std::array<bool, VA_VertexAttribArray_Count> boundToVAO = { false,false,false,false };
 			bool vaoCompletion = false;
+
+		private:
+
 		};
+
+		//class GRAPHICS_EXPORT_IMPORT OutOfCorePrimitive :public Primitive
+		//{
+		//public:
+		//	void AddRenderCallback(Ref<IDrawCallEvent>  callback);
+		//protected:
+		//	void Render_Implement(const Actor* actor, const Shading* shading, const Camera* camera, RenderContext* context) const override;
+		//	Ref<IDrawCallEvent> callback;
+		//};
 
 
 		Ref<Primitive> GRAPHICS_EXPORT_IMPORT MakePrimitive(const std::string & fileName);
@@ -90,6 +105,9 @@ namespace ysl
 		Ref<Primitive> GRAPHICS_EXPORT_IMPORT MakeCube(const Bound3f& bound);
 
 	}
+
+
+
 }
 
 #endif

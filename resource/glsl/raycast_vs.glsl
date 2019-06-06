@@ -1,4 +1,5 @@
 #version 430 core
+
 uniform mat4 vpl_ModelMatrix;
 uniform mat4 vpl_ViewMatrix;
 uniform mat4 vpl_ProjectionMatrix;

@@ -286,9 +286,23 @@ namespace ysl {
 
 		void RenderContext::ApplyRenderState(const RenderStateSet* rss)
 		{
+
+			if(!rss)
+			{
+				for(const auto & each:defaultRenderStates)
+				{
+					each.Apply(nullptr, this);
+				}
+
+				std::swap(currentRenderStates, std::unordered_map<RenderStateType, RenderStateBox>());
+
+				return;
+			}
+
+
+			assert(rss);
 			// Set the new render state and reset all states that 
 			// don't exist in the new render state list as default
-			assert(rss);
 
 			std::unordered_map<RenderStateType, RenderStateBox> newStates;
 
@@ -322,9 +336,20 @@ namespace ysl {
 
 		void RenderContext::ApplyRenderEnable(const EnableStateSet* ess)
 		{
+
+			if(!ess)
+			{
+				for(int i = 0 ; i < sizeof(EnableEnum2GLEnum) / sizeof(GLenum);i++ )
+				{
+					GL(glDisable(EnableEnum2GLEnum[i]));
+				}
+				std::swap(currentEnableStates, std::unordered_set<EnableState>());
+				return;
+			}
+
 			// Set the new enable state and reset all enable state that
 			// don't exist in the new enable state list as disabled
-			if (!ess)return;
+			assert(ess);
 			std::unordered_set<EnableState> newEnableStates;
 
 			for(const auto & each:ess->enableSet)
@@ -386,7 +411,7 @@ namespace ysl {
 			defaultRenderStates[RS_DepthFunc] = RenderStateBox(MakeRef<DepthFuncState>(FU_LESS), 0);
 			defaultRenderStates[RS_BlendEquation] = RenderStateBox(MakeRef<BlendEquationState>(BE_FUNC_ADD, BE_FUNC_ADD), 0);
 			defaultRenderStates[RS_PolygonMode] = RenderStateBox(MakeRef<PolygonModeState>(PM_FILL,PM_FILL), 0);
-			//defaultRenderStates[RS_FrontFace] = RenderStateBox(MakeRef<FrontFace>(), 0);
+			defaultRenderStates[RS_FrontFace] = RenderStateBox(MakeRef<FrontFaceState>(), 0);
 			defaultRenderStates[RS_LineWidth] = RenderStateBox(MakeRef<LineWidthState>(1.0), 0);
 
 			//defaultRenderStates[RS_StencilFunc] = RenderStateBox(new StencilFunc, 0);
@@ -421,6 +446,10 @@ namespace ysl {
 			{
 				defaultRenderStates[RS_TextureImageUnit + i] = RenderStateBox(MakeRef<TextureImageUnit>(),i);
 			}
+		}
+
+		void RenderContext::InitDefaultRenderEnable()
+		{
 		}
 	}
 }

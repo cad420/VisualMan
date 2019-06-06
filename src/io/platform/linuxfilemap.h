@@ -11,7 +11,8 @@
 
 namespace ysl
 {
-	class LinuxMappingRawIO :public AbstraFileMap {
+	class LinuxMappingRawIO :public AbstraFileMap
+	{
 	public:
 		LinuxMappingRawIO(const std::string & fileName, std::size_t fileSize);
 		unsigned char * FileMemPointer(unsigned long long offset, std::size_t size)override;
