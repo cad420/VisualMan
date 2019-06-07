@@ -1,6 +1,7 @@
 #ifndef __gl_glcorearb_h_
 #define __gl_glcorearb_h_ 1
-#include "../KHR/khrplatform.h"
+//#include "../KHR/khrplatform.h"
+#include <KHR/khrplatform.h>
 
 #ifdef __cplusplus
 extern "C" {

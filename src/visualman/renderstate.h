@@ -10,7 +10,7 @@ namespace ysl
 	{
 		class Texture;
 
-		class GRAPHICS_EXPORT_IMPORT DepthFuncState :public RenderStateNonIndexed
+		class VISUALMAN_EXPORT_IMPORT DepthFuncState :public RenderStateNonIndexed
 		{
 		public:
 			DepthFuncState(Function fun) :RenderStateNonIndexed(RS_DepthFunc), func(fun) {}
@@ -21,7 +21,7 @@ namespace ysl
 			Function func = FU_LESS;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT AtomicCounter:public RenderStateIndexed
+		class VISUALMAN_EXPORT_IMPORT AtomicCounter:public RenderStateIndexed
 		{
 		public:
 			AtomicCounter() :RenderStateIndexed(RS_AtomicCounterBuffer){}
@@ -37,7 +37,7 @@ namespace ysl
 			std::string atomicName;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT ShaderStorageBufferObject :public RenderStateIndexed
+		class VISUALMAN_EXPORT_IMPORT ShaderStorageBufferObject :public RenderStateIndexed
 		{
 		public:
 			ShaderStorageBufferObject() :RenderStateIndexed(RS_ShaderStorageBuffer) {}
@@ -54,7 +54,7 @@ namespace ysl
 			//unsigned int offset = 0;		// reserved field
 		};
 
-		class GRAPHICS_EXPORT_IMPORT TextureSampler :public RenderStateIndexed
+		class VISUALMAN_EXPORT_IMPORT TextureSampler :public RenderStateIndexed
 
 		{
 		public:
@@ -74,7 +74,7 @@ namespace ysl
 			//ImageUnitInfo unitInfo;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT TextureImageUnit:public RenderStateIndexed
+		class VISUALMAN_EXPORT_IMPORT TextureImageUnit:public RenderStateIndexed
 		{
 		public:
 			struct ImageUnitInfo
@@ -95,7 +95,7 @@ namespace ysl
 			//std::string imageUnitName;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT BlendFuncState :public RenderStateNonIndexed
+		class VISUALMAN_EXPORT_IMPORT BlendFuncState :public RenderStateNonIndexed
 		{
 		public:
 			BlendFuncState(BlendFactor rgbSrc,
@@ -124,7 +124,7 @@ namespace ysl
 			BlendFactor alphaDest = BF_ZERO;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT BlendEquationState :public RenderStateNonIndexed
+		class VISUALMAN_EXPORT_IMPORT BlendEquationState :public RenderStateNonIndexed
 		{
 		public:
 			BlendEquationState():RenderStateNonIndexed(RS_BlendEquation){}
@@ -143,7 +143,7 @@ namespace ysl
 			BlendEquation alphaEquation = BE_FUNC_ADD;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT CullFaceState :public RenderStateNonIndexed
+		class VISUALMAN_EXPORT_IMPORT CullFaceState :public RenderStateNonIndexed
 		{
 		public:
 			CullFaceState():RenderStateNonIndexed(RS_CullFace){}
@@ -155,7 +155,7 @@ namespace ysl
 			PolygonFace face = PF_BACK;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT FrontFaceState :public RenderStateNonIndexed
+		class VISUALMAN_EXPORT_IMPORT FrontFaceState :public RenderStateNonIndexed
 		{
 		public:
 			FrontFaceState():RenderStateNonIndexed(RS_FrontFace) {}
@@ -167,7 +167,7 @@ namespace ysl
 			FrontFace face = FF_CCW;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT LineWidthState :public RenderStateNonIndexed
+		class VISUALMAN_EXPORT_IMPORT LineWidthState :public RenderStateNonIndexed
 		{
 		public:
 			LineWidthState(float width) :RenderStateNonIndexed(RS_LineWidth), lineWidth(width) {}
@@ -181,7 +181,7 @@ namespace ysl
 
 
 
-		class GRAPHICS_EXPORT_IMPORT PolygonModeState :public RenderStateNonIndexed
+		class VISUALMAN_EXPORT_IMPORT PolygonModeState :public RenderStateNonIndexed
 		{
 		public:
 			PolygonModeState():RenderStateNonIndexed(RS_PolygonMode){}

@@ -14,7 +14,7 @@ namespace ysl
 
 		class RayCastActorEventCallback;
 
-		class GRAPHICS_EXPORT_IMPORT VM_VolumeRayCast:public VisualMan
+		class VISUALMAN_EXPORT_IMPORT VM_VolumeRayCast:public VisualMan
 		{
 		public:
 			VM_VolumeRayCast() = default;

@@ -12,7 +12,7 @@ namespace ysl
 	{
 		class Renderable;
 
-		class GRAPHICS_EXPORT_IMPORT IActorEvent:public std::enable_shared_from_this<IActorEvent>
+		class VISUALMAN_EXPORT_IMPORT IActorEvent:public std::enable_shared_from_this<IActorEvent>
 		{
 		public:
 			virtual void OnActorRenderStartedEvent(Actor * actor,
@@ -34,7 +34,7 @@ namespace ysl
 			bool eventEnable = true;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT MarchingCubeActorCallback :public IActorEvent
+		class VISUALMAN_EXPORT_IMPORT MarchingCubeActorCallback :public IActorEvent
 		{
 		public:
 			void OnActorRenderStartedEvent(Actor* actor, const Camera* camera, Renderable* renderable, const Shading* shading, int pass) override;
@@ -42,7 +42,7 @@ namespace ysl
 
 
 
-		class GRAPHICS_EXPORT_IMPORT Actor
+		class VISUALMAN_EXPORT_IMPORT Actor
 		{
 		public:
 			Actor(Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform);

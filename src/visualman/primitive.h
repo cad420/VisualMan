@@ -18,7 +18,7 @@ namespace ysl
 	//	class AbstraDrawCall;
 		class IRenderEvent;
 
-		class GRAPHICS_EXPORT_IMPORT Primitive:public Renderable,
+		class VISUALMAN_EXPORT_IMPORT Primitive:public Renderable,
 											   public IVertexAttribSet
 		{
 		public:
@@ -98,11 +98,11 @@ namespace ysl
 		//};
 
 
-		Ref<Primitive> GRAPHICS_EXPORT_IMPORT MakePrimitive(const std::string & fileName);
-		Ref<Primitive> GRAPHICS_EXPORT_IMPORT MakePrimitive(const float* position, size_t positionCount, const float* normals, size_t normalCount,
+		Ref<Primitive> VISUALMAN_EXPORT_IMPORT MakePrimitive(const std::string & fileName);
+		Ref<Primitive> VISUALMAN_EXPORT_IMPORT MakePrimitive(const float* position, size_t positionCount, const float* normals, size_t normalCount,
 			const unsigned* index, size_t indexCount);
 
-		Ref<Primitive> GRAPHICS_EXPORT_IMPORT MakeCube(const Bound3f& bound);
+		Ref<Primitive> VISUALMAN_EXPORT_IMPORT MakeCube(const Bound3f& bound);
 
 	}
 

@@ -8,7 +8,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT ScreenActorEventCallback:public IActorEvent
+		class VISUALMAN_EXPORT_IMPORT ScreenActorEventCallback:public IActorEvent
 		{
 		public:
 			ScreenActorEventCallback();

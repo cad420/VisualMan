@@ -11,7 +11,7 @@ namespace ysl
 		class AbstraAggregate;
 		class AbstraRenderer;
 
-		class GRAPHICS_EXPORT_IMPORT IRenderEvent
+		class VISUALMAN_EXPORT_IMPORT IRenderEvent
 		{
 		public:
 			virtual bool OnRenderingStartedEvent(const vm::AbstraAggregate * studio) = 0;

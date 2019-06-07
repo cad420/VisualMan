@@ -56,9 +56,9 @@
 
 
 #if defined(MRE_EXPORT_DLL)
-#define GRAPHICS_EXPORT_IMPORT __declspec(dllexport)
+#define VISUALMAN_EXPORT_IMPORT __declspec(dllexport)
 #else
-#define GRAPHICS_EXPORT_IMPORT
+#define VISUALMAN_EXPORT_IMPORT
 #endif
 
 //#define GRAPHICS_EXPORT_IMPORT 

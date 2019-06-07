@@ -13,7 +13,7 @@ namespace ysl
 	{
 		class FramebufferObject;
 
-		class GRAPHICS_EXPORT_IMPORT AbstraFBOAttachment:public std::enable_shared_from_this<AbstraFBOAttachment>
+		class VISUALMAN_EXPORT_IMPORT AbstraFBOAttachment:public std::enable_shared_from_this<AbstraFBOAttachment>
 		{
 			friend class FramebufferObject;
 		public:
@@ -32,7 +32,7 @@ namespace ysl
 		/**
 		 * \brief 
 		 */
-		class GRAPHICS_EXPORT_IMPORT FBORenderBufferAttachment:public AbstraFBOAttachment
+		class VISUALMAN_EXPORT_IMPORT FBORenderBufferAttachment:public AbstraFBOAttachment
 		{
 			friend class FramebufferObject;
 		public:
@@ -58,7 +58,7 @@ namespace ysl
 		/**
 		 * \brief This is a render attachment
 		 */
-		class GRAPHICS_EXPORT_IMPORT FBOColorBufferAttachment:public FBORenderBufferAttachment
+		class VISUALMAN_EXPORT_IMPORT FBOColorBufferAttachment:public FBORenderBufferAttachment
 		{
 			friend class FramebufferObject;
 		public:
@@ -74,7 +74,7 @@ namespace ysl
 		/**
 		 * \brief 
 		 */
-		class GRAPHICS_EXPORT_IMPORT FBODepthAttachment:public FBORenderBufferAttachment
+		class VISUALMAN_EXPORT_IMPORT FBODepthAttachment:public FBORenderBufferAttachment
 		{
 			friend class FramebufferObject;
 		public:
@@ -83,7 +83,7 @@ namespace ysl
 		/**
 		 * \brief 
 		 */
-		class GRAPHICS_EXPORT_IMPORT FBOStencilAttachment:public FBORenderBufferAttachment
+		class VISUALMAN_EXPORT_IMPORT FBOStencilAttachment:public FBORenderBufferAttachment
 		{
 			friend class FramebufferObject;
 		public:
@@ -99,7 +99,7 @@ namespace ysl
 		/**
 		 * \brief 
 		 */
-		class GRAPHICS_EXPORT_IMPORT FBODepthStencilAttachment:public FBORenderBufferAttachment
+		class VISUALMAN_EXPORT_IMPORT FBODepthStencilAttachment:public FBORenderBufferAttachment
 		{
 			friend class FramebufferObject;
 		public:
@@ -119,7 +119,7 @@ namespace ysl
 		/**
 		 * \brief 
 		 */
-		class GRAPHICS_EXPORT_IMPORT AbstraFBOTextureAttachment:public AbstraFBOAttachment
+		class VISUALMAN_EXPORT_IMPORT AbstraFBOTextureAttachment:public AbstraFBOAttachment
 		{
 			friend class FramebufferObject;
 		public:
@@ -136,7 +136,7 @@ namespace ysl
 		/**
 		 * \brief 
 		 */
-		class GRAPHICS_EXPORT_IMPORT FBOTextureAttachment:public AbstraFBOTextureAttachment
+		class VISUALMAN_EXPORT_IMPORT FBOTextureAttachment:public AbstraFBOTextureAttachment
 		{
 			friend class FramebufferObject;
 		public:
@@ -156,7 +156,7 @@ namespace ysl
 		/**
 		 * \brief 
 		 */
-		class GRAPHICS_EXPORT_IMPORT FramebufferObject:public Framebuffer
+		class VISUALMAN_EXPORT_IMPORT FramebufferObject:public Framebuffer
 		{
 		public:
 			FramebufferObject() :Framebuffer(nullptr,0,0,ReadDrawBuffer::RDB_COLOR_ATTACHMENT0,ReadDrawBuffer::RDB_COLOR_ATTACHMENT0)

@@ -11,7 +11,7 @@ namespace ysl
 	{
 		class AbstraSceneManager;
 
-		class GRAPHICS_EXPORT_IMPORT VisualMan :public IEventListener
+		class VISUALMAN_EXPORT_IMPORT VisualMan :public IEventListener
 		{
 		public:
 			void InitDefault();

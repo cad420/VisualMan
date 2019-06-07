@@ -13,7 +13,7 @@ namespace ysl
 		class GLSLProgram;
 	
 
-		class GRAPHICS_EXPORT_IMPORT RenderState:public std::enable_shared_from_this<RenderState>
+		class VISUALMAN_EXPORT_IMPORT RenderState:public std::enable_shared_from_this<RenderState>
 		{
 		public:
 			RenderState() = delete;
@@ -26,13 +26,13 @@ namespace ysl
 		};
 
 
-		class GRAPHICS_EXPORT_IMPORT RenderStateNonIndexed :public RenderState
+		class VISUALMAN_EXPORT_IMPORT RenderStateNonIndexed :public RenderState
 		{
 		public:
 			RenderStateNonIndexed(RenderStateType type) :RenderState(type) {}
 		};
 
-		class GRAPHICS_EXPORT_IMPORT RenderStateIndexed:public RenderState
+		class VISUALMAN_EXPORT_IMPORT RenderStateIndexed:public RenderState
 		{
 		public:
 			RenderStateIndexed(RenderStateType type):RenderState(type){}

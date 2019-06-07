@@ -25,7 +25,7 @@ set(GRAPHIC_INCLUDE)
 
 #message(STATUS  ${GRAPHIC_SRC})
 
-add_library(vm 
+add_library(vm SHARED
 ${GRAPHIC_SRC} 
 ${GL3W_SRC})
 target_link_libraries(vm ${OPENGL_LIBRARIES} common graphicfoundation)

@@ -9,7 +9,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT VM_LargeVolumeRayCast:public VisualMan
+		class VISUALMAN_EXPORT_IMPORT VM_LargeVolumeRayCast:public VisualMan
 		{
 		public:
 			void InitEvent() override;

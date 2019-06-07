@@ -104,7 +104,7 @@ namespace ysl
 		};
 
 
-		class GRAPHICS_EXPORT_IMPORT Uniform
+		class VISUALMAN_EXPORT_IMPORT Uniform
 		{
 		public:
 			Uniform() :type(UT_NONE) {}
@@ -226,7 +226,7 @@ namespace ysl
 		};
 
 
-		class GRAPHICS_EXPORT_IMPORT UniformSet
+		class VISUALMAN_EXPORT_IMPORT UniformSet
 		{
 		public:
 			UniformSet() = default;

@@ -71,7 +71,7 @@ namespace ysl
 		};
 
 
-		class GRAPHICS_EXPORT_IMPORT Camera
+		class VISUALMAN_EXPORT_IMPORT Camera
 		{
 		public:
 			Camera(int w = 800,int h = 600,const Point3f& position = { 0.0f, 0.0f, 5.0f }, 
@@ -107,7 +107,7 @@ namespace ysl
 			Ref<Viewport> viewport;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT CameraManipulator:public IEventListener
+		class VISUALMAN_EXPORT_IMPORT CameraManipulator:public IEventListener
 		{
 		public:
 			CameraManipulator(Ref<Camera> camera = nullptr):camera(std::move(camera)){}

@@ -10,7 +10,7 @@
 #include "material.h"
 #include "interaction.h"
 
-#include "../utility/materialreader.h"
+#include "materialreader.h"
 
 namespace ysl
 {

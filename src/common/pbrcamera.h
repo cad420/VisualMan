@@ -1,15 +1,12 @@
 
 #ifndef _PBRCAMERA_H_
 #define _PBRCAMERA_H_
-#include "../mathematics/basetype.h"
-#include "../mathematics/geometry.h"
-#include "../mathematics/transformation.h"
+#include "geometry.h"
+#include "transformation.h"
 #include "film.h"
 
 namespace ysl
 {
-
-
 
 	struct CameraSample
 	{

@@ -10,7 +10,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT VM_ISOSurface :public VisualMan
+		class VISUALMAN_EXPORT_IMPORT VM_ISOSurface :public VisualMan
 		{
 		public:
 			void InitEvent() override;

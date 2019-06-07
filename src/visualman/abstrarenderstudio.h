@@ -10,7 +10,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT AbstraAggregate
+		class VISUALMAN_EXPORT_IMPORT AbstraAggregate
 		{
 		public:
 			virtual ~AbstraAggregate()=default;

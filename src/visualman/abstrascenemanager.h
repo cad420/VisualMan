@@ -9,7 +9,7 @@ namespace ysl
 	namespace vm
 	{
 		class Actor;
-		class GRAPHICS_EXPORT_IMPORT AbstraSceneManager
+		class VISUALMAN_EXPORT_IMPORT AbstraSceneManager
 		{
 		public:
 			AbstraSceneManager() = default;

@@ -57,7 +57,7 @@ namespace ysl
 		};
 
 
-		Ref<Shading> GRAPHICS_EXPORT_IMPORT MakePhongShading();
+		Ref<Shading> VISUALMAN_EXPORT_IMPORT MakePhongShading();
 	}
 }
 

@@ -14,7 +14,7 @@ namespace ysl
 		class Primitive;
 		class ArrayFloat3;
 
-		class GRAPHICS_EXPORT_IMPORT RayCastActorEventCallback :public IActorEvent
+		class VISUALMAN_EXPORT_IMPORT RayCastActorEventCallback :public IActorEvent
 		{
 		public:
 			RayCastActorEventCallback();
@@ -27,7 +27,7 @@ namespace ysl
 			Ref<ArrayFloat3> texCoordArray;
 		};
 
-		class GRAPHICS_EXPORT_IMPORT RayCast2ActorEventCallback :public IActorEvent
+		class VISUALMAN_EXPORT_IMPORT RayCast2ActorEventCallback :public IActorEvent
 		{
 		public:
 			RayCast2ActorEventCallback();

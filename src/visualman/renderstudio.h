@@ -13,7 +13,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT Aggregate:public AbstraAggregate
+		class VISUALMAN_EXPORT_IMPORT Aggregate:public AbstraAggregate
 		{
 		public:
 			Aggregate()
@@ -49,7 +49,7 @@ namespace ysl
 		/**
 		 * \brief This class is used to run aggregates in a serialized order
 		 */
-		class GRAPHICS_EXPORT_IMPORT SerializedAggregates:public AbstraAggregate
+		class VISUALMAN_EXPORT_IMPORT SerializedAggregates:public AbstraAggregate
 		{
 		public:
 			void Render() override;

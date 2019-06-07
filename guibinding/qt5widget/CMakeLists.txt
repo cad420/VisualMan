@@ -10,5 +10,5 @@ aux_source_directory(. QT5GUI_SRC)
 
 add_library(vmqtwindow STATIC)
 target_sources(vmqtwindow PRIVATE ${QT5GUI_SRC})
-target_link_libraries(vmqtwindow Qt5::Widgets Qt5::Core Qt5::OpenGL vm)
+target_link_libraries(vmqtwindow Qt5::Widgets vm)
 target_include_directories(vmqtwindow PUBLIC "../../src/visualman")

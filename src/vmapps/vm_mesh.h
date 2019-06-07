@@ -8,7 +8,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT VM_Mesh :public VisualMan
+		class VISUALMAN_EXPORT_IMPORT VM_Mesh :public VisualMan
 		{
 		public:
 			void InitEvent() override;

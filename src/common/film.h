@@ -1,8 +1,7 @@
 
 #ifndef _FILM_H_
 #define _FILM_H_
-#include "../mathematics/geometry.h"
-#include "../core/spectrum.h"
+#include "geometry.h"
 
 
 namespace ysl

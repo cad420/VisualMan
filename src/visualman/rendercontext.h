@@ -81,7 +81,7 @@ namespace ysl
 			Context_OnRenderingFinished
 		};
 
-		class GRAPHICS_EXPORT_IMPORT RenderContext
+		class VISUALMAN_EXPORT_IMPORT RenderContext
 		{
 		public:
 			RenderContext();

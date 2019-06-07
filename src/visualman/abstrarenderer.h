@@ -15,7 +15,7 @@ namespace ysl
 
 		class IRenderEvent;
 
-		class GRAPHICS_EXPORT_IMPORT AbstraRenderer
+		class VISUALMAN_EXPORT_IMPORT AbstraRenderer
 		{
 		public:
 			AbstraRenderer() = default;

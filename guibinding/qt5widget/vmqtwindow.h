@@ -5,11 +5,13 @@
 #include "rendercontext.h"
 #include "graphictype.h"
 
+//#define QT_NO_OPENGL
+
 namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT VMQtWindow:public QOpenGLWidget, public RenderContext
+		class VISUALMAN_EXPORT_IMPORT VMQtWindow:public QOpenGLWidget, public RenderContext
 		{
 		public:
 			VMQtWindow(QWidget * parent = nullptr);

@@ -10,7 +10,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT BufferObject:public LocalBuffer,
+		class VISUALMAN_EXPORT_IMPORT BufferObject:public LocalBuffer,
 											      public std::enable_shared_from_this<BufferObject>
 		{
 		public:

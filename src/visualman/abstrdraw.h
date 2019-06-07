@@ -21,7 +21,7 @@ namespace ysl
 		//		RenderContext* context) = 0;
 		//};
 
-		class GRAPHICS_EXPORT_IMPORT AbstrDrawCall
+		class VISUALMAN_EXPORT_IMPORT AbstrDrawCall
 		{
 		public:
 			AbstrDrawCall():drawType(PT_TRIANGLES){}

@@ -12,7 +12,7 @@ namespace ysl
 		class Framebuffer;
 		class TransformChangeCallback;
 
-		class GRAPHICS_EXPORT_IMPORT Renderer:public AbstraRenderer
+		class VISUALMAN_EXPORT_IMPORT Renderer:public AbstraRenderer
 		{
 		public:
 			Renderer();

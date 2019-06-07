@@ -12,7 +12,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT BlitFramebufferEvent:public IRenderEvent
+		class VISUALMAN_EXPORT_IMPORT BlitFramebufferEvent:public IRenderEvent
 		{
 		public:
 			BlitFramebufferEvent() = default;

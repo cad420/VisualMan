@@ -18,7 +18,7 @@ namespace ysl
 
 
 
-		class GRAPHICS_EXPORT_IMPORT GLSLShader
+		class VISUALMAN_EXPORT_IMPORT GLSLShader
 		{
 		public:
 			GLSLShader() = delete;
@@ -40,37 +40,37 @@ namespace ysl
 		};
 
 
-		class GRAPHICS_EXPORT_IMPORT GLSLVertexShader :public GLSLShader
+		class VISUALMAN_EXPORT_IMPORT GLSLVertexShader :public GLSLShader
 		{
 		public:
 			GLSLVertexShader() :GLSLShader(ST_VERTEX_SHADER) {}
 		};
 
-		class GRAPHICS_EXPORT_IMPORT GLSLFragmentShader :public GLSLShader
+		class VISUALMAN_EXPORT_IMPORT GLSLFragmentShader :public GLSLShader
 		{
 		public:
 			GLSLFragmentShader() :GLSLShader(ST_FRAGMENT_SHADER) {}
 		};
 
-		class GRAPHICS_EXPORT_IMPORT GLSLTessControlShader :public GLSLShader
+		class VISUALMAN_EXPORT_IMPORT GLSLTessControlShader :public GLSLShader
 		{
 		public:
 			GLSLTessControlShader() :GLSLShader(ST_TESS_CONTROL_SHADER) {}
 		};
 
-		class GRAPHICS_EXPORT_IMPORT GLSLTessEvaluationShader :public GLSLShader
+		class VISUALMAN_EXPORT_IMPORT GLSLTessEvaluationShader :public GLSLShader
 		{
 		public:
 			GLSLTessEvaluationShader() :GLSLShader(ST_TESS_EVALUATION_SHADER) {}
 		};
 
-		class GRAPHICS_EXPORT_IMPORT GLSLGeometryShader :public GLSLShader
+		class VISUALMAN_EXPORT_IMPORT GLSLGeometryShader :public GLSLShader
 		{
 		public:
 			GLSLGeometryShader() :GLSLShader(ST_GEOMETRY_SHADER) {}
 		};
 
-		class GRAPHICS_EXPORT_IMPORT GLSLProgram :public RenderStateNonIndexed
+		class VISUALMAN_EXPORT_IMPORT GLSLProgram :public RenderStateNonIndexed
 		{
 		public:
 			GLSLProgram() :RenderStateNonIndexed(RS_GLSLProgram) {}
