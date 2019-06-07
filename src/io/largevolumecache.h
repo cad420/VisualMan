@@ -1,7 +1,7 @@
 
 #ifndef _LARGEVOLUMECACHE_H_
 #define _LARGEVOLUMECACHE_H_
-#include "../mathematics/geometry.h"
+#include "../common/geometry.h"
 #include <map>
 #include <list>
 #include "lvdreader.h"

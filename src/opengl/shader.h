@@ -1,8 +1,8 @@
 #ifndef _SHADER_H_
 #define _SHADER_H_
 
-#include "../mathematics/transformation.h"
-#include "../mathematics/geometry.h"
+#include "../common/transformation.h"
+#include "../common/geometry.h"
 #include "../core/spectrum.h"
 
 #include <vector>

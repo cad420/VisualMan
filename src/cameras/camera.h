@@ -1,8 +1,8 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "../mathematics/geometry.h"
-#include "../mathematics/transformation.h"
+#include "../common/geometry.h"
+#include "../common/transformation.h"
 
 
 class FocusCamera

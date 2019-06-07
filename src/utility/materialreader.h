@@ -3,7 +3,7 @@
 #define _MATERIALREADER_H_
 #include <unordered_map>
 #include <string>
-#include "../core/spectrum.h"
+#include "../graphicfoundation/spectrum.h"
 
 namespace ysl
 {

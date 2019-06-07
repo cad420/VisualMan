@@ -1,10 +1,10 @@
 #ifndef BVH_H
 #define BVH_H
 
-#include "../core/shape.h"
 
 #include <mutex>
 #include <vector>
+#include "../graphicfoundation/shape.h"
 
 namespace ysl {
 

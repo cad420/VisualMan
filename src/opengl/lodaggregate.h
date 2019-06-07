@@ -4,7 +4,7 @@
 
 #include <memory>
 #include <string>
-#include "../mathematics/geometry.h"
+#include "../common/geometry.h"
 
 namespace ysl
 {

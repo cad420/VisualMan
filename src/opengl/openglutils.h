@@ -27,7 +27,7 @@
 #ifndef _OPENGLUTILS_H_
 #define _OPENGLUTILS_H_
 
-#include "../utility/error.h"
+#include "../common/error.h"
 #include "GL/gl3w.h"
 //#include "../../lib/gl3w/GL/glcorearb.h"
 

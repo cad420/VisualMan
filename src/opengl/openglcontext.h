@@ -1,10 +1,12 @@
 #ifndef _OPENGLCONTEXT_H_
 #define _OPENGLCONTEXT_H_
 
-#include <GLFW/glfw3.h>
+//#include <GLFW/glfw3.h>
+
 #include <memory>
 #include "openglobject.h"
 
+class GLFWwindow;
 
 namespace ysl
 {

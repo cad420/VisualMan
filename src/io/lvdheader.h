@@ -2,7 +2,7 @@
 #ifndef _LVDHEADER_H_
 #define _LVDHEADER_H_
 #include <cstdint>
-#include "../mathematics/geometry.h"
+#include "../common/geometry.h"
 #include <memory>
 
 

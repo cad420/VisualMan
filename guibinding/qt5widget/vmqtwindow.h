@@ -2,7 +2,6 @@
 #define _VMQTWINDOW_H_
 
 #include <QOpenGLWidget>
-
 #include "rendercontext.h"
 #include "graphictype.h"
 
@@ -10,8 +9,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class GRAPHICS_EXPORT_IMPORT VMQtWindow:public QOpenGLWidget,
-						public RenderContext
+		class GRAPHICS_EXPORT_IMPORT VMQtWindow:public QOpenGLWidget, public RenderContext
 		{
 		public:
 			VMQtWindow(QWidget * parent = nullptr);
@@ -28,7 +26,5 @@ namespace ysl
 		};
 	}
 }
-
-
 
 #endif

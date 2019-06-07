@@ -1,5 +1,6 @@
 
 #include "kdtree.h"
+#include <vector>
 
 namespace ysl
 {

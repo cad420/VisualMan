@@ -2,7 +2,7 @@
 #ifndef _VIRTUALVOLUMEHIERACHY_H_
 #define _VIRTUALVOLUMEHIERACHY_H_
 
-#include "../memory/lineararray.h"
+#include "../common/lineararray.h"
 #include "../io/largevolumecache.h"
 #include <list>
 #include "gpupagetable.h"

@@ -2,7 +2,7 @@
 #ifndef _GPUVOLUMEDATACACHE_H_
 #define _GPUVOLUMEDATACACHE_H_
 
-#include "../mathematics/geometry.h"
+#include "../common/geometry.h"
 #include "abstrgpuobject/abstrgpucache.h"
 
 namespace ysl

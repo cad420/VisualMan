@@ -1,10 +1,9 @@
 
 #include "vmglfwwindow.h"
-#include "../utility/error.h"
-#include "../graphic/abstraarray.h"
-#include "../graphic/primitive.h"
-#include "../graphic/renderstudio.h"
-#include "../graphic/trivialscenemanager.h"
+#include <error.h>
+#include <abstraarray.h>
+#include <primitive.h>
+#include <renderstudio.h>
 
 
 namespace ysl {

@@ -2,12 +2,12 @@
 #ifndef _LVDREADER_H_
 #define _LVDREADER_H_
 
-#include "../memory/blockarray.h"
-#include "../mathematics/geometry.h"
 
 #include <memory>
 #include "lvdheader.h"
 #include "rawio.h"
+#include "../common/blockarray.h"
+#include "../common/geometry.h"
 
 
 namespace ysl
@@ -40,7 +40,7 @@ namespace ysl
 		int BlockCount(int lod = 0)const { return bSize.x*bSize.y*bSize.z; }
 		ysl::Size3 OriginalDataSize(int lod = 0)const { return oSize; }
 		template<typename T, int nLogBlockSize>
-		std::shared_ptr<ysl::Block3DArray<T, nLogBlockSize>> ReadAll(int lod = 0);
+		std::shared_ptr<Block3DArray<T, nLogBlockSize>> ReadAll(int lod = 0);
 		void ReadBlock(char * dest, int blockId,int lod = 0);
 		unsigned char* ReadBlock(int blockId, int lod = 0);
 		~LVDReader();

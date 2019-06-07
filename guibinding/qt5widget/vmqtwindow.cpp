@@ -1,7 +1,6 @@
 
 #include "vmqtwindow.h"
 #include <QMouseEvent>
-#include <iostream>
 
 namespace ysl
 {
@@ -14,8 +13,7 @@ namespace ysl
 
 		void VMQtWindow::initializeGL()
 		{
-			RenderContext::InitContext();
-
+			InitContext();
 			RenderContext::DispatchInitEvent();
 		}
 
@@ -31,17 +29,17 @@ namespace ysl
 
 		void VMQtWindow::MakeCurrent()
 		{
-			QOpenGLWidget::makeCurrent();
+			makeCurrent();
 		}
 
 		void VMQtWindow::SwapBuffer()
 		{
-			QOpenGLWidget::frameSwapped();
+			frameSwapped();
 		}
 
 		void VMQtWindow::Update()
 		{
-			QOpenGLWidget::update();
+			update();
 		}
 
 		void VMQtWindow::mousePressEvent(QMouseEvent* event)
