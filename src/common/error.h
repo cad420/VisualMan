@@ -4,6 +4,7 @@
 #include <cassert>
 #include <string>
 #include <cstdarg>
+#include "common.h"
 
 #ifdef NDEBUG
 #define Assert(expr) ((void)(0)) 
@@ -13,15 +14,15 @@
 
 namespace ysl
 {
-	std::string formatToString(const std::string& fmt, va_list args);
+	COMMON_EXPORT_IMPORT std::string formatToString(const std::string& fmt, va_list args);
 
-	void _internal_msg_process_(const char* format, va_list args, const char* type);
+	COMMON_EXPORT_IMPORT void _internal_msg_process_(const char* format, va_list args, const char* type);
 
-	void Error(const char* fmt, ...);
+	COMMON_EXPORT_IMPORT void Error(const char* fmt, ...);
 
-	void Warning(const char* fmt, ...);
+	COMMON_EXPORT_IMPORT void Warning(const char* fmt, ...);
 
-	void Log(const char * fmt, ...);
+	COMMON_EXPORT_IMPORT void Log(const char * fmt, ...);
 
 	inline
 	void Debug(const char * fmt, ...)

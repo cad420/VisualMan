@@ -54,11 +54,14 @@
 #include <map>
 #include <set>
 
-
-#if defined(MRE_EXPORT_DLL)
-#define VISUALMAN_EXPORT_IMPORT __declspec(dllexport)
+#if defined(_WIN32) && defined(VM_SHARED_LIBRARY)
+	#ifdef vm_EXPORTS
+		#define VISUALMAN_EXPORT_IMPORT __declspec(dllexport)
+	#else
+		#define VISUALMAN_EXPORT_IMPORT __declspec(dllimport)
+	#endif
 #else
-#define VISUALMAN_EXPORT_IMPORT
+	#define VISUALMAN_EXPORT_IMPORT
 #endif
 
 //#define GRAPHICS_EXPORT_IMPORT 

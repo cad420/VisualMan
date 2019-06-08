@@ -2,14 +2,12 @@
 #ifndef _RAWREADER_H_
 #define _RAWREADER_H_
 #include "geometry.h"
-#include <fstream>
-
-
+#include "common.h"
 #include "rawio.h"
 
 namespace ysl
 {
-	class RawReader
+	class COMMON_EXPORT_IMPORT RawReader
 	{
 		std::string fileName;
 		ysl::Size3 dimensions;

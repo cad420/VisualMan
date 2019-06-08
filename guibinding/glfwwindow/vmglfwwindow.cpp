@@ -14,10 +14,10 @@ namespace ysl {
 		std::thread::id VMGLFWWindow::threadId;
 		std::mutex VMGLFWWindow::mutex;
 
-
 		//unsigned VAO;
 		//Ref<graphics::GLSLProgram> glslProgram;
 		//Ref<graphics::ArrayFloat3> triangle;
+
 		Ref<vm::Primitive> primitive;
 		Ref<vm::Aggregate> frame;
 
@@ -27,7 +27,11 @@ namespace ysl {
 			DestroyWindow();
 
 			if (!glfwInit())
+			{
 				Error("GLFW cannot be initialized");
+				return false;
+			}
+			
 
 
 			glfwSetErrorCallback(glfw_error_callback);
@@ -88,6 +92,8 @@ namespace ysl {
 
 			DispatchInitEvent();
 
+			return true;
+
 		}
 
 		void VMGLFWWindow::DestroyWindow()
@@ -111,7 +117,7 @@ namespace ysl {
 
 		VMGLFWWindow::~VMGLFWWindow()
 		{
-			singleton = nullptr;
+			//singleton = nullptr;
 		}
 
 		void VMGLFWWindow::MakeCurrent()
@@ -148,7 +154,6 @@ namespace ysl {
 		void VMGLFWWindow::glfwCursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 		{
 			const auto ins = Instance();
-
 			ins->glfwWindow == window;
 
 			int button = 0;
@@ -164,7 +169,6 @@ namespace ysl {
 		void VMGLFWWindow::glfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 		{
 			const auto app = Instance();
-
 			assert(app->glfwWindow == window);
 			double xpos, ypos;
 			glfwGetCursorPos(window, &xpos, &ypos);

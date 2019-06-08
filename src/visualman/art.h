@@ -13,7 +13,7 @@ namespace ysl
 
 		using ShadingPasses = std::vector<Ref<Shading>>;
 		
-		class Artist
+		class VISUALMAN_EXPORT_IMPORT Artist
 		{
 		public:
 			Artist()

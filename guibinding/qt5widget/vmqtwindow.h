@@ -1,17 +1,25 @@
 #ifndef _VMQTWINDOW_H_
 #define _VMQTWINDOW_H_
 
+#include <rendercontext.h>
 #include <QOpenGLWidget>
-#include "rendercontext.h"
-#include "graphictype.h"
 
 //#define QT_NO_OPENGL
+#if defined(_WIN32) && defined(VM_SHARED_LIBRARY)
+#ifdef vmqtwindow_EXPORTS
+#define VMQTWINDOW_EXPORT_IMPORT __declspec(dllexport)
+#else
+#define VMQTWINDOW_EXPORT_IMPORT __declspec(dllimport)
+#endif
+#else
+#define VMQTWINDOW_EXPORT_IMPORT
+#endif
 
 namespace ysl
 {
 	namespace vm
 	{
-		class VISUALMAN_EXPORT_IMPORT VMQtWindow:public QOpenGLWidget, public RenderContext
+		class VMQTWINDOW_EXPORT_IMPORT VMQtWindow:public QOpenGLWidget, public RenderContext
 		{
 		public:
 			VMQtWindow(QWidget * parent = nullptr);

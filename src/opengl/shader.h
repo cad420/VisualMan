@@ -3,7 +3,7 @@
 
 #include "../common/transformation.h"
 #include "../common/geometry.h"
-#include "../core/spectrum.h"
+#include "../graphicfoundation/spectrum.h"
 
 #include <vector>
 #include "texture.h"

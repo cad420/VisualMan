@@ -5,19 +5,46 @@ project ("MRE")
 
 add_definitions(-DNOMINMAX)
 
+
+# Shared or static library
+option(VM_SHARED_LIBRARY "Set to On to build using dynimic linking")
+if(VM_SHARED_LIBRARY)
+	add_definitions(-DVM_SHARED_LIBRARY)
+	set(VM_SHARED_OR_STATIC "SHARED")
+else()
+	set(VM_SHARED_OR_STATIC "STATIC")
+endif()
+
+
+
+
+# Test build
+option(VM_BUILD_QT5_GUIBINDING "Set to On to build qt5 binding")
+
+option(VM_BUILD_GLFW_GUIBINDING "Set to On to build glfw binding")
+
+option(VM_BUILD_QT5_EXAMPLE "Set to On to build qt5 example")
+if(VM_BUILD_QT5_EXAMPLE)
+	set(VM_BUILD_QT5_GUIBINDING "On")
+endif()
+
+option(VM_BUILD_GLFW_EXAMPLE "Set to On to build glfw example")
+if(VM_BUILD_GLFW_EXAMPLE)
+	set(VM_BUILD_GLFW_GUIBINDING "On")
+endif()
+
+# GuiBinding build
+
+
+# Tools Build
+option(VM_BUILD_TOOLS "Set to On to build tools")
+
+
 #---------------------------------------------------
 # Build Type
 #---------------------------------------------------
 
-set(CMAKE_CXX_STANDARD 17)
-
-#if (MSVC_VERSION GREATER_EQUAL "1900")
-#    include(CheckCXXCompilerFlag)
-#    CHECK_CXX_COMPILER_FLAG("/std:c++latest" _cpp_latest_flag_supported)
-#    if (_cpp_latest_flag_supported)
-#        add_compile_options("/std:c++latest")
-#    endif()
-#endif()
+set(CMAKE_CXX_STANDARD 17)				# C++17 is required
 
 # OpenMP
 FIND_PACKAGE(OpenMP)
@@ -36,3 +63,5 @@ add_subdirectory("guibinding")
 add_subdirectory("test")
 
 add_subdirectory("tools")
+
+#message(STATUS "-------" ${CMAKE_RUNTIME_OUTPUT_DIR})

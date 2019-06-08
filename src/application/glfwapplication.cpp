@@ -1,7 +1,6 @@
 
-
 #include "glfwapplication.h"
-#include "../utility/error.h"
+#include "../common/error.h"
 #include "../../lib/gl3w/GL/gl3w.h"
 
 #include "event.h"

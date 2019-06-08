@@ -6,15 +6,15 @@
 #include <cstdlib>
 #include <list>
 #include <vector>
-
+#include "common.h"
 
 
 constexpr std::size_t CashLine = 64;
 
 
-void *AllocAligned(std::size_t size, int align);
+COMMON_EXPORT_IMPORT void *AllocAligned(std::size_t size, int align);
 
-void  FreeAligned(void * ptr);
+COMMON_EXPORT_IMPORT void  FreeAligned(void * ptr);
 
 template<typename T>
 T * AllocAligned(std::size_t n)

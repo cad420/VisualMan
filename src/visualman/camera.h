@@ -14,7 +14,7 @@ namespace ysl
 
 		class Viewport;
 
-		class Camera_Impl
+		class VISUALMAN_EXPORT_IMPORT  Camera_Impl
 		{
 			static constexpr float YAW = -90.0f;
 			static constexpr float PITCH = 0.0f;

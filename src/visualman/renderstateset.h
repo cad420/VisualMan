@@ -10,7 +10,7 @@ namespace ysl
 	{
 		class GLSLProgram;
 
-		class RenderStateSet
+		class VISUALMAN_EXPORT_IMPORT RenderStateSet
 		{
 			friend class Aggregate;
 			friend class RenderContext;

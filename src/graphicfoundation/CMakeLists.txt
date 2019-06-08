@@ -1,5 +1,6 @@
 
-add_library(graphicfoundation)
+
+add_library(graphicfoundation ${VM_SHARED_OR_STATIC})
 
 aux_source_directory(. GRAPHIC_FOUNDATION_SRC)
 target_sources(graphicfoundation PRIVATE ${GRAPHIC_FOUNDATION_SRC})

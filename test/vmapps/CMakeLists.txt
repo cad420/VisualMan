@@ -1,0 +1,15 @@
+
+
+if(VM_SHARED_LIBRARY)
+	add_definitions(-DUSE_EXPORT_LIBRARY)
+	set(VM_SHARED_OR_STATIC "SHARED")
+else()
+	add_definitions(-DUSE_IMPORT_LIBRARY)
+	set(VM_SHARED_OR_STATIC "STATIC")
+endif()
+
+add_library(vmapps STATIC)
+aux_source_directory(. VMAPPS_SRC)
+target_sources(vmapps PRIVATE ${VMAPPS_SRC})
+target_link_libraries(vmapps vm graphicfoundation)
+target_include_directories(vmapps PRIVATE "../../src/visualman" "../../src/graphicfoundation")

@@ -1,8 +1,7 @@
 
 cmake_minimum_required (VERSION 3.3)
-project ("vm")
+project (vm)
 
-add_definitions(-DMRE_EXPORT_DLL)
 
 set(GL3W_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/gl3w")											 #gl3w headers
 set(GL3W_SRC "${CMAKE_SOURCE_DIR}/lib/gl3w/GL/gl3w.c")
@@ -19,14 +18,18 @@ endif(OPENGL_FOUND)
 set(GRAPHIC_SRC)
 aux_source_directory(. GRAPHIC_SRC)
 
+file(GLOB VM_INC "*.h")
+
 
 set(GRAPHIC_INCLUDE)
 
 
 #message(STATUS  ${GRAPHIC_SRC})
 
-add_library(vm SHARED
+add_library(vm ${VM_SHARED_OR_STATIC}
 ${GRAPHIC_SRC} 
 ${GL3W_SRC})
 target_link_libraries(vm ${OPENGL_LIBRARIES} common graphicfoundation)
 target_include_directories(vm PUBLIC ${GL3W_INCLUDE_DIR} "../common" "../graphicfoundation")
+
+#install(FILES ${VN_INC} DESTINATION "include")

@@ -11,7 +11,7 @@ namespace ysl
 	namespace vm
 	{
 
-		class VISUALMAN_EXPORT_IMPORT DrawElementsBase :public AbstrDrawCall {
+		class DrawElementsBase :public AbstrDrawCall {
 		public:
 			//virtual bool PrimitiveRestartEnable()const { return enablePrimitiveRestart; }
 			DrawElementsBase() = default;
@@ -27,7 +27,7 @@ namespace ysl
 
 
 		template<typename ArrayType>
-		class VISUALMAN_EXPORT_IMPORT DrawElements:public DrawElementsBase
+		class DrawElements:public DrawElementsBase
 		{
 		public:
 

@@ -1,15 +1,25 @@
 
-#ifndef _GLFWAPP2_H_
-#define _GLFWAPP2_H_
-#include "rendercontext.h"
+#ifndef _VMGLFWWINDOW_H_
+#define _VMGLFWWINDOW_H_
+#include <rendercontext.h>
 #include <GLFW/glfw3.h>
 #include <mutex>
+
+#if defined(_WIN32) && defined(VM_SHARED_LIBRARY)
+#ifdef vmglfwwindow_EXPORTS
+#define GLFWWINDOW_EXPORT_IMPORT __declspec(dllexport)
+#else
+#define GLFWWINDOW_EXPORT_IMPORT __declspec(dllimport)
+#endif
+#else
+#define GLFWWINDOW_EXPORT_IMPORT
+#endif
 
 namespace ysl
 {
 	namespace app
 	{
-		class VMGLFWWindow:public vm::RenderContext
+		class GLFWWINDOW_EXPORT_IMPORT VMGLFWWindow:public vm::RenderContext
 		{
 		public:
 			VMGLFWWindow(const std::string& title, const vm::RenderContextFormat& format, int width,
@@ -31,7 +41,7 @@ namespace ysl
 
 			const GLFWwindow * Handle() const { return glfwWindow; }
 
-			static VMGLFWWindow * Instance() { return singleton; }
+			static	VMGLFWWindow * Instance() { return singleton; }
 		private:
 			
 			static void glfwCursorPosCallback(GLFWwindow* window, double xpos, double ypos);
@@ -49,9 +59,12 @@ namespace ysl
 			static VMGLFWWindow* singleton;
 			static std::thread::id threadId;
 			static std::mutex mutex;
+
 			GLFWwindow * glfwWindow = nullptr;
 			bool mouseRightButtonPressed = false;
 			bool mouseLeftButtonPressed = false;
+
+			//static std::unordered_map<GLFWwindow *, VMGLFWWindow*> windowMap;
 
 		};
 	}

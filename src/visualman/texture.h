@@ -9,7 +9,6 @@ namespace ysl
 {
 	namespace vm
 	{
-
 		class TexParams
 		{
 		public:
@@ -82,10 +81,7 @@ namespace ysl
 		int GetTypeBySizedFormat(TextureFormat sizedFormat);
 
 
-
-
-
-		class  Texture
+		class VISUALMAN_EXPORT_IMPORT  Texture
 		{
 		public:
 			Texture()
@@ -158,9 +154,9 @@ namespace ysl
 
 		};
 
-		Ref<Texture> MakeVolumeTexture(const std::string & fileName, size_t x, size_t y, size_t z);
-		Ref<Texture> MakeImageTexuture(const std::string & fileName);
-		Ref<Texture> MakeTransferFunction1D(const std::string & fileName);
+		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeVolumeTexture(const std::string & fileName, size_t x, size_t y, size_t z);
+		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeImageTexuture(const std::string & fileName);
+		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeTransferFunction1D(const std::string & fileName);
 	}
 }
 

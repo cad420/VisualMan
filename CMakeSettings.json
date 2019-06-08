@@ -18,18 +18,26 @@
           "value": "D:\\Qt\\5.12.1\\msvc2017_64\\lib\\cmake\\Qt5"
         },
         {
+          "name": "GLFW3_DIR",
+          "value": "C:\\Program Files\\GLFW\\lib\\cmake\\glfw3"
+        },
+        {
           "name": "VM_USE_QT_BINDING",
           "value": ""
         },
+
         {
-          "name": "VM_BUILD_TEST",
-          "value": "ON"
+          "name": "VM_SHARED_LIBRARY",
+          "value": "On"
         },
         {
-          "name": "GLFW3_DIR",
-          "value": "C:\\Program Files\\GLFW\\lib\\cmake\\glfw3"
+          "name": "VM_BUILD_GLFW_EXAMPLE",
+          "value": "On"
+        },
+        {
+          "name": "VM_BUILD_QT5_EXAMPLE",
+          "value": "On"
         }
-       
       ]
     },
     {
@@ -43,7 +51,34 @@
       "installRoot": "D:\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "Qt5_DIR",
+          "value": "D:\\Qt\\5.12.1\\msvc2017_64\\lib\\cmake\\Qt5"
+        },
+        {
+          "name": "GLFW3_DIR",
+          "value": "C:\\Program Files\\GLFW\\lib\\cmake\\glfw3"
+        },
+        {
+          "name": "VM_USE_QT_BINDING",
+          "value": ""
+        },
+
+        {
+          "name": "VM_SHARED_LIBRARY",
+          "value": "On"
+        },
+        {
+          "name": "VM_BUILD_GLFW_EXAMPLE",
+          "value": "On"
+        },
+        {
+          "name": "VM_BUILD_QT5_EXAMPLE",
+          "value": "On"
+        }
+      ]
     },
 
     {
@@ -57,7 +92,34 @@
       "installRoot": "D:\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "Qt5_DIR",
+          "value": "D:\\Qt\\5.12.1\\msvc2017_64\\lib\\cmake\\Qt5"
+        },
+        {
+          "name": "GLFW3_DIR",
+          "value": "C:\\Program Files\\GLFW\\lib\\cmake\\glfw3"
+        },
+        {
+          "name": "VM_USE_QT_BINDING",
+          "value": ""
+        },
+
+        {
+          "name": "VM_SHARED_LIBRARY",
+          "value": "On"
+        },
+        {
+          "name": "VM_BUILD_GLFW_EXAMPLE",
+          "value": "On"
+        },
+        {
+          "name": "VM_BUILD_QT5_EXAMPLE",
+          "value": "On"
+        }
+      ]
     }
   ]
 }

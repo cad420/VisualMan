@@ -12,7 +12,7 @@ namespace ysl
 		class RenderState;
 		class Actor;
 
-		class  Renderable
+		class VISUALMAN_EXPORT_IMPORT Renderable
 		{
 		public:
 			Renderable() = default;

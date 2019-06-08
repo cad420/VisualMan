@@ -13,7 +13,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class Shading
+		class VISUALMAN_EXPORT_IMPORT Shading
 		{
 		public:
 			Shading() = default;

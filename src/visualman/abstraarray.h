@@ -10,7 +10,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		class /*GRAPHICS_EXPORT_IMPORT*/ AbstraArray
+		class VISUALMAN_EXPORT_IMPORT AbstraArray
 		{
 		public:
 			AbstraArray();

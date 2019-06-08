@@ -4,31 +4,25 @@
 
 #include <thread>
 #include <mutex>
+#include "graphictype.h"
 
 namespace ysl
 {
 	namespace vm
 	{
-		class Booster
+		class VISUALMAN_EXPORT_IMPORT Booster
 		{
 			static Booster * booster;
 			static std::thread::id threadId;
 			static std::mutex mutex;
-			
-
 		public:
 			Booster(int argc, char ** argv);
-
 			~Booster();
-
-			static Booster * GetInstance(){return booster;}
-
-			static std::string GetExePatah() { return exePath; }
-
+			//static Booster * VISUALMAN_EXPORT_IMPORT GetInstance(){return booster;}
+			//static std::string VISUALMAN_EXPORT_IMPORT GetExePatah() { return exePath; }
 		private:
 			void Init();
 			static std::string exePath;
-
 		};
 	}
 }

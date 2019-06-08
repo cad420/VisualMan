@@ -65,7 +65,7 @@ namespace ysl
 		 *
 		 */
 
-	class COMMON_EXPORT_IMPORT  Object :public std::enable_shared_from_this<Object>
+	class COMMON_EXPORT_IMPORT Object :public std::enable_shared_from_this<Object>
 	{
 	protected:
 		Object();
