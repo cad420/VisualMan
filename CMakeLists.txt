@@ -1,5 +1,5 @@
 ﻿
-cmake_minimum_required (VERSION 3.3)
+cmake_minimum_required (VERSION 3.8)
 
 project ("MRE")
 
@@ -63,6 +63,8 @@ add_subdirectory("guibinding")
 
 add_subdirectory("test")
 
+if(VM_BUILD_TOOLS)
 add_subdirectory("tools")
+endif()
 
 #message(STATUS "-------" ${CMAKE_RUNTIME_OUTPUT_DIR})

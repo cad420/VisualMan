@@ -4,14 +4,15 @@
 #include <fstream>
 #include "abcflowgen.h"
 
-#include "../../src/mathematics/numeric.h"
+//#include "../../src/mathematics/numeric.h"
+
+const float Pi = 3.1415926535;
 
 int ABCFlowGen(std::size_t x, std::size_t y, std::size_t z)
 {
 	const auto A = std::sqrt(3);
 	const auto B = std::sqrt(2);
 	const auto C = 1;
-
 
 
 	size_t sideX = x;
@@ -83,7 +84,7 @@ int ABCFlowGen(std::size_t x, std::size_t y, std::size_t z)
 			for (int x = 0; x < sideX; x++)
 			{
 				const auto index = x + y * sideX + z * sideX*sideY;
-				const double X = x * 2 * ysl::Pi / sideX, Y = y * 2 * ysl::Pi / sideY, Z = z * 2 * ysl::Pi / sideZ;
+				const double X = x * 2 * Pi / sideX, Y = y * 2 * Pi / sideY, Z = z * 2 * Pi / sideZ;
 				const auto value = std::sqrt(6 + 2 * A *std::sin(Z)*std::cos(Y) + 2 * B * std::sin(Y)*std::cos(X) + 2 * std::sqrt(6)*sin(X)*std::cos(Z));
 				buffer1[index] = ((value - minValue) / (maxValue - minValue) * 255+0.5);
 			}

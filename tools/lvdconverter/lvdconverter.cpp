@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "../../src/io/lvdconverter.h"
+#include <lvdconverter.h>
 
 //
 //int LVDTester()

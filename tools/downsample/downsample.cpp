@@ -1,9 +1,16 @@
 
-#include "../io/rawreader.h"
-#include "../mathematics/numeric.h"
+#include <rawreader.h>
+#include <numeric.h>
 #include <string>
-#include "../io/platform/windowsfilemap.h"
+
+#ifdef _WIN32
+#include <windowsfilemap.h>
+#elif defined(__linux__)
+#include <linuxfilemap.h>
+#endif
+
 #include <iostream>
+#include <fstream>
 
 //#include "../io/rawio.h"
 
