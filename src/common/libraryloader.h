@@ -3,14 +3,6 @@
 #define _LIBRARY_LOADER_H_
 
 
-#if defined(_WIN32)
-#define DLLEXPORT __declspec(dllexport)
-#define DLLIMPORT __declspec(dllimport)
-#elif defined(__linux)
-#define DLLEXPORT
-#define DLLIMPORT
-#endif
-
 #include <string>
 #include "library.h"
 #include <map>

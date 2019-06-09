@@ -3,9 +3,7 @@
 
 #include <algorithm>
 #include "geometry.h"
-
-#include "numeric.h"
-//#include "../core/spectrum.h"
+#include <cassert>
 
 /*
 	* Sample Functions

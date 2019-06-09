@@ -9,7 +9,7 @@ class Timer
 	std::chrono::time_point<std::chrono::system_clock> begin_, end_;
 	std::chrono::microseconds duration_;
 public:
-	Timer() {};
+	Timer() = default;
 	void begin()
 	{
 		begin_ = std::chrono::system_clock::now();
