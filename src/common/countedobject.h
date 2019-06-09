@@ -10,7 +10,7 @@ namespace ysl
 	template <typename ClassName>
 	class CountedObject {
 	public:
-		int ObjectCount()const;
+		static int ObjectCount();
 		virtual ~CountedObject();
 	protected:
 		CountedObject();
@@ -20,11 +20,8 @@ namespace ysl
 		void init();
 	};
 
-	//template<typename ClassName>
-	//int CountedObject<ClassName>::objectNum;
-
 	template <typename ClassName>
-	int CountedObject<ClassName>::ObjectCount() const
+	int CountedObject<ClassName>::ObjectCount()
 	{
 		return objectNum;
 	}
