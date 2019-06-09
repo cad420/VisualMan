@@ -1,6 +1,6 @@
 
 #include "bufferobject.h"
-#include "../opengl/openglutils.h"
+#include "graphictype.h"
 #include <cassert>
 
 //#include <GLFW/glfw3.h>

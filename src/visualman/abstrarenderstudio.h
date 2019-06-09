@@ -3,8 +3,9 @@
 #define _ABSTRARENDERSTUDIO_H_
 
 #include "graphictype.h"
-#include <vector>
 #include "renderevent.h"
+
+#include <vector>
 
 namespace ysl
 {

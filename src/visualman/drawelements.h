@@ -1,10 +1,13 @@
 
 #ifndef _DRAWELEMENTS_H_
 #define _DRAWELEMENTS_H_
-#include "../opengl/openglutils.h"
-#include "../../lib/gl3w/GL/gl3w.h"
+
+#include <GL/gl3w.h>
+
+#include "graphictype.h"
 #include "abstrdraw.h"
 #include "abstraarray.h"
+
 
 namespace ysl
 {

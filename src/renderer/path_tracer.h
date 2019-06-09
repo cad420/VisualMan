@@ -2,7 +2,7 @@
 #define PATH_TRACER_H
 #endif
 
-#include "../core/spectrum.h"
+#include "../graphicfoundation/spectrum.h"
 
 namespace ysl 
 {

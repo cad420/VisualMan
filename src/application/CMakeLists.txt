@@ -56,6 +56,5 @@ ${LVD_APP_SRC_LIST}
 ${LVD_ABSTRGPUOBJ_SRC_LIST} ${LVD_IO_PLATFORM_SRC_LIST} ${VD_3RDPARTY_SRC_LIST} "../opengl/lodaggregate.cpp"
 )
 
-
 target_link_libraries(largetvolumerenderer glfw ${OPENGL_LIBRARIES})
 target_include_directories(largetvolumerenderer PRIVATE ${GL3W_INCLUDE_DIR})

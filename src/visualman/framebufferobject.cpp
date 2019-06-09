@@ -1,7 +1,7 @@
 
 #include "framebufferobject.h"
 #include "rendercontext.h"
-#include "../opengl/openglutils.h"
+#include "graphictype.h"
 #include <cassert>
 #include <iostream>
 

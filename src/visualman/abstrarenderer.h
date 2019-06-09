@@ -1,9 +1,9 @@
 #ifndef _ABSTRARENDERER_H_
 #define _ABSTRARENDERER_H_
 
+#include <memory>
 #include <vector>
 #include "graphictype.h"
-#include <memory>
 #include "renderqueue.h"
 #include "camera.h"
 #include "framebuffer.h"

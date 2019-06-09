@@ -1,9 +1,8 @@
 
+#include <GL/gl3w.h>
 #include "framebuffer.h"
-#include "GL/gl3w.h"
+#include "graphictype.h"
 #include <cassert>
-#include "../opengl/openglutils.h"
-#include <iostream>
 
 namespace ysl
 {

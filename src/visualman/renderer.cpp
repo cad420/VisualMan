@@ -1,7 +1,7 @@
 
 #include "renderer.h"
 #include <iostream>
-#include "../opengl/openglutils.h"
+#include "graphictype.h"
 #include "rendercontext.h"
 #include "renderable.h"
 #include "transformchangecallback.h"

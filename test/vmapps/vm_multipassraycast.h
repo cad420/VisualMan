@@ -5,7 +5,6 @@
 #include "graphictype.h"
 #include "visualman.h"
 
-
 namespace ysl
 {
 	namespace vm

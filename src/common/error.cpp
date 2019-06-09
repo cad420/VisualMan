@@ -1,5 +1,4 @@
 #include "error.h"
-#include <iostream>
 
 namespace ysl
 {

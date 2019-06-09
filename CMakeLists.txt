@@ -7,7 +7,7 @@ add_definitions(-DNOMINMAX)
 
 
 # Shared or static library
-option(VM_SHARED_LIBRARY "Set to On to build using dynimic linking")
+option(VM_SHARED_LIBRARY "Set to On to build using dynimic linking" ON)
 if(VM_SHARED_LIBRARY)
 	add_definitions(-DVM_SHARED_LIBRARY)
 	set(VM_SHARED_OR_STATIC "SHARED")
@@ -16,6 +16,7 @@ else()
 endif()
 
 
+option(VM_BUILD_OLD_LARGE_VOLUME_RENDERER "Set to On to build the old large volume renderer")
 
 
 # Test build

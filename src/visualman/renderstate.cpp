@@ -1,10 +1,8 @@
 
+#include <GL/gl3w.h>
 #include "renderstate.h"
 #include "rendercontext.h"
-#include <iostream>
-#include "../opengl/openglutils.h"
-#include "../../lib/gl3w/GL/gl3w.h"
-
+#include "graphictype.h"
 #include "texture.h"
 #include <cassert>
 

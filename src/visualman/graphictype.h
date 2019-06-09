@@ -3,51 +3,167 @@
 #define _GRAPHICTYPE_H_
 
 
-#define USE_SMART_POINTER
+
+#include <error.h>
+#include <GL/gl3w.h>
+//#include "../../lib/gl3w/GL/glcorearb.h"
+
+inline
+void PrintGLErrorType(GLenum glerr)
+{
+	std::string error;
+	switch (glerr)
+	{
+	case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+	case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+	case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+	case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
+	case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
+	case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+	case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+	default:							   error = "UNKNOWN_ERROR"; break;
+	}
+	ysl::Warning("%s", error.c_str());
+}
+
+inline
+GLenum PrintGLErrorMsg(const char * file, int line)
+{
+	GLenum errorCode;
+	while ((errorCode = glGetError()) != GL_NO_ERROR)
+	{
+		std::string error;
+		switch (errorCode)
+		{
+		case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+		case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+		case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+		case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
+		case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
+		case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+		}
+		ysl::Warning("%s | %s (%d)", error.c_str(), file, line);
+	}
+	return errorCode;
+}
+
+#ifdef NDEBUG
+#define GL_ERROR_REPORT void(0);
+#define GL_ERROR_ASSERT	void(0);
+#define GL(stmt) stmt;
+#define GL_CHECK void(0);
+#else
+#define GL_ERROR_REPORT								PrintGLErrorMsg(__FILE__, __LINE__);
+//{												\
+	//	GLenum err;									\
+	//	while((err = glGetError()) != GL_NO_ERROR)	\
+	//	{											\
+	//		ysl::Warning("OpenGL Error Code:%d. File:%s, Line:%d. \n",err,__FILE__,__LINE__);\
+	//	}											\
+	//}
 
 
-#define Ref(typeName) std::shared_ptr<typeName>
+#define GL_ERROR_ASSERT														\
+		assert(glGetError() == GL_NO_ERROR);								\
 
-#ifdef USE_SMART_POINTER
+#define GL(stmt)															\
+ do {																		\
+    GLenum glerr;															\
+    unsigned int iCounter = 0;												\
+    while((glerr = glGetError()) != GL_NO_ERROR) {							\
+      ysl::Warning("GL error calling %s before line %u (%s): (%x)",     \
+              #stmt, __LINE__, __FILE__,									\
+              static_cast<unsigned>(glerr));								\
+	  PrintGLErrorType(glerr);												\
+      iCounter++;															\
+      if (iCounter > 100) break;											\
+    }																		\
+    stmt;																	\
+    iCounter = 0;															\
+    while((glerr = glGetError()) != GL_NO_ERROR) {							\
+      ysl::Warning("'%s' on line %u (%s) caused GL error: (%d)", #stmt, \
+              __LINE__, __FILE__,											\
+              static_cast<unsigned>(glerr));								\
+	  PrintGLErrorType(glerr);												\
+      iCounter++;															\
+      if (iCounter > 100) break;											\
+    }																		\
+  } while(0);
+
+#define GL_CHECK	\
+ do {																		\
+    GLenum glerr;															\
+    unsigned int iCounter = 0;												\
+    while((glerr = glGetError()) != GL_NO_ERROR) {							\
+      ysl::Warning("before line %u (%s):(%#x)",							\
+              __LINE__, __FILE__,											\
+              static_cast<unsigned>(glerr));								\
+	  PrintGLErrorType(glerr);												\
+      iCounter++;															\
+      if (iCounter > 100) break;											\
+    }																		\
+    iCounter = 0;															\
+    while((glerr = glGetError()) != GL_NO_ERROR) {							\
+      ysl::Warning(" on line %u (%s) caused GL error:(%#x)",			\
+              __LINE__, __FILE__,											\
+              static_cast<unsigned>(glerr));								\
+	  PrintGLErrorType(glerr);												\
+      iCounter++;															\
+      if (iCounter > 100) break;											\
+    }																		\
+  } while(0);
 
 
-#define SharedPtr(typeName) std::shared_ptr<typeName>
-#define RSharedPtr(typeName) std::shared_ptr<typeName> &
-#define CSharedPtr(typeName) std::shared_ptr<const typeName>
-#define CRSharedPtr(typeName) const std::shared_ptr<typeName> &
+#endif /*NDBUG*/
 
-#define UniquePtr(typeName) std::unique_ptr<typeName>
-#define RUniquePtr(typeName) std::unique_ptr<typeName> &
-#define CUniquePtr(typeName) std::unique_ptr<const typeName>
-#define CRUniquePtr(typeName) const std::unique_ptr<typeName> &
 
-#define WeakPtr(typeName) std::weak_ptr<typeName>
-#define RWeakPtr(typeName) std::weak_ptr<typeName> &
-#define CWeakPtr(typeName) std::weak_ptr<const typeName>
-#define CRWeakPtr(typeName) const std::weak<typeName> &
-
-#define GetPtr(ptr) (ptr.get())
-
-#elif
-
-#define SharedPtr(typeName) typeName*
-#define RSharedPtr(typeName) typeName*
-#define CSharedPtr(typeName) const typeName*
-#define CRSharedPtr(typeName) const typeName*
-
-#define UniquePtr(typeName) typeName*
-#define RUniquePtr(typeName) typeName*
-#define CUniquePtr(typeName) const typeName*
-#define CRUniquePtr(typeName) const typeName*
-
-#define WeakPtr(typeName) typeName*
-#define RWeakPtr(typeName) typeName*
-#define CWeakPtr(typeName) const typeName*
-#define CRWeakPtr(typeName) const typeName*
-
-#define GetPtr(ptr) (ptr)
-
-#endif
+//
+//#define USE_SMART_POINTER
+//
+//
+//#define Ref(typeName) std::shared_ptr<typeName>
+//
+//#ifdef USE_SMART_POINTER
+//
+//
+//#define SharedPtr(typeName) std::shared_ptr<typeName>
+//#define RSharedPtr(typeName) std::shared_ptr<typeName> &
+//#define CSharedPtr(typeName) std::shared_ptr<const typeName>
+//#define CRSharedPtr(typeName) const std::shared_ptr<typeName> &
+//
+//#define UniquePtr(typeName) std::unique_ptr<typeName>
+//#define RUniquePtr(typeName) std::unique_ptr<typeName> &
+//#define CUniquePtr(typeName) std::unique_ptr<const typeName>
+//#define CRUniquePtr(typeName) const std::unique_ptr<typeName> &
+//
+//#define WeakPtr(typeName) std::weak_ptr<typeName>
+//#define RWeakPtr(typeName) std::weak_ptr<typeName> &
+//#define CWeakPtr(typeName) std::weak_ptr<const typeName>
+//#define CRWeakPtr(typeName) const std::weak<typeName> &
+//
+//#define GetPtr(ptr) (ptr.get())
+//
+//#elif
+//
+//#define SharedPtr(typeName) typeName*
+//#define RSharedPtr(typeName) typeName*
+//#define CSharedPtr(typeName) const typeName*
+//#define CRSharedPtr(typeName) const typeName*
+//
+//#define UniquePtr(typeName) typeName*
+//#define RUniquePtr(typeName) typeName*
+//#define CUniquePtr(typeName) const typeName*
+//#define CRUniquePtr(typeName) const typeName*
+//
+//#define WeakPtr(typeName) typeName*
+//#define RWeakPtr(typeName) typeName*
+//#define CWeakPtr(typeName) const typeName*
+//#define CRWeakPtr(typeName) const typeName*
+//
+//#define GetPtr(ptr) (ptr)
+//
+//#endif
 
 #include <memory>
 #include <GL/glcorearb.h>

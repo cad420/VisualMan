@@ -1,10 +1,8 @@
 
+#include <GL/gl3w.h>
 #include "rendercontext.h"
 #include "vertexattribsetinterface.h"
-
-#include "../../lib/gl3w/GL/gl3w.h"
-#include "../opengl/openglutils.h"
-
+#include "graphictype.h"
 #include "abstraarray.h"
 #include "renderstateset.h"
 #include "enableset.h"

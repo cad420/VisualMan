@@ -1,7 +1,6 @@
 
 #include "abstrarenderer.h"
 #include "renderevent.h"
-#include "error.h"
 
 namespace ysl
 {

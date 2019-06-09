@@ -40,9 +40,15 @@ endif() ## if(VM_BUILD_GLFW_EXAMPLE)
 
 endif()##if(VM_BUILD_QT5_EXAMPLE OR VM_BUILD_GLFW_EXAMPLE)
 
+
+
+
 # Large Volume Renderer Test
+
+if(VM_BUILD_OLD_LARGE_VOLUME_RENDERER)
 #add_executable(largevolumerenderer_test)
 #target_sources(largevolumerenderer_test PRIVATE "largevolume_test.cpp")
-#target_link_libraries(largevolumerenderer_test largetvolumerenderer)
-#target_include_directories(largevolumerenderer_test PRIVATE ${PROJECT_SOURCE_DIR}/src/application)
+#target_link_libraries(largevolumerenderer_test lvdrenderer common)
+#target_include_directories(largevolumerenderer_test PRIVATE ${PROJECT_SOURCE_DIR}/src/lvdrenderer)
+endif()
 

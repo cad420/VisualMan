@@ -118,6 +118,10 @@
         {
           "name": "VM_BUILD_QT5_EXAMPLE",
           "value": "On"
+        },
+        {
+          "name": "VM_BUILD_OLD_LARGE_VOLUME_RENDERER",
+          "value": "On"
         }
       ]
     }

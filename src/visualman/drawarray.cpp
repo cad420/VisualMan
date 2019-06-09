@@ -1,7 +1,7 @@
 
+//#include <GL/gl3w.h>
+#include "graphictype.h"
 #include "drawarray.h"
-#include "../../lib/gl3w/GL/gl3w.h"
-#include "../opengl/openglutils.h"
 
 namespace ysl {
 	namespace vm

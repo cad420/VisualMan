@@ -1,9 +1,6 @@
 
+#include "graphictype.h"
 #include "texture.h"
-#include <GL/gl3w.h>
-
-#include "../opengl/openglutils.h"
-
 #include <interpulator.h>
 #include <cassert>
 #include <rawreader.h>

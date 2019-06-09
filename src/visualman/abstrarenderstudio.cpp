@@ -1,7 +1,5 @@
 
 #include "abstrarenderstudio.h"
-#include <iostream>
-#include <error.h>
 
 namespace ysl
 {

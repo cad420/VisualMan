@@ -1,9 +1,9 @@
 #ifndef _ERROR_H_
 #define _ERROR_H_
 
-#include <cassert>
 #include <string>
 #include <cstdarg>
+#include <cassert>
 #include "common.h"
 
 #ifdef NDEBUG

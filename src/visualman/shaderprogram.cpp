@@ -1,11 +1,6 @@
 
+#include "graphictype.h"
 #include "shaderprogram.h"
-#include <iostream>
-
-#include "../opengl/openglutils.h"
-
-#include "GL/gl3w.h"
-
 #include "rendercontext.h"
 #include <cassert>
 #include <fstream>

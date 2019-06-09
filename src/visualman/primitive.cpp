@@ -2,12 +2,13 @@
 #include "primitive.h"
 #include "rendercontext.h"
 #include "abstraarray.h"
-#include "../opengl/openglutils.h"
-#include "../common/objreader.h"
-#include "drawelements.h"
-#include "abstrdraw.h"
+#include "graphictype.h"
+#include <objreader.h>
 #include <cassert>
 #include <iostream>
+
+#include "drawelements.h"
+#include "abstrdraw.h"
 
 namespace ysl
 {

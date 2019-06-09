@@ -1,7 +1,6 @@
 
 #include "viewport.h"
-
-#include "../opengl/openglutils.h"
+#include "graphictype.h"
 
 namespace ysl
 {

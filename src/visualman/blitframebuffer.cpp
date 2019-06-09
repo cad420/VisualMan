@@ -1,6 +1,6 @@
 
 #include "blitframebuffer.h"
-#include "../opengl/openglutils.h"
+#include "graphictype.h"
 
 namespace ysl
 {

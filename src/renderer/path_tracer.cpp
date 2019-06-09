@@ -1,9 +1,9 @@
 
 #include "path_tracer.h"
-#include "../core/interaction.h"
-#include "../core/light.h"
-#include "../core/appearance.h"
-#include "../core/scene.h"
+#include "../graphicfoundation/interaction.h"
+#include "../graphicfoundation/light.h"
+#include "../graphicfoundation/appearance.h"
+#include "../graphicfoundation//scene.h"
 
 #include <random>
 #include <ctime>

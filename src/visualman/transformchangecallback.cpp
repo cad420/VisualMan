@@ -1,9 +1,9 @@
 
+#include <GL/gl3w.h>
 #include "transformchangecallback.h"
 #include "camera.h"
 #include "shaderprogram.h"
-#include "../../lib/gl3w/GL/gl3w.h"
-#include "../opengl/openglutils.h"
+#include "graphictype.h"
 #include <cassert>
 
 namespace ysl

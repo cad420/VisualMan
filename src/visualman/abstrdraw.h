@@ -8,8 +8,6 @@ namespace ysl
 {
 	namespace vm
 	{
-
-
 		//class  GRAPHICS_EXPORT_IMPORT IDrawCallEvent 
 		//{
 		//public:

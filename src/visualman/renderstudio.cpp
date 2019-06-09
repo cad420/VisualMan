@@ -3,7 +3,7 @@
 #include "renderer.h"
 #include "rendercontext.h"
 #include "error.h"
-#include "../opengl/openglutils.h"
+#include "graphictype.h"
 
 namespace ysl
 {
