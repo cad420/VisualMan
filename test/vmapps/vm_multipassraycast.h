@@ -2,15 +2,15 @@
 #ifndef _VM_VOLUMERAYCAST2_H_
 #define _VM_VOLUMERAYCAST2_H_
 
-#include "graphictype.h"
 #include "visualman.h"
+#include "config.h"
 
 namespace ysl
 {
 	namespace vm
 	{
 
-		class VM_VolumeRayCast2:public VisualMan
+		class VMAPPS_EXPORT_IMPORT VM_VolumeRayCast2:public VisualMan
 		{
 		public:
 			VM_VolumeRayCast2() = default;

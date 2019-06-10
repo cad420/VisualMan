@@ -5,12 +5,13 @@
 #include "primitive.h"
 
 #include <marchingcubes.h>
+#include "config.h"
 
 namespace ysl
 {
 	namespace vm
 	{
-		class VISUALMAN_EXPORT_IMPORT VM_ISOSurface :public VisualMan
+		class VMAPPS_EXPORT_IMPORT VM_ISOSurface :public VisualMan
 		{
 		public:
 			void InitEvent() override;

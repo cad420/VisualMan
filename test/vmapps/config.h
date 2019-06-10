@@ -10,7 +10,7 @@
 #endif
 
 #else
-#define VMAPPS_EXPORT_IMPORT 
+#define VMAPPS_EXPORT_IMPORT
 #endif
 
 #endif

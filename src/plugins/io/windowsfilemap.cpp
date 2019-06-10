@@ -29,7 +29,8 @@ namespace ysl
 	{
 		bool newCreated = false;
 		DWORD dwAttrib = GetFileAttributes(fileName.c_str());
-
+		fileFlag = fileFlags;
+		mapFlag = mapFlags;
 		if (!(dwAttrib != INVALID_FILE_ATTRIBUTES && 0 == (FILE_ATTRIBUTE_DIRECTORY & dwAttrib)))
 		{
 			newCreated = true;
@@ -111,10 +112,10 @@ namespace ysl
 		os.QuadPart = offset;
 
 		int flags = 0;
-		//if (mapAccess == MapAccess::ReadOnly)
-		//	flags = FILE_MAP_READ;
-		//if (mapAccess == MapAccess::ReadWrite)
-		flags = FILE_MAP_READ | FILE_MAP_WRITE;
+		if (mapFlag == MapAccess::ReadOnly)
+			flags |= FILE_MAP_READ;
+		if (mapFlag == MapAccess::ReadWrite)
+			flags |= FILE_MAP_WRITE;
 
 		auto addr = (unsigned char*)MapViewOfFile(mapping,
 			flags,

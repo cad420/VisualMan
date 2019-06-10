@@ -24,7 +24,7 @@ namespace ysl
 	{
 		if (obj == nullptr)
 			return nullptr;
-		return Ty::_ms_RttiType == obj->GetRtti() ? (Ty*)(obj) : nullptr;
+		return Ty::_ms_RttiType.DerivedFrom(obj->GetRtti()) || obj->GetRtti().DerivedFrom(Ty::_ms_RttiType) ? static_cast<Ty*>(obj) : nullptr;
 	}
 
 	template<typename Ty>

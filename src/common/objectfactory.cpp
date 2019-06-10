@@ -1,6 +1,8 @@
 
 #include "objectfactory.h"
 #include "object.h"
+#include <iostream>
+
 namespace ysl
 {
 
@@ -10,6 +12,7 @@ namespace ysl
 		{
 			return false;
 		}
+		std::cout << uid << " " << ctor.target<std::unique_ptr<Object>()>() << std::endl;
 		constructors[uid] = ctor;
 		return true;
 	}

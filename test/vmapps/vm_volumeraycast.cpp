@@ -7,6 +7,7 @@
 #include "drawelements.h"
 #include "blitframebuffer.h"
 #include "actoreventcallback.h"
+#include "primitive.h"
 
 namespace ysl
 {

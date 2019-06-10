@@ -3,12 +3,13 @@
 #define _VM_MESH_H_
 #include "visualman.h"
 #include "primitive.h"
+#include "config.h"
 
 namespace ysl
 {
 	namespace vm
 	{
-		class VISUALMAN_EXPORT_IMPORT VM_Mesh :public VisualMan
+		class VMAPPS_EXPORT_IMPORT VM_Mesh :public VisualMan
 		{
 		public:
 			void InitEvent() override;

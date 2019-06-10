@@ -149,12 +149,12 @@ int main()
 
 	auto repo = ysl::LibraryReposity::GetLibraryRepo();
 	repo->AddLibrary("ioplugin");
+	std::shared_ptr<ysl::IPluginFileMap> rm = ysl::Object::CreateObject<ysl::IPluginFileMap>("common.filemapio");
 
 
-	std::shared_ptr<ysl::IPluginFileMap> rm = std::shared_ptr<ysl::Object>(ysl::Object::CreateObject("common.filemapio"))->As<ysl::IPluginFileMap>();
 	if (rm == nullptr)
 		throw std::runtime_error("IO plugin can not be loaded");
-
+	rm->Open(inFileName, x*y*z, ysl::FileAccess::Read, ysl::MapAccess::ReadOnly);
 	const auto ptr = rm->FileMemPointer(0, x*y*z + offset);
 	if(!ptr)
 	{

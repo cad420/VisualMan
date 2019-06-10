@@ -62,12 +62,8 @@ namespace ysl
 	std::unique_ptr<Object> Object::CreateObject(const std::string& name)
 	{
 		auto factory = GetObjectFactory();
-
 		if (factory)
 		{
-			//const auto iter = ms_pClassFactory->find(name);
-			//if (iter != ms_pClassFactory->end())
-			//	return (*iter->second)();
 			return factory->CreateInstance<Object>(name);
 		}
 		return nullptr;

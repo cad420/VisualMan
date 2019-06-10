@@ -2,14 +2,14 @@
 #ifndef _LARGEVOLUMERAYCAST_H_
 #define _LARGEVOLUMERAYCAST_H_
 
-#include "graphictype.h"
 #include "visualman.h"
+#include "config.h"
 
 namespace ysl
 {
 	namespace vm
 	{
-		class VISUALMAN_EXPORT_IMPORT VM_LargeVolumeRayCast:public VisualMan
+		class VMAPPS_EXPORT_IMPORT VM_LargeVolumeRayCast:public VisualMan
 		{
 		public:
 			void InitEvent() override;

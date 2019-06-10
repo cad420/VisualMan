@@ -3,6 +3,7 @@
 #define _LVDHEADER_H_
 #include <cstdint>
 #include <memory>
+#include "common.h"
 
 #define LVD_HEADER_BUF_ORIGIN_OFFSET  0
 
@@ -49,7 +50,7 @@
 namespace ysl
 {
 
-	class LVDHeader
+	class COMMON_EXPORT_IMPORT LVDHeader
 	{
 		std::unique_ptr<unsigned char[]> buf;
 		static constexpr int BufSize = 64;

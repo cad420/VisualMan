@@ -1,13 +1,13 @@
 ﻿
 cmake_minimum_required (VERSION 3.8)
 
-project ("MRE")
+project ("VisualMan")
 
 add_definitions(-DNOMINMAX)
 
 
 # Shared or static library
-option(VM_SHARED_LIBRARY "Set to On to build using dynimic linking" ON)
+option(VM_SHARED_LIBRARY "Set to On to build using dynimic linking" OFF)
 if(VM_SHARED_LIBRARY)
 	add_definitions(-DVM_SHARED_LIBRARY)
 	set(VM_SHARED_OR_STATIC "SHARED")
@@ -38,7 +38,7 @@ endif()
 
 
 # Tools Build
-option(VM_BUILD_TOOLS "Set to On to build tools")
+option(VM_BUILD_TOOLS "Set to On to build tools" ON)
 
 
 #---------------------------------------------------

@@ -17,6 +17,8 @@ namespace ysl
 		DECLARE_INITIAL(WindowsFileMapping)
 		HANDLE f = nullptr;
 		HANDLE mapping = nullptr;
+		FileAccess fileFlag;
+		MapAccess mapFlag;
 		void * addr = nullptr;
 		std::unordered_set<unsigned char*> mappedPointers;
 		void PrintLastErrorMsg();

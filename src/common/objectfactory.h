@@ -18,7 +18,8 @@ namespace ysl
 		std::unique_ptr<T> CreateInstance(const std::string & uid)
 		{
 			auto ptr = CreateInstance_Implement(uid).release();
-			return std::unique_ptr<T>(Object_Dynamic_Cast<T>(ptr));
+			auto pp = Object_Dynamic_Cast<T>(ptr);
+			return std::unique_ptr<T>(pp);
 		}
 	protected:
 		virtual std::unique_ptr<Object> CreateInstance_Implement(const std::string & uid) = 0;
@@ -35,7 +36,6 @@ namespace ysl
 		void UnregisterClass(const std::string& uid);
 	protected:
 		std::unique_ptr<Object> CreateInstance_Implement(const std::string& uid) override;
-
 	private:
 		std::unordered_map<std::string, std::function<std::unique_ptr<Object>()>> constructors;
 	};

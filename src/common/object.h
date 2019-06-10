@@ -10,7 +10,8 @@ namespace ysl
 {
 
 	class Object;
-	using ObjectCtorFunc = std::function<std::unique_ptr<Object>()>;
+	//using ObjectCtorFunc = std::function<std::unique_ptr<Object>()>;
+	using ObjectCtorFunc = std::unique_ptr<Object>(*)();
 
 	//IObjectFactory* GetObjectFactory();
 
@@ -81,6 +82,8 @@ namespace ysl
 		std::shared_ptr<Ty> As() { return Shared_Object_Dynamic_Cast<Ty>(shared_from_this()); }
 
 		static std::unique_ptr<Object> CreateObject(const std::string& name);
+		template<typename Ty>
+		static std::unique_ptr<Ty> CreateObject(const std::string & name);
 
 		template<typename Ty> friend class __init__dummy;
 		DECLARE_RTTI
@@ -97,6 +100,17 @@ namespace ysl
 
 		 //static std::unique_ptr<std::unordered_map<std::string, ObjectCtorFunc>> ms_pClassFactory;			// Only one in global
 	};
+
+	template <typename Ty>
+	std::unique_ptr<Ty> Object::CreateObject(const std::string& name)
+	{
+		auto factory = GetObjectFactory();
+		if (factory)
+		{
+			return factory->CreateInstance<Ty>(name);
+		}
+		return nullptr;
+	}
 
 	/**
 	* \brief This class is used to execute some initialization before main()
