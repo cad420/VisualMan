@@ -7,8 +7,9 @@
 
 #include "geometry.h"
 #include "numeric.h"
-#include "windowsfilemap.h"
 #include "lvdheader.h"
+#include "rawio.h"
+#include "libraryloader.h"
 
 namespace ysl
 {
@@ -50,11 +51,11 @@ namespace ysl
 		ysl::Vector3i m_blockDimension;
 
 		//std::unique_ptr<RawType[]> m_rawBuf;
-		std::shared_ptr<ysl::AbstraFileMap> rawIO;
+		std::shared_ptr<ysl::IPluginFileMap> rawIO;
 		unsigned char * rawPtr;
 
 		//std::unique_ptr<RawType[]> m_lvdBuf;
-		std::shared_ptr<ysl::AbstraFileMap> lvdIO;
+		std::shared_ptr<ysl::IPluginFileMap> lvdIO;
 		unsigned char * lvdPtr;
 
 		const int m_repeat;
@@ -167,11 +168,23 @@ namespace ysl
 			throw std::runtime_error("empty data");
 		}
 
-#ifdef _WIN32
-		rawIO = std::make_shared<WindowsFileMapping>(fileName,
-			rawBytes,
-			WindowsFileMapping::Read, 
-			WindowsFileMapping::ReadOnly);
+
+
+		auto repo = ysl::LibraryReposity::GetLibraryRepo();
+		assert(repo);
+		repo->AddLibrary("ioplugin");
+
+		std::shared_ptr<Object> io = Object::CreateObject("common.filemapio");
+		rawIO = io->As<IPluginFileMap>();
+		if (rawIO == nullptr)
+			throw std::runtime_error("can not load ioplugin");
+
+		rawIO->Open(fileName, rawBytes, FileAccess::Read, MapAccess::ReadOnly);
+
+		//rawIO = std::make_shared<WindowsFileMapping>(fileName,
+		//	rawBytes,
+		//	WindowsFileMapping::Read, 
+		//	WindowsFileMapping::ReadOnly);
 
 		rawPtr = rawIO->FileMemPointer(0, rawBytes);
 		if(!rawPtr)
@@ -180,19 +193,18 @@ namespace ysl
 		}
 		const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
 
-		lvdIO = std::make_shared<WindowsFileMapping>(outFileName,
-			lvdBytes+LVD_HEADER_SIZE,
-			WindowsFileMapping::FileAccess::Write | WindowsFileMapping::FileAccess::Read,
-			WindowsFileMapping::ReadWrite);
-		lvdPtr = lvdIO->FileMemPointer(0, lvdBytes + LVD_HEADER_SIZE);
 
+		io = Object::CreateObject("common.filemapio");
+		lvdIO = io->As<IPluginFileMap>();
+		if (lvdIO == nullptr)
+			throw std::runtime_error("can not load ioplugin");
+
+		lvdIO->Open(fileName, lvdBytes, FileAccess::Read, MapAccess::ReadOnly);
+		lvdPtr = lvdIO->FileMemPointer(0, lvdBytes + LVD_HEADER_SIZE);
 		if (!lvdPtr)
 		{
 			throw std::runtime_error("lvd file bad mapping");
 		}
-#else
-		static_assert(false);
-#endif
 	}
 
 	template <int nLogBlockSize, typename LVDTraits>

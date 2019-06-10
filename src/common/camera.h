@@ -3,9 +3,9 @@
 
 #include "geometry.h"
 #include "transformation.h"
+#include "common.h"
 
-
-class FocusCamera
+class COMMON_EXPORT_IMPORT FocusCamera
 {
 	static constexpr float YAW = -90.0f;
 	static constexpr float PITCH = 0.0f;

@@ -1,8 +1,9 @@
 
 #include <iostream>
 #include <fstream>
-#include "windowsfilemap.h"
+//#include "windowsfilemap.h"
 #include "lvdreader.h"
+#include "libraryloader.h"
 
 namespace ysl
 {
@@ -82,16 +83,32 @@ namespace ysl
 
 		const std::size_t bytes = std::size_t(vx) * vy*vz + LVD_HEADER_SIZE;
 
-#ifdef _WIN32
-		lvdIO = std::make_unique<WindowsFileMapping>(fileName, bytes,
-			WindowsFileMapping::FileAccess::Read,
-			WindowsFileMapping::MapAccess::ReadOnly);
-		lvdPtr = lvdIO->FileMemPointer(0, bytes);
-		if (!lvdPtr)
-			throw std::runtime_error("LVDReader: bad mapping");
-#elif 
-		static_assert(false);
-#endif
+
+		// Load Library
+
+		auto repo = LibraryReposity::GetLibraryRepo();
+		assert(repo);
+		repo->AddLibrary("ioplugin");
+
+		std::shared_ptr<Object> io = Object::CreateObject("common.filemapio");
+		lvdIO = io->As<IPluginFileMap>();
+		if (lvdIO == nullptr)
+			throw std::runtime_error("can not load ioplugin");
+		lvdIO->Open(fileName, bytes, FileAccess::Read, MapAccess::ReadOnly);
+
+
+//#ifdef _WIN32
+//		lvdIO = std::make_unique<WindowsFileMapping>(fileName, bytes,
+//			WindowsFileMapping::FileAccess::Read,
+//			WindowsFileMapping::MapAccess::ReadOnly);
+//		lvdPtr = lvdIO->FileMemPointer(0, bytes);
+//		if (!lvdPtr)
+//			throw std::runtime_error("LVDReader: bad mapping");
+//#elif 
+//		static_assert(false);
+//#endif
+
+
 	}
 
 	LVDReader::LVDReader(const std::vector<std::string>& fileName, const std::vector<int>& lods)

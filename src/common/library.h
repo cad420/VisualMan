@@ -2,13 +2,11 @@
 #ifndef _LIBRARY_H_
 #define _LIBRARY_H_
 #include <string>
-
+#include "common.h"
 
 namespace ysl
 {
-	namespace util
-	{
-		class Library
+		class COMMON_EXPORT_IMPORT Library
 		{
 		public:
 			Library(const std::string & name);
@@ -18,8 +16,6 @@ namespace ysl
 		private:
 			void * lib;
 		};
-
-	}
 }
 
 #endif

@@ -9,12 +9,10 @@
 
 namespace ysl
 {
-	namespace util
-	{
-		class LibraryReposity
+		class COMMON_EXPORT_IMPORT LibraryReposity
 		{
 		public:
-			static LibraryReposity * GetInstance();
+			static LibraryReposity * GetLibraryRepo();
 
 			/**
 			 * \brief Add a library to the repository
@@ -42,7 +40,6 @@ namespace ysl
 			static LibraryReposity * instance;
 			std::map<std::string, std::shared_ptr<Library>> repo;
 		};
-	}
 
 }
 #endif

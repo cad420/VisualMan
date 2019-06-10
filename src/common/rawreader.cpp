@@ -1,9 +1,9 @@
 
 #include "rawreader.h"
-#ifdef _WIN32
-#include "windowsfilemap.h"
-#endif
+#include "rawio.h"
 #include <cstring> // memcpy
+#include "libraryloader.h"
+#include <cassert>
 
 
 namespace ysl
@@ -20,19 +20,32 @@ namespace ysl
 		//}
 
 		const auto rawBytes = dimensions.x * dimensions.y * dimensions.z * voxelSize;
+
+		auto repo = LibraryReposity::GetLibraryRepo();
+		assert(repo);
+		repo->AddLibrary("ioplugin");
+
+		std::shared_ptr<Object> p = Object::CreateObject("common.filemapio");
+
+		io = p->As<IPluginFileMap>();
+
+		if (io == nullptr)
+			throw std::runtime_error("can not load ioplugin");
+
+		io->Open(fileName, rawBytes, FileAccess::Read, MapAccess::ReadOnly);
 			
-#ifdef _WIN32
-		io.reset(new WindowsFileMapping(fileName,rawBytes,WindowsFileMapping::Read,WindowsFileMapping::MapAccess::ReadOnly));
-		ptr = reinterpret_cast<unsigned char*>(io->FileMemPointer(0, rawBytes));
-#elif
-		static_assert(false);
-#endif
+//#ifdef _WIN32
+//		io.reset(new WindowsFileMapping(fileName,rawBytes,WindowsFileMapping::Read,WindowsFileMapping::MapAccess::ReadOnly));
+//		ptr = reinterpret_cast<unsigned char*>(io->FileMemPointer(0, rawBytes));
+//#elif
+//		static_assert(false);
+//#endif
 		if (!ptr)
 		{
 			throw std::runtime_error("ImportRAW: Error seeking file");
 		}
-
 	}
+
 	RawReader::~RawReader() 
 	{
 

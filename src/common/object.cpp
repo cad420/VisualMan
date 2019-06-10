@@ -2,13 +2,13 @@
 #include <memory>
 #include <unordered_map>
 
-namespace ysl {
 
-	std::unique_ptr<std::unordered_map<std::string, ObjectCtorFunc>> Object::ms_pClassFactory = nullptr;
-	IMPLEMENT_RTTI_NoParent(Object)
-
-
-		Rtti::Rtti(const std::string& rttiName, Rtti* pBase, ObjectCtorFunc ctor) :
+namespace ysl
+{
+	/*
+	 * Rtti Implement
+	 */
+	Rtti::Rtti(const std::string& rttiName, Rtti* pBase, ObjectCtorFunc ctor) :
 		rttiName(rttiName),
 		pBase(pBase),
 		ctor(ctor)
@@ -58,4 +58,22 @@ namespace ysl {
 	{
 		return pBase;
 	}
+
+	std::unique_ptr<Object> Object::CreateObject(const std::string& name)
+	{
+		auto factory = GetObjectFactory();
+
+		if (factory)
+		{
+			//const auto iter = ms_pClassFactory->find(name);
+			//if (iter != ms_pClassFactory->end())
+			//	return (*iter->second)();
+			return factory->CreateInstance<Object>(name);
+		}
+		return nullptr;
+	}
+
+	//std::unique_ptr<std::unordered_map<std::string, ObjectCtorFunc>> Object::ms_pClassFactory = nullptr;
+	IMPLEMENT_RTTI_NoParent(Object)
 }
+

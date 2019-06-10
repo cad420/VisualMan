@@ -10,7 +10,7 @@ namespace ysl
 	namespace vm
 	{
 
-		class VISUALMAN_EXPORT_IMPORT VM_VolumeRayCast2:public VisualMan
+		class VM_VolumeRayCast2:public VisualMan
 		{
 		public:
 			VM_VolumeRayCast2() = default;

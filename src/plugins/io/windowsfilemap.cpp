@@ -1,10 +1,14 @@
 #ifdef _WIN32
-
 #include "windowsfilemap.h"
-
 
 namespace ysl
 {
+
+	IMPLEMENT_RTTI_NoConstructor(WindowsFileMapping, IPluginFileMap)
+	IMPLEMENT_INITIAL(WindowsFileMapping, common.filemapio)
+
+
+
 	void WindowsFileMapping::PrintLastErrorMsg()
 	{
 		DWORD dw = GetLastError();
@@ -20,16 +24,9 @@ namespace ysl
 		printf("[%d]%s\n", dw, msg);
 	}
 
-	WindowsFileMapping::WindowsFileMapping(const std::string & fileName,
-		std::size_t fileSize,
-		int FileAccessFlags,
-		int MapAccessFlags) :
-		AbstraFileMap(fileName, fileSize, flags),
-		addr(nullptr),
-		fileAccess(FileAccessFlags),
-		mapAccess(MapAccessFlags)
+	bool WindowsFileMapping::Open(const std::string& fileName, size_t fileSize, FileAccess fileFlags,
+		MapAccess mapFlags)
 	{
-		// Checking if the file is new created first
 		bool newCreated = false;
 		DWORD dwAttrib = GetFileAttributes(fileName.c_str());
 
@@ -38,8 +35,25 @@ namespace ysl
 			newCreated = true;
 		}
 
+		//enum class FileAccess
+		//{
+		//	Read = GENERIC_READ,
+		//	Write = GENERIC_WRITE,
+		//};
+		//enum class MapAccess
+		//{
+		//	ReadOnly = PAGE_READONLY,
+		//	ReadWrite = PAGE_READWRITE
+		//};
+
+		int flags = 0;
+		if (fileFlags == FileAccess::Read)
+			flags = GENERIC_READ;
+		if (fileFlags == FileAccess::Write)
+			flags = GENERIC_WRITE;
+
 		f = CreateFile(TEXT(fileName.c_str()),
-			FileAccessFlags,
+			flags,
 			0,
 			NULL,
 			OPEN_ALWAYS,
@@ -50,7 +64,7 @@ namespace ysl
 		{
 			printf("Create file failed:");
 			PrintLastErrorMsg();
-			return;
+			return false;
 		}
 
 		/// NOTE: LARGE_INTEGER is a signed 64bit integer, but fileSize is an unsigned 64-bit integer
@@ -64,14 +78,19 @@ namespace ysl
 			{
 				printf("Set end of file failed:");
 				PrintLastErrorMsg();
-				return;
+				return false;
 			}
 		}
 
+		int mapflags = 0;
+		if (mapFlags == MapAccess::ReadOnly)
+			mapflags = PAGE_READONLY;
+		if (mapFlags == MapAccess::ReadWrite)
+			mapflags = PAGE_READWRITE;
 
 		mapping = CreateFileMapping(f,
 			NULL,
-			MapAccessFlags,
+			mapflags,
 			fs.HighPart,
 			fs.LowPart,
 			NULL);
@@ -80,9 +99,9 @@ namespace ysl
 		{
 			printf("Create file mapping failed");
 			PrintLastErrorMsg();
-			return;
+			return false;
 		}
-
+		return true;
 	}
 
 	unsigned char* WindowsFileMapping::FileMemPointer(unsigned long long offset, std::size_t size)
@@ -92,10 +111,10 @@ namespace ysl
 		os.QuadPart = offset;
 
 		int flags = 0;
-		if (mapAccess == MapAccess::ReadOnly)
-			flags = FILE_MAP_READ;
-		if (mapAccess == MapAccess::ReadWrite)
-			flags = FILE_MAP_READ | FILE_MAP_WRITE;
+		//if (mapAccess == MapAccess::ReadOnly)
+		//	flags = FILE_MAP_READ;
+		//if (mapAccess == MapAccess::ReadWrite)
+		flags = FILE_MAP_READ | FILE_MAP_WRITE;
 
 		auto addr = (unsigned char*)MapViewOfFile(mapping,
 			flags,
@@ -117,7 +136,7 @@ namespace ysl
 	void WindowsFileMapping::DestroyFileMemPointer(unsigned char* addr)
 	{
 		auto it = mappedPointers.find(addr);
-		if(it != mappedPointers.end())
+		if (it != mappedPointers.end())
 		{
 			UnmapViewOfFile((LPVOID)addr);
 			mappedPointers.erase(it);
@@ -142,8 +161,6 @@ namespace ysl
 	{
 		WindowsFileMapping::Close();
 	}
-
-
 
 }
 

@@ -46,7 +46,7 @@ namespace ysl
 		unsigned char* ReadBlock(int blockId, int lod = 0);
 		~LVDReader();
 	private:
-		std::unique_ptr<AbstraFileMap> lvdIO;		// the declaration must be behind the declaration of ~LVDReader()
+		std::shared_ptr<IPluginFileMap> lvdIO;		// the declaration must be behind the declaration of ~LVDReader()
 	};
 
 	template <typename T, int nLogBlockSize>

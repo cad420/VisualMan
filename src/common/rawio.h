@@ -1,6 +1,8 @@
 #ifndef _RAWIO_H_
 #define _RAWIO_H_
 #include <string>
+#include "object.h"
+#include "common.h"
 
 //#ifdef _WIN32
 //#include <Windows.h>
@@ -8,20 +10,28 @@
 
 namespace ysl
 {
-
-	class AbstraFileMap//:public Reflectable
+	enum class FileAccess
 	{
-	protected:
-		std::string fileName;
-		std::size_t fileSize;
-		int flags;
+		Read,// = GENERIC_READ,
+		Write//= GENERIC_WRITE,
+	};
+	enum class MapAccess
+	{
+		ReadOnly,// = PAGE_READONLY,
+		ReadWrite //= PAGE_READWRITE
+	};
+
+	class COMMON_EXPORT_IMPORT IPluginFileMap:public Object
+	{
+		DECLARE_RTTI
 	public:
-		AbstraFileMap(const std::string & fileName, std::size_t fileSize,int flags):fileName(fileName), fileSize(fileSize), flags(flags){}
+		IPluginFileMap() = default;
+		virtual bool Open(const std::string & fileName, size_t fileSize, FileAccess fileFlags, MapAccess mapFlags) = 0;
 		virtual unsigned char* FileMemPointer(unsigned long long offset, std::size_t size) = 0;
 		virtual void DestroyFileMemPointer(unsigned char* addr) = 0;
 		virtual bool WriteCommit() = 0;
-		virtual bool Close()=0;
-		virtual ~AbstraFileMap() = default;
+		virtual bool Close() = 0;
+		virtual ~IPluginFileMap() = default;
 	};
 
 }

@@ -13,7 +13,7 @@ namespace ysl
 		ysl::Size3 dimensions;
 		size_t voxelSize;
 		uint64_t offset;
-		std::shared_ptr<AbstraFileMap> io;
+		std::shared_ptr<IPluginFileMap> io;
 		unsigned char * ptr;
 		uint64_t seekAmt;
 	public:

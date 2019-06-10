@@ -2,15 +2,11 @@
 #include <rawreader.h>
 #include <numeric.h>
 #include <string>
-
-#ifdef _WIN32
-#include <windowsfilemap.h>
-#elif defined(__linux__)
-#include <linuxfilemap.h>
-#endif
+//
 
 #include <iostream>
 #include <fstream>
+#include <libraryloader.h>
 
 //#include "../io/rawio.h"
 
@@ -148,7 +144,17 @@ int main()
 	std::cout << "Step:" << step << std::endl;
 
 	//std::unique_ptr<unsigned char> buf(new unsigned char[x*y*z]);
-	std::shared_ptr<ysl::AbstraFileMap> rm(new ysl::WindowsFileMapping(inFileName, offset+x*y*z, ysl::WindowsFileMapping::FileAccess::Read,ysl::WindowsFileMapping::MapAccess::ReadOnly));
+	//std::shared_ptr<ysl::IPluginFileMap> rm(new ysl::WindowsFileMapping(inFileName, offset+x*y*z, ysl::WindowsFileMapping::FileAccess::Read,ysl::WindowsFileMapping::MapAccess::ReadOnly));
+
+
+	auto repo = ysl::LibraryReposity::GetLibraryRepo();
+	repo->AddLibrary("ioplugin");
+
+
+	std::shared_ptr<ysl::IPluginFileMap> rm = std::shared_ptr<ysl::Object>(ysl::Object::CreateObject("common.filemapio"))->As<ysl::IPluginFileMap>();
+	if (rm == nullptr)
+		throw std::runtime_error("IO plugin can not be loaded");
+
 	const auto ptr = rm->FileMemPointer(0, x*y*z + offset);
 	if(!ptr)
 	{

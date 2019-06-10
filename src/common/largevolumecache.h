@@ -5,9 +5,11 @@
 #include <list>
 #include "lvdreader.h"
 #include "geometry.h"
+#include "common.h"
+
 namespace ysl
 {
-	struct VirtualMemoryBlockIndex
+	struct COMMON_EXPORT_IMPORT VirtualMemoryBlockIndex
 	{
 		VirtualMemoryBlockIndex(std::size_t linearId, int xb, int yb, int zb)
 		{
@@ -23,7 +25,7 @@ namespace ysl
 		size_type x, y, z;
 	};
 
-	class AbstrCPUBlockCache
+	class COMMON_EXPORT_IMPORT AbstrCPUBlockCache
 	{
 	public:
 		virtual const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock) = 0;
@@ -35,7 +37,7 @@ namespace ysl
 		virtual ~AbstrCPUBlockCache();
 	};
 
-	class AbstrBlockedVolumeDataCPUCache:public AbstrCPUBlockCache
+	class COMMON_EXPORT_IMPORT AbstrBlockedVolumeDataCPUCache:public AbstrCPUBlockCache
 	{
 		const Size3 cacheBlockDim;
 	public:
@@ -46,7 +48,7 @@ namespace ysl
 		Size3 CacheBlockDim()const { return cacheBlockDim; }
 	};
 
-	class CPUVolumeDataCache :public AbstrBlockedVolumeDataCPUCache
+	class COMMON_EXPORT_IMPORT CPUVolumeDataCache :public AbstrBlockedVolumeDataCPUCache
 	{
 		static constexpr int nLogBlockSize = 7;		//
 		static constexpr ysl::Size3 cacheBlockSize{ 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
@@ -68,8 +70,8 @@ namespace ysl
 		LRUHash	m_blockIdInCache;		// blockId---> (blockIndex,the position of blockIndex in list)
 		bool m_valid;
 		std::unique_ptr<Cache> m_volumeCache;
-		LVDReader lvdReader;
 
+		LVDReader lvdReader;
 
 		int blockCoordinateToBlockId(int xBlock, int yBlock, int zBlock)const
 		{
