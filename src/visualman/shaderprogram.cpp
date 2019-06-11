@@ -18,20 +18,15 @@ namespace ysl
 
 		void GLSLShader::SetFromFile(const std::string& fileName)
 		{
-			std::ifstream sourceFile(fileName);
+			std::ifstream sourceFile(fileName,std::ios::in);
 			if (!sourceFile.is_open())
 			{
-				Warning("Can not open shader source file.\n");
+
+				Warning("Can not open shader source file. Path: %s\n",fileName.c_str());
 				return;
 			}
-
-			const std::string prog{ std::istreambuf_iterator<char>{sourceFile},
-				std::istreambuf_iterator<char>{} };
-
-			SetFromSource(prog);
-
-			//CreateShader();
-			//Compile();
+			const std::string text{std::istreambuf_iterator<char>{sourceFile},std::istreambuf_iterator<char>{} };
+			SetFromSource(text);
 		}
 
 		void GLSLShader::CreateShader()
@@ -39,7 +34,6 @@ namespace ysl
 			if (handle == 0)
 			{
 				GL(handle = glCreateShader(Type()))
-
 					// Check Create Shader Errors
 					compiled = false;
 			}
@@ -54,7 +48,7 @@ namespace ysl
 				GL(glShaderSource(handle, 1, &p, nullptr));
 				GL(glCompileShader(handle))
 
-					int success = 1;
+				int success = 1;
 				char infoLog[512];
 				GL(glGetShaderiv(handle, GL_COMPILE_STATUS, &success));
 				if (!success)
@@ -391,7 +385,7 @@ namespace ysl
 
 			for (const auto &each : fragDataLocation)
 			{
-				GL(glBindFragDataLocation(handle,each.second,each.first.c_str()));
+				GL(glBindFragDataLocation(handle, each.second, each.first.c_str()));
 				//GL(glBindFragDataLocationIndexed(handle))
 			}
 

@@ -48,10 +48,25 @@ namespace ysl
 		ColorInterpulator() :m_valid(false) {}
 		explicit ColorInterpulator(const std::string & fileName) :m_valid(false)
 		{
-			read(fileName);
+			Read(fileName);
 		}
 
-		void read(const std::string& fileName);
+		//template<typename ...Args>
+		//ColorInterpulator(Args&&...args)
+		//{
+		//	
+		//}
+
+		void AddColorKey(float intensity, ysl::Color color);
+		void AddColorKey(float intensity, const RGBASpectrum & spectrum);
+		void Sort();
+		void SetLeftThreshold(float left) { leftThreshold = left; }
+		void SetRightThreshold(float right) { rightThreshold = right; }
+		void SetLeftRightThreshold(float left, float right) { SetLeftThreshold(left); SetRightThreshold(right);}
+		//template<typename  ...Args>
+		//void SetColorKeys(Args&&... args);
+
+		void Read(const std::string& fileName);
 		bool valid()const
 		{
 			return m_valid;
@@ -84,10 +99,15 @@ namespace ysl
 		bool m_valid;
 	protected:
 		std::vector<MappingKey> keys;
-		Float leftThreshold;
-		Float rightThreshold;
+		Float leftThreshold=0.0;
+		Float rightThreshold=1.0;
 	};
 
+	//template <typename ... Args>
+	//void ColorInterpulator::SetColorKeys(Args&&... args)
+	//{
+
+	//}
 }
 
 #endif

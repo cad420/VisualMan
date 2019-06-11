@@ -546,7 +546,7 @@ namespace ysl
 
 			// Load Transfer Function
 			{
-				tfObject.read(tfName);
+				tfObject.Read(tfName);
 				//tfObject.read("d:\\temp.txt");
 				tfObject.FetchData(tfData.data(), 256);
 				texTransferFunction->SetData(OpenGLTexture::RGBA32F, OpenGLTexture::RGBA, OpenGLTexture::Float32, 256,

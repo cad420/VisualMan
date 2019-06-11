@@ -35,7 +35,7 @@ namespace ysl
 			Size3 volSize{ 480,720,120 };
 			auto volumeTex = MakeVolumeTexture(R"(D:\scidata\combustion\mixfrac.raw)", volSize.x,volSize.y,volSize.z);
 			// Read transfer function
-			auto tfTex = MakeTransferFunction1D(R"(D:\scidata\elt_tf1d2.TF1D)");
+			auto tfTex = MakeTransferFunction1DTexture(R"(D:\scidata\elt_tf1d2.TF1D)");
 
 			auto effect = MakeRef<Artist>();
 			effect->GetLOD(0)->push_back(rayCastShading);

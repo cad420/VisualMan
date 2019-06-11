@@ -41,9 +41,7 @@ namespace ysl
 		}
 		void VM_ISOSurface::UpdateScene()
 		{
-
 			UpdatePrimitive();
-
 		}
 		void VM_ISOSurface::SetNewData(const unsigned char* data, const Size3& size)
 		{

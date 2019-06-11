@@ -18,10 +18,10 @@ namespace ysl
 		{
 			//InitDefault();
 			auto  vertShader = MakeRef<vm::GLSLVertexShader>();
-			vertShader->SetFromFile(R"(D:\code\MRE\resource\glsl\trivial_vs.glsl)");
+			vertShader->SetFromFile(R"(glsl\trivial_vs.glsl)");
 			assert(vertShader->Compile());
 			auto fragShader = MakeRef<vm::GLSLFragmentShader>();
-			fragShader->SetFromFile(R"(D:\code\MRE\resource\glsl\trivial_fs.glsl)");
+			fragShader->SetFromFile(R"(glsl\trivial_fs.glsl)");
 			assert(fragShader->Compile());
 			//Vec3f viewPos{ 0,0,5 };
 			//bunnyPrimitive = MakePrimitive(R"(D:\Desktop\bunny1.obj)");

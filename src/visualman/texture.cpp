@@ -374,7 +374,7 @@ namespace ysl
 			return volumeTex;
 		}
 
-		Ref<Texture> MakeTransferFunction1D(const std::string& fileName)
+		Ref<Texture> MakeTransferFunction1DTexture(const std::string& fileName)
 		{
 			Ref<TexCreateParams> params = MakeRef<TexCreateParams>();
 			params->EnableMipMap(false);
@@ -389,13 +389,39 @@ namespace ysl
 				return nullptr;
 			}
 			ColorInterpulator interpulator(fileName);
-			if(interpulator.valid() == false)
+			if(!interpulator.valid())
 			{
 				throw std::runtime_error("Return Color Table error");
 			}
 			std::unique_ptr<float[]> buffer(new float[256 * 4]);
 			interpulator.FetchData((float*)(buffer.get()), 256);
 			tfTex->SetSubTextureData(buffer.get(), IF_RGBA, IT_FLOAT, 0, 0, 0, 256, 0, 0 );
+			return tfTex;
+		}
+
+		Ref<Texture> MakeTransferFunction1DTexture(const std::vector<Color> & colors)
+		{
+			Ref<TexCreateParams> params = MakeRef<TexCreateParams>();
+			params->EnableMipMap(false);
+			params->EnableBorder(false);
+			params->SetSize(256, 0, 0);
+			params->SetTextureFormat(TF_RGBA32F);
+			params->SetTextureTarget(TD_TEXTURE_1D);
+			auto tfTex = MakeRef<Texture>();
+			tfTex->SetSetupParams(params);
+
+			if (!tfTex->CreateTexture())
+			{
+				return nullptr;
+			}
+			ColorInterpulator interpulator;
+
+			for(int i = 0 ; i < colors.size();i++)
+				interpulator.AddColorKey(i*1.0 / colors.size(), colors[i]);
+			interpulator.Sort();
+			std::unique_ptr<float[]> buffer(new float[256 * 4]);
+			interpulator.FetchData((buffer.get()), 256);
+			tfTex->SetSubTextureData(buffer.get(), IF_RGBA, IT_FLOAT, 0, 0, 0, 256, 0, 0);
 			return tfTex;
 		}
 	}

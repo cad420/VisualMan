@@ -4,6 +4,7 @@
 
 #include "graphictype.h"
 #include "bufferobject.h"
+#include "spectrum.h"
 
 namespace ysl
 {
@@ -156,7 +157,8 @@ namespace ysl
 
 		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeVolumeTexture(const std::string & fileName, size_t x, size_t y, size_t z);
 		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeImageTexuture(const std::string & fileName);
-		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeTransferFunction1D(const std::string & fileName);
+		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeTransferFunction1DTexture(const std::string & fileName);
+		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeTransferFunction1DTexture(const std::vector<Color> & colors);
 	}
 }
 

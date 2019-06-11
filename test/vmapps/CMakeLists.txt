@@ -18,3 +18,5 @@ target_include_directories(vmapps PRIVATE "${CMAKE_SOURCE_DIR}/src/visualman" "$
 
 install(TARGETS vmapps LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
 install(FILES ${INC_LIST} DESTINATION "include")
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/resource/glsl" DESTINATION "bin")
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/resource/data" DESTINATION "bin")

@@ -13,36 +13,24 @@ namespace ysl
 		: fileName(fileName), dimensions(dimensions), voxelSize(voxelSize)//,file(fileName,std::ios::binary),
 		 ,offset(0),ptr(nullptr)
 	{
-
-		//if (!file)
-		//{
-		//	throw std::runtime_error("ImportRAW: Unable to open file " + fileName);
-		//}
-
 		const auto rawBytes = dimensions.x * dimensions.y * dimensions.z * voxelSize;
 
 		auto repo = LibraryReposity::GetLibraryRepo();
+
 		assert(repo);
+
 		repo->AddLibrary("ioplugin");
 
-		std::shared_ptr<Object> p = Object::CreateObject("common.filemapio");
-
-		io = p->As<IPluginFileMap>();
+		io = Object::CreateObject<IPluginFileMap>("common.filemapio");
 
 		if (io == nullptr)
 			throw std::runtime_error("can not load ioplugin");
 
 		io->Open(fileName, rawBytes, FileAccess::Read, MapAccess::ReadOnly);
-			
-//#ifdef _WIN32
-//		io.reset(new WindowsFileMapping(fileName,rawBytes,WindowsFileMapping::Read,WindowsFileMapping::MapAccess::ReadOnly));
-//		ptr = reinterpret_cast<unsigned char*>(io->FileMemPointer(0, rawBytes));
-//#elif
-//		static_assert(false);
-//#endif
+		ptr = io->FileMemPointer(0, rawBytes);
 		if (!ptr)
 		{
-			throw std::runtime_error("ImportRAW: Error seeking file");
+			throw std::runtime_error("map file failed");
 		}
 	}
 

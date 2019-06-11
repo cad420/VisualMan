@@ -5,17 +5,17 @@
 #include <cmath>
 #include "../common/basetype.h"
 
-namespace ysl 
+namespace ysl
 {
 	template<int nSamples>
-	class CoefficientSpectrum 
+	class CoefficientSpectrum
 	{
 	public:
 		Float c[nSamples];
 
-		explicit CoefficientSpectrum(Float v = 0.0) 
+		explicit CoefficientSpectrum(Float v = 0.0)
 		{
-			for(auto i = 0 ; i < nSamples ; i++) 
+			for (auto i = 0; i < nSamples; i++)
 				c[i] = v;
 		}
 
@@ -25,7 +25,7 @@ namespace ysl
 				c[i] = v[i];
 		}
 
-		bool IsNull()const 
+		bool IsNull()const
 		{
 			for (auto i = 0; i < nSamples; i++)
 				if (c[i] != 0.0f)
@@ -33,17 +33,17 @@ namespace ysl
 			return true;
 		}
 
-		bool HasNaNs()const 
+		bool HasNaNs()const
 		{
-			for(auto i = 0 ; i < nSamples ; i++) 
+			for (auto i = 0; i < nSamples; i++)
 				if (std::isnan(c[i]))
 					return true;
 			return false;
 		}
 
-		CoefficientSpectrum& operator+=(const CoefficientSpectrum & spectrum) 
+		CoefficientSpectrum& operator+=(const CoefficientSpectrum & spectrum)
 		{
-			for(auto i = 0 ;i<nSamples;i++)
+			for (auto i = 0; i < nSamples; i++)
 				c[i] += spectrum.c[i];
 			return *this;
 		}
@@ -55,7 +55,7 @@ namespace ysl
 			return *this;
 		}
 
-		CoefficientSpectrum& operator*=(const CoefficientSpectrum & spectrum) 
+		CoefficientSpectrum& operator*=(const CoefficientSpectrum & spectrum)
 		{
 			for (auto i = 0; i < nSamples; i++)
 				c[i] *= spectrum.c[i];
@@ -68,7 +68,7 @@ namespace ysl
 			return *this;
 		}
 
-		CoefficientSpectrum& operator/=(const CoefficientSpectrum & spectrum) 
+		CoefficientSpectrum& operator/=(const CoefficientSpectrum & spectrum)
 		{
 			assert(!spectrum.HasNaNs());
 			for (auto i = 0; i < nSamples; i++)
@@ -76,7 +76,7 @@ namespace ysl
 			return *this;
 		}
 
-		CoefficientSpectrum& operator/=(Float s) 
+		CoefficientSpectrum& operator/=(Float s)
 		{
 			Float inv = 1 / s;
 			for (auto i = 0; i < nSamples; i++)
@@ -96,7 +96,7 @@ namespace ysl
 			return c[i];
 		}
 
-		bool IsBlack()const 
+		bool IsBlack()const
 		{
 			for (auto i = 0; i < nSamples; i++)
 				if (c[i] != 0.f)
@@ -114,28 +114,28 @@ namespace ysl
 	};
 
 	template<int nSamples>
-	CoefficientSpectrum<nSamples> 
-	operator+(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
+	CoefficientSpectrum<nSamples>
+		operator+(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
 	{
 		return CoefficientSpectrum<nSamples>(s1) += s2;			// More Effective C++: Item 22
 	}
 
 	template<int nSamples>
-	CoefficientSpectrum<nSamples> 
-	operator-(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
+	CoefficientSpectrum<nSamples>
+		operator-(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
 	{
 		return CoefficientSpectrum<nSamples>(s1) -= s2;			// More Effective C++: Item 22
 	}
 	template<int nSamples>
-	CoefficientSpectrum<nSamples> 
-	operator*(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
+	CoefficientSpectrum<nSamples>
+		operator*(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
 	{
 		return CoefficientSpectrum<nSamples>(s1) *= s2;			// More Effective C++: Item 22
 	}
 
 	template<int nSamples>
-	CoefficientSpectrum<nSamples> 
-	operator/(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
+	CoefficientSpectrum<nSamples>
+		operator/(const CoefficientSpectrum<nSamples> & s1, const CoefficientSpectrum<nSamples> & s2)
 	{
 		return CoefficientSpectrum<nSamples>(s1) /= s2;			// More Effective C++: Item 22
 	}
@@ -148,8 +148,8 @@ namespace ysl
 	}
 
 	template<int nSamples>
-	CoefficientSpectrum<nSamples> 
-	operator*(const CoefficientSpectrum<nSamples> & s,Float v)
+	CoefficientSpectrum<nSamples>
+		operator*(const CoefficientSpectrum<nSamples> & s, Float v)
 	{
 		auto r = s;
 		for (auto i = 0; i < nSamples; i++) r.c[i] *= v;
@@ -157,15 +157,15 @@ namespace ysl
 	}
 
 	template<int nSamples>
-	CoefficientSpectrum<nSamples> 
-	operator*(Float v, const CoefficientSpectrum<nSamples> & s)
+	CoefficientSpectrum<nSamples>
+		operator*(Float v, const CoefficientSpectrum<nSamples> & s)
 	{
 		return s * v;
 	}
 
 	template<int nSamples>
-	std::ofstream & 
-		operator<<(std::ofstream & fs,const CoefficientSpectrum<nSamples> & coe)
+	std::ofstream &
+		operator<<(std::ofstream & fs, const CoefficientSpectrum<nSamples> & coe)
 	{
 		fs << "[";
 		for (auto i = 0; i < nSamples; i++)
@@ -175,8 +175,8 @@ namespace ysl
 	}
 
 	template<int nSamples>
-	std::ifstream & 
-		operator>>(std::ifstream & fs,const CoefficientSpectrum<nSamples> & coe)
+	std::ifstream &
+		operator>>(std::ifstream & fs, const CoefficientSpectrum<nSamples> & coe)
 	{
 		for (auto i = 0; i < nSamples; i++)
 			fs >> coe.c[i];
@@ -184,19 +184,19 @@ namespace ysl
 	}
 
 	template<int nSamples>
-	std::ostream & 
+	std::ostream &
 		operator<<(std::ostream & os, const CoefficientSpectrum<nSamples> & coe)
 	{
 		os << "[";
 		for (auto i = 0; i < nSamples; i++)
-			os << coe.c[i]<<", ";
+			os << coe.c[i] << ", ";
 		os << "]";
 
 		return os;
 	}
 
 	template<int nSamples>
-	std::istream & 
+	std::istream &
 		operator>>(std::istream & is, const CoefficientSpectrum<nSamples> & coe)
 	{
 		for (auto i = 0; i < nSamples; i++)
@@ -259,7 +259,36 @@ namespace ysl
 	{
 		return (1 - t)*s1 + t * s2;
 	}
-	
+
+	enum class Color
+	{
+		green,
+		red,
+		blue,
+		white,
+		black,
+		yellow,
+		transparent,
+		gray
+	};
+
+	inline RGBASpectrum TranslateColor(ysl::Color color)
+	{
+		float c[4];
+		switch (color)
+		{
+			case Color::green:	(c[0] = 0, c[1] = 1, c[2] = 0, c[3] = 1); break;
+			case Color::red:	(c[0] = 1, c[1] = 0, c[2] = 0, c[3] = 1); break;
+			case Color::blue:	(c[0] = 0, c[1] = 0, c[2] = 1, c[3] = 1); break;
+			case Color::white:	(c[0] = 1, c[1] = 1, c[2] = 1, c[3] = 1); break;
+			case Color::yellow:	(c[0] = 1, c[1] = 1, c[2] = 0, c[3] = 1); break;
+			case Color::black:	(c[0] = 0, c[1] = 0, c[2] = 0, c[3] = 1); break;
+			case Color::transparent: (c[0] = 1, c[1] = 1, c[2] = 1, c[3] = 0); break;
+			case Color::gray: (c[0] = 0.5, c[1] = 0.5, c[2] = 0.5, c[3] = 0.5); break;
+		}
+		return RGBASpectrum(c);
+	}
+
 }
 
 #endif

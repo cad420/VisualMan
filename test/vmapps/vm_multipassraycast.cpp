@@ -27,27 +27,19 @@ namespace ysl {
 			auto positionGLSL = positionShading->CreateGetProgram();
 
 			auto fragShader = MakeRef<GLSLFragmentShader>();
-
-			fragShader->SetFromFile(R"(D:\code\MRE\resource\glsl\position_f.glsl)");
-
+			fragShader->SetFromFile(R"(glsl/position_f.glsl)");
 			auto vertShader = MakeRef<GLSLVertexShader>();
-
-			vertShader->SetFromFile(R"(D:\code\MRE\resource\glsl\position_v.glsl)");
-
+			vertShader->SetFromFile(R"(glsl/position_v.glsl)");
 			positionGLSL->AttachShader(fragShader);
-
 			positionGLSL->AttachShader(vertShader);
-
 			positionGLSL->BindFragDataLocation(0, "entryPos");
-
 			positionGLSL->BindFragDataLocation(1, "exitPos");
-
 
 			// Create a artist
 			auto artist = MakeRef<Artist>();
 			artist->GetLOD(0)->push_back(positionShading);
 			auto scale = MakeRef<Transform>();
-			scale->SetScale(Vec3f(480, 720, 120).Normalized());
+			scale->SetScale(Vec3f(160,240,40).Normalized());
 			auto geometryActor = MakeRef<Actor>(nullptr, artist, scale);
 			auto geometryActorCallback = MakeRef<RayCast2ActorEventCallback>();
 			geometryActorCallback->BindToActor(geometryActor);
@@ -72,16 +64,17 @@ namespace ysl {
 			auto mainAggregate = MakeRef<Aggregate>();
 			mainAggregate->SceneManager().push_back(MakeRef<TrivialSceneManager>());
 			// Read a raw volume and tf function
-			Vec3i volSize{ 480,720,120 };
-			auto volumeTex = MakeVolumeTexture(R"(D:\scidata\combustion\mixfrac.raw)", volSize.x, volSize.y, volSize.z);
-			auto tfTex = MakeTransferFunction1D(R"(D:\scidata\elt_tf1d2.TF1D)");
+			Vec3i volSize{ 160,240,40 };
+			auto volumeTex = MakeVolumeTexture(R"(data\mixfrac160x240x40.raw)", volSize.x, volSize.y, volSize.z);
+			//auto tfTex = MakeTransferFunction1D(R"(D:\scidata\elt_tf1d2.TF1D)");
+			auto tfTex = MakeTransferFunction1DTexture({Color::transparent,Color::blue,Color::yellow});
 
 			auto rayCastShading = MakeRef<Shading>();
 			auto raycastGLSL = rayCastShading->CreateGetProgram();
 			auto fs = MakeRef<GLSLFragmentShader>();
-			fs->SetFromFile(R"(D:\code\MRE\resource\glsl\raycast_fs.glsl)");
+			fs->SetFromFile(R"(glsl\raycast_fs.glsl)");
 			auto vs = MakeRef<GLSLVertexShader>();
-			vs->SetFromFile(R"(D:\code\MRE\resource\glsl\raycast_vs.glsl)");
+			vs->SetFromFile(R"(glsl\raycast_vs.glsl)");
 			raycastGLSL->AttachShader(fs);
 			raycastGLSL->AttachShader(vs);
 
