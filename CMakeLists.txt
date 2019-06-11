@@ -2,8 +2,18 @@
 cmake_minimum_required (VERSION 3.8)
 
 project ("VisualMan")
+set(CMAKE_CXX_STANDARD 17)				# C++17 is requireddd
 
-add_definitions(-DNOMINMAX)
+if(WIN32)
+add_definitions(-DNOMINMAX)			# min and max are recoginized as macro on windows
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX)		# options for gnu compliler
+	add_compile_options(-fpermissive)
+	add_compile_options(-std=c++17)
+endif()
+
+
 
 
 # Shared or static library
@@ -45,7 +55,6 @@ option(VM_BUILD_TOOLS "Set to On to build tools" ON)
 # Build Type
 #---------------------------------------------------
 
-set(CMAKE_CXX_STANDARD 17)				# C++17 is required
 
 # OpenMP
 FIND_PACKAGE(OpenMP)

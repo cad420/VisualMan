@@ -1,5 +1,6 @@
 
 #include "uniform.h"
+#include <cstring>		// for memcpy
 namespace ysl
 {
 	namespace vm
@@ -338,7 +339,8 @@ namespace ysl
 
 		void UniformSet::RemoveAllUniforms()
 		{
-			uniforms.swap(std::vector<Ref<Uniform>>());
+			//uniforms.swap(std::vector<Ref<Uniform>>());
+			std::vector<Ref<Uniform>>().swap(uniforms);
 		}
 	}
 }

@@ -242,7 +242,8 @@ namespace ysl
 
 		void FramebufferObject::RemoveAllAttachments()
 		{
-			std::swap(attachments, std::map<AttachmentBindPoint, Ref<AbstraFBOAttachment>>());
+			//std::swap(attachments, std::map<AttachmentBindPoint, Ref<AbstraFBOAttachment>>());
+			std::map<AttachmentBindPoint,Ref<AbstraFBOAttachment>>().swap(attachments);
 		}
 
 		void FramebufferObject::RemoveAttachments(AttachmentBindPoint point)

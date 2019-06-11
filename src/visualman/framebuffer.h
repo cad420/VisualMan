@@ -10,6 +10,7 @@ namespace ysl
 {
 	namespace vm
 	{
+		class RenderContext;
 		class VISUALMAN_EXPORT_IMPORT Framebuffer:public std::enable_shared_from_this<Framebuffer>
 		{
 			friend class RenderContext;

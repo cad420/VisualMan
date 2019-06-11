@@ -292,7 +292,7 @@ namespace ysl {
 					each.Apply(nullptr, this);
 				}
 
-				std::swap(currentRenderStates, std::unordered_map<RenderStateType, RenderStateBox>());
+				std::unordered_map<RenderStateType,RenderStateBox>().swap(currentRenderStates);
 
 				return;
 			}
@@ -341,7 +341,7 @@ namespace ysl {
 				{
 					GL(glDisable(EnableEnum2GLEnum[i]));
 				}
-				std::swap(currentEnableStates, std::unordered_set<EnableState>());
+				std::unordered_set<EnableState>().swap(currentEnableStates);
 				return;
 			}
 

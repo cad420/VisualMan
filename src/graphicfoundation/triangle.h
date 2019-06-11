@@ -1,11 +1,12 @@
 #ifndef _TRIANGLE_H_
 #define _TRIANGLE_H_
 
+#include <cstring> // memcpy
 #include <transformation.h>
 #include <arithmetic.h>
-
 #include <vector>
 #include <unordered_map>
+
 #include "shape.h"
 #include "material.h"
 #include "interaction.h"

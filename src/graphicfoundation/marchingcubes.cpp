@@ -229,8 +229,9 @@ MeshGenerator::OctreeNode *MeshGenerator::BuildOctree(const ysl::Size3 &size, co
 				for (int x = 0; x < diagnal.x; x++) {
 					const auto global = dataBound.min + ysl::Vector3i{ x,y,z };
 					const auto i = global.x + size.x*(global.y + global.z * size.y);
-					minV = (std::min)((unsigned char(d[i])), minV);
-					maxV = (std::max)((unsigned char(d[i])), maxV);
+					const unsigned char dd = d[i];
+					minV = (std::min)(dd, minV);
+					maxV = (std::max)(dd,maxV);
 				}
 			}
 		}

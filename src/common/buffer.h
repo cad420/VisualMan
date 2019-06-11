@@ -2,11 +2,13 @@
 #ifndef _BUFFER_H_
 #define _BUFFER_H_
 #include <cstdint>
+#include <cstring>
 #include "dataarena.h"
+#include "common.h"
 
 namespace ysl
 {
-	class LocalBuffer
+	class COMMON_EXPORT_IMPORT LocalBuffer
 	{
 		using size_type = size_t;
 		size_type bytes = 0;

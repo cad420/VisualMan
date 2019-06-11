@@ -1,8 +1,8 @@
 #include "graphicsbooster.h"
 
-#include <experimental/filesystem>
+//#include <experimental/filesystem>
 #include <iostream>
-
+#include <filesystem>
 
 namespace ysl
 {
@@ -18,9 +18,10 @@ namespace ysl
 			Init();
 
 			// Initialize path
-			const auto argv0 = std::experimental::filesystem::path(argv[0]);
-			auto p = std::experimental::filesystem::current_path();
-			p.append(argv0.parent_path());
+			const auto argv0 = std::filesystem::path(argv[0]);
+			auto p = std::filesystem::current_path();
+			auto pp = argv0.parent_path().string();
+			p.append(pp);
 			exePath = p.string();
 		}
 

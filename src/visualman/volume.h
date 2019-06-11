@@ -56,7 +56,7 @@ namespace ysl
 			Any(const Any& other) : m_ptr(other.Clone()), m_tpIndex(other.m_tpIndex) {}
 			Any(Any && other)noexcept : m_ptr(std::move(other.m_ptr)), m_tpIndex(other.m_tpIndex) {}
 
-			template<typename U, class = typename std::enable_if<!std::is_same<typename std::decay<U>::type, Any>::value, U>::type> Any(U && value) : m_ptr(new Derived < typename std::decay<U>::type>(forward<U>(value))),
+			template<typename U, class = typename std::enable_if<!std::is_same<typename std::decay<U>::type, Any>::value, U>::type> Any(U && value) : m_ptr(new Derived < typename std::decay<U>::type>(std::forward<U>(value))),
 				m_tpIndex(std::type_index(typeid(typename std::decay<U>::type))) {}
 
 			bool IsNull() const { return !bool(m_ptr); }
@@ -72,7 +72,7 @@ namespace ysl
 			{
 				if (!As<U>())
 				{
-					std::cout << "can not cast " << typeid(U).name() << " to " << m_tpIndex.name() << endl;
+					std::cout << "can not cast " << typeid(U).name() << " to " << m_tpIndex.name() << std::endl;
 					throw std::bad_cast();
 				}
 
@@ -104,7 +104,7 @@ namespace ysl
 			struct Derived : Base
 			{
 				template<typename U>
-				Derived(U && value) : m_value(forward<U>(value)) { }
+				Derived(U && value) : m_value(std::forward<U>(value)) { }
 
 				BasePtr Clone() const
 				{

@@ -10,8 +10,8 @@ namespace ysl
 {
 
 	class Object;
-	//using ObjectCtorFunc = std::function<std::unique_ptr<Object>()>;
-	using ObjectCtorFunc = std::unique_ptr<Object>(*)();
+	using ObjectCtorFunc = std::function<std::unique_ptr<Object>()>;
+	//using ObjectCtorFunc = std::unique_ptr<Object>(*)();
 
 	//IObjectFactory* GetObjectFactory();
 
