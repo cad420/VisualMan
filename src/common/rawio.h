@@ -13,7 +13,8 @@ namespace ysl
 	enum class FileAccess
 	{
 		Read,// = GENERIC_READ,
-		Write//= GENERIC_WRITE,
+		Write,//= GENERIC_WRITE,
+		ReadWrite
 	};
 	enum class MapAccess
 	{

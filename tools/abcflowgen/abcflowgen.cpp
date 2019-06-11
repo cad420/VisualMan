@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <cmath>
 #include "abcflowgen.h"
 
 //#include "../../src/mathematics/numeric.h"

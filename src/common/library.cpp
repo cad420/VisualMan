@@ -1,6 +1,7 @@
 
 #include "library.h"
 #include <cassert>
+#include <iostream>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -47,7 +48,6 @@ namespace ysl
 		if (!lib)
 			errorMsg = dlerror();
 #endif /*_WIN32*/
-
 		if (!lib)
 		{
 			throw std::runtime_error(errorMsg);

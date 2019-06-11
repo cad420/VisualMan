@@ -32,7 +32,7 @@ ${GL3W_SRC})
 target_link_libraries(vm ${OPENGL_LIBRARIES} common graphicfoundation)
 target_include_directories(vm PUBLIC ${GL3W_INCLUDE_DIR} "../common" "../graphicfoundation")
 
-install(TARGETS vm LIBRARY DESTINATION "bin" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
+install(TARGETS vm LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
 install(FILES ${VM_INC} DESTINATION "include")
 install(DIRECTORY ${GL3W_INCLUDE_DIR} DESTINATION "include")
 #install(FILES ${VN_INC} DESTINATION "include")
