@@ -4,6 +4,7 @@
 #include <rendercontext.h>
 #include <GLFW/glfw3.h>
 #include <mutex>
+#include <thread>
 
 #if defined(_WIN32) && defined(VM_SHARED_LIBRARY)
 #ifdef vmglfwwindow_EXPORTS

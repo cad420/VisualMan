@@ -18,11 +18,12 @@ namespace ysl
 			Init();
 
 			// Initialize path
-			const auto argv0 = std::filesystem::path(argv[0]);
-			auto p = std::filesystem::current_path();
-			auto pp = argv0.parent_path().string();
-			p.append(pp);
-			exePath = p.string();
+
+			// const auto argv0 = std::filesystem::path(argv[0]);
+			// auto p = std::filesystem::current_path();
+			// auto pp = argv0.parent_path().string();
+			// p.append(pp);
+			// exePath = p.string();
 		}
 
 

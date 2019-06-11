@@ -34,6 +34,5 @@ namespace ysl
 		virtual bool Close() = 0;
 		virtual ~IPluginFileMap() = default;
 	};
-
 }
 #endif

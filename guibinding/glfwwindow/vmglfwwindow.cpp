@@ -4,6 +4,7 @@
 #include <abstraarray.h>
 #include <primitive.h>
 #include <renderstudio.h>
+#include <thread>
 
 
 namespace ysl {
