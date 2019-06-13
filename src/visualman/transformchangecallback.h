@@ -24,9 +24,7 @@ namespace ysl
 				const Transform* transform);
 			virtual ~TransformChangeCallback() = default;
 		private:
-
 		};
-
 	}
 }
 

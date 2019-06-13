@@ -14,7 +14,7 @@ add_library(vmapps ${VM_SHARED_OR_STATIC})
 aux_source_directory(. VMAPPS_SRC)
 target_sources(vmapps PRIVATE ${VMAPPS_SRC})
 target_link_libraries(vmapps vm graphicfoundation)
-target_include_directories(vmapps PRIVATE "${CMAKE_SOURCE_DIR}/src/visualman" "${CMAKE_SOURCE_DIR}/src/graphicfoundation")
+target_include_directories(vmapps PRIVATE "${CMAKE_SOURCE_DIR}/src/visualman" "${CMAKE_SOURCE_DIR}/src/graphicfoundation" "${CMAKE_SOURCE_DIR}/src/common")
 
 install(TARGETS vmapps LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
 install(FILES ${INC_LIST} DESTINATION "include")

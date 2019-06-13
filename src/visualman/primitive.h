@@ -54,7 +54,6 @@ namespace ysl
 			Ref<const AbstraArray> GetVertexAttribArray(int attribLocation) const override { return vertexAttribArrays[attribLocation]; }
 
 			void UpdateDirtyBufferObject(BufferObjectUpdateMode mode) override;
-
 			
 
 		protected:
@@ -75,17 +74,11 @@ namespace ysl
 			 * \brief  Indicates whether the vao is completed. Completion is broken when new vertex attribute array is set.
 			 */
 			bool IsVAOCompletion()const { return vaoCompletion; }
-
 			unsigned int vaoHandle = 0;
-
 			std::vector<Ref<AbstrDrawCall>> drawCalls;
 			std::array<Ref<AbstraArray>, VA_VertexAttribArray_Count> vertexAttribArrays;
-
 			std::array<bool, VA_VertexAttribArray_Count> boundToVAO = { false,false,false,false };
 			bool vaoCompletion = false;
-
-		private:
-
 		};
 
 		//class GRAPHICS_EXPORT_IMPORT OutOfCorePrimitive :public Primitive

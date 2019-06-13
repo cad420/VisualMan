@@ -27,7 +27,7 @@ namespace ysl
 
 			virtual ~Renderable() = default;
 		protected:
-			virtual void Render_Implement(const Actor * actor, const Shading * shading, const Camera* camera, RenderContext * context)const = 0; // like a callback
+			virtual void Render_Implement(const Actor * actor, const Shading * shading, const Camera* camera, RenderContext * context)const = 0; 
 		private:
 			bool renderableDirty = true;
 			bool enableBufferObject = true;

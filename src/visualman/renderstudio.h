@@ -18,24 +18,19 @@ namespace ysl
 		public:
 			Aggregate()
 			{
-				
-				camera = MakeRef<Camera>();  // A default camera
+				//camera = MakeRef<Camera>();  // A default camera
 				renderers.push_back(MakeRef<Renderer>());
 			}
-			void SetCamera(const Ref<Camera> & camera)
-			{
-				this->camera = camera;
-			}
+			void SetCamera(const Ref<Camera> & camera){this->camera = camera;}
+			Ref<Camera> CreateGetCamera() { return camera?camera:(camera = MakeRef<Camera>()); }
 
-			Ref<Camera> GetCamera()const { return camera; };
 			void Render() override;
 			
-			std::vector<Ref<AbstraSceneManager>> & SceneManager() { return sceneManagers; }
-			const std::vector<Ref<AbstraSceneManager>> & SceneManager()const { return sceneManagers; }
+			std::vector<Ref<AbstraSceneManager>> & SceneManager() {return sceneManagers;}
+			const std::vector<Ref<AbstraSceneManager>> & SceneManager()const {return sceneManagers;}
 
 			std::vector<Ref<Renderer>> & Renderers() { return renderers; }
 			const std::vector<Ref<Renderer>> & Renderers()const { return renderers; }
-
 			
 		protected:
 			std::vector<Ref<AbstraSceneManager>> sceneManagers;

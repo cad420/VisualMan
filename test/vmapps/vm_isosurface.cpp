@@ -26,10 +26,10 @@ namespace ysl
 			SetAggregation(MakeRef<Aggregate>());
 			std::static_pointer_cast<Aggregate>(GetAggregate())->SceneManager().push_back(sceneManager);
 			std::static_pointer_cast<Aggregate>(GetAggregate())->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
-			std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
-			std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->SetClearColor(Vec4f{ 0,0,0,1 });
+			std::static_pointer_cast<Aggregate>(GetAggregate())->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			std::static_pointer_cast<Aggregate>(GetAggregate())->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 0,0,0,1 });
 
-			manipulator->SetCamera(std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera());
+			manipulator->SetCamera(std::static_pointer_cast<Aggregate>(GetAggregate())->CreateGetCamera());
 
 
 			// Open a Test File 

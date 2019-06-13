@@ -91,6 +91,7 @@ namespace ysl
 			{
 				dc->UpdateDirtyBufferObject(mode);
 			}
+			
 		}
 
 		void Primitive::Render_Implement(const Actor * actor, const Shading * shading, const Camera* camera, RenderContext * context)const

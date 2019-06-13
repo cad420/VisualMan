@@ -27,6 +27,7 @@ namespace ysl
 			Ref<ArrayFloat3> texCoordArray;
 		};
 
+
 		class VISUALMAN_EXPORT_IMPORT RayCast2ActorEventCallback :public IActorEvent
 		{
 		public:
@@ -34,12 +35,16 @@ namespace ysl
 			void OnActorRenderStartedEvent(Actor* actor, const Camera* camera, Renderable* renderable, const Shading* shading, int pass) override;
 			void BindToActor(Ref<Actor> actor);
 			Ref<Primitive> ProxyGeometry() { return proxyGeometry; }
+
 		private:
 			Ref<Primitive> proxyGeometry;
 			Ref<ArrayFloat3> vertexArray;
 			Ref<ArrayFloat3> texCoordArray;
 
 		};
+
+
+	
 
 	}
 }

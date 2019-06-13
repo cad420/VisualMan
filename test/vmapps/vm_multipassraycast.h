@@ -2,7 +2,7 @@
 #ifndef _VM_VOLUMERAYCAST2_H_
 #define _VM_VOLUMERAYCAST2_H_
 
-#include "visualman.h"
+#include <visualman.h>
 #include "config.h"
 
 namespace ysl

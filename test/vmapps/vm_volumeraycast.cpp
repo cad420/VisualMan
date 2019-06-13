@@ -74,17 +74,17 @@ namespace ysl
 			sceneManager->AddActor(actor);
 			std::static_pointer_cast<Aggregate>(GetAggregate())->SceneManager().push_back(sceneManager);
 			// Set Clear flags
-			std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			std::static_pointer_cast<Aggregate>(GetAggregate())->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
 			// Set camera under control
 			//manipulator->SetCamera(aggregate->GetCamera());
-			BindCameraEvent(std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera());
+			BindCameraEvent(std::static_pointer_cast<Aggregate>(GetAggregate())->CreateGetCamera());
 
 
 			assert(Context());
 
 			// Create A FBO
-			auto w = std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->GetWidth();
-			auto h = std::static_pointer_cast<Aggregate>(GetAggregate())->GetCamera()->GetViewport()->GetHeight();
+			auto w = std::static_pointer_cast<Aggregate>(GetAggregate())->CreateGetCamera()->GetViewport()->GetWidth();
+			auto h = std::static_pointer_cast<Aggregate>(GetAggregate())->CreateGetCamera()->GetViewport()->GetHeight();
 			Size2 viewportSize(w,h);
 			auto fbo = Context()->CreateFramebufferObject(w,h, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
 			fbo->AddDepthStencilAttachment(MakeRef<FBODepthStencilAttachment>(DSBT_DEPTH24_STENCIL8));

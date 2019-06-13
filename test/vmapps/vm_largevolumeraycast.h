@@ -2,8 +2,10 @@
 #ifndef _LARGEVOLUMERAYCAST_H_
 #define _LARGEVOLUMERAYCAST_H_
 
-#include "visualman.h"
+#include <visualman.h>
 #include "config.h"
+#include "oocprimitive.h"
+#include "oocresources.h"
 
 namespace ysl
 {
@@ -16,6 +18,7 @@ namespace ysl
 			void UpdateScene() override;
 		private:
 			void SetupShading();
+			void SetupResources();
 		};
 	}
 }

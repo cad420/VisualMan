@@ -29,9 +29,6 @@ namespace ysl
 		};
 
 
-
-
-
 		// 缺页处理类，用来实现交换算法
 
 		class MemoryFaultHandler

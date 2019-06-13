@@ -6,16 +6,16 @@
 
 namespace ysl
 {
-		class COMMON_EXPORT_IMPORT Library
-		{
-		public:
-			Library(const std::string & name);
-			void * Symbol(const std::string & name)const;
-			void Close();
-			~Library();
-		private:
-			void * lib;
-		};
+	class COMMON_EXPORT_IMPORT Library
+	{
+	public:
+		Library(const std::string & name);
+		void * Symbol(const std::string & name)const;
+		void Close();
+		~Library();
+	private:
+		void * lib;
+	};
 }
 
 #endif

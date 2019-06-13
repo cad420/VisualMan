@@ -15,7 +15,7 @@ namespace ysl {
 		{
 			auto mrtAggregate = MakeRef<Aggregate>();
 			mrtAggregate->SceneManager().push_back(MakeRef<TrivialSceneManager>());
-			BindCameraEvent(mrtAggregate->GetCamera());
+			BindCameraEvent(mrtAggregate->CreateGetCamera());
 			/// Step 1.
 			// Create and setup 
 			auto positionShading = MakeRef<Shading>();
@@ -46,8 +46,8 @@ namespace ysl {
 			std::static_pointer_cast<TrivialSceneManager>(mrtAggregate->SceneManager().at(0))->AddActor(geometryActor);
 
 			// Create position Texture
-			auto w = mrtAggregate->GetCamera()->GetViewport()->GetWidth();
-			auto h = mrtAggregate->GetCamera()->GetViewport()->GetHeight();
+			auto w = mrtAggregate->CreateGetCamera()->GetViewport()->GetWidth();
+			auto h = mrtAggregate->CreateGetCamera()->GetViewport()->GetHeight();
 			Vec2i vSize{ w,h };
 			entryTexture = MakeRef<Texture>();
 			auto texParam = MakeRef<TexCreateParams>();
@@ -115,10 +115,10 @@ namespace ysl {
 
 
 			mrtAggregate->Renderers().at(0)->SetFramebuffer(fbo);
-			mrtAggregate->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
-			mrtAggregate->GetCamera()->GetViewport()->SetClearColor(Vec4f{ 0,0,0,0 });
+			mrtAggregate->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			mrtAggregate->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 0,0,0,0 });
 			
-			mainAggregate->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			mainAggregate->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
 			mainAggregate->Renderers().at(0)->SetFramebuffer(Context()->GetFramebuffer());
 
 			auto serializedAggregate = MakeRef<SerializedAggregates>();

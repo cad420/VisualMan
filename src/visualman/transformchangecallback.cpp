@@ -17,9 +17,6 @@ namespace ysl
 			// Because there uniforms are volatile every loop. They should not be saved 
 			// in a uniform set. we just set them by using the OpenGL api
 
-
-
-
 			// NOTE: program is already be used before this call
 			if (program)
 			{
@@ -30,7 +27,6 @@ namespace ysl
 				//Debug("%d %d\n", program->Handle(), prog);
 				assert(prog == program->Handle());
 #endif
-
 				const int modelLoc = program->GetWorldMatrixUniformLocation();
 
 				if (modelLoc != -1)

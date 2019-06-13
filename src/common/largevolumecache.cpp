@@ -43,6 +43,7 @@ namespace ysl
 
 		//	cacheSize = Size();
 		//}
+
 		auto p = new Cache(cacheSize.x, cacheSize.y, cacheSize.z, nullptr);
 		if (!p)
 		{

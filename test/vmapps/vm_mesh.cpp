@@ -75,10 +75,10 @@ namespace ysl
 
 			//actor2->AddActorRenderEventCallback(actorEvent);
 
-			abstraAggregate->GetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
-			abstraAggregate->GetCamera()->GetViewport()->SetClearColor(Vec4f{ 1,1,1,1 });
+			abstraAggregate->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			abstraAggregate->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 1,1,1,1 });
 
-			manipulator->SetCamera(abstraAggregate->GetCamera());
+			manipulator->SetCamera(abstraAggregate->CreateGetCamera());
 
 			artist->GetLOD(0)->push_back(shading);		//single pass
 

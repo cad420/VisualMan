@@ -20,9 +20,8 @@ namespace ysl
 		VirtualMemoryBlockIndex(int x, int y, int z):x(x),y(y),z(z)
 		{
 		}
-
-		using size_type = int;
-		size_type x, y, z;
+		using index_type = int;
+		index_type x, y, z;
 	};
 
 	class COMMON_EXPORT_IMPORT AbstrCPUBlockCache
@@ -50,7 +49,7 @@ namespace ysl
 
 	class COMMON_EXPORT_IMPORT CPUVolumeDataCache :public AbstrBlockedVolumeDataCPUCache
 	{
-		static constexpr int nLogBlockSize = 7;		//
+		static constexpr int nLogBlockSize = 7;		// 128
 		static constexpr ysl::Size3 cacheBlockSize{ 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
 		static constexpr ysl::Size3 cacheDim{ 16,16,16 };
 		static constexpr ysl::Size3 cacheSize = cacheDim * (1 << nLogBlockSize);

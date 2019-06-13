@@ -1,8 +1,8 @@
 
 #ifndef _VM_MESH_H_
 #define _VM_MESH_H_
-#include "visualman.h"
-#include "primitive.h"
+#include <visualman.h>
+#include <primitive.h>
 #include "config.h"
 
 namespace ysl

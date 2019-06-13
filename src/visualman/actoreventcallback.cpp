@@ -120,16 +120,6 @@ namespace ysl
 			const Shading* shading,
 			int pass)
 		{
-			//if (shading)
-			//{
-			//	auto const program = shading->GetProgram();
-			//	const auto eyePos = camera->Position();
-			//	const auto eye_position = program->GetGenericUniformLocation("eye_position");
-			//	if (eye_position != -1)
-			//		actor->CreateGetUniformSet()->CreateGetUniform("eye_position")->SetUniform3f(1, eyePos.ConstData());;
-
-			//	// update light dir and halfway 
-			//}
 			
 		}
 
@@ -143,5 +133,10 @@ namespace ysl
 				actor->SetRenderable(proxyGeometry, 0);
 			}
 		}
+
+
+
+
+
 	}
 }

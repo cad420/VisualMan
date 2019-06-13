@@ -13,6 +13,7 @@ namespace ysl
 			{
 				// Update Buffer Object
 				UpdateDirtyBufferObject(VM_UM_KeepRAM);
+				SetBufferObjectDirty(false);
 			}
 			Render_Implement(actor,shading,camera,context);
 		}

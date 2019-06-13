@@ -13,7 +13,7 @@ namespace ysl
 			abstraAggregate = aggre;
 			// A frame has created a camera, 
 			//We just need to bind it to the manipulator
-			manipulator->SetCamera(aggre->GetCamera());
+			manipulator->SetCamera(aggre->CreateGetCamera());
 		}
 
 		VisualMan::VisualMan()
