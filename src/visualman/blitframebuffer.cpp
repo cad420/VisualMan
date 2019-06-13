@@ -29,6 +29,7 @@ namespace ysl
 
 		void BlitFramebufferEvent::Blit()
 		{
+			//Warning("asdfsadf");
 			const auto src = srcFBO->Handle();
 			const auto dst = dstFBO->Handle();
 			GL(glBlitNamedFramebuffer(src,

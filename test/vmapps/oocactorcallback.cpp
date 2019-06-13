@@ -68,5 +68,6 @@ namespace ysl
 				actor->SetRenderable(proxyGeometry, 0);
 			}
 		}
+
 	}
 }

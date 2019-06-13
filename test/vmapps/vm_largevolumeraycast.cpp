@@ -1,11 +1,11 @@
 
 #include "vm_largevolumeraycast.h"
-
-#include "rendercontext.h"
-#include "blitframebuffer.h"
-#include "actoreventcallback.h"
 #include "oocactorcallback.h"
-#include "trivialscenemanager.h"
+
+#include <rendercontext.h>
+#include <screenactor.h>
+#include <trivialscenemanager.h>
+#include "blitframebuffer.h"
 
 
 namespace ysl
@@ -17,9 +17,11 @@ namespace ysl
 			// Pipline Configuration
 
 
-			/*[0]*************************************************************************
-			 * Resources Initialization
-			 * 
+			/*[0] Resources Initialization****************************************
+			 *
+			 * entryTexture:
+			 * exitTexture:
+			 * intermediateResult:
 			 */
 
 			Vec2i vSize{ 800,600 };
@@ -38,21 +40,20 @@ namespace ysl
 			// intermediate result texture
 			auto intermediateResult = MakeRef<Texture>();
 			intermediateResult->SetSetupParams(texParam);
-			exitTexture->CreateTexture();
+			intermediateResult->CreateTexture();
 
 
-			/*[1]***************************************************************************
-			 * Multi Render Targets Aggregation
-			 * 
-			 * This aggregate is used to the render the front and back face of the proxy 
+			/*[1]Multi Render Targets Aggregation*****************************************
+			 *
+			 * This aggregate is used to the render the front and back face of the proxy
 			 * geometry of the volume into multi render targets. So the the user should
 			 * control this camera to interact.
 			 *****************************************************************************/
 
 			auto mrtAgt = MakeRef<Aggregate>();
 			auto mrtFBO = Context()->CreateFramebufferObject(vSize.x, vSize.y, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
-			mrtFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT0,MakeRef<FBOTextureAttachment>(entryTexture));
-			mrtFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT1,MakeRef<FBOTextureAttachment>(exitTexture));
+			mrtFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(entryTexture));
+			mrtFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT1, MakeRef<FBOTextureAttachment>(exitTexture));
 			mrtFBO->SetDrawBuffers(RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT1);
 			mrtAgt->Renderers().at(0)->SetFramebuffer(mrtFBO);
 			BindCameraEvent(mrtAgt->CreateGetCamera());
@@ -86,48 +87,70 @@ namespace ysl
 			sceneManager->AddActor(geometryActor);
 			mrtAgt->SceneManager().push_back(sceneManager);
 			mrtAgt->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
-			mrtAgt->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{0.f,0.f,0.f,1.f});
+			mrtAgt->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 0.f,0.f,0.f,1.f });
 
-
-
-			//auto blit = MakeRef<BlitFramebufferEvent>(mrtFBO, Bound2i{{0,0},{vSize.x,vSize.y}}, Context()->GetFramebuffer(),Bound2i{{0,0},{vSize.x,vSize.y}}, VM_BB_COLOR_BUFFER_BIT);
-
-
-
-			/*[2] Ray Cast Aggregation *********************************************************
-			 * 
+			/*[2] Ray Cast Aggregation ********************************************************
+			 *
 			 * This aggregation is used to execute the ray casting volume rendering.
-			 * Intermediate result is saved in a texture between the intervals of 
-			 * resources swapping. 
+			 * Intermediate result is saved in a texture between the intervals of
+			 * resources swapping.
 			 *********************************************************************************/
-
-
 			auto raycastAgt = MakeRef<Aggregate>();
-			//auto intermediateFBO = Context()->CreateFramebufferObject(800, 600, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
-			//intermediateFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(intermediateResult));
+			auto intermediateFBO = Context()->CreateFramebufferObject(800, 600, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
+			intermediateFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(intermediateResult));
+			intermediateFBO->SetDrawBuffers(RDB_COLOR_ATTACHMENT0);
+			intermediateFBO->CheckFramebufferStatus();
+			Vec3i volSize{ 160,240,40 };
+			auto volumeTex = MakeVolumeTexture(R"(data\mixfrac160x240x40.raw)", volSize.x, volSize.y, volSize.z);
+			//auto tfTex = MakeTransferFunction1D(R"(D:\scidata\elt_tf1d2.TF1D)");
+			auto tfTex = MakeTransferFunction1DTexture({ Color::transparent,Color::blue,Color::yellow });
 
+			auto rayCastShading = MakeRef<Shading>();
+			auto raycastGLSL = rayCastShading->CreateGetProgram();
+			auto fs = MakeRef<GLSLFragmentShader>();
+			fs->SetFromFile(R"(glsl\raycast_fs.glsl)");
+			auto vs = MakeRef<GLSLVertexShader>();
+			vs->SetFromFile(R"(glsl\raycast_vs.glsl)");
+			raycastGLSL->AttachShader(fs);
+			raycastGLSL->AttachShader(vs);
 
+			rayCastShading->CreateGetTextureSampler(1)->SetTexture(volumeTex);
+			rayCastShading->CreateGetTextureSampler(2)->SetTexture(tfTex);
+			rayCastShading->CreateGetTextureSampler(3)->SetTexture(entryTexture);
+			rayCastShading->CreateGetTextureSampler(4)->SetTexture(exitTexture);
 
-			//raycastAgt->Renderers().at(0)->SetFramebuffer();
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.001f);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ka")->SetUniformValue(1.0f);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("kd")->SetUniformValue(1.0f);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ks")->SetUniformValue(50.f);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texTransfunc")->SetUniformValue(2);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texVolume")->SetUniformValue(1);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texStartPos")->SetUniformValue(3);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texEndPos")->SetUniformValue(4);
 
-			/*[3] Main Aggregation******************************************************** 
-			 *
-			 *
-			 *****************************************************************************/
-			auto mainAgt = MakeRef<Aggregate>();
-			//mainAgt->Renderers().at(0)->SetFramebuffer(Context()->GetFramebuffer());
-			//std::static_pointer_cast<Aggregate>(GetAggregate())->CreateGetCamera()->GetViewport()->SetViewportSize(vSize.x,vSize.y);
+			auto effect2 = MakeRef<Artist>();
+			effect2->GetLOD(0)->push_back(rayCastShading);
 
+			auto screenActor = MakeRef<Actor>(nullptr, effect2, nullptr);
+			auto screenActorCallback = MakeRef<ScreenActorEventCallback>();
+			screenActorCallback->BindToActor(screenActor);
+			sceneManager = MakeRef<TrivialSceneManager>();
+			sceneManager->AddActor(screenActor);
+			raycastAgt->SceneManager().push_back(sceneManager);
 
-			/*[4] Pipline Configuration *************************************************/
+			raycastAgt->Renderers().at(0)->SetFramebuffer(intermediateFBO);
+			auto rect = Bound2i{ {0,0},{vSize.x,vSize.y} };
+
+			auto blit = MakeRef<BlitFramebufferEvent>(intermediateFBO, rect, Context()->GetFramebuffer(), rect, BufferBits::VM_BB_COLOR_BUFFER_BIT);
+			raycastAgt->Renderers().at(0)->AddRenderFinishedEventCallback(blit);
+			raycastAgt->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR);
+			raycastAgt->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 1.f,1.f,1.f,1.f });
 
 			auto serializedAgts= MakeRef<SerializedAggregates>();
 			SetAggregation(serializedAgts);
 
 			serializedAgts->GetAggregates().push_back(mrtAgt);
-			//serializedAgts->GetAggregates().push_back(raycastAgt);
-			//serializedAgts->GetAggregates().push_back(mainAgt);
-
+			serializedAgts->GetAggregates().push_back(raycastAgt);
 		}
 
 		void VM_LargeVolumeRayCast::UpdateScene()

@@ -60,8 +60,6 @@ namespace ysl
 			}raii(this, camera.get());
 
 			// Apply Render state
-
-
 			assert(framebuffer);
 
 			RenderContext * context = framebuffer->Context();

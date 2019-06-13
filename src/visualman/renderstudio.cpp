@@ -25,7 +25,6 @@ namespace ysl
 					assert(!aggr->renderers.empty());
 					assert(aggr->renderers[0]->GetFramebuffer());
 					assert(context);
-
 					if(aggr->renderers.empty())
 					{
 						ysl::Log("No specified renderer\n");
@@ -54,11 +53,19 @@ namespace ysl
 					GL_CHECK
 				}
 				
-			} raii(this);
+			}raii(this);
 
-			if (sceneManagers.empty()) return;
+			if (sceneManagers.empty())
+			{
+				Warning("There is no scene manager in this aggregation. %x",this);
+				return;
+			}
 
-			if (!camera) return;
+			if (!camera)
+			{
+				Warning("There is no camera in this aggregation. %x",this);
+				return;
+			}
 
 			// construct actor queue from scene manager
 			actorQueue.clear();
