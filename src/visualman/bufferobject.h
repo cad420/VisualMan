@@ -90,21 +90,44 @@ namespace ysl
 
 			/**
 			 * \brief  Upload data directly to GPU provided by \a data
+			 * 
+			 * \note This function will check whether the buffer object has been created.
 			 */
 			void SetBufferData(size_t bytes,const void * data,BufferObjectUsage usage);
 
 			/**
-			 * \brief  Upload data to GPU using the local buffer
+			 * \brief  Upload data to GPU using the local buffer.
+			 * 
+			 * \note This function will fail if the buffer is allocated by glBufferStorage() because it will allocate a fixed size memory
 			 */
 			void SetBufferData(BufferObjectUsage usage,bool discard);
 
 			/**
-			 * \brief  Upload data directly to GPU provided by \a data
+			 * \brief  Upload data given by \a data directly to GPU at \a offset with a size \a bytes if \a data is not \a nullptr
+			 			 *  
+			 *  \note This function don't do any check for memory size. In other words, it could any kind of lead CPU or GPU memory errors
 			 */
 			void SetBufferSubData(size_t offset,size_t bytes,const void * data);
 
-			//void Upload();
+			/**
+			 * \brief Upload data from local buffer.
+			 *
+			 *  \note This function don't do any check for memory size. In other words, it could any kind of lead CPU or GPU memory errors
+			 */
+			void SetBufferSubData(size_t offset, size_t bytes, bool discard);
 
+			/**
+			 * \brief Upload sub data from local sub data
+			 * 
+			 *  \note This function don't do any check for memory size. In other words, it could any kind of lead CPU or GPU memory errors
+			 */
+			void SetBufferSubDataFromLocalSubData(size_t bOffset, size_t localBufferOffset, size_t bytes);
+
+			/**
+			 * \brief 
+			 * 
+			 * \note This function will check whether the buffer object has been created.
+			 */
 			void * MapBuffer(BufferObjectAccess access);
 
 			void UnmapBuffer();

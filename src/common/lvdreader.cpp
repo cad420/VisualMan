@@ -82,20 +82,19 @@ namespace ysl
 		oSize = ysl::Size3(originalWidth, originalHeight, originalDepth);
 
 		const std::size_t bytes = std::size_t(vx) * vy*vz + LVD_HEADER_SIZE;
-
-
 		// Load Library
 
 		auto repo = LibraryReposity::GetLibraryRepo();
 		assert(repo);
 		repo->AddLibrary("ioplugin");
 
-		std::shared_ptr<Object> io = Object::CreateObject("common.filemapio");
-		lvdIO = io->As<IPluginFileMap>();
+		lvdIO = Object::CreateObject<ysl::IPluginFileMap>("common.filemapio");
 		if (lvdIO == nullptr)
 			throw std::runtime_error("can not load ioplugin");
 		lvdIO->Open(fileName, bytes, FileAccess::Read, MapAccess::ReadOnly);
 
+		lvdPtr = lvdIO->FileMemPointer(0, bytes);
+		if (!lvdPtr) throw std::runtime_error("LVDReader: bad mapping");
 
 //#ifdef _WIN32
 //		lvdIO = std::make_unique<WindowsFileMapping>(fileName, bytes,
@@ -107,8 +106,6 @@ namespace ysl
 //#elif 
 //		static_assert(false);
 //#endif
-
-
 	}
 
 	LVDReader::LVDReader(const std::vector<std::string>& fileName, const std::vector<int>& lods)

@@ -13,8 +13,6 @@ namespace ysl
 		{
 			switch (sizedFormat)
 			{
-
-
 			case TF_RED:
 			case TF_R8:
 			case TF_R8_SNORM:
@@ -290,6 +288,8 @@ namespace ysl
 				assert(false);
 				Debug("Unsupported format");
 			}
+
+
 			// Set up the texture properties and delete the setup params 
 
 			this->target = target;
@@ -299,7 +299,7 @@ namespace ysl
 			this->h = h;
 			this->samples = samples;
 			this->border = border;
-
+			this->bufferObject = std::move(bufferObject);
 
 			return true;
 		}
@@ -318,29 +318,31 @@ namespace ysl
 			createParams = std::move(params);
 		}
 
-		void Texture::SetSubTextureData(void* data, ImageFormat imageFormat, ImageType imageType, int xoffset, int yoffset, int zoffset, int w, int h, int d)
+
+
+		void Texture::SetSubTextureData(void * data, ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d)
 		{
 			if (handle == 0)
 			{
+				Warning("No Texture has been created. %s: %d", __FILE__, __LINE__);
 				if (!CreateTexture())
 				{
-					Debug("Texture has not beed created. But it created failed\n. %s %d", __FILE__, __LINE__);
+					Debug("Texture has not beed created. But it created failed\n. %s: %d", __FILE__, __LINE__);
 					return;
 				}
 			}
 
 			if (target == GL_TEXTURE_1D)
 			{
-				GL(glTextureSubImage1D(handle, 0, xoffset, w, imageFormat, imageType, data));
+				GL(glTextureSubImage1D(handle, 0, xOffset, w, imageFormat, imageType, data));
 			}
 			else if (target == GL_TEXTURE_2D || target == GL_TEXTURE_RECTANGLE)
 			{
-				GL(glTextureSubImage2D(handle, 0, xoffset, yoffset, w, h, imageFormat, imageType, data));
-
+				GL(glTextureSubImage2D(handle, 0, xOffset, yOffset, w, h, imageFormat, imageType, data));
 			}
 			else if (target == GL_TEXTURE_3D)
 			{
-				GL(glTextureSubImage3D(handle, 0, xoffset, yoffset, zoffset, w, h, d, imageFormat, imageType, data));
+				GL(glTextureSubImage3D(handle, 0, xOffset, yOffset, zOffset, w, h, d, imageFormat, imageType, data));
 			}
 			else
 			{
@@ -348,15 +350,85 @@ namespace ysl
 			}
 		}
 
+		void Texture::SetSubTextureData(void* data, int xOffset, int yOffset, int zOffset, int w, int h, int d)
+		{
+			assert(createParams);
+			const auto sizedFormat = createParams->GetTextureFormat();
+			const auto imageFormat = ImageFormat(GetBaseFormatBySizedFormat(sizedFormat));
+			const auto imageType = ImageType(GetTypeBySizedFormat(sizedFormat));
+			SetSubTextureData(data, imageFormat, imageType, xOffset, yOffset, zOffset, w, h, d);
+		}
+
+		void Texture::SetSubTextureData(ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset,
+			int zOffset, int w, int h, int d)
+		{
+			if(bufferObject)
+			{
+				SetSubTextureData(bufferObject->LocalData(), imageFormat, imageType, xOffset, yOffset, zOffset, w, h, d);
+			}else
+			{
+				Debug("No Buffer Object. %s:%d", __FILE__, __LINE__);
+			}
+		}
+
+		void Texture::SetSubTextureData(int xOffset, int yOffset, int zOffset, int w, int h, int d)
+		{
+			assert(createParams);
+			const auto sizedFormat = createParams->GetTextureFormat();
+			const auto imageFormat = ImageFormat(GetBaseFormatBySizedFormat(sizedFormat));
+			const auto imageType = ImageType(GetTypeBySizedFormat(sizedFormat));
+			SetSubTextureData(imageFormat, imageType, xOffset, yOffset, zOffset, w, h, d);
+		}
+
+		void Texture::SetSubTextureDataUsePBO(ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset,
+			int zOffset, int w, int h, int d)
+		{
+			assert(bufferObject);
+			assert(bufferObject->Handle());
+
+			GL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+			GL(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, bufferObject->Handle()));
+			SetSubTextureData(nullptr, imageFormat, imageType, xOffset, yOffset, zOffset, w, h, d);
+			GL(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
+			GL(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
+
+		}
+
+		void Texture::SetSubTextureDataUsePBO(int xOffset, int yOffset, int zOffset, int w, int h, int d)
+		{
+			assert(bufferObject);
+			const auto sizedFormat = createParams->GetTextureFormat();
+			const auto imageFormat = ImageFormat(GetBaseFormatBySizedFormat(sizedFormat));
+			const auto imageType = ImageType(GetTypeBySizedFormat(sizedFormat));
+			SetSubTextureDataUsePBO(imageFormat, imageType, xOffset, yOffset, zOffset, w, h, d);
+		}
+
+	
+
 		Ref<Texture> MakeVolumeTexture(const std::string& fileName, size_t x, size_t y, size_t z)
 		{
 			Ref<TexCreateParams> params = MakeRef<TexCreateParams>();
+
+			RawReader rawReader(fileName, { x,y,z }, sizeof(char));
+			std::unique_ptr<char[]> buffer(new char[x*y*z * sizeof(char)]);
+			if (x*y*z != rawReader.readRegion({ 0,0,0 }, { x,y,z }, (unsigned char*)buffer.get()))
+			{
+				throw std::runtime_error("Size read error");
+			}
+
+			auto texBuffer = MakeRef<BufferObject>();
+
+			texBuffer->SetLocalData(buffer.get(), size_t(x)*y*z);
 
 			params->EnableMipMap(false);
 			params->EnableBorder(false);
 			params->SetSize(x, y, z);
 			params->SetTextureFormat(TF_R8);
 			params->SetTextureTarget(TD_TEXTURE_3D);
+			params->SetBufferObject(texBuffer);
+			texBuffer->CreateBufferObject();
+
+			texBuffer->SetBufferData(BU_STREAM_DRAW, true);
 
 			auto volumeTex = MakeRef<Texture>();
 			volumeTex->SetSetupParams(params);
@@ -364,13 +436,10 @@ namespace ysl
 			{
 				return nullptr;
 			}
-			RawReader rawReader(fileName, { x,y,z }, sizeof(char));
-			std::unique_ptr<char[]> buffer(new char[x*y*z * sizeof(char)]);
-			if (x*y*z != rawReader.readRegion({ 0,0,0 }, { x,y,z },(unsigned char*) buffer.get()))
-			{
-				throw std::runtime_error("Size read error");
-			}
-			volumeTex->SetSubTextureData(buffer.get(), IF_RED, IT_BYTE, 0, 0, 0, x, y, z);
+			//volumeTex->SetSubTextureData(buffer.get(), IF_RED, IT_UNSIGNED_BYTE, 0, 0, 0, x, y, z);
+			//volumeTex->SetSubTextureData(buffer.get(), 0, 0, 0, x, y, z);
+			//volumeTex->SetSubTextureData(0, 0, 0, x, y, z);
+			volumeTex->SetSubTextureDataUsePBO(0, 0, 0, x,y,z);
 			return volumeTex;
 		}
 

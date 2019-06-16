@@ -10,7 +10,17 @@ namespace ysl
 		ScreenActorEventCallback::ScreenActorEventCallback()
 		{
 			// Init a screen primitive
+			SetPrimitive(MakeRef<Primitive>());
+		}
 
+		void ScreenActorEventCallback::OnActorRenderStartedEvent(Actor*, const Camera*,
+			Renderable* , const Shading*  ,int )
+		{
+
+		}
+
+		void ScreenActorEventCallback::SetPrimitive(Ref<Primitive> primitive)
+		{
 			auto vertexNDC = MakeRef<ArrayFloat2>();
 			auto texCoord = MakeRef<ArrayFloat2>();
 
@@ -36,23 +46,15 @@ namespace ysl
 				1.0f,1.0f
 			};
 
-			vertexNDC->GetBufferObject()->SetLocalData(v,sizeof(v));
+			vertexNDC->GetBufferObject()->SetLocalData(v, sizeof(v));
 			texCoord->GetBufferObject()->SetLocalData(t, sizeof(t));
-
-			screenRect = MakeRef<Primitive>();
-			screenRect->SetVertexPositionArray(vertexNDC);
-			screenRect->SetVertexTexCoordArray(texCoord);
-
+			primitive->SetVertexPositionArray(vertexNDC);
+			primitive->SetVertexTexCoordArray(texCoord);
 			//draw call
-			screenRect->DrawCalls().push_back(MakeRef<DrawArray>(0, 6));
-
+			primitive->DrawCalls().push_back(MakeRef<DrawArray>(0, 6));
+			screenRect = primitive;
 		}
 
-		void ScreenActorEventCallback::OnActorRenderStartedEvent(Actor*, const Camera*,
-			Renderable* , const Shading*  ,int )
-		{
-
-		}
 
 		void ScreenActorEventCallback::BindToActor(Ref<Actor> actor)
 		{

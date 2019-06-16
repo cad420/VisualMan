@@ -4,8 +4,6 @@
 
 #include <visualman.h>
 #include "config.h"
-#include "oocprimitive.h"
-#include "oocresources.h"
 
 namespace ysl
 {

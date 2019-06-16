@@ -42,7 +42,6 @@ namespace ysl
 			auto drawCall = MakeRef<DrawElementsUInt>();
 			drawCall->SetIndexBuffer(vertexIndex);
 			proxyGeometry->DrawCalls().push_back(drawCall);
-
 			// bind resources
 			auto oocresource = MakeRef<OutOfCoreResources>();
 
@@ -66,6 +65,15 @@ namespace ysl
 				actor->RemoveActorRenderEventCallback(shared_this);
 				actor->AddActorRenderEventCallback(shared_this);
 				actor->SetRenderable(proxyGeometry, 0);
+
+
+
+				// The actor need to be added with a shading object and some extra buffers as the render state.
+				// It includes:
+				// A SSBO for recording the missed block id.
+				// Some atomic counters for synchronization.
+				// Maybe an another SSBO for a hash table to unique the missed block ids. It depends on implementation.
+
 			}
 		}
 

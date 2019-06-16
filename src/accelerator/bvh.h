@@ -10,7 +10,7 @@ namespace ysl {
 
 	class Interaction;
 
-	class BVHTreeAccelerator :public Shape
+	class BVHTreeAccelerator :public Shape			// Decorator Pattern
 	{
 		class BVHNode {
 		public:

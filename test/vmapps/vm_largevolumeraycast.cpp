@@ -6,6 +6,7 @@
 #include <screenactor.h>
 #include <trivialscenemanager.h>
 #include "blitframebuffer.h"
+#include "actoreventcallback.h"
 
 
 namespace ysl
@@ -15,7 +16,6 @@ namespace ysl
 		void VM_LargeVolumeRayCast::InitEvent()
 		{
 			// Pipline Configuration
-
 
 			/*[0] Resources Initialization****************************************
 			 *
@@ -80,7 +80,7 @@ namespace ysl
 			//scale->SetScale(Vec3f(160, 240, 40).Normalized());
 
 			auto geometryActor = MakeRef<Actor>(nullptr, artist, nullptr);
-			auto geometryActorCallback = MakeRef<OOCActorEvent>();
+			auto geometryActorCallback = MakeRef<RayCast2ActorEventCallback>();
 			geometryActorCallback->BindToActor(geometryActor);
 
 			auto sceneManager = MakeRef<TrivialSceneManager>();
@@ -114,7 +114,11 @@ namespace ysl
 			raycastGLSL->AttachShader(fs);
 			raycastGLSL->AttachShader(vs);
 
-			rayCastShading->CreateGetTextureSampler(1)->SetTexture(volumeTex);
+
+			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\s1_480_480_480_2_64.lvd)");
+			
+			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture());
+
 			rayCastShading->CreateGetTextureSampler(2)->SetTexture(tfTex);
 			rayCastShading->CreateGetTextureSampler(3)->SetTexture(entryTexture);
 			rayCastShading->CreateGetTextureSampler(4)->SetTexture(exitTexture);
@@ -133,6 +137,11 @@ namespace ysl
 
 			auto screenActor = MakeRef<Actor>(nullptr, effect2, nullptr);
 			auto screenActorCallback = MakeRef<ScreenActorEventCallback>();
+			auto oocPrimitive = MakeRef<OutOfCorePrimitive>();
+			screenActorCallback->SetPrimitive(oocPrimitive);// Out Of Core
+			//oocResources->BindToOutOfCorePrimitive(oocPrimitive);
+			oocPrimitive->SetOutOfCoreResources(oocResources);
+
 			screenActorCallback->BindToActor(screenActor);
 			sceneManager = MakeRef<TrivialSceneManager>();
 			sceneManager->AddActor(screenActor);

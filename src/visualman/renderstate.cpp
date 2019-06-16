@@ -32,13 +32,9 @@ namespace ysl
 			{
 				GL(glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, index, 0));
 			}
-
 			//  GL_INVALID_ENUM is generated if target is not GL_ATOMIC_COUNTER_BUFFER, GL_TRANSFORM_FEEDBACK_BUFFER, GL_UNIFORM_BUFFER or GL_SHADER_STORAGE_BUFFER.
-
 			//	GL_INVALID_VALUE is generated if index is greater than or equal to the number of target - specific indexed binding points.
-
 			//	GL_INVALID_VALUE is generated if buffer does not have an associated data store, or if the size of that store is zero.
-
 		}
 
 		void ShaderStorageBufferObject::Apply(int index, const Camera* camera, RenderContext* context) const

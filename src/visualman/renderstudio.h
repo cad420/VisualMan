@@ -44,7 +44,7 @@ namespace ysl
 		/**
 		 * \brief This class is used to run aggregates in a serialized order
 		 */
-		class VISUALMAN_EXPORT_IMPORT SerializedAggregates:public AbstraAggregate
+		class VISUALMAN_EXPORT_IMPORT SerializedAggregates:public AbstraAggregate			// Decorator Pattern
 		{
 		public:
 			void Render() override;

@@ -2,6 +2,7 @@
 #include "library.h"
 #include <cassert>
 #include <iostream>
+#include "error.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -50,9 +51,9 @@ namespace ysl
 #endif /*_WIN32*/
 		if (!lib)
 		{
+			Debug("%s can bot be found.", fullName.c_str());
 			throw std::runtime_error(errorMsg);
 		}
-
 	}
 
 	void* Library::Symbol(const std::string& name) const

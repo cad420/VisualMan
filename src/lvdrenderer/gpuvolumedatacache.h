@@ -21,6 +21,7 @@ namespace ysl
 		Size3 CacheSize()const;
 		Size3 BlockSize()const;
 	};
+
 }
 
 #endif

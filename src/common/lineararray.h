@@ -28,11 +28,9 @@ namespace ysl
 
 		LocalBuffer(size_type x, const uint8_t * data) :LocalBuffer(x, nullptr, true)
 		{
-			data = (uint8_t*)AllocAligned<uint8_t>(x);
-			if (data == nullptr)
-			{
+			this->data = (uint8_t*)AllocAligned<uint8_t>(x);
+			if (!this->data)
 				throw std::runtime_error("Bad Alloc");
-			}
 			if (data)
 				memcpy(this->data, data, x * sizeof(uint8_t));
 		}
@@ -69,6 +67,7 @@ namespace ysl
 		}
 
 		size_type Bytes()const { return bytes * sizeof(uint8_t); }
+
 		std::size_t Count()const { return bytes; }
 
 		char & operator()(int x)
@@ -131,8 +130,18 @@ namespace ysl
 		}
 
 		const uint8_t * LocalData()const { return data; }
+
 		uint8_t * LocalData() { return data; }
+
+		void SetUnderlyingDataPointer(uint8_t * d, size_t size, bool own)
+		{
+			Clear();
+			data = d;
+			this->bytes = size;
+			this->own = own;
+		}
 	};
+
 
 	template<typename T,int nCacheLine = 64>
 	class Linear1DArray

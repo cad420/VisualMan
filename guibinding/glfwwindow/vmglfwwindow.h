@@ -52,6 +52,8 @@ namespace ysl
 			static void glfwKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
 			static void glfw_error_callback(int error, const char* description);
 
+
+
 			static vm::KeyButton TranslateKey(int key, int scancode, int mods);
 
 			void InitSingleton();

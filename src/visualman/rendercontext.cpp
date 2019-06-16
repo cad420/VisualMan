@@ -34,6 +34,16 @@ namespace ysl {
 			GetMaxInteger();
 			InitDefaultRenderState();
 
+#ifndef NDBUG
+			glEnable(GL_DEBUG_OUTPUT);
+
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+			glDebugMessageCallback((GLDEBUGPROC)gl_debug_msg_callback, NULL);
+
+			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+#endif
+
 			initialized = true;
 		}
 
@@ -285,14 +295,14 @@ namespace ysl {
 		void RenderContext::ApplyRenderState(const RenderStateSet* rss)
 		{
 
-			if(!rss)
+			if (!rss)
 			{
-				for(const auto & each:defaultRenderStates)
+				for (const auto & each : defaultRenderStates)
 				{
 					each.Apply(nullptr, this);
 				}
 
-				std::unordered_map<RenderStateType,RenderStateBox>().swap(currentRenderStates);
+				std::unordered_map<RenderStateType, RenderStateBox>().swap(currentRenderStates);
 
 				return;
 			}
@@ -304,25 +314,25 @@ namespace ysl {
 
 			std::unordered_map<RenderStateType, RenderStateBox> newStates;
 
-			for(const auto & each: rss->renderStates)
+			for (const auto & each : rss->renderStates)
 			{
 				const auto type = each.StateType();			// Indexed or non-indexed
 				auto it = currentRenderStates.find(type);
 				newStates[type] = each;
 
-				if(it == currentRenderStates.end() || (it->second.rawRenderState != each.rawRenderState))
+				if (it == currentRenderStates.end() || (it->second.rawRenderState != each.rawRenderState))
 				{
 					//If the state don't exist in current states or the value of new state is not the same as before 
 					each.Apply(nullptr, this);
 				}
 			}
 
-			for(const auto & each:currentRenderStates)
+			for (const auto & each : currentRenderStates)
 			{
 				const auto curStateType = each.first;
 
 				auto it = newStates.find(curStateType);
-				if(it == newStates.end())
+				if (it == newStates.end())
 				{
 					// If the state don't exist in new state
 					defaultRenderStates[curStateType].Apply(nullptr, this);
@@ -335,9 +345,9 @@ namespace ysl {
 		void RenderContext::ApplyRenderEnable(const EnableStateSet* ess)
 		{
 
-			if(!ess)
+			if (!ess)
 			{
-				for(int i = 0 ; i < sizeof(EnableEnum2GLEnum) / sizeof(GLenum);i++ )
+				for (int i = 0; i < sizeof(EnableEnum2GLEnum) / sizeof(GLenum); i++)
 				{
 					GL(glDisable(EnableEnum2GLEnum[i]));
 				}
@@ -350,21 +360,21 @@ namespace ysl {
 			assert(ess);
 			std::unordered_set<EnableState> newEnableStates;
 
-			for(const auto & each:ess->enableSet)
+			for (const auto & each : ess->enableSet)
 			{
 				auto it = currentEnableStates.find(each);
 				newEnableStates.insert(each);
-				if(it == currentEnableStates.end())
+				if (it == currentEnableStates.end())
 				{
 					assert(each >= 0 && each < sizeof(EnableEnum2GLEnum) / sizeof(GLenum));
 					GL(glEnable(EnableEnum2GLEnum[each]));
 				}
 			}
 
-			for(const auto & each:currentEnableStates)
+			for (const auto & each : currentEnableStates)
 			{
 				auto it = newEnableStates.find(each);
-				if(it == newEnableStates.end())
+				if (it == newEnableStates.end())
 				{
 					assert(each >= 0 && each < sizeof(EnableEnum2GLEnum) / sizeof(GLenum));
 					GL(glDisable(EnableEnum2GLEnum[each]));
@@ -375,26 +385,69 @@ namespace ysl {
 
 		}
 
+		void RenderContext::gl_debug_msg_callback(GLenum source, GLenum type, GLuint id, GLenum severity,
+			GLsizei length, const GLchar* message, void* userParam)
+		{
+			(void)userParam;
+
+			if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+			std::cout << "---------------" << std::endl;
+			std::cout << "Debug message (" << id << "): " << message << std::endl;
+
+			switch (source)
+			{
+			case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
+			case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
+			case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
+			case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
+			case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
+			case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
+			} std::cout << std::endl;
+
+			switch (type)
+			{
+			case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
+			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
+			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
+			case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
+			case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
+			case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
+			case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
+			case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
+			case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
+			} std::cout << std::endl;
+
+			switch (severity)
+			{
+			case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
+			case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
+			case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
+			case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
+			} std::cout << std::endl;
+			std::cout << std::endl;
+		}
+
 		void RenderContext::GetMaxInteger()
 		{
 			// Get max integer at run-time
 			GL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxInteger.MAX_VERTEX_ATTRIBS));
 			maxInteger.MAX_VERTEX_ATTRIBS = std::min(int(VA_VertexAttribArray_Count), int(maxInteger.MAX_VERTEX_ATTRIBS));
 			GL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxInteger.MAX_TEXTURE_IMAGE_UNITE));
-			maxInteger.MAX_TEXTURE_IMAGE_UNITE = std::min(int(RS_TextureSampler15- RS_TextureSampler0 + 1), int(maxInteger.MAX_TEXTURE_IMAGE_UNITE));
+			maxInteger.MAX_TEXTURE_IMAGE_UNITE = std::min(int(RS_TextureSampler15 - RS_TextureSampler0 + 1), int(maxInteger.MAX_TEXTURE_IMAGE_UNITE));
 			GL(glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &maxInteger.MAX_SHADER_STORAGE_BINDINGS));
-			maxInteger.MAX_SHADER_STORAGE_BINDINGS = std::min(int(RS_ShaderStorageBuffer7-RS_ShaderStorageBuffer0 + 1), maxInteger.MAX_SHADER_STORAGE_BINDINGS);
-			GL(glGetIntegerv(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS,&maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS));
-			maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS = std::min(int(RS_AtomicCounterBuffer7-RS_AtomicCounterBuffer0 + 1), maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
+			maxInteger.MAX_SHADER_STORAGE_BINDINGS = std::min(int(RS_ShaderStorageBuffer7 - RS_ShaderStorageBuffer0 + 1), maxInteger.MAX_SHADER_STORAGE_BINDINGS);
+			GL(glGetIntegerv(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS, &maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS));
+			maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS = std::min(int(RS_AtomicCounterBuffer7 - RS_AtomicCounterBuffer0 + 1), maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
 			GL(glGetIntegerv(GL_MAX_IMAGE_UNITS, &maxInteger.MAX_IMAGE_UNITS));
 			maxInteger.MAX_IMAGE_UNITS = std::min(int(RS_TextureImageUnit15 - RS_TextureSampler + 1), maxInteger.MAX_IMAGE_UNITS);
 
 
-			Log("MAX_VERTEX_ATTRIBS:%d\n",maxInteger.MAX_VERTEX_ATTRIBS);
-			Log("MAX_TEXTURE_IMAGE_UNITE:%d\n",maxInteger.MAX_TEXTURE_IMAGE_UNITE);
-			Log("MAX_SHADER_STORAGE_BINDINGS:%d\n",maxInteger.MAX_SHADER_STORAGE_BINDINGS);
-			Log("MAX_ATOMIC_COUNTER_BUFFER_BINDINGS:%d\n",maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
-			Log("MAX_IMAGE_UNITS:%d\n",maxInteger.MAX_IMAGE_UNITS);
+			Log("MAX_VERTEX_ATTRIBS:%d\n", maxInteger.MAX_VERTEX_ATTRIBS);
+			Log("MAX_TEXTURE_IMAGE_UNITE:%d\n", maxInteger.MAX_TEXTURE_IMAGE_UNITE);
+			Log("MAX_SHADER_STORAGE_BINDINGS:%d\n", maxInteger.MAX_SHADER_STORAGE_BINDINGS);
+			Log("MAX_ATOMIC_COUNTER_BUFFER_BINDINGS:%d\n", maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
+			Log("MAX_IMAGE_UNITS:%d\n", maxInteger.MAX_IMAGE_UNITS);
 		}
 
 		void RenderContext::InitDefaultRenderState()
@@ -408,7 +461,7 @@ namespace ysl {
 			defaultRenderStates[RS_CullFace] = RenderStateBox(MakeRef<CullFaceState>(PF_BACK), 0);
 			defaultRenderStates[RS_DepthFunc] = RenderStateBox(MakeRef<DepthFuncState>(FU_LESS), 0);
 			defaultRenderStates[RS_BlendEquation] = RenderStateBox(MakeRef<BlendEquationState>(BE_FUNC_ADD, BE_FUNC_ADD), 0);
-			defaultRenderStates[RS_PolygonMode] = RenderStateBox(MakeRef<PolygonModeState>(PM_FILL,PM_FILL), 0);
+			defaultRenderStates[RS_PolygonMode] = RenderStateBox(MakeRef<PolygonModeState>(PM_FILL, PM_FILL), 0);
 			defaultRenderStates[RS_FrontFace] = RenderStateBox(MakeRef<FrontFaceState>(), 0);
 			defaultRenderStates[RS_LineWidth] = RenderStateBox(MakeRef<LineWidthState>(1.0), 0);
 
@@ -421,13 +474,13 @@ namespace ysl {
 			// indexed state
 
 			// Texture Sampler
-			for(int i = 0 ; i < maxInteger.MAX_TEXTURE_IMAGE_UNITE;i++)
+			for (int i = 0; i < maxInteger.MAX_TEXTURE_IMAGE_UNITE; i++)
 			{
 				defaultRenderStates[RS_TextureSampler + i] = RenderStateBox(MakeRef<TextureSampler>(), i);
 			}
 
 			// SSBO
-			for(int i = 0 ; i < maxInteger.MAX_SHADER_STORAGE_BINDINGS;i++)
+			for (int i = 0; i < maxInteger.MAX_SHADER_STORAGE_BINDINGS; i++)
 			{
 				defaultRenderStates[RS_ShaderStorageBuffer + i] = RenderStateBox(MakeRef<ShaderStorageBufferObject>(), i);
 			}
@@ -440,9 +493,9 @@ namespace ysl {
 
 			// Image Units
 
-			for(int i =0;i<maxInteger.MAX_IMAGE_UNITS;i++)
+			for (int i = 0; i < maxInteger.MAX_IMAGE_UNITS; i++)
 			{
-				defaultRenderStates[RS_TextureImageUnit + i] = RenderStateBox(MakeRef<TextureImageUnit>(),i);
+				defaultRenderStates[RS_TextureImageUnit + i] = RenderStateBox(MakeRef<TextureImageUnit>(), i);
 			}
 		}
 

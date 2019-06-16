@@ -41,7 +41,6 @@ namespace ysl
 			return false;
 		const auto posInCache = vmManager->UpdatePageTable(hits);	 // policy
 
-
 		const auto blockBytes = blockSize.x * blockSize.y * blockSize.z * sizeof(char);
 		// Ping-Pong PBO Transfer
 		auto curPBO = 0;
@@ -54,8 +53,8 @@ namespace ysl
 		memcpy(pp, dd, blockBytes);
 		pbo[1 - curPBO]->Unmap(); // copy data to pbo
 		pbo[1 - curPBO]->Bind();
-
 		dest->Bind();
+
 		for (; i < missedBlocks - 1;)
 		{
 			pbo[1 - curPBO]->Bind();

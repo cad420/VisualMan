@@ -2,7 +2,7 @@
 #ifndef _VIRTUALVOLUMEHIERACHY_H_
 #define _VIRTUALVOLUMEHIERACHY_H_
 
-#include "../common/lineararray.h"
+#include "lineararray.h"
 #include <largevolumecache.h>
 #include <list>
 #include "gpupagetable.h"
@@ -10,38 +10,14 @@
 
 namespace ysl
 {
-	struct PageDirectoryEntryAbstractIndex
-	{
-		using internal_type = int;
-		const internal_type x, y, z;
-		PageDirectoryEntryAbstractIndex(internal_type x_ = -1,
-			internal_type y_ = -1,
-			internal_type z_ = -1)
-			:x(x_), y(y_), z(z_) {}
-	};
 
-	struct PageTableEntryAbstractIndex
-	{
-		using internal_type = int;
-		internal_type x, y, z;
-		PageTableEntryAbstractIndex(internal_type x_ = -1,
-			internal_type y_ = -1,
-			internal_type z_ = -1) :
-			x(x_), y(y_), z(z_) {}
 
-	};
-
-	struct PhysicalMemoryBlockIndex			// DataBlock start in 3d texture
-	{
-		using internal_type = int;
-		const internal_type x, y, z;
-		PhysicalMemoryBlockIndex(internal_type x_ = -1,
-			internal_type y_ = -1,
-			internal_type z_ = -1) :
-			x(x_), y(y_), z(z_) {}
-	};
 	enum EntryFlag { Empty = 0, Unmapped = 2, Mapped = 1 };
 
+
+	class CPUVolumeDataCache;
+	class GPUVolumeDataCache;
+	class GPUPageTableDataCache;
 
 	class PageTableManager
 	{

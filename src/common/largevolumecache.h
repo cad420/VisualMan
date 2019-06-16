@@ -9,7 +9,39 @@
 
 namespace ysl
 {
-	struct COMMON_EXPORT_IMPORT VirtualMemoryBlockIndex
+
+	struct PageDirectoryEntryAbstractIndex
+	{
+		using internal_type = int;
+		const internal_type x, y, z;
+		PageDirectoryEntryAbstractIndex(internal_type x_ = -1,
+			internal_type y_ = -1,
+			internal_type z_ = -1)
+			:x(x_), y(y_), z(z_) {}
+	};
+
+	struct PageTableEntryAbstractIndex
+	{
+		using internal_type = int;
+		internal_type x, y, z;
+		PageTableEntryAbstractIndex(internal_type x_ = -1,
+			internal_type y_ = -1,
+			internal_type z_ = -1) :
+			x(x_), y(y_), z(z_) {}
+
+	};
+
+	struct PhysicalMemoryBlockIndex			// DataBlock start in 3d texture
+	{
+		using internal_type = int;
+		const internal_type x, y, z;
+		PhysicalMemoryBlockIndex(internal_type x_ = -1,
+			internal_type y_ = -1,
+			internal_type z_ = -1) :
+			x(x_), y(y_), z(z_) {}
+	};
+
+	struct VirtualMemoryBlockIndex
 	{
 		VirtualMemoryBlockIndex(std::size_t linearId, int xb, int yb, int zb)
 		{
@@ -49,8 +81,8 @@ namespace ysl
 
 	class COMMON_EXPORT_IMPORT CPUVolumeDataCache :public AbstrBlockedVolumeDataCPUCache
 	{
-		static constexpr int nLogBlockSize = 7;		// 128
-		static constexpr ysl::Size3 cacheBlockSize{ 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
+		static constexpr int nLogBlockSize = 6;		// 64
+		static constexpr ysl::Size3 cacheBlockSize { 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
 		static constexpr ysl::Size3 cacheDim{ 16,16,16 };
 		static constexpr ysl::Size3 cacheSize = cacheDim * (1 << nLogBlockSize);
 		static constexpr size_t totalCacheBlocks = cacheDim.x*cacheDim.y*cacheDim.z;

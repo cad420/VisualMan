@@ -4,7 +4,7 @@
 
 #include "graphictype.h"
 #include "bufferobject.h"
-#include "spectrum.h"
+#include <spectrum.h>
 
 namespace ysl
 {
@@ -125,22 +125,31 @@ namespace ysl
 
 			unsigned int Handle()const { return handle; }
 
+			bool GetTextureDataDirty()const { return this->dirty; };
+			void SetTextureDataDirty(bool dirty) { this->dirty = dirty; }
 
-			//void CreatePixelBufferObject(int w,int h,int d) = delete;
-			//void DestroyPixelBufferObject() = delete;
+			/**
+			 * \brief Set texture sub data given by \a data
+			 */
+			void SetSubTextureData(void * data,ImageFormat imageFormat,ImageType imageType,int xOffset, int yOffset, int zOffset, int w, int h, int d);
+			void SetSubTextureData(void * data, int xOffset, int yOffset, int zOffset, int w, int h, int d);
 
-			void SetSubTextureData(void * data,ImageFormat imageFormat,ImageType imageType,int offset, int yoffset, int zoffset, int w, int h, int d);
+			void SetSubTextureData(ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d);
+			void SetSubTextureData(int xOffset, int yOffset, int zOffset, int w, int h, int d);
 
-			//void * MapSubTexture(int xoffset, int yoffset, int zoffset, int w, int h, int d) = delete;
-			//void UnmappedSubTexture() = delete;
-
+			void SetSubTextureDataUsePBO(ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d);
+			void SetSubTextureDataUsePBO(int xOffset, int yOffset, int zOffset, int w, int h, int d);
+		
 
 		private:
 
 			// std::unique_ptr<BufferObject> pixelBufferObject; this is used to swap data between texture and memory
+			
+
 			Ref<BufferObject> bufferObject;
 			Ref<TexCreateParams> createParams = nullptr;
 			Ref<TexParams> texParams = nullptr;
+			bool dirty = true;
 
 			TextureTarget target = TD_TEXTURE_2D;
 			TextureFormat format = TF_RGBA;
@@ -150,9 +159,7 @@ namespace ysl
 			int samples = 0;
 			bool border = false;
 			bool mipMap = false;
-
 			unsigned int handle = 0;
-
 		};
 
 		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeVolumeTexture(const std::string & fileName, size_t x, size_t y, size_t z);

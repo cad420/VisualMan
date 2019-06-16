@@ -1,0 +1,125 @@
+
+#ifndef _CACHETEXTURE_H_
+#define _CACHETEXTURE_H_
+#include "texture.h"
+#include <vector>
+#include "largevolumecache.h"
+#include "oocprimitive.h"
+
+namespace ysl
+{
+	namespace vm
+	{
+
+		struct SubDataDescriptor
+		{
+		private:
+			void * data = nullptr;
+			PhysicalMemoryBlockIndex key;
+			size_t blockId = 0;
+		public:
+			SubDataDescriptor() = default;
+			SubDataDescriptor(void * d, const PhysicalMemoryBlockIndex & key,size_t id) :data(d), key(key),blockId(id) {}
+			void * Value()const { return data; }
+			PhysicalMemoryBlockIndex & Key() { return key; }
+			const PhysicalMemoryBlockIndex & Key()const { return key; }
+			size_t BlockId()const { return blockId; }
+		};
+
+		enum EntryFlag { Empty = 0, Unmapped = 2, Mapped = 1 };
+
+		class MappingTableManager
+		{
+
+		public:
+			struct PageDirEntry
+			{
+				int x, y, z, w;
+			};
+			struct PageTableEntry
+			{
+				int x, y, z, w;
+			};
+		private:
+			//Linear3DArray<PageDirEntry> PageDir;
+
+			Linear3DArray<PageTableEntry> pageTable;
+			std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>> g_lruList;
+			//const Size3 physicalMemoryBlock;
+			//const Size3 virtualMemoryBlock;
+			//const Size3 blockSize;
+			//CPUVolumeDataCache * const cacheData;
+			//const std::shared_ptr<CPUVolumeDataCache> cacheData;
+			void InitCPUPageTable(const Size3& blockDim);
+			void InitLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize);
+			void InitLRUList(const Size3& physicalMemoryBlock);
+		public:
+			using size_type = std::size_t;
+			//PageTableManager(const Size3 & physicalMemoryBlock, std::shared_ptr<CPUVolumeDataCache> virtualData): physicalMemoryBlock(physicalMemoryBlock),
+			//virtualMemoryBlock(virtualData->BlockDim()),
+			//blockSize(virtualData->BlockSize()),
+			//cacheData(virtualData)
+			//{
+
+			//	InitCPUPageTable(virtualMemoryBlock);
+			//	InitLRUList(physicalMemoryBlock, blockSize);
+			//	InitGPUPageTable();
+			//}
+
+			//MappingTableManager(std::shared_ptr<CPUVolumeDataCache> virtualData)
+			//	//cacheData(std::move(virtualData)),
+			//	//gpuCacheData(std::move(physicalData))
+			//{
+
+			//	//InitCPUPageTable(TODO:);    // block size
+			//	//InitLRUList(TODO:,TODO:);	// blocks zie ,page table size}
+			//}
+
+			MappingTableManager(const Size3 & tableSize)
+			{
+				InitCPUPageTable(tableSize);
+				InitLRUList(tableSize);
+			}
+
+			std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices);
+		};
+
+		class VISUALMAN_EXPORT_IMPORT OutOfCoreVolumeTexture :public IOutOfCoreAdapter			// Dest
+		{
+		public:
+			explicit OutOfCoreVolumeTexture(const std::string & fileName);
+			void OnDrawCallStart(OutOfCorePrimitive* p) override;
+			void OnDrawCallFinished(OutOfCorePrimitive* p) override;
+			Ref<Texture> GetVolumeTexture() { return volumeData; }
+			Ref<const Texture> GetVolumeTexture()const { return volumeData; }
+			void BindToOutOfCorePrimitive(Ref<OutOfCorePrimitive> oocPrimitive);
+			~OutOfCoreVolumeTexture();
+		private:
+			static constexpr int pboCount = 3;
+			void SetSubTextureDataUsePBO(const std::vector<SubDataDescriptor> & data);
+
+			void CreatePBOs(int bytes);
+			void DestroyPBOs();
+
+			Size3 EvalTextureSize(const Size3 & hint)const;
+
+			//std::array<unsigned int, 2> pbo;
+			unsigned int pbo=0;
+			std::array<void*, pboCount> pboPtrs;
+			std::array<void*, pboCount> offset;
+			std::array<GLsync, pboCount> fences;
+
+			size_t bytes = 0;
+
+			Ref<Texture> volumeData;
+			Ref<CPUVolumeDataCache> cpuVolumeData;
+
+			//Ref<Texture> mappingTable;
+			//Ref<MappingTableManager> mappingTableManager;
+
+			// CPU Volume Cache
+		};
+	}
+}
+
+#endif

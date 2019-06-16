@@ -6,11 +6,15 @@ namespace ysl
 	{
 		OutOfCoreResources::OutOfCoreResources(const std::string & fileName)
 		{
-			cpuMemoryData = std::make_unique<CPUVolumeDataCache>(fileName);
+			//cpuMemoryData = std::make_unique<CPUVolumeDataCache>(fileName);
 		}
 
 		void OutOfCoreResources::OnDrawCallFinished(OutOfCorePrimitive* p)
 		{
+			/*
+			 * Capture missed block ids and transfer them from memory into texture
+			 */
+
 			p->SetRenderFinished(true);
 		}
 
@@ -21,8 +25,8 @@ namespace ysl
 
 		void OutOfCoreResources::BindPrimitive(Ref<OutOfCorePrimitive> primitive)
 		{
-			primitive->RemoveOutOfCoreEvent(shared_from_this());
-			primitive->AddOutOfCoreEvent(shared_from_this());
+			primitive->RemoveOutOfCoreResources(shared_from_this());
+			primitive->SetOutOfCoreResources(shared_from_this());
 		}
 	}
 }

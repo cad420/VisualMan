@@ -202,6 +202,8 @@ namespace ysl
 			return &x;
 		}
 
+		T Prod()const { return x * y; }
+
 		template<typename X> friend class Point2; //Vector2D can be accessed by all instances of Point2D
 	};
 
@@ -507,6 +509,8 @@ namespace ysl
 					v1.z * v2.x - v1.x * v2.z,
 					v1.x * v2.y - v1.y * v2.x};
 		}
+
+		T Prod()const { return x * y * z; }
 
 		constexpr Float LengthSquared()const { return x * x + y * y + z * z; }
 
@@ -1029,6 +1033,8 @@ namespace ysl
 			return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z + v1.w * v2.w;
 		}
 
+		T Prod()const { return x * y * z * w; }
+
 
 		constexpr Float LengthSquared()const { return x * x + y * y + z * z + w*w; }
 
@@ -1109,6 +1115,24 @@ namespace ysl
 		double v2x = v2.x, v2y = v2.y, v2z = v2.z;
 		return Vector3<T>((v1y * v2z) - (v1z * v2y), (v1z * v2x) - (v1x * v2z),
 			(v1x * v2y) - (v1y * v2x));
+	}
+
+	template<typename T>
+	T Prod(const Vector2<T> & v)
+	{
+		return v.x*v.y;
+	}
+
+	template<typename T>
+	T Prod(const Vector3<T> & v)
+	{
+		return v.x*v.y*v.z;
+	}
+
+	template<typename T>
+	T Prod(const Vector4<T> & v)
+	{
+		return v.x*v.y*v.z *v.w;
 	}
 
 

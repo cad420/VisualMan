@@ -64,6 +64,7 @@ namespace ysl
 
 	HashBasedGPUCacheFaultHandler::HashBasedGPUCacheFaultHandler(int capacity, const Size3& dim) :capacity(capacity), dim(dim)
 	{
+
 		InitHashBuffer(capacity);
 		InitMissTableBuffer();
 		InitGPUAtomicCounter();

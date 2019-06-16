@@ -151,6 +151,14 @@ namespace ysl
 
 		private:
 
+			static void gl_debug_msg_callback(GLenum source,
+				GLenum type,
+				GLuint id,
+				GLenum severity,
+				GLsizei length,
+				const GLchar *message,
+				void *userParam);
+
 			void GetMaxInteger();
 			void InitDefaultRenderState();
 			void InitDefaultRenderEnable();

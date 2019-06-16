@@ -58,9 +58,6 @@ namespace ysl
 
 		{
 		public:
-
-
-
 			TextureSampler() :RenderStateIndexed(RS_TextureSampler) {}
 			void Apply(int index, const Camera * camera, RenderContext* context) const override;
 			void SetTexture(Ref<Texture> texture) { this->texture = std::move(texture); }

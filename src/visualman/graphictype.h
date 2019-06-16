@@ -206,6 +206,32 @@ Ref<Ty> MakeRef(Args && ... args)
 }
 
 
+namespace ysl
+{
+	namespace vm
+	{
+		struct Descriptor3D
+		{
+			int w = 0, h = 0, d = 0;
+			int xOffset =0, yOffset=0, zOffset =0;
+		};
+
+		struct Descriptor2D
+		{
+			int w = 0, h = 0;
+			int xOffset = 0, yOffset = 0; 
+		};
+
+		struct Descriptor1D
+		{
+			size_t offset = 0;
+			size_t bytes = 0;
+		};
+	}
+
+
+}
+
 // Enum for OpenGL
 
 enum Function
