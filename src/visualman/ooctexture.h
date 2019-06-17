@@ -10,7 +10,6 @@ namespace ysl
 {
 	namespace vm
 	{
-
 		struct SubDataDescriptor
 		{
 		private:
@@ -45,11 +44,13 @@ namespace ysl
 
 			Linear3DArray<PageTableEntry> pageTable;
 			std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>> g_lruList;
+
 			//const Size3 physicalMemoryBlock;
 			//const Size3 virtualMemoryBlock;
 			//const Size3 blockSize;
 			//CPUVolumeDataCache * const cacheData;
 			//const std::shared_ptr<CPUVolumeDataCache> cacheData;
+
 			void InitCPUPageTable(const Size3& blockDim);
 			void InitLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize);
 			void InitLRUList(const Size3& physicalMemoryBlock);
@@ -75,12 +76,19 @@ namespace ysl
 			//	//InitLRUList(TODO:,TODO:);	// blocks zie ,page table size}
 			//}
 
-			MappingTableManager(const Size3 & tableSize)
+			/**
+			 * \brief 
+			 * \param virtualSpaceSize virtual space size
+			 */
+			MappingTableManager(const Size3 & virtualSpaceSize)
 			{
-				InitCPUPageTable(tableSize);
-				InitLRUList(tableSize);
+				InitCPUPageTable(virtualSpaceSize);
+				InitLRUList(virtualSpaceSize);
 			}
 
+			/**
+			 * \brief Translates the virtual space address to the physical address and update the mapping table by LRU policy
+			 */
 			std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices);
 		};
 
@@ -88,34 +96,51 @@ namespace ysl
 		{
 		public:
 			explicit OutOfCoreVolumeTexture(const std::string & fileName);
+
 			void OnDrawCallStart(OutOfCorePrimitive* p) override;
 			void OnDrawCallFinished(OutOfCorePrimitive* p) override;
+
 			Ref<Texture> GetVolumeTexture() { return volumeData; }
 			Ref<const Texture> GetVolumeTexture()const { return volumeData; }
+
+			Ref<BufferObject> GetAtomicCounterBuffer() { return atomicCounterBuffer; }
+			Ref<const BufferObject> GetAtomicCounterBuffer()const { return atomicCounterBuffer; }
+
+			Ref<BufferObject> GetBlockIDBuffer() { return blockIdBuffer; }
+			Ref<const BufferObject> GetBlockIDBuffer()const { return blockIdBuffer; }
+
+			Ref<BufferObject> GetHashBuffer() { return duplicateRemoveHash; }
+			Ref<const BufferObject> GetHashBuffer()const { return duplicateRemoveHash; }
+
 			void BindToOutOfCorePrimitive(Ref<OutOfCorePrimitive> oocPrimitive);
 			~OutOfCoreVolumeTexture();
 		private:
 			static constexpr int pboCount = 3;
+
 			void SetSubTextureDataUsePBO(const std::vector<SubDataDescriptor> & data);
 
-			void CreatePBOs(int bytes);
-			void DestroyPBOs();
 
 			Size3 EvalTextureSize(const Size3 & hint)const;
+			size_t EvalIDBufferSize(const Size3 & hint)const;
 
 			//std::array<unsigned int, 2> pbo;
+			void CreatePBOs(int bytes);
+			void DestroyPBOs();
 			unsigned int pbo=0;
 			std::array<void*, pboCount> pboPtrs;
 			std::array<void*, pboCount> offset;
 			std::array<GLsync, pboCount> fences;
 
-			size_t bytes = 0;
 
+			size_t bytes = 0;
 			Ref<Texture> volumeData;
 			Ref<CPUVolumeDataCache> cpuVolumeData;
+			Ref<BufferObject> atomicCounterBuffer;
+			Ref<BufferObject> duplicateRemoveHash;
+			Ref<BufferObject> blockIdBuffer;
 
-			//Ref<Texture> mappingTable;
-			//Ref<MappingTableManager> mappingTableManager;
+			Ref<Texture> mappingTable;
+			Ref<MappingTableManager> mappingTableManager;
 
 			// CPU Volume Cache
 		};

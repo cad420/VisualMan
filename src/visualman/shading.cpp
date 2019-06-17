@@ -33,6 +33,32 @@ namespace ysl
 			return texImageUnit;
 		}
 
+		Ref<AtomicCounter> Shading::CreateGetAtomicCounter(int binding)
+		{
+			auto atomicCounter = std::static_pointer_cast<AtomicCounter>(
+				CreateGetRenderStateSet()->GetRenderState(RS_AtomicCounterBuffer, binding)
+				);
+			if(!atomicCounter)
+			{
+				atomicCounter = MakeRef<AtomicCounter>();
+				CreateGetRenderStateSet()->SetRenderState(atomicCounter, binding);
+			}
+			return atomicCounter;
+		}
+
+		Ref<ShaderStorageBufferObject> Shading::CreateGetSSBO(int binding)
+		{
+			auto ssbo = std::static_pointer_cast<ShaderStorageBufferObject>(
+				CreateGetRenderStateSet()->GetRenderState(RS_ShaderStorageBuffer, binding)
+				);
+			if (!ssbo)
+			{
+				ssbo = MakeRef<ShaderStorageBufferObject>();
+				CreateGetRenderStateSet()->SetRenderState(ssbo, binding);
+			}
+			return ssbo;
+		}
+
 
 		Ref<Shading> MakePhongShading()
 		{

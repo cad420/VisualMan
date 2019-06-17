@@ -107,8 +107,9 @@ namespace ysl
 			const auto & blockIndex = data[i].Key();
 			const auto posInCache = Vec3i(blockIndex.x*blockSize.x, blockIndex.y*blockSize.y, blockIndex.z*blockSize.z);
 			GL(glTextureSubImage3D(textureId, 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, GL_UNSIGNED_BYTE, offset[curPBO]));
-
 			GL(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
+
+
 			t.end();
 			std::cout << t.duration() << std::endl;
 
@@ -142,6 +143,12 @@ namespace ysl
 			//auto texSize = blockSize * Size3{ 8,8,8 };
 			return hint * blockSize;
 		}
+
+		size_t OutOfCoreVolumeTexture::EvalIDBufferSize(const Size3& hint) const
+		{
+			return 5000;
+		}
+
 		OutOfCoreVolumeTexture::OutOfCoreVolumeTexture(const std::string& fileName)
 		{
 
@@ -172,11 +179,41 @@ namespace ysl
 			//}
 			CreatePBOs(blockBytes);
 
-
-			// Test:
-			std::vector<SubDataDescriptor> descs;
 			const auto blocks = cpuVolumeData->BlockDim().Prod();
 			const auto dim = cpuVolumeData->BlockDim();
+
+			// Test:
+
+
+
+			//Create a page table texture
+			texSetupParams = MakeRef<TexCreateParams>();
+			const auto mappingTableSize = cpuVolumeData->BlockDim();
+			texSetupParams->SetSize(mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
+			texSetupParams->SetTextureFormat(TF_RGBA32UI);
+			texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
+
+			mappingTable= MakeRef<Texture>();		// gpu volume data cache size
+			mappingTable->SetSetupParams(texSetupParams);
+			mappingTable->CreateTexture();
+
+			std::cout << "Block Dim:" << cpuVolumeData->BlockDim() << std::endl;
+			mappingTableManager = MakeRef<MappingTableManager>(cpuVolumeData->BlockDim());	// It need the virtual memory space size and the block size
+
+
+			//Test:
+
+			std::vector<VirtualMemoryBlockIndex> virtualSpaceAddress;
+			for(int i = 0 ; i < blocks;i++)
+			{
+				virtualSpaceAddress.emplace_back(i, dim.x, dim.y, dim.z);
+				const auto & b = virtualSpaceAddress.back();
+			}
+
+			const auto pa = mappingTableManager->UpdatePageTable(virtualSpaceAddress);
+
+			std::vector<SubDataDescriptor> descs;
+
 			descs.reserve(blocks);
 			for (int i = 0; i < blocks; i++)
 			{
@@ -185,19 +222,27 @@ namespace ysl
 				descs.emplace_back((void*)ptr, PhysicalMemoryBlockIndex{ index3d.x,index3d.y,index3d.z }, i);
 			}
 
+
 			SetSubTextureDataUsePBO(descs);
 
-			// Create a page table texture
-			//texSetupParams = MakeRef<TexCreateParams>();
-			//const auto mappingTableSize = cpuVolumeData->BlockDim();
-			//texSetupParams->SetSize(mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
-			//texSetupParams->SetTextureFormat(TF_RGBA32UI);
-			//texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
+			//
 
-			//mappingTable= MakeRef<Texture>();		// gpu volume data cache size
-			//mappingTable->SetSetupParams(texSetupParams);
-			//mappingTable->CreateTexture();
-			//mappingTableManager = MakeRef<MappingTableManager>(cpuVolumeData);	// It need the virtual memory space size and the block size
+			// Create Atomic Buffer
+			atomicCounterBuffer = MakeRef<BufferObject>();
+			int zero = 0;
+			atomicCounterBuffer->SetLocalData(&zero, sizeof(int));
+			atomicCounterBuffer->SetBufferData(BU_DYNAMIC_DRAW, false);
+
+			// Create Hash Table Buffer
+
+			const auto idBufferSize = EvalIDBufferSize(cpuVolumeData->BlockDim());
+			blockIdBuffer = MakeRef<BufferObject>();
+			blockIdBuffer->SetBufferData(idBufferSize*sizeof(int32_t), nullptr, BU_DYNAMIC_DRAW);
+
+			duplicateRemoveHash = MakeRef<BufferObject>();
+			std::vector<uint32_t> emptyBuffer(idBufferSize,0);
+			duplicateRemoveHash->SetLocalData(emptyBuffer.data(), emptyBuffer.size());
+			duplicateRemoveHash->SetBufferData(BU_DYNAMIC_DRAW, false);
 
 		}
 
@@ -209,7 +254,7 @@ namespace ysl
 		void OutOfCoreVolumeTexture::OnDrawCallFinished(OutOfCorePrimitive* p)
 		{
 			// Get descriptors from cpu volume data cache;
-			//
+
 
 			p->SetRenderFinished(true);
 		}

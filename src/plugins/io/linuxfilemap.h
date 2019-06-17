@@ -31,7 +31,6 @@ namespace ysl
         bool Close()override;
         ~LinuxFileMapping();
     };
-
 }
 
 

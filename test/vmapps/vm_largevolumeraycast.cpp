@@ -103,12 +103,12 @@ namespace ysl
 			Vec3i volSize{ 160,240,40 };
 			auto volumeTex = MakeVolumeTexture(R"(data\mixfrac160x240x40.raw)", volSize.x, volSize.y, volSize.z);
 			//auto tfTex = MakeTransferFunction1D(R"(D:\scidata\elt_tf1d2.TF1D)");
-			auto tfTex = MakeTransferFunction1DTexture({ Color::transparent,Color::blue,Color::yellow });
+			auto tfTex = MakeTransferFunction1DTexture({ Color::transparent,Color::blue,Color::yellow ,Color::green});
 
 			auto rayCastShading = MakeRef<Shading>();
 			auto raycastGLSL = rayCastShading->CreateGetProgram();
 			auto fs = MakeRef<GLSLFragmentShader>();
-			fs->SetFromFile(R"(glsl\raycast_fs.glsl)");
+			fs->SetFromFile(R"(glsl\blockraycasting_f.glsl)");
 			auto vs = MakeRef<GLSLVertexShader>();
 			vs->SetFromFile(R"(glsl\raycast_vs.glsl)");
 			raycastGLSL->AttachShader(fs);
@@ -118,19 +118,28 @@ namespace ysl
 			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\s1_480_480_480_2_64.lvd)");
 			
 			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture());
-
 			rayCastShading->CreateGetTextureSampler(2)->SetTexture(tfTex);
 			rayCastShading->CreateGetTextureSampler(3)->SetTexture(entryTexture);
+			rayCastShading->CreateGetTextureImageUnit(2)->SetTexture(entryTexture);
+
+			rayCastShading->CreateGetAtomicCounter(3)->SetBufferObject(oocResources->GetAtomicCounterBuffer());
+			rayCastShading->CreateGetSSBO(0)->SetBufferObject(oocResources->GetHashBuffer());
+			rayCastShading->CreateGetSSBO(1)->SetBufferObject(oocResources->GetBlockIDBuffer());
+
 			rayCastShading->CreateGetTextureSampler(4)->SetTexture(exitTexture);
 
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.001f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ka")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("kd")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ks")->SetUniformValue(50.f);
+
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texTransfunc")->SetUniformValue(2);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texVolume")->SetUniformValue(1);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texStartPos")->SetUniformValue(3);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texEndPos")->SetUniformValue(4);
+
+
+
 
 			auto effect2 = MakeRef<Artist>();
 			effect2->GetLOD(0)->push_back(rayCastShading);

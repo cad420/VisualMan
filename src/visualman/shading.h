@@ -32,6 +32,8 @@ namespace ysl
 
 			Ref<TextureSampler> CreateGetTextureSampler(int unitIndex);
 			Ref<TextureImageUnit> CreateGetTextureImageUnit(int unitIndex);
+			Ref<AtomicCounter> CreateGetAtomicCounter(int binding);
+			Ref<ShaderStorageBufferObject> CreateGetSSBO(int binding);
 
 			// EnableState getter and setter
 			Ref<EnableStateSet> CreateGetEnableStateSet() { return enableSet ? enableSet : (enableSet = MakeRef<EnableStateSet>()); }

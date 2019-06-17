@@ -126,6 +126,7 @@ namespace ysl {
 		VMGLFWWindow::~VMGLFWWindow()
 		{
 			//singleton = nullptr;
+			DestroyWindow();
 		}
 
 		void VMGLFWWindow::MakeCurrent()

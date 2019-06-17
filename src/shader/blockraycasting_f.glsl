@@ -3,7 +3,9 @@
 uniform sampler1D texTransfunc;
 uniform sampler2DRect texStartPos;
 uniform sampler2DRect texEndPos;
+
 uniform sampler2DRect texIntermediateResult;
+
 uniform float step;
 uniform float ka;
 uniform float kd;

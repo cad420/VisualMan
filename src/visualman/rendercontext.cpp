@@ -51,6 +51,18 @@ namespace ysl {
 		{
 			// Destroy all gl resources
 
+			InitDefaultRenderEnable();
+			InitDefaultRenderEnable();
+
+
+			std::vector<Ref<IEventListener>>().swap(listeners);
+
+			std::vector<Ref<FramebufferObject>>().swap(framebufferObjects);
+			framebuffer = nullptr;
+			curProgram = nullptr;
+
+			std::unordered_map<RenderStateType, RenderStateBox>().swap(currentRenderStates);
+			std::unordered_set<EnableState>().swap(currentEnableStates);
 
 		}
 
