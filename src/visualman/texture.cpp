@@ -320,7 +320,7 @@ namespace ysl
 
 
 
-		void Texture::SetSubTextureData(void * data, ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d)
+		void Texture::SetSubTextureData(const void * data, ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d)
 		{
 			if (handle == 0)
 			{
@@ -350,7 +350,7 @@ namespace ysl
 			}
 		}
 
-		void Texture::SetSubTextureData(void* data, int xOffset, int yOffset, int zOffset, int w, int h, int d)
+		void Texture::SetSubTextureData(const void* data, int xOffset, int yOffset, int zOffset, int w, int h, int d)
 		{
 			assert(createParams);
 			const auto sizedFormat = createParams->GetTextureFormat();

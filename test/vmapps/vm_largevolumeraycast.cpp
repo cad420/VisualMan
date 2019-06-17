@@ -114,29 +114,51 @@ namespace ysl
 			raycastGLSL->AttachShader(fs);
 			raycastGLSL->AttachShader(vs);
 
-
 			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\s1_480_480_480_2_64.lvd)");
 			
 			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture());
+		
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume")->SetUniformValue(1);
+
 			rayCastShading->CreateGetTextureSampler(2)->SetTexture(tfTex);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texTransfunc")->SetUniformValue(2);
+
 			rayCastShading->CreateGetTextureSampler(3)->SetTexture(entryTexture);
 			rayCastShading->CreateGetTextureImageUnit(2)->SetTexture(entryTexture);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texStartPos")->SetUniformValue(3);
+		
+			rayCastShading->CreateGetTextureSampler(4)->SetTexture(exitTexture);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texEndPos")->SetUniformValue(4);
+
+			//rayCastShading->CreateGetTextureSampler(5)->SetTexture(oocResources->GetMappingTableTexture());
+			rayCastShading->CreateGetTextureImageUnit(1)->SetTexture(oocResources->GetMappingTableTexture());
+
+			//rayCastShading->CreateGetTextureSampler(6)->SetTexture(intermediateResult);
+			rayCastShading->CreateGetTextureImageUnit(4)->SetTexture(intermediateResult);
 
 			rayCastShading->CreateGetAtomicCounter(3)->SetBufferObject(oocResources->GetAtomicCounterBuffer());
 			rayCastShading->CreateGetSSBO(0)->SetBufferObject(oocResources->GetHashBuffer());
 			rayCastShading->CreateGetSSBO(1)->SetBufferObject(oocResources->GetBlockIDBuffer());
-
-			rayCastShading->CreateGetTextureSampler(4)->SetTexture(exitTexture);
 
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.001f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ka")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("kd")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ks")->SetUniformValue(50.f);
 
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texTransfunc")->SetUniformValue(2);
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texVolume")->SetUniformValue(1);
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texStartPos")->SetUniformValue(3);
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texEndPos")->SetUniformValue(4);
+		
+			
+		
+		
+
+			auto v = oocResources->VirtualBlockDim();
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("totalPageTableSize")->SetUniform3i(1,v.Data());
+			v = oocResources->DataResolution();
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("volumeDataSizeNoRepeat")->SetUniform3i(1,v.Data());
+			v = oocResources->BlockSize() - oocResources->Padding();
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("blockDataSizeNoRepeat")->SetUniform3i(1,v.Data());
+			v = oocResources->Padding();
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("repeatOffset")->SetUniform3i(1,v.Data());
+			//rayCastShading->CreateGetUniformSet()->CreateGetUniform("texIntermediateResult")->SetUniformValue(6);
 
 
 

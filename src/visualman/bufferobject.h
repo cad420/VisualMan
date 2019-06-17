@@ -15,6 +15,7 @@ namespace ysl
 		{
 		public:
 			BufferObject() = default;
+			BufferObject(BufferObjectTarget target);
 			~BufferObject() { DestroyBufferObject(); }
 			/**
 			 * \brief A copy constructor
@@ -128,6 +129,11 @@ namespace ysl
 			 * 
 			 * \note This function will check whether the buffer object has been created.
 			 */
+
+			void SetBufferTarget(BufferObjectTarget target) { this->bufferTarget = target; }
+
+			BufferObjectTarget GetBufferTarget()const { return bufferTarget; }
+
 			void * MapBuffer(BufferObjectAccess access);
 
 			void UnmapBuffer();
@@ -137,6 +143,7 @@ namespace ysl
 			unsigned int handle = 0;
 			uint64_t bufferSize = 0;
 			BufferObjectUsage bufferUsage = BU_STATIC_DRAW;
+			BufferObjectTarget bufferTarget = VM_BT_ARRAY_BUFFER;
 			bool mapped = false;
 		};
 	}

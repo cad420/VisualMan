@@ -12,6 +12,7 @@ namespace ysl
 {
 	class IO_EXPORT_IMPORT WindowsFileMapping:public IPluginFileMap
 	{
+
 		DECLARE_RTTI
 		DECLARE_INITIAL(WindowsFileMapping)
 		HANDLE f = nullptr;

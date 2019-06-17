@@ -39,16 +39,14 @@ namespace ysl
 			auto i = 0;
 			//const auto dd = data[0].Value();
 			const auto dd = cpuVolumeData->ReadBlockDataFromCPUCache(data[i].BlockId());
-
-			Timer t;
-			t.begin();
-
 			GL(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo));
 
 			///**********************************************/
 
 			auto pp = pboPtrs[curPBO];
 			memcpy(pp, dd, blockBytes);
+
+
 			//for (; i < data.size() - 1;)
 			//{
 			//	const auto & blockIndex = data[i].Key();
@@ -94,7 +92,7 @@ namespace ysl
 
 				int is = 0;
 				GL(is = glIsSync(fences[nextPBO]));
-				if(is == GL_TRUE)
+				if (is == GL_TRUE)
 				{
 					//GL(s = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
 					GL(glClientWaitSync(fences[nextPBO], 0, 100000000));
@@ -109,9 +107,6 @@ namespace ysl
 			GL(glTextureSubImage3D(textureId, 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, GL_UNSIGNED_BYTE, offset[curPBO]));
 			GL(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
 
-
-			t.end();
-			std::cout << t.duration() << std::endl;
 
 		}
 		void OutOfCoreVolumeTexture::CreatePBOs(int bytes)
@@ -158,7 +153,7 @@ namespace ysl
 
 			auto texSetupParams = MakeRef<TexCreateParams>();
 			const auto texSize = EvalTextureSize(cpuVolumeData->BlockDim());
-			std::cout << "Cache Texture Cache:" << texSize << std::endl;
+			//std::cout << "Cache Texture Cache:" << texSize << std::endl;
 			texSetupParams->SetSize(texSize.x, texSize.y, texSize.z);
 			texSetupParams->SetTextureFormat(TF_R8);
 			texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
@@ -184,8 +179,6 @@ namespace ysl
 
 			// Test:
 
-
-
 			//Create a page table texture
 			texSetupParams = MakeRef<TexCreateParams>();
 			const auto mappingTableSize = cpuVolumeData->BlockDim();
@@ -193,18 +186,17 @@ namespace ysl
 			texSetupParams->SetTextureFormat(TF_RGBA32UI);
 			texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
 
-			mappingTable= MakeRef<Texture>();		// gpu volume data cache size
+			mappingTable = MakeRef<Texture>();		// gpu volume data cache size
 			mappingTable->SetSetupParams(texSetupParams);
 			mappingTable->CreateTexture();
 
-			std::cout << "Block Dim:" << cpuVolumeData->BlockDim() << std::endl;
+			//std::cout << "Block Dim:" << cpuVolumeData->BlockDim() << std::endl;
 			mappingTableManager = MakeRef<MappingTableManager>(cpuVolumeData->BlockDim());	// It need the virtual memory space size and the block size
-
 
 			//Test:
 
 			std::vector<VirtualMemoryBlockIndex> virtualSpaceAddress;
-			for(int i = 0 ; i < blocks;i++)
+			for (int i = 0; i < blocks; i++)
 			{
 				virtualSpaceAddress.emplace_back(i, dim.x, dim.y, dim.z);
 				const auto & b = virtualSpaceAddress.back();
@@ -221,28 +213,25 @@ namespace ysl
 				const auto index3d = ysl::Dim(i, { dim.x,dim.y });
 				descs.emplace_back((void*)ptr, PhysicalMemoryBlockIndex{ index3d.x,index3d.y,index3d.z }, i);
 			}
-
-
 			SetSubTextureDataUsePBO(descs);
-
 			//
 
 			// Create Atomic Buffer
-			atomicCounterBuffer = MakeRef<BufferObject>();
+			atomicCounterBuffer = MakeRef<BufferObject>(VM_BT_ATOMIC_COUNTER_BUFFER);
 			int zero = 0;
 			atomicCounterBuffer->SetLocalData(&zero, sizeof(int));
-			atomicCounterBuffer->SetBufferData(BU_DYNAMIC_DRAW, false);
+			atomicCounterBuffer->SetBufferData(BU_STREAM_READ, false);
 
 			// Create Hash Table Buffer
 
 			const auto idBufferSize = EvalIDBufferSize(cpuVolumeData->BlockDim());
-			blockIdBuffer = MakeRef<BufferObject>();
-			blockIdBuffer->SetBufferData(idBufferSize*sizeof(int32_t), nullptr, BU_DYNAMIC_DRAW);
+			blockIdBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
+			blockIdBuffer->SetBufferData(idBufferSize * sizeof(int32_t), nullptr, BU_STREAM_READ);
 
-			duplicateRemoveHash = MakeRef<BufferObject>();
-			std::vector<uint32_t> emptyBuffer(idBufferSize,0);
+			duplicateRemoveHash = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
+			std::vector<uint32_t> emptyBuffer(idBufferSize, 0);
 			duplicateRemoveHash->SetLocalData(emptyBuffer.data(), emptyBuffer.size());
-			duplicateRemoveHash->SetBufferData(BU_DYNAMIC_DRAW, false);
+			duplicateRemoveHash->SetBufferData(BU_STREAM_READ, false);
 
 		}
 
@@ -253,10 +242,51 @@ namespace ysl
 
 		void OutOfCoreVolumeTexture::OnDrawCallFinished(OutOfCorePrimitive* p)
 		{
-			// Get descriptors from cpu volume data cache;
+			//return;
+
+			blockIdLocalBuffer.clear();
+			auto aptr = atomicCounterBuffer->MapBuffer(BA_READ_WRITE);
+			assert(aptr);
+			int blocks = *((int*)aptr);
+			*((int*)aptr) = 0;
+			atomicCounterBuffer->UnmapBuffer();
+
+			if (blocks == 0)
+			{
+				p->SetRenderFinished(true);
+				return;
+			}
+
+			auto bptr = (int*)blockIdBuffer->MapBuffer(BA_READ_ONLY);
+			blockIdLocalBuffer.resize(blocks);
+			memcpy(blockIdLocalBuffer.data(), bptr, sizeof(int) * blocks);
+			blockIdBuffer->UnmapBuffer();
+			duplicateRemoveHash->SetBufferData(BU_STREAM_READ, false);		//Reset Hash Table
 
 
-			p->SetRenderFinished(true);
+			const auto dim = cpuVolumeData->BlockDim();
+			const auto physicalBlockCount = dim.Prod();
+			std::vector<VirtualMemoryBlockIndex> virtualSpaceAddress;
+			virtualSpaceAddress.reserve(blocks);
+
+			std::vector<SubDataDescriptor> descs;
+			descs.reserve(blocks);
+
+			for (int i = 0; i < blocks && i < physicalBlockCount; i++)
+			{
+				virtualSpaceAddress.emplace_back(blockIdLocalBuffer[i], dim.x, dim.y, dim.z);
+				//const auto & b = virtualSpaceAddress.back();
+			}
+
+			const auto pa = mappingTableManager->UpdatePageTable(virtualSpaceAddress);
+			mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, dim.x, dim.y, dim.z);
+			for(int i = 0;i < pa.size();i++)
+			{
+				descs.emplace_back(nullptr, PhysicalMemoryBlockIndex{ pa[i].x,pa[i].y,pa[i].z }, blockIdLocalBuffer[i]);
+			}
+			SetSubTextureDataUsePBO(descs);
+
+
 		}
 
 		void MappingTableManager::InitCPUPageTable(const Size3& blockDim)
@@ -308,6 +338,7 @@ namespace ysl
 			const auto missedBlocks = missedBlockIndices.size();
 
 			std::vector<PhysicalMemoryBlockIndex> physicalIndices;
+			physicalIndices.reserve(missedBlocks);
 			// Update LRU List 
 			for (int i = 0; i < missedBlocks; i++)
 			{
@@ -330,20 +361,20 @@ namespace ysl
 					pageTable(last.first.x, last.first.y, last.first.z).w = EntryFlag::Unmapped;
 				}
 
+				// critical section : last
 				last.first.x = index.x;
 				last.first.y = index.y;
 				last.first.z = index.z;
+				//
 				g_lruList.splice(g_lruList.begin(), g_lruList, --g_lruList.end()); // move from tail to head, LRU policy
 
+				// critical section physicalIndex
 				physicalIndices.push_back({ xInCache, yInCache, zInCache });
 				//std::cout << last.first.x << " " << last.first.y << " " << last.first.z << " " << xInCache << " " << yInCache << " " << zInCache << std::endl;
 			}
 
 			return physicalIndices;
 		}
-
-
-
 
 	}
 }

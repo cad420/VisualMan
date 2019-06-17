@@ -131,8 +131,8 @@ namespace ysl
 			/**
 			 * \brief Set texture sub data given by \a data
 			 */
-			void SetSubTextureData(void * data,ImageFormat imageFormat,ImageType imageType,int xOffset, int yOffset, int zOffset, int w, int h, int d);
-			void SetSubTextureData(void * data, int xOffset, int yOffset, int zOffset, int w, int h, int d);
+			void SetSubTextureData(const void * data,ImageFormat imageFormat,ImageType imageType,int xOffset, int yOffset, int zOffset, int w, int h, int d);
+			void SetSubTextureData(const void * data, int xOffset, int yOffset, int zOffset, int w, int h, int d);
 
 			void SetSubTextureData(ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d);
 			void SetSubTextureData(int xOffset, int yOffset, int zOffset, int w, int h, int d);

@@ -9,6 +9,11 @@ namespace ysl
 {
 	namespace vm
 	{
+		BufferObject::BufferObject(BufferObjectTarget target):bufferTarget(target)
+		{
+
+		}
+
 		void BufferObject::CreateBufferObject()
 		{
 			if (handle == 0)
@@ -47,9 +52,9 @@ namespace ysl
 		{
 			CreateBufferObject();
 			assert(handle);
-			GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
-			GL(glBufferData(GL_ARRAY_BUFFER, bytes, data, usage));
-			GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			GL(glBindBuffer(GetBufferTarget(), handle));
+			GL(glBufferData(GetBufferTarget(), bytes, data, usage));
+			GL(glBindBuffer(GetBufferTarget(), 0));
 			bufferSize = bytes;
 			this->bufferUsage = usage;
 		}
@@ -66,9 +71,9 @@ namespace ysl
 			assert(handle);
 			if (handle && data)
 			{
-				GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
-				GL(glBufferSubData(GL_ARRAY_BUFFER, offset, bytes, data));
-				GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+				GL(glBindBuffer(GetBufferTarget(), handle));
+				GL(glBufferSubData(GetBufferTarget(), offset, bytes, data));
+				GL(glBindBuffer(GetBufferTarget(), 0));
 			}
 			else
 			{
@@ -81,9 +86,9 @@ namespace ysl
 			assert(handle);
 			if (handle)
 			{
-				GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
-				GL(glBufferSubData(GL_ARRAY_BUFFER, offset, bytes, LocalData()));
-				GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+				GL(glBindBuffer(GetBufferTarget(), handle));
+				GL(glBufferSubData(GetBufferTarget(), offset, bytes, LocalData()));
+				GL(glBindBuffer(GetBufferTarget(), 0));
 				if (discard) Resize(0);
 			}
 			else
@@ -97,9 +102,9 @@ namespace ysl
 			assert(handle);
 			if (handle)
 			{
-				GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
-				GL(glBufferSubData(GL_ARRAY_BUFFER, bOffset, bytes, LocalData() + localBufferOffset));
-				GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+				GL(glBindBuffer(GetBufferTarget(), handle));
+				GL(glBufferSubData(GetBufferTarget(), bOffset, bytes, LocalData() + localBufferOffset));
+				GL(glBindBuffer(GetBufferTarget(), 0));
 			}
 			else
 			{
@@ -118,9 +123,9 @@ namespace ysl
 			if (handle)
 			{
 				void * ptr = nullptr;
-				GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
-				GL(ptr = glMapBuffer(handle, access));
-				GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+				GL(glBindBuffer(GetBufferTarget(), handle));
+				GL(ptr = glMapNamedBuffer(handle, access));
+				GL(glBindBuffer(GetBufferTarget(), 0));
 				mapped = true;
 				return ptr;
 			}
@@ -132,9 +137,9 @@ namespace ysl
 		{
 			if (handle && mapped)
 			{
-				GL(glBindBuffer(GL_ARRAY_BUFFER, handle));
-				GL(glUnmapBuffer(GL_ARRAY_BUFFER));
-				GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+				GL(glBindBuffer(GetBufferTarget(), handle));
+				GL(glUnmapNamedBuffer(handle));
+				GL(glBindBuffer(GetBufferTarget(), 0));
 				mapped = false;
 			}
 			else if (!handle)

@@ -41,16 +41,13 @@ namespace ysl
 			};
 		private:
 			//Linear3DArray<PageDirEntry> PageDir;
-
 			Linear3DArray<PageTableEntry> pageTable;
 			std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>> g_lruList;
-
 			//const Size3 physicalMemoryBlock;
 			//const Size3 virtualMemoryBlock;
 			//const Size3 blockSize;
 			//CPUVolumeDataCache * const cacheData;
 			//const std::shared_ptr<CPUVolumeDataCache> cacheData;
-
 			void InitCPUPageTable(const Size3& blockDim);
 			void InitLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize);
 			void InitLRUList(const Size3& physicalMemoryBlock);
@@ -86,6 +83,9 @@ namespace ysl
 				InitLRUList(virtualSpaceSize);
 			}
 
+
+			const void * GetData()const { return pageTable.Data(); }
+
 			/**
 			 * \brief Translates the virtual space address to the physical address and update the mapping table by LRU policy
 			 */
@@ -112,13 +112,21 @@ namespace ysl
 			Ref<BufferObject> GetHashBuffer() { return duplicateRemoveHash; }
 			Ref<const BufferObject> GetHashBuffer()const { return duplicateRemoveHash; }
 
+			Ref<Texture> GetMappingTableTexture() { return mappingTable; }
+			Ref<const Texture> GetMappingTableTexture()const { return mappingTable; }
+
+			Vec3i DataResolution()const { return Vec3i(cpuVolumeData->OriginalDataSize()); }
+			Vec3i DataResolutionWithPadding()const { return Vec3i(cpuVolumeData->BlockDim()*cpuVolumeData->BlockSize()); }
+			Vec3i Padding()const {return Vec3i( cpuVolumeData->Padding(),cpuVolumeData->Padding(),cpuVolumeData->Padding()); }
+			Vec3i VirtualBlockDim()const { return Vec3i(cpuVolumeData->BlockDim()); }
+			Vec3i BlockSize()const { return Vec3i(cpuVolumeData->BlockSize());}
+
 			void BindToOutOfCorePrimitive(Ref<OutOfCorePrimitive> oocPrimitive);
 			~OutOfCoreVolumeTexture();
 		private:
 			static constexpr int pboCount = 3;
 
 			void SetSubTextureDataUsePBO(const std::vector<SubDataDescriptor> & data);
-
 
 			Size3 EvalTextureSize(const Size3 & hint)const;
 			size_t EvalIDBufferSize(const Size3 & hint)const;
@@ -137,7 +145,9 @@ namespace ysl
 			Ref<CPUVolumeDataCache> cpuVolumeData;
 			Ref<BufferObject> atomicCounterBuffer;
 			Ref<BufferObject> duplicateRemoveHash;
+
 			Ref<BufferObject> blockIdBuffer;
+			std::vector<int> blockIdLocalBuffer;
 
 			Ref<Texture> mappingTable;
 			Ref<MappingTableManager> mappingTableManager;
