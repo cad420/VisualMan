@@ -39,21 +39,23 @@ namespace ysl
 			internal_type y_ = -1,
 			internal_type z_ = -1) :
 			x(x_), y(y_), z(z_) {}
+		Vec3i ToVec3i()const { return Vec3i{ x,y,z }; }
 	};
 
 	struct VirtualMemoryBlockIndex
 	{
+		VirtualMemoryBlockIndex() = default;
 		VirtualMemoryBlockIndex(std::size_t linearId, int xb, int yb, int zb)
 		{
 			z = linearId / (xb*yb);
 			y = (linearId - z * xb*yb) / xb;
 			x = linearId - z * xb*yb - y * xb;
 		}
-		VirtualMemoryBlockIndex(int x, int y, int z):x(x),y(y),z(z)
-		{
-		}
+		VirtualMemoryBlockIndex(int x, int y, int z):x(x),y(y),z(z){}
+		Vec3i ToVec3i()const { return Vec3i{ x,y,z }; }
+
 		using index_type = int;
-		index_type x, y, z;
+		index_type x = -1, y=-1, z=-1;
 	};
 
 	class COMMON_EXPORT_IMPORT AbstrCPUBlockCache
@@ -81,7 +83,7 @@ namespace ysl
 
 	class COMMON_EXPORT_IMPORT CPUVolumeDataCache :public AbstrBlockedVolumeDataCPUCache
 	{
-		static constexpr int nLogBlockSize = 6;		// 64
+		static constexpr int nLogBlockSize = 7;		// 64
 		static constexpr ysl::Size3 cacheBlockSize { 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
 		static constexpr ysl::Size3 cacheDim{ 16,16,16 };
 		static constexpr ysl::Size3 cacheSize = cacheDim * (1 << nLogBlockSize);

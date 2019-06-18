@@ -102,8 +102,8 @@ namespace ysl
 			intermediateFBO->CheckFramebufferStatus();
 			Vec3i volSize{ 160,240,40 };
 			auto volumeTex = MakeVolumeTexture(R"(data\mixfrac160x240x40.raw)", volSize.x, volSize.y, volSize.z);
-			//auto tfTex = MakeTransferFunction1D(R"(D:\scidata\elt_tf1d2.TF1D)");
-			auto tfTex = MakeTransferFunction1DTexture({ Color::transparent,Color::blue,Color::yellow ,Color::green});
+			auto tfTex = MakeTransferFunction1DTexture(R"(D:\scidata\elt_tf1d2.TF1D)");
+			//auto tfTex = MakeTransferFunction1DTexture({ Color::transparent,Color::blue,Color::transparent});
 
 			auto rayCastShading = MakeRef<Shading>();
 			auto raycastGLSL = rayCastShading->CreateGetProgram();
@@ -114,7 +114,7 @@ namespace ysl
 			raycastGLSL->AttachShader(fs);
 			raycastGLSL->AttachShader(vs);
 
-			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\s1_480_480_480_2_64.lvd)");
+			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\s1_1984_1984_1984_2_128.lvd)");
 			
 			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture());
 		
@@ -123,17 +123,9 @@ namespace ysl
 			rayCastShading->CreateGetTextureSampler(2)->SetTexture(tfTex);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texTransfunc")->SetUniformValue(2);
 
-			rayCastShading->CreateGetTextureSampler(3)->SetTexture(entryTexture);
 			rayCastShading->CreateGetTextureImageUnit(2)->SetTexture(entryTexture);
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texStartPos")->SetUniformValue(3);
-		
-			rayCastShading->CreateGetTextureSampler(4)->SetTexture(exitTexture);
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texEndPos")->SetUniformValue(4);
-
-			//rayCastShading->CreateGetTextureSampler(5)->SetTexture(oocResources->GetMappingTableTexture());
+			rayCastShading->CreateGetTextureImageUnit(3)->SetTexture(exitTexture);
 			rayCastShading->CreateGetTextureImageUnit(1)->SetTexture(oocResources->GetMappingTableTexture());
-
-			//rayCastShading->CreateGetTextureSampler(6)->SetTexture(intermediateResult);
 			rayCastShading->CreateGetTextureImageUnit(4)->SetTexture(intermediateResult);
 
 			rayCastShading->CreateGetAtomicCounter(3)->SetBufferObject(oocResources->GetAtomicCounterBuffer());
@@ -145,23 +137,15 @@ namespace ysl
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("kd")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ks")->SetUniformValue(50.f);
 
-		
-			
-		
-		
-
 			auto v = oocResources->VirtualBlockDim();
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("totalPageTableSize")->SetUniform3i(1,v.Data());
+
 			v = oocResources->DataResolution();
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("volumeDataSizeNoRepeat")->SetUniform3i(1,v.Data());
-			v = oocResources->BlockSize() - oocResources->Padding();
+			v = oocResources->BlockSize() - 2*oocResources->Padding();
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("blockDataSizeNoRepeat")->SetUniform3i(1,v.Data());
 			v = oocResources->Padding();
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("repeatOffset")->SetUniform3i(1,v.Data());
-			//rayCastShading->CreateGetUniformSet()->CreateGetUniform("texIntermediateResult")->SetUniformValue(6);
-
-
-
 
 			auto effect2 = MakeRef<Artist>();
 			effect2->GetLOD(0)->push_back(rayCastShading);
@@ -184,7 +168,7 @@ namespace ysl
 			auto blit = MakeRef<BlitFramebufferEvent>(intermediateFBO, rect, Context()->GetFramebuffer(), rect, BufferBits::VM_BB_COLOR_BUFFER_BIT);
 			raycastAgt->Renderers().at(0)->AddRenderFinishedEventCallback(blit);
 			raycastAgt->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR);
-			raycastAgt->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 1.f,1.f,1.f,1.f });
+			raycastAgt->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 0.f,0.f,0.f,0.f });
 
 			auto serializedAgts= MakeRef<SerializedAggregates>();
 			SetAggregation(serializedAgts);

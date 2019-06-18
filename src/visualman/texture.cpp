@@ -428,7 +428,7 @@ namespace ysl
 			params->SetBufferObject(texBuffer);
 			texBuffer->CreateBufferObject();
 
-			texBuffer->SetBufferData(BU_STREAM_DRAW, true);
+			texBuffer->ReallocBufferData(BU_STREAM_DRAW, true);
 
 			auto volumeTex = MakeRef<Texture>();
 			volumeTex->SetSetupParams(params);

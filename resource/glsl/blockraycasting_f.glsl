@@ -2,15 +2,15 @@
 
 //
 uniform sampler1D texTransfunc;
-
-uniform sampler2D texStartPos;
-
-uniform sampler2D texEndPos;
+//uniform sampler2D texStartPos;
+//uniform sampler2D texEndPos;
 //uniform sampler3D texVolume;
 uniform sampler3D cacheVolume;
+layout(binding = 1, rgba32ui) uniform volatile uimage3D pageTableTexture;
+uniform ivec3 totalPageTableSize;					// page table texture size1
 layout(binding = 2, rgba32f) uniform volatile image2D entryPos;
-
-//uniform sampler2D texIntermediateResult;		// useless
+layout(binding = 3, rgba32f) uniform volatile image2D endPos;
+layout(binding = 4, rgba32f) uniform volatile image2DRect interResult;
 
 uniform float step;
 // illumination params
@@ -20,43 +20,27 @@ uniform float ka;
 uniform float kd;
 uniform float shininess;
 uniform float ks;
-
-// 
 in vec2 screenCoord;
-
-//
 out vec4 fragColor;
-
-
 // Out-Of-Core uniforms
 
 uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (no repeat)
 uniform ivec3 blockDataSizeNoRepeat;				// block data size (no repeat)
 uniform ivec3 repeatOffset;							// repeat boarder size
-
-
-layout(binding = 0, rgba32i) uniform volatile iimage3D pageDirTexutre;
-
-layout(binding = 1, rgba32i) uniform volatile iimage3D pageTableTexture;
-uniform ivec3 totalPageTableSize;					// page table texture size1
-
-
-
+//layout(binding = 0, rgba32i) uniform volatile iimage3D pageDirTexutre;
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
-layout(binding = 4, rgba32f) uniform volatile image2DRect interResult;
-
-
 // keywords buffer shows the read-write feature of the buffer.
 layout(std430, binding = 0) buffer HashTable {int blockId[];}hashTable;
 layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
 
+
 vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
 	vec4 scalar;
+	//ivec3 totalPageTableSize = imageSize(pageTableTexture);
 	// address translation
-	ivec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
+	vec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
 	vec3 voxelCoord=vec3(samplePos * (volumeDataSizeNoRepeat));
-	//int dataSize = volumeDataSizeNoRepeat.x;
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
 
 
@@ -64,8 +48,6 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
 				+blockCoord.y * totalPageTableSize.x 
 				+blockCoord.x;
-
-
 	if(pageTableEntry.w == 2)		// Unmapped flag
 	{
 		if(atomicCompSwap(hashTable.blockId[blockId],0,1) == 0)
@@ -78,7 +60,7 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	}
 	else 
 	{
-		vec3 samplePoint = pageTableEntry.xyz + blockOffset + (repeatOffset);
+		vec3 samplePoint = pageTableEntry.xyz * (blockDataSizeNoRepeat + 2*repeatOffset) + blockOffset + (repeatOffset);
 		samplePoint = samplePoint/textureSize(cacheVolume,0);
 		scalar = texture(cacheVolume,samplePoint);
 		mapped = true;
@@ -86,7 +68,6 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	}
 	return scalar;
 }
-
 
 vec3 PhongShadingEx(vec3 samplePos, vec3 diffuseColor)
 {
@@ -118,48 +99,20 @@ vec3 PhongShadingEx(vec3 samplePos, vec3 diffuseColor)
 void main()
 {
 
-//	vec3 rayStart = texture2D(texStartPos, screenCoord).xyz;
-//	vec3 rayEnd = texture2D(texEndPos, screenCoord).xyz;
-//
-//	vec3 start2end = rayEnd - rayStart;
-//	vec4 bg = vec4(1.0, 1.0, 1.0, 1.0);
-//	if (start2end.x == 0.0 && start2end.y == 0.0 && start2end.z == 0.0) {
-//		fragColor = bg; // Background Colors
-//		return;
-//	}
-//	vec4 color = vec4(0, 0, 0, 0);
-//	vec3 direction = normalize(start2end);
-//	float distance = dot(direction, start2end);
-//	int steps = int(distance / step);
-//	for (int i = 0; i < steps; ++i) {
-//		vec3 samplePoint = rayStart + direction * step * (float(i) + 0.5);
-//		vec4 scalar = texture(texVolume, samplePoint);
-//		vec4 sampledColor = texture(texTransfunc, scalar.r);
-//		//sampledColor.rgb = PhongShading(samplePoint, sampledColor.rgb);
-//		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
-//		if (color.a > 0.99)
-//			break;
-//	}
-//
-//	if (color.a == 0.0) discard;
-//	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
-//	color.a = 1.0;
-//	fragColor = color;
-
-
 	vec3 rayStart = imageLoad(entryPos,ivec2(gl_FragCoord)).xyz;
-	vec3 rayEnd = texture2D(texEndPos,ivec2(gl_FragCoord)).xyz;
+	vec3 rayEnd = imageLoad(endPos,ivec2(gl_FragCoord)).xyz;
 	vec3 start2end = rayEnd - rayStart;
-	vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
 	vec4 color = imageLoad(interResult,ivec2(gl_FragCoord));
 	int count = 0;
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
 	vec3 samplePoint = rayStart;
+
 	for (int i = 0; i < steps; ++i) 
 	{
 		samplePoint = rayStart + direction * step * (float(i) + 0.5);
+		//fragColor = vec4(samplePoint,1.0);
 		if(samplePoint.x <= 0.01 ||
 		samplePoint.y <= 0.01 ||
 		samplePoint.z <= 0.01 || 
@@ -170,26 +123,26 @@ void main()
 		//sample a scalar at samplePoint
 		bool mapped;
 		vec4 scalar = virtualVolumeSample(samplePoint,mapped);
+		//count++;
 		if (mapped == false) 
 		{
-			// If this block is unmaped,
-			// store the intermediate rendering result and the entry position
 			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
-			// Render to intermediate result texture
-			//fragColor = color;
+			memoryBarrier();
 			imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
+			memoryBarrier();
 			discard;
 		}
-		//count++;
 		vec4 sampledColor = texture(texTransfunc, scalar.r);
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)
+		{
 			break;
+		}
 	}
-
-	imageStore(entryPos,ivec2(gl_FragCoord),vec4(rayEnd ,0.0));
+	imageStore(entryPos,ivec2(gl_FragCoord),vec4(rayEnd ,0.0));		// Terminating flag
+	memoryBarrier();
+	vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;
-	//imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
 	fragColor = color;
 }

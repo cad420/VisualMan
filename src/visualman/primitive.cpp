@@ -81,7 +81,7 @@ namespace ysl
 					// Is it possible that a vertex attribute array don't have a buffer object?
 					// and what it mean?
 					assert(vertexAttribArrays[i]->GetBufferObject());
-					vertexAttribArrays[i]->GetBufferObject()->SetBufferData(BU_STATIC_DRAW, discard);
+					vertexAttribArrays[i]->GetBufferObject()->ReallocBufferData(BU_STATIC_DRAW, discard);
 					vertexAttribArrays[i]->SetbufferObjectDataDirty(false);
 				}
 			}

@@ -92,14 +92,14 @@ namespace ysl
 			const auto mesh = meshGen->GenerateMesh(isoValue);
 			const auto nVertex = mesh->VertexCount();
 
-			surface->GetVertexArray()->GetBufferObject()->SetBufferData(sizeof(Point3f) * nVertex, mesh->Vertices(), BU_STATIC_DRAW);
+			surface->GetVertexArray()->GetBufferObject()->ReallocBufferData(sizeof(Point3f) * nVertex, mesh->Vertices(), BU_STATIC_DRAW);
 			surface->GetVertexArray()->SetbufferObjectDataDirty(false);
-			surface->GetNormalArray()->GetBufferObject()->SetBufferData(sizeof(Point3f) * nVertex, mesh->Normals(), BU_STATIC_DRAW);
+			surface->GetNormalArray()->GetBufferObject()->ReallocBufferData(sizeof(Point3f) * nVertex, mesh->Normals(), BU_STATIC_DRAW);
 			surface->GetNormalArray()->SetbufferObjectDataDirty(false);
 			assert(surface->DrawCalls().size());
 
 			auto de = std::static_pointer_cast<DrawElementsUInt>(surface->DrawCalls()[0]);
-			de->GetIndexArray()->GetBufferObject()->SetBufferData(sizeof(unsigned int) * nVertex, mesh->Indices(), BU_STATIC_DRAW);
+			de->GetIndexArray()->GetBufferObject()->ReallocBufferData(sizeof(unsigned int) * nVertex, mesh->Indices(), BU_STATIC_DRAW);
 			de->GetIndexArray()->SetbufferObjectDataDirty(false);
 			changed = false;
 		}

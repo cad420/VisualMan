@@ -10,19 +10,16 @@ namespace ysl
 {
 	namespace vm
 	{
-		struct SubDataDescriptor
+		struct BlockDescriptor
 		{
 		private:
-			void * data = nullptr;
-			PhysicalMemoryBlockIndex key;
-			size_t blockId = 0;
+			PhysicalMemoryBlockIndex value;
+			VirtualMemoryBlockIndex key;
 		public:
-			SubDataDescriptor() = default;
-			SubDataDescriptor(void * d, const PhysicalMemoryBlockIndex & key,size_t id) :data(d), key(key),blockId(id) {}
-			void * Value()const { return data; }
-			PhysicalMemoryBlockIndex & Key() { return key; }
-			const PhysicalMemoryBlockIndex & Key()const { return key; }
-			size_t BlockId()const { return blockId; }
+			BlockDescriptor() = default;
+			BlockDescriptor(const PhysicalMemoryBlockIndex & value,VirtualMemoryBlockIndex key) :value(value),key(key) {}
+			const PhysicalMemoryBlockIndex & Value()const { return value; }
+			const VirtualMemoryBlockIndex & Key()const { return key; }
 		};
 
 		enum EntryFlag { Empty = 0, Unmapped = 2, Mapped = 1 };
@@ -77,10 +74,10 @@ namespace ysl
 			 * \brief 
 			 * \param virtualSpaceSize virtual space size
 			 */
-			MappingTableManager(const Size3 & virtualSpaceSize)
+			MappingTableManager(const Size3 & virtualSpaceSize,const Size3 & physicalSpaceSize)
 			{
 				InitCPUPageTable(virtualSpaceSize);
-				InitLRUList(virtualSpaceSize);
+				InitLRUList(physicalSpaceSize);
 			}
 
 
@@ -125,18 +122,22 @@ namespace ysl
 			~OutOfCoreVolumeTexture();
 		private:
 			static constexpr int pboCount = 3;
+			static constexpr GLbitfield mapping_flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+			static constexpr GLbitfield	storage_flags = GL_DYNAMIC_STORAGE_BIT | mapping_flags;
 
-			void SetSubTextureDataUsePBO(const std::vector<SubDataDescriptor> & data);
+			void SetSubTextureDataUsePBO(const std::vector<BlockDescriptor> & data);
 
 			Size3 EvalTextureSize(const Size3 & hint)const;
 			size_t EvalIDBufferSize(const Size3 & hint)const;
 
-			//std::array<unsigned int, 2> pbo;
 			void CreatePBOs(int bytes);
-			void DestroyPBOs();
-			unsigned int pbo=0;
+
+			double time = 0;
+			size_t totalBlocks = 0;
+
 			std::array<void*, pboCount> pboPtrs;
 			std::array<void*, pboCount> offset;
+			Ref<BufferObject> pbos;
 			std::array<GLsync, pboCount> fences;
 
 
@@ -145,13 +146,10 @@ namespace ysl
 			Ref<CPUVolumeDataCache> cpuVolumeData;
 			Ref<BufferObject> atomicCounterBuffer;
 			Ref<BufferObject> duplicateRemoveHash;
-
 			Ref<BufferObject> blockIdBuffer;
 			std::vector<int> blockIdLocalBuffer;
-
 			Ref<Texture> mappingTable;
 			Ref<MappingTableManager> mappingTableManager;
-
 			// CPU Volume Cache
 		};
 	}

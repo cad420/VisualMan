@@ -53,7 +53,6 @@ namespace ysl
 		//const auto ptr = bufMissedTable->Map(OpenGLBuffer::WriteOnly);
 		//memset(ptr, 0, bufMissedTable->Size());
 		//bufMissedTable->Unmap();
-
 		atomicCounter->BindBufferBase(3);
 		unsigned int zero = 0;
 		atomicCounter->AllocateFor(&zero, sizeof(unsigned int));

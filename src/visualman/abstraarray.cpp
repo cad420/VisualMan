@@ -12,7 +12,7 @@ namespace ysl
 
 		void AbstraArray::UpdateBufferObject(BufferObjectUpdateMode mode)
 		{
-			bufferObject->SetBufferData(usage, mode & VM_UM_DiscardRAM);
+			bufferObject->ReallocBufferData(usage, mode & VM_UM_DiscardRAM);
 			SetbufferObjectDataDirty(false);
 		}
 	}

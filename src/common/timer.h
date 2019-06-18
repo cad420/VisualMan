@@ -27,5 +27,9 @@ public:
 	{
 		return duration_.count();
 	}
+	double to_seconds()const
+	{
+		return duration()*1.0 / 1000000;
+	}
 };
 #endif

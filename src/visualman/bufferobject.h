@@ -26,7 +26,7 @@ namespace ysl
 			{
 				handle = 0;
 				bufferSize = 0;
-				bufferUsage = BU_STATIC_DRAW;
+				//bufferUsage = BU_STATIC_DRAW;
 				*this = other;
 			}
 			/**
@@ -41,7 +41,7 @@ namespace ysl
 				LocalBuffer::operator=(other);
 				handle = other.handle;
 				bufferSize = other.bufferSize;
-				bufferUsage = other.bufferUsage;
+				//bufferUsage = other.bufferUsage;
 				return *this;
 			}
 
@@ -54,7 +54,7 @@ namespace ysl
 			{
 				handle = other.handle;
 				bufferSize = other.bufferSize;
-				bufferUsage = other.bufferUsage;
+				//bufferUsage = other.bufferUsage;
 				other.handle = 0;
 				other.bufferSize = 0;
 			}
@@ -70,7 +70,7 @@ namespace ysl
 				LocalBuffer::operator=(std::move(other));
 				handle = other.handle;
 				bufferSize = other.bufferSize;
-				bufferUsage = other.bufferUsage;
+				//bufferUsage = other.bufferUsage;
 				other.handle = 0;
 				other.bufferSize = 0;
 				return *this;
@@ -79,6 +79,8 @@ namespace ysl
 			unsigned int Handle()const { return handle; }
 
 			void CreateBufferObject();
+
+			void CreateImmutableBufferObject(size_t size,const void * data,int flags);
 
 			void DestroyBufferObject();
 
@@ -94,14 +96,14 @@ namespace ysl
 			 * 
 			 * \note This function will check whether the buffer object has been created.
 			 */
-			void SetBufferData(size_t bytes,const void * data,BufferObjectUsage usage);
+			void ReallocBufferData(size_t bytes,const void * data,BufferObjectUsage usage);
 
 			/**
 			 * \brief  Upload data to GPU using the local buffer.
 			 * 
 			 * \note This function will fail if the buffer is allocated by glBufferStorage() because it will allocate a fixed size memory
 			 */
-			void SetBufferData(BufferObjectUsage usage,bool discard);
+			void ReallocBufferData(BufferObjectUsage usage,bool discard);
 
 			/**
 			 * \brief  Upload data given by \a data directly to GPU at \a offset with a size \a bytes if \a data is not \a nullptr
@@ -134,17 +136,39 @@ namespace ysl
 
 			BufferObjectTarget GetBufferTarget()const { return bufferTarget; }
 
-			void * MapBuffer(BufferObjectAccess access);
+			/**
+			 * \brief 
+			 */
+			void * MapBuffer(BufferMapAccess access);
+
+			/**
+			 * \brief 
+			 */
+			void * MapBufferRange(size_t offset, size_t length, int rangeMapFlags);
+
+			template<typename Ty>
+			std::remove_pointer_t<Ty>* MappedPointer() { return reinterpret_cast<std::remove_pointer_t<Ty>*>(mappedPointer); }
+
+			int GetBufferStorageFlags()const;
 
 			void UnmapBuffer();
 
-			BufferObjectUsage Usage()const { return bufferUsage; }
+			bool IsMapped()const;
+
+			bool IsImmutable()const;
+
+			BufferMapAccess GetBufferMapAccess()const;
+
+			int GetBufferMapRangeFlags()const;
+
+			BufferObjectUsage Usage() const;
+
 		private:
 			unsigned int handle = 0;
 			uint64_t bufferSize = 0;
-			BufferObjectUsage bufferUsage = BU_STATIC_DRAW;
+			//BufferObjectUsage bufferUsage = BU_STATIC_DRAW;
 			BufferObjectTarget bufferTarget = VM_BT_ARRAY_BUFFER;
-			bool mapped = false;
+			void * mappedPointer = nullptr;
 		};
 	}
 }
