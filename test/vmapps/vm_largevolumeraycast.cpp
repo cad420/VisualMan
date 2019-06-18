@@ -114,7 +114,7 @@ namespace ysl
 			raycastGLSL->AttachShader(fs);
 			raycastGLSL->AttachShader(vs);
 
-			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\s1_1984_1984_1984_2_128.lvd)");
+			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\subregion_2_128.lvd)");
 			
 			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture());
 		
