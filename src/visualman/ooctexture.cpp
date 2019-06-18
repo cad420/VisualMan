@@ -21,7 +21,6 @@ namespace ysl
 
 		OutOfCoreVolumeTexture::~OutOfCoreVolumeTexture()
 		{
-			DestroyPBOs();
 		}
 
 		void OutOfCoreVolumeTexture::SetSubTextureDataUsePBO(const std::vector<BlockDescriptor>& data)
