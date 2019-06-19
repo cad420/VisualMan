@@ -21,7 +21,7 @@ namespace ysl
 			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			msg,
 			0, NULL);
-		printf("[%d]%s\n", dw, msg);
+		printf("Last Error Code: [%d]\n", dw, msg);
 	}
 
 	bool WindowsFileMapping::Open(const std::string& fileName, size_t fileSize, FileAccess fileFlags,
@@ -52,6 +52,8 @@ namespace ysl
 			flags = GENERIC_READ;
 		if (fileFlags == FileAccess::Write)
 			flags = GENERIC_WRITE;
+		if (fileFlags == FileAccess::ReadWrite)
+			flags = GENERIC_READ | GENERIC_WRITE;
 
 		f = CreateFile(TEXT(fileName.c_str()),
 			flags,
