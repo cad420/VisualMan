@@ -35,10 +35,20 @@ namespace ysl
 	{
 		using internal_type = int;
 		const internal_type x, y, z;
+	private:
+		uint8_t unit = 0;
+	public:
 		PhysicalMemoryBlockIndex(internal_type x_ = -1,
 			internal_type y_ = -1,
 			internal_type z_ = -1) :
-			x(x_), y(y_), z(z_) {}
+			x(x_), y(y_), z(z_),unit(0) {}
+		PhysicalMemoryBlockIndex(internal_type x_,
+			internal_type y_ ,
+			internal_type z_ ,
+			uint8_t unit) :
+			x(x_), y(y_), z(z_),unit(unit) {}
+		int GetPhysicalStorageUnit()const { return unit; }
+		void SetPhysicalStorageUnit(uint8_t u) { unit = u; }
 		Vec3i ToVec3i()const { return Vec3i{ x,y,z }; }
 	};
 

@@ -101,8 +101,9 @@ namespace ysl
 			intermediateFBO->SetDrawBuffers(RDB_COLOR_ATTACHMENT0);
 			intermediateFBO->CheckFramebufferStatus();
 			Vec3i volSize{ 160,240,40 };
-			auto volumeTex = MakeVolumeTexture(R"(data\mixfrac160x240x40.raw)", volSize.x, volSize.y, volSize.z);
-			auto tfTex = MakeTransferFunction1DTexture(R"(D:\scidata\elt_tf1d2.TF1D)");
+			//auto volumeTex = MakeVolumeTexture(R"(data\mixfrac160x240x40.raw)", volSize.x, volSize.y, volSize.z);
+			auto tfTex = MakeTransferFunction1DTexture(R"(C:\data\std_tf1d.TF1D)");
+
 			//auto tfTex = MakeTransferFunction1DTexture({ Color::transparent,Color::blue,Color::transparent});
 
 			auto rayCastShading = MakeRef<Shading>();
@@ -114,15 +115,20 @@ namespace ysl
 			raycastGLSL->AttachShader(fs);
 			raycastGLSL->AttachShader(vs);
 
-			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\subregion_2_128.lvd)");
+			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\s1_3968_3968_3968_2_128.lvd)");
 
 			
-			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture());
-		
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume")->SetUniformValue(1);
+			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture(0));
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume0")->SetUniformValue(1);
 
-			rayCastShading->CreateGetTextureSampler(2)->SetTexture(tfTex);
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texTransfunc")->SetUniformValue(2);
+			rayCastShading->CreateGetTextureSampler(2)->SetTexture(oocResources->GetVolumeTexture(1));
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume1")->SetUniformValue(2);
+
+			rayCastShading->CreateGetTextureSampler(3)->SetTexture(oocResources->GetVolumeTexture(2));
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume2")->SetUniformValue(3);
+
+			rayCastShading->CreateGetTextureSampler(4)->SetTexture(tfTex);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texTransfunc")->SetUniformValue(4);
 
 			rayCastShading->CreateGetTextureImageUnit(2)->SetTexture(entryTexture);
 			rayCastShading->CreateGetTextureImageUnit(3)->SetTexture(exitTexture);

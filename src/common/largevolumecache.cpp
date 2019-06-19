@@ -68,6 +68,7 @@ namespace ysl
 			m_valid = false;
 			return;
 		}
+
 		createCache();
 		initLRU();
 		//sizeByBlock = SizeByBlock();
@@ -96,7 +97,6 @@ namespace ysl
 
 	const unsigned char* CPUVolumeDataCache::ReadBlockDataFromCPUCache(int blockId)
 	{
-
 		const auto it = m_blockIdInCache.find(blockId);
 		if (it == m_blockIdInCache.end())
 		{

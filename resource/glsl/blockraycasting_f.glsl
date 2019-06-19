@@ -5,7 +5,11 @@ uniform sampler1D texTransfunc;
 //uniform sampler2D texStartPos;
 //uniform sampler2D texEndPos;
 //uniform sampler3D texVolume;
-uniform sampler3D cacheVolume;
+uniform sampler3D cacheVolume0;
+uniform sampler3D cacheVolume1;
+uniform sampler3D cacheVolume2;
+uniform sampler3D cacheVolume3;
+
 layout(binding = 1, rgba32ui) uniform volatile uimage3D pageTableTexture;
 uniform ivec3 totalPageTableSize;					// page table texture size1
 layout(binding = 2, rgba32f) uniform volatile image2D entryPos;
@@ -39,7 +43,7 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	vec4 scalar;
 	//ivec3 totalPageTableSize = imageSize(pageTableTexture);
 	// address translation
-	vec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
+	uvec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
 	vec3 voxelCoord=vec3(samplePos * (volumeDataSizeNoRepeat));
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
 
@@ -48,7 +52,7 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
 				+blockCoord.y * totalPageTableSize.x 
 				+blockCoord.x;
-	if(pageTableEntry.w == 2)		// Unmapped flag
+	if(((pageTableEntry.w) & (0x000f)) == 2)		// Unmapped flag
 	{
 		if(atomicCompSwap(hashTable.blockId[blockId],0,1) == 0)
 		{
@@ -58,11 +62,30 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 		}
 		mapped = false;
 	}
-	else 
+	else
 	{
+		int texId = int((pageTableEntry.w  >> 4)&0xf);
 		vec3 samplePoint = pageTableEntry.xyz * (blockDataSizeNoRepeat + 2*repeatOffset) + blockOffset + (repeatOffset);
-		samplePoint = samplePoint/textureSize(cacheVolume,0);
-		scalar = texture(cacheVolume,samplePoint);
+		if(texId == 0){
+			samplePoint = samplePoint/textureSize(cacheVolume0,0);
+			scalar = texture(cacheVolume0,samplePoint);
+			//scalar = vec4(1,0,0,1);
+		}else if(texId == 1){
+			
+			samplePoint = samplePoint/textureSize(cacheVolume1,0);
+			scalar = texture(cacheVolume1,samplePoint);
+			//scalar = vec4(0,1,0,1);
+		}else if(texId == 2){
+			samplePoint = samplePoint/textureSize(cacheVolume2,0);
+			scalar = texture(cacheVolume2,samplePoint);
+			//scalar = vec4(0,0,1,1);
+		}else if(texId == 3){
+			samplePoint = samplePoint/textureSize(cacheVolume3,0);
+			scalar = texture(cacheVolume3,samplePoint);
+			//scalar = vec4(1,1,1,1);
+		}
+		//samplePoint = samplePoint/textureSize(cacheVolume0,0);
+		//scalar = texture(cacheVolume0,samplePoint);
 		mapped = true;
 		//return vec4(0.8+blockId*0.005,0.9,0.8,0.8);
 	}

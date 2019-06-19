@@ -257,10 +257,14 @@ namespace ysl
 
 			if (target == TD_TEXTURE_1D)
 			{
+
 				GL(glTextureStorage1D(handle, 1, texFormat, w));
 				GL(glTextureParameteri(handle, GL_TEXTURE_WRAP_R, texParams->WrapR()));
 				GL(glTextureParameteri(handle, GL_TEXTURE_MAG_FILTER, texParams->MaxFilter()));
 				GL(glTextureParameteri(handle, GL_TEXTURE_MIN_FILTER, texParams->MinFilter()));
+
+
+
 				//createParams.reset();
 			}
 			else if (target == TD_TEXTURE_2D || target == TD_TEXTURE_RECTANGLE)
@@ -270,16 +274,22 @@ namespace ysl
 				GL(glTextureParameteri(handle, GL_TEXTURE_WRAP_S, texParams->WrapS()));
 				GL(glTextureParameteri(handle, GL_TEXTURE_MAG_FILTER, texParams->MaxFilter()));
 				GL(glTextureParameteri(handle, GL_TEXTURE_MIN_FILTER, texParams->MinFilter()));
+
 				//createParams.reset();
 			}
 			else if (target == TD_TEXTURE_3D)
 			{
+
+
+
 				GL(glTextureStorage3D(handle, 1, texFormat, w, h, d));
 				GL(glTextureParameteri(handle, GL_TEXTURE_WRAP_R, texParams->WrapR()));
 				GL(glTextureParameteri(handle, GL_TEXTURE_WRAP_S, texParams->WrapS()));
 				GL(glTextureParameteri(handle, GL_TEXTURE_WRAP_T, texParams->WrapT()));
 				GL(glTextureParameteri(handle, GL_TEXTURE_MAG_FILTER, texParams->MaxFilter()));
 				GL(glTextureParameteri(handle, GL_TEXTURE_MIN_FILTER, texParams->MinFilter()));
+
+
 
 				//createParams.reset();
 			}
@@ -288,8 +298,6 @@ namespace ysl
 				assert(false);
 				Debug("Unsupported format");
 			}
-
-
 			// Set up the texture properties and delete the setup params 
 
 			this->target = target;

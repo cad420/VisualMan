@@ -22,7 +22,7 @@ namespace ysl
 			const VirtualMemoryBlockIndex & Key()const { return key; }
 		};
 
-		enum EntryFlag { Empty = 0, Unmapped = 2, Mapped = 1 };
+		enum EntryMapFlag { EM_UNKNOWN = 0, EM_UNMAPPED = 2, EM_MAPPED = 1 };
 
 		class MappingTableManager
 		{
@@ -31,45 +31,27 @@ namespace ysl
 			struct PageDirEntry
 			{
 				int x, y, z, w;
+
 			};
 			struct PageTableEntry
 			{
-				int x, y, z, w;
+				int x, y, z;
+			private:
+				int w = 0;
+			public:
+				void SetMapFlag(EntryMapFlag f) { w = (w & (0xFFF0)) | ((0xF)&f); }// [0,4) bits
+				void SetTextureUnit(int unit) { w = (w&0xFF0F) | ((0xF&unit)<<4); } // [4,8) bits
+				EntryMapFlag GetMapFlag()const { return EntryMapFlag((0xF)&w); }
+				int GetTextureUnit()const { return (w >> 4)&0xF; }
 			};
 		private:
-			//Linear3DArray<PageDirEntry> PageDir;
 			Linear3DArray<PageTableEntry> pageTable;
 			std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>> g_lruList;
-			//const Size3 physicalMemoryBlock;
-			//const Size3 virtualMemoryBlock;
-			//const Size3 blockSize;
-			//CPUVolumeDataCache * const cacheData;
-			//const std::shared_ptr<CPUVolumeDataCache> cacheData;
 			void InitCPUPageTable(const Size3& blockDim);
-			void InitLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize);
-			void InitLRUList(const Size3& physicalMemoryBlock);
+			//void InitLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize);
+			void InitLRUList(const Size3& physicalMemoryBlock,int unitCount);
 		public:
 			using size_type = std::size_t;
-			//PageTableManager(const Size3 & physicalMemoryBlock, std::shared_ptr<CPUVolumeDataCache> virtualData): physicalMemoryBlock(physicalMemoryBlock),
-			//virtualMemoryBlock(virtualData->BlockDim()),
-			//blockSize(virtualData->BlockSize()),
-			//cacheData(virtualData)
-			//{
-
-			//	InitCPUPageTable(virtualMemoryBlock);
-			//	InitLRUList(physicalMemoryBlock, blockSize);
-			//	InitGPUPageTable();
-			//}
-
-			//MappingTableManager(std::shared_ptr<CPUVolumeDataCache> virtualData)
-			//	//cacheData(std::move(virtualData)),
-			//	//gpuCacheData(std::move(physicalData))
-			//{
-
-			//	//InitCPUPageTable(TODO:);    // block size
-			//	//InitLRUList(TODO:,TODO:);	// blocks zie ,page table size}
-			//}
-
 			/**
 			 * \brief 
 			 * \param virtualSpaceSize virtual space size
@@ -77,9 +59,14 @@ namespace ysl
 			MappingTableManager(const Size3 & virtualSpaceSize,const Size3 & physicalSpaceSize)
 			{
 				InitCPUPageTable(virtualSpaceSize);
-				InitLRUList(physicalSpaceSize);
+				InitLRUList(physicalSpaceSize,1);
 			}
 
+			MappingTableManager(const Size3 & virtualSpaceSize, const Size3 & physicalSpaceSize,int physicalSpaceCount)
+			{
+				InitCPUPageTable(virtualSpaceSize);
+				InitLRUList(physicalSpaceSize,physicalSpaceCount);
+			}
 
 			const void * GetData()const { return pageTable.Data(); }
 
@@ -97,8 +84,11 @@ namespace ysl
 			void OnDrawCallStart(OutOfCorePrimitive* p) override;
 			void OnDrawCallFinished(OutOfCorePrimitive* p) override;
 
-			Ref<Texture> GetVolumeTexture() { return volumeData; }
-			Ref<const Texture> GetVolumeTexture()const { return volumeData; }
+			Ref<Texture> GetVolumeTexture() { return volumeDataTexture[0]; }
+			Ref<const Texture> GetVolumeTexture()const { return volumeDataTexture[0]; }
+
+			Ref<Texture> GetVolumeTexture(int unit) { return volumeDataTexture[unit]; }
+			Ref<const Texture> GetVolumeTexture(int unit)const { return volumeDataTexture[unit]; }
 
 			Ref<BufferObject> GetAtomicCounterBuffer() { return atomicCounterBuffer; }
 			Ref<const BufferObject> GetAtomicCounterBuffer()const { return atomicCounterBuffer; }
@@ -124,7 +114,6 @@ namespace ysl
 			static constexpr int pboCount = 3;
 			static constexpr GLbitfield mapping_flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
 			static constexpr GLbitfield	storage_flags = GL_DYNAMIC_STORAGE_BIT | mapping_flags;
-
 			void SetSubTextureDataUsePBO(const std::vector<BlockDescriptor> & data);
 
 			Size3 EvalTextureSize(const Size3 & hint)const;
@@ -140,13 +129,13 @@ namespace ysl
 			Ref<BufferObject> pbos;
 			std::array<GLsync, pboCount> fences;
 
-
 			size_t bytes = 0;
-			Ref<Texture> volumeData;
+			std::array<Ref<Texture>, 4> volumeDataTexture;
 			Ref<CPUVolumeDataCache> cpuVolumeData;
 			Ref<BufferObject> atomicCounterBuffer;
 			Ref<BufferObject> duplicateRemoveHash;
 			Ref<BufferObject> blockIdBuffer;
+
 			std::vector<int> blockIdLocalBuffer;
 			Ref<Texture> mappingTable;
 			Ref<MappingTableManager> mappingTableManager;

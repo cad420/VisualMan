@@ -453,13 +453,14 @@ namespace ysl {
 			maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS = std::min(int(RS_AtomicCounterBuffer7 - RS_AtomicCounterBuffer0 + 1), maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
 			GL(glGetIntegerv(GL_MAX_IMAGE_UNITS, &maxInteger.MAX_IMAGE_UNITS));
 			maxInteger.MAX_IMAGE_UNITS = std::min(int(RS_TextureImageUnit15 - RS_TextureSampler + 1), maxInteger.MAX_IMAGE_UNITS);
-
+			GL(glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE,&maxInteger.MAX_3DTEXUTRE_SIZE));
 
 			Log("MAX_VERTEX_ATTRIBS:%d\n", maxInteger.MAX_VERTEX_ATTRIBS);
 			Log("MAX_TEXTURE_IMAGE_UNITE:%d\n", maxInteger.MAX_TEXTURE_IMAGE_UNITE);
 			Log("MAX_SHADER_STORAGE_BINDINGS:%d\n", maxInteger.MAX_SHADER_STORAGE_BINDINGS);
 			Log("MAX_ATOMIC_COUNTER_BUFFER_BINDINGS:%d\n", maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
 			Log("MAX_IMAGE_UNITS:%d\n", maxInteger.MAX_IMAGE_UNITS);
+			Log("MAX_3DTEXTURE_SIZE:%d\n", maxInteger.MAX_3DTEXUTRE_SIZE);
 		}
 
 		void RenderContext::InitDefaultRenderState()

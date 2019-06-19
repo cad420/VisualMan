@@ -17,19 +17,24 @@ namespace ysl
 		return str;
 	}
 
-	void _internal_msg_process_(const char* format, va_list args, const char* type)
+	void _internal_msg_process_(const char* format, va_list args, const char* type,bool sameLine)
 	{
 		std::string msg;
 		msg += type;
 		msg = formatToString(format, args);
-		fprintf(stderr, "%s\n", msg.c_str());
+		if(sameLine)
+			fprintf(stderr, "%s\r", msg.c_str());
+		else
+			fprintf(stderr, "%s\n", msg.c_str());
+
 	}
+
 
 	void Error(const char* fmt, ...)
 	{
 		va_list args;
 		va_start(args, fmt);
-		_internal_msg_process_(fmt, args, "Error");
+		_internal_msg_process_(fmt, args, "Error",false);
 		va_end(args);
 		abort();
 	}
@@ -38,7 +43,7 @@ namespace ysl
 	{
 		va_list args;
 		va_start(args, fmt);
-		_internal_msg_process_(fmt, args, "Warning");
+		_internal_msg_process_(fmt, args, "Warning",false);
 		va_end(args);
 	}
 
@@ -46,8 +51,15 @@ namespace ysl
 	{
 		va_list args;
 		va_start(args, fmt);
-		_internal_msg_process_(fmt, args, "Log");
+		_internal_msg_process_(fmt, args, "Log",false);
 		va_end(args);
 	}
 
+	void Display(const char* fmt, ...)
+	{
+		va_list args;
+		va_start(args, fmt);
+		_internal_msg_process_(fmt, args, "Display",true);
+		va_end(args);
+	}
 }

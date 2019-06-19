@@ -16,7 +16,7 @@ namespace ysl
 {
 	COMMON_EXPORT_IMPORT std::string formatToString(const std::string& fmt, va_list args);
 
-	COMMON_EXPORT_IMPORT void _internal_msg_process_(const char* format, va_list args, const char* type);
+	COMMON_EXPORT_IMPORT void _internal_msg_process_(const char* format, va_list args, const char* type,bool);
 
 	COMMON_EXPORT_IMPORT void Error(const char* fmt, ...);
 
@@ -24,13 +24,15 @@ namespace ysl
 
 	COMMON_EXPORT_IMPORT void Log(const char * fmt, ...);
 
+	COMMON_EXPORT_IMPORT void Display(const char * fmt, ...);
+
 	inline
 	void Debug(const char * fmt, ...)
 	{
 #ifndef NDEBUG
 		va_list args;
 		va_start(args, fmt);
-		_internal_msg_process_(fmt, args, "Debug");
+		_internal_msg_process_(fmt, args, "Debug",false);
 		va_end(args);
 #else
 		void(0);

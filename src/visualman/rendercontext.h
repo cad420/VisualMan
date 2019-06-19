@@ -171,6 +171,7 @@ namespace ysl
 				int MAX_SHADER_STORAGE_BINDINGS = 0;
 				int MAX_ATOMIC_COUNTER_BUFFER_BINDINGS = 0;
 				int MAX_IMAGE_UNITS = 0;
+				int MAX_3DTEXUTRE_SIZE = 0;
 			}maxInteger;
 
 			//GLFWwindow * windowContext;
