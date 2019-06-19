@@ -24,6 +24,32 @@ namespace ysl
 
 		enum EntryMapFlag { EM_UNKNOWN = 0, EM_UNMAPPED = 2, EM_MAPPED = 1 };
 
+
+		struct IVideoMemoryParamsEvaluator 
+		{
+			virtual Size3 EvalPhysicalTextureSize()const = 0;
+			virtual int EvalPhysicalTextureCount()const = 0;
+			virtual Size3 EvalPhysicalBlockDim()const = 0;
+			virtual int EvalHashBufferSize()const = 0;
+			virtual int EvalIDBufferCount()const = 0;
+			virtual ~IVideoMemoryParamsEvaluator()=default;
+		};
+
+		struct DefaultMemoryParamsEvaluator:IVideoMemoryParamsEvaluator
+		{
+		private:
+			const Size3 virtualDim;
+			const Size3 blockSize;
+		public:
+			DefaultMemoryParamsEvaluator(const Size3 & virtualDim, const Size3 & blockSize) :virtualDim(virtualDim), blockSize(blockSize) {}
+			Size3 EvalPhysicalTextureSize() const override;
+			Size3 EvalPhysicalBlockDim() const override;
+			int EvalPhysicalTextureCount() const override;
+			int EvalHashBufferSize() const override;
+			int EvalIDBufferCount() const override;
+			~DefaultMemoryParamsEvaluator() = default;
+		};
+
 		class MappingTableManager
 		{
 
@@ -96,17 +122,22 @@ namespace ysl
 			Ref<BufferObject> GetBlockIDBuffer() { return blockIdBuffer; }
 			Ref<const BufferObject> GetBlockIDBuffer()const { return blockIdBuffer; }
 
-			Ref<BufferObject> GetHashBuffer() { return duplicateRemoveHash; }
-			Ref<const BufferObject> GetHashBuffer()const { return duplicateRemoveHash; }
+			Ref<BufferObject> GetHashBuffer() { return hashBuffer; }
+			Ref<const BufferObject> GetHashBuffer()const { return hashBuffer; }
 
 			Ref<Texture> GetMappingTableTexture() { return mappingTable; }
 			Ref<const Texture> GetMappingTableTexture()const { return mappingTable; }
+
+			Ref<BufferObject> GetSamplerUBO() { return volumeTexSamplerUBO; }
+			Ref<const BufferObject> GetSamplerUBO()const { return volumeTexSamplerUBO; }
 
 			Vec3i DataResolution()const { return Vec3i(cpuVolumeData->OriginalDataSize()); }
 			Vec3i DataResolutionWithPadding()const { return Vec3i(cpuVolumeData->BlockDim()*cpuVolumeData->BlockSize()); }
 			Vec3i Padding()const {return Vec3i( cpuVolumeData->Padding(),cpuVolumeData->Padding(),cpuVolumeData->Padding()); }
 			Vec3i VirtualBlockDim()const { return Vec3i(cpuVolumeData->BlockDim()); }
 			Vec3i BlockSize()const { return Vec3i(cpuVolumeData->BlockSize());}
+
+			void PrintVideoMemoryUsageInfo();
 
 			void BindToOutOfCorePrimitive(Ref<OutOfCorePrimitive> oocPrimitive);
 			~OutOfCoreVolumeTexture();
@@ -116,29 +147,24 @@ namespace ysl
 			static constexpr GLbitfield	storage_flags = GL_DYNAMIC_STORAGE_BIT | mapping_flags;
 			void SetSubTextureDataUsePBO(const std::vector<BlockDescriptor> & data);
 
-			Size3 EvalTextureSize(const Size3 & hint)const;
-			size_t EvalIDBufferSize(const Size3 & hint)const;
-
-			void CreatePBOs(int bytes);
+			void InitVolumeTextures();
+			void InitMappingTable();
 
 			double time = 0;
 			size_t totalBlocks = 0;
-
-			std::array<void*, pboCount> pboPtrs;
-			std::array<void*, pboCount> offset;
-			Ref<BufferObject> pbos;
-			std::array<GLsync, pboCount> fences;
-
 			size_t bytes = 0;
-			std::array<Ref<Texture>, 4> volumeDataTexture;
+
+			std::vector<Ref<Texture>> volumeDataTexture;
 			Ref<CPUVolumeDataCache> cpuVolumeData;
 			Ref<BufferObject> atomicCounterBuffer;
-			Ref<BufferObject> duplicateRemoveHash;
+			Ref<BufferObject> hashBuffer;
 			Ref<BufferObject> blockIdBuffer;
+			Ref<BufferObject> volumeTexSamplerUBO;
 
 			std::vector<int> blockIdLocalBuffer;
 			Ref<Texture> mappingTable;
 			Ref<MappingTableManager> mappingTableManager;
+			Ref<IVideoMemoryParamsEvaluator> memoryEvalator;
 			// CPU Volume Cache
 		};
 	}

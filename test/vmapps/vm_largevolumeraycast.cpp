@@ -117,7 +117,8 @@ namespace ysl
 
 			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\s1_3968_3968_3968_2_128.lvd)");
 
-			
+			rayCastShading->CreateGetUBO(0)->SetBufferObject(oocResources->GetSamplerUBO());
+
 			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture(0));
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume0")->SetUniformValue(1);
 
@@ -146,7 +147,6 @@ namespace ysl
 
 			auto v = oocResources->VirtualBlockDim();
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("totalPageTableSize")->SetUniform3i(1,v.Data());
-
 			v = oocResources->DataResolution();
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("volumeDataSizeNoRepeat")->SetUniform3i(1,v.Data());
 			v = oocResources->BlockSize() - 2*oocResources->Padding();

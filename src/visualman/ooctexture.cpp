@@ -10,6 +10,27 @@ namespace ysl
 {
 	namespace vm
 	{
+		void OutOfCoreVolumeTexture::PrintVideoMemoryUsageInfo()
+		{
+
+			size_t volumeTextureMemoryUsage = memoryEvalator->EvalPhysicalTextureSize().Prod()*memoryEvalator->EvalPhysicalTextureCount();
+			size_t pageTableTextureMemoryUsage = cpuVolumeData->BlockDim().Prod() * sizeof(MappingTableManager::PageTableEntry);
+
+			std::cout << "--------------- LVD Data Info---------------\n";
+			std::cout << "Data Block Dimension: " << cpuVolumeData->BlockDim() << std::endl;
+			std::cout << "Data Block Size: " << cpuVolumeData->BlockSize() << std::endl;
+			std::cout << "Data Block Dimension In Host Memory: " << cpuVolumeData->CPUCacheBlockSize() << std::endl;
+			std::cout << "Data Block Storage In Host Memory: " << cpuVolumeData->CPUCacheSize() << std::endl;
+			std::cout << "Data Dimension Without Padding: " << cpuVolumeData->OriginalDataSize() << std::endl;
+			std::cout << "Block Padding: " << cpuVolumeData->Padding() << std::endl;
+			Log("------------Video Memory Usage ---------------");
+			Log("Volume Texture Memory Usage: %d Bytes = %.2fMB", volumeTextureMemoryUsage, volumeTextureMemoryUsage*1.0 / 1024 / 1024);
+			Log("Page Table Memory Usage: %d Bytes = %2.f MB", pageTableTextureMemoryUsage, pageTableTextureMemoryUsage*1.0 / 1024 / 1024);
+			Log("ID Buffer Block Memory Usage: %d Bytes = %2.f MB", blockIdBuffer->BufferObjectSize(), blockIdBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
+			Log("Hash Buffer Block Memory Usage: %d Bytes = %2.f MB", hashBuffer->BufferObjectSize(), hashBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
+			Log("--------------End-----------------------------");
+		}
+
 		void OutOfCoreVolumeTexture::BindToOutOfCorePrimitive(Ref<OutOfCorePrimitive> oocPrimitive)
 		{
 			if (oocPrimitive)
@@ -67,93 +88,46 @@ namespace ysl
 			//GL(glTextureSubImage3D(textureId, 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, GL_UNSIGNED_BYTE, offset[curPBO]));
 			//GL(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
 
-
 			for (int i = 0; i < data.size(); i++)
 			{
 				const auto posInCache = Vec3i(blockSize) * data[i].Value().ToVec3i();
 				GL(glTextureSubImage3D(volumeDataTexture[data[i].Value().GetPhysicalStorageUnit()]->Handle(), 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, IT_UNSIGNED_BYTE, cpuVolumeData->ReadBlockDataFromCPUCache(data[i].Key())));
 			}
-
 			t.end();
 			totalBlocks += data.size();
 			time += t.to_seconds();
-
-		}
-		void OutOfCoreVolumeTexture::CreatePBOs(int bytes)
-		{
-			this->bytes = bytes;
-			pbos = MakeRef<BufferObject>();
-			pbos->CreateImmutableBufferObject(bytes*pboCount, nullptr, storage_flags);
-			pbos->MapBufferRange(0, pboCount*bytes, mapping_flags);
-			for (int i = 0; i < pboCount; i++)
-			{
-				offset[i] = (void*)(i * bytes);
-				pboPtrs[i] = pbos->MappedPointer<char*>() + i * bytes;
-			}
-		}
-		Size3 OutOfCoreVolumeTexture::EvalTextureSize(const Size3 & hint) const
-		{
-			assert(cpuVolumeData);
-			const auto blockSize = cpuVolumeData->BlockSize();
-			//auto texSize = blockSize * Size3{ 8,8,8 };
-			return hint * blockSize;
 		}
 
-		size_t OutOfCoreVolumeTexture::EvalIDBufferSize(const Size3& hint) const	
+		void OutOfCoreVolumeTexture::InitVolumeTextures()
 		{
-			return 40000;
-		}
-
-		OutOfCoreVolumeTexture::OutOfCoreVolumeTexture(const std::string& fileName)
-		{
-
-			// Open the volume data file
-			cpuVolumeData = MakeRef<CPUVolumeDataCache>(fileName,Size3{32,32,32});
-
 			auto texSetupParams = MakeRef<TexCreateParams>();
-			const auto l = cpuVolumeData->BlockDim().x;
-			const auto cacheVolumeSizeHint = Size3{ 12,12,12 };
-			const auto texSize = EvalTextureSize(cacheVolumeSizeHint);
-
-			//std::cout << "Cache Texture Cache:" << texSize << std::endl;
+			const auto texSize = memoryEvalator->EvalPhysicalTextureSize();
 
 			texSetupParams->SetSize(texSize.x, texSize.y, texSize.z);
 			texSetupParams->SetTextureFormat(TF_R8);
 			texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
 
-			volumeDataTexture[0] = MakeRef<Texture>();		// gpu volume data cache size
-			volumeDataTexture[0]->SetSetupParams(texSetupParams);
-			volumeDataTexture[0]->CreateTexture();
+			volumeTexSamplerUBO = MakeRef<BufferObject>();
+			volumeTexSamplerUBO->CreateImmutableBufferObject(4 * 4, nullptr, storage_flags);
+			std::vector<int> texUnits;
 
-			volumeDataTexture[1] = MakeRef<Texture>();
-			volumeDataTexture[1]->SetSetupParams(texSetupParams);
-			volumeDataTexture[1]->CreateTexture();
+			for (int i = 0; i < memoryEvalator->EvalPhysicalTextureCount(); i++)
+			{
+				auto vTex = MakeRef<Texture>();		// gpu volume data cache size
+				vTex->SetSetupParams(texSetupParams);
+				vTex->CreateTexture();
+				volumeDataTexture.push_back(vTex);
+				texUnits.push_back(i);
+			}
+			const int uboSize = texUnits.size() * sizeof(int);
+			const auto ptr = volumeTexSamplerUBO->MapBufferRange(0, uboSize, mapping_flags);
+			memcpy(ptr, texUnits.data(), uboSize);
+		}
 
-			volumeDataTexture[2] = MakeRef<Texture>();
-			volumeDataTexture[2]->SetSetupParams(texSetupParams);
-			volumeDataTexture[2]->CreateTexture();
-
-			volumeDataTexture[3] = MakeRef<Texture>();
-			volumeDataTexture[3]->SetSetupParams(texSetupParams);
-			volumeDataTexture[3]->CreateTexture();
-
-			std::cout << cpuVolumeData->BlockDim() << std::endl;
-			std::cout << cpuVolumeData->BlockSize() << std::endl;
-
-			std::cout << cpuVolumeData->CPUCacheBlockSize() << std::endl;
-			std::cout << cpuVolumeData->CPUCacheSize() << std::endl;
-			std::cout << cpuVolumeData->OriginalDataSize() << std::endl;
-			std::cout << cpuVolumeData->Padding() << std::endl;
-
-			// Init PBO
-			const auto blockBytes = cpuVolumeData->BlockSize().Prod() * sizeof(char);
-			CreatePBOs(blockBytes);
-
-			const auto blocks = cpuVolumeData->BlockDim().Prod();
-			const auto dim = cpuVolumeData->BlockDim();
-
+		void OutOfCoreVolumeTexture::InitMappingTable()
+		{
 			//Create a page table texture
-			texSetupParams = MakeRef<TexCreateParams>();
+			auto texSetupParams = MakeRef<TexCreateParams>();
 			const auto mappingTableSize = cpuVolumeData->BlockDim();
 			texSetupParams->SetSize(mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
 			texSetupParams->SetTextureFormat(TF_RGBA32UI);
@@ -162,35 +136,50 @@ namespace ysl
 			mappingTable->SetSetupParams(texSetupParams);
 			mappingTable->CreateTexture();
 
-			//std::cout << "Block Dim:" << cpuVolumeData->BlockDim() << std::endl;
-			mappingTableManager = MakeRef<MappingTableManager>(cpuVolumeData->BlockDim(), cacheVolumeSizeHint,3);	// It need the virtual memory space size and the block size
+			mappingTableManager = MakeRef<MappingTableManager>(cpuVolumeData->BlockDim(), memoryEvalator->EvalPhysicalBlockDim(), memoryEvalator->EvalPhysicalTextureCount());	// It need the virtual memory space size and the block size
 
 			mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
 
+		}
+
+		OutOfCoreVolumeTexture::OutOfCoreVolumeTexture(const std::string& fileName)
+		{
+			// Open the volume data file
+			cpuVolumeData = MakeRef<CPUVolumeDataCache>(fileName, Size3{ 32,32,32 });
+			memoryEvalator = MakeRef<DefaultMemoryParamsEvaluator>(cpuVolumeData->BlockDim(), cpuVolumeData->BlockSize());
+
+			InitVolumeTextures();
+			InitMappingTable();
+
 			// Create Atomic Buffer
+
 			atomicCounterBuffer = MakeRef<BufferObject>(VM_BT_ATOMIC_COUNTER_BUFFER);
 			int zero = 0;
 			atomicCounterBuffer->SetLocalData(&zero, sizeof(int));
-			//atomicCounterBuffer->ReallocBufferData(BU_STREAM_READ, false);
 			atomicCounterBuffer->CreateImmutableBufferObject(4, nullptr, storage_flags);
 			atomicCounterBuffer->SetBufferSubDataFromLocalSubData(0, 0, 4);
 			atomicCounterBuffer->MapBufferRange(0, 4, mapping_flags);
 
 			// Create Hash Table Buffer
 
-			const auto idBufferSize = EvalIDBufferSize(cpuVolumeData->BlockDim());
+			const auto idBufferBytes = memoryEvalator->EvalIDBufferCount() * sizeof(int32_t);
 			blockIdBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
-			//blockIdBuffer->ReallocBufferData(idBufferSize * sizeof(int32_t), nullptr, BU_STREAM_READ);
-			blockIdBuffer->CreateImmutableBufferObject(idBufferSize * sizeof(int32_t), nullptr, storage_flags);
+			blockIdBuffer->CreateImmutableBufferObject(idBufferBytes, nullptr, storage_flags);
+			blockIdBuffer->MapBufferRange(0, idBufferBytes, mapping_flags);
 
-			blockIdBuffer->MapBufferRange(0, idBufferSize * sizeof(int32_t), mapping_flags);
 
-			duplicateRemoveHash = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
-			std::vector<uint32_t> emptyBuffer(idBufferSize * sizeof(int32_t), 0);
-			duplicateRemoveHash->SetLocalData(emptyBuffer.data(), emptyBuffer.size());
-			duplicateRemoveHash->CreateImmutableBufferObject(idBufferSize * sizeof(int32_t), nullptr, storage_flags);
-			duplicateRemoveHash->MapBufferRange(0, idBufferSize * sizeof(int32_t), mapping_flags);
-			//duplicateRemoveHash->ReallocBufferData(BU_STREAM_READ, false);
+			const auto hashBufferBytes = memoryEvalator->EvalHashBufferSize() * sizeof(int);
+			hashBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
+			std::vector<uint32_t> emptyBuffer(hashBufferBytes, 0);
+			hashBuffer->SetLocalData(emptyBuffer.data(), emptyBuffer.size());
+			hashBuffer->CreateImmutableBufferObject(hashBufferBytes, nullptr, storage_flags);
+			hashBuffer->MapBufferRange(0, hashBufferBytes, mapping_flags);
+
+
+			PrintVideoMemoryUsageInfo();
+
+
+
 		}
 
 		void OutOfCoreVolumeTexture::OnDrawCallStart(OutOfCorePrimitive* p)
@@ -200,14 +189,11 @@ namespace ysl
 
 		void OutOfCoreVolumeTexture::OnDrawCallFinished(OutOfCorePrimitive* p)
 		{
-			//int times[10];
 			glFinish();		// wait the memory to be done
-
 			blockIdLocalBuffer.clear();
 			const auto counter = (atomicCounterBuffer->MappedPointer<int*>());
 			const auto blocks = *counter;
 			*(counter) = 0;
-			//std::cout << blocks << std::endl;
 			if (blocks == 0)  // render finished
 			{
 				p->SetRenderFinished(true);
@@ -220,7 +206,7 @@ namespace ysl
 			blockIdLocalBuffer.resize(blocks);
 
 			memcpy(blockIdLocalBuffer.data(), blockIdBuffer->MappedPointer<int*>(), sizeof(int) * blocks);
-			memset(duplicateRemoveHash->MappedPointer<void*>(), 0, duplicateRemoveHash->BufferObjectSize()); // reset hash
+			memset(hashBuffer->MappedPointer<void*>(), 0, hashBuffer->BufferObjectSize()); // reset hash
 
 			const auto dim = cpuVolumeData->BlockDim();
 			const auto physicalBlockCount = dim.Prod();
@@ -242,7 +228,33 @@ namespace ysl
 			}
 
 			SetSubTextureDataUsePBO(descs);			// Upload missed blocks
+
 			mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, dim.x, dim.y, dim.z);
+		}
+
+		Size3 DefaultMemoryParamsEvaluator::EvalPhysicalTextureSize() const
+		{
+			return Size3{ 10,10,10 } *blockSize;
+		}
+
+		Size3 DefaultMemoryParamsEvaluator::EvalPhysicalBlockDim() const
+		{
+			return Size3{ 10,10,10 };
+		}
+
+		int DefaultMemoryParamsEvaluator::EvalPhysicalTextureCount() const
+		{
+			return 3;
+		}
+
+		int DefaultMemoryParamsEvaluator::EvalHashBufferSize() const
+		{
+			return virtualDim.Prod();
+		}
+
+		int DefaultMemoryParamsEvaluator::EvalIDBufferCount() const
+		{
+			return virtualDim.Prod();
 		}
 
 		void MappingTableManager::InitCPUPageTable(const Size3& blockDim)
@@ -262,19 +274,6 @@ namespace ysl
 						(pageTable)(x, y, z) = entry;
 					}
 		}
-
-		//void MappingTableManager::InitLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize)
-		//{
-		//	for (auto z = 0; z < physicalMemoryBlock.z; z++)
-		//		for (auto y = 0; y < physicalMemoryBlock.y; y++)
-		//			for (auto x = 0; x < physicalMemoryBlock.x; x++)
-		//			{
-		//				g_lruList.emplace_back(
-		//					PageTableEntryAbstractIndex(-1, -1, -1),
-		//					PhysicalMemoryBlockIndex(x * page3DSize.x, y * page3DSize.y, z * page3DSize.z)
-		//				);
-		//			}
-		//}
 
 		void MappingTableManager::InitLRUList(const Size3& physicalMemoryBlock, int unitCount)
 		{

@@ -455,12 +455,16 @@ namespace ysl {
 			maxInteger.MAX_IMAGE_UNITS = std::min(int(RS_TextureImageUnit15 - RS_TextureSampler + 1), maxInteger.MAX_IMAGE_UNITS);
 			GL(glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE,&maxInteger.MAX_3DTEXUTRE_SIZE));
 
+			GL(glGetIntegerv(GL_MAX_COMBINED_UNIFORM_BLOCKS, &maxInteger.MAX_UNIFORM_BLOCKS_COUNT));
+			maxInteger.MAX_UNIFORM_BLOCKS_COUNT = std::min(int(RS_UniformBuffer7 - RS_UniformBuffer0 + 1), maxInteger.MAX_UNIFORM_BLOCKS_COUNT);
+
 			Log("MAX_VERTEX_ATTRIBS:%d\n", maxInteger.MAX_VERTEX_ATTRIBS);
 			Log("MAX_TEXTURE_IMAGE_UNITE:%d\n", maxInteger.MAX_TEXTURE_IMAGE_UNITE);
 			Log("MAX_SHADER_STORAGE_BINDINGS:%d\n", maxInteger.MAX_SHADER_STORAGE_BINDINGS);
 			Log("MAX_ATOMIC_COUNTER_BUFFER_BINDINGS:%d\n", maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
 			Log("MAX_IMAGE_UNITS:%d\n", maxInteger.MAX_IMAGE_UNITS);
 			Log("MAX_3DTEXTURE_SIZE:%d\n", maxInteger.MAX_3DTEXUTRE_SIZE);
+			Log("MAX_UNIFORM_BLOCKS_COUNT:%d\n", maxInteger.MAX_UNIFORM_BLOCKS_COUNT);
 		}
 
 		void RenderContext::InitDefaultRenderState()
@@ -509,6 +513,12 @@ namespace ysl {
 			for (int i = 0; i < maxInteger.MAX_IMAGE_UNITS; i++)
 			{
 				defaultRenderStates[RS_TextureImageUnit + i] = RenderStateBox(MakeRef<TextureImageUnit>(), i);
+			}
+
+
+			for(int i = 0 ; i < maxInteger.MAX_UNIFORM_BLOCKS_COUNT;i++)
+			{
+				defaultRenderStates[RS_UniformBuffer + i] = RenderStateBox(MakeRef<UniformBufferObject>(), i);
 			}
 		}
 

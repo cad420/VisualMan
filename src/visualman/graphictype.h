@@ -840,6 +840,15 @@ enum RenderStateType
 	RS_ShaderStorageBuffer6 = RS_ShaderStorageBuffer + 6,
 	RS_ShaderStorageBuffer7 = RS_ShaderStorageBuffer + 7,
 
+	RS_UniformBuffer,
+	RS_UniformBuffer0 = RS_UniformBuffer + 0,
+	RS_UniformBuffer1 = RS_UniformBuffer + 1,
+	RS_UniformBuffer2 = RS_UniformBuffer + 2,
+	RS_UniformBuffer3 = RS_UniformBuffer + 3,
+	RS_UniformBuffer4 = RS_UniformBuffer + 4,
+	RS_UniformBuffer5 = RS_UniformBuffer + 5,
+	RS_UniformBuffer6 = RS_UniformBuffer + 6,
+	RS_UniformBuffer7 = RS_UniformBuffer + 7,
 
 
 	RS_RenderState_Count,

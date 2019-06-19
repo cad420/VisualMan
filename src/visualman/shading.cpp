@@ -59,6 +59,19 @@ namespace ysl
 			return ssbo;
 		}
 
+		Ref<UniformBufferObject> Shading::CreateGetUBO(int binding)
+		{
+			auto ubo = std::static_pointer_cast<UniformBufferObject>(
+				CreateGetRenderStateSet()->GetRenderState(RS_UniformBuffer, binding)
+				);
+			if (!ubo)
+			{
+				ubo = MakeRef<UniformBufferObject>();
+				CreateGetRenderStateSet()->SetRenderState(ubo, binding);
+			}
+			return ubo;
+		}
+
 
 		Ref<Shading> MakePhongShading()
 		{

@@ -1,10 +1,8 @@
 #version 430 core
 
+
 //
 uniform sampler1D texTransfunc;
-//uniform sampler2D texStartPos;
-//uniform sampler2D texEndPos;
-//uniform sampler3D texVolume;
 uniform sampler3D cacheVolume0;
 uniform sampler3D cacheVolume1;
 uniform sampler3D cacheVolume2;
@@ -31,9 +29,7 @@ out vec4 fragColor;
 uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (no repeat)
 uniform ivec3 blockDataSizeNoRepeat;				// block data size (no repeat)
 uniform ivec3 repeatOffset;							// repeat boarder size
-//layout(binding = 0, rgba32i) uniform volatile iimage3D pageDirTexutre;
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
-// keywords buffer shows the read-write feature of the buffer.
 layout(std430, binding = 0) buffer HashTable {int blockId[];}hashTable;
 layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
 
@@ -69,25 +65,17 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 		if(texId == 0){
 			samplePoint = samplePoint/textureSize(cacheVolume0,0);
 			scalar = texture(cacheVolume0,samplePoint);
-			//scalar = vec4(1,0,0,1);
 		}else if(texId == 1){
-			
 			samplePoint = samplePoint/textureSize(cacheVolume1,0);
 			scalar = texture(cacheVolume1,samplePoint);
-			//scalar = vec4(0,1,0,1);
 		}else if(texId == 2){
 			samplePoint = samplePoint/textureSize(cacheVolume2,0);
 			scalar = texture(cacheVolume2,samplePoint);
-			//scalar = vec4(0,0,1,1);
 		}else if(texId == 3){
 			samplePoint = samplePoint/textureSize(cacheVolume3,0);
 			scalar = texture(cacheVolume3,samplePoint);
-			//scalar = vec4(1,1,1,1);
 		}
-		//samplePoint = samplePoint/textureSize(cacheVolume0,0);
-		//scalar = texture(cacheVolume0,samplePoint);
 		mapped = true;
-		//return vec4(0.8+blockId*0.005,0.9,0.8,0.8);
 	}
 	return scalar;
 }

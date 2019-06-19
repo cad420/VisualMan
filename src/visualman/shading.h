@@ -34,6 +34,10 @@ namespace ysl
 			Ref<TextureImageUnit> CreateGetTextureImageUnit(int unitIndex);
 			Ref<AtomicCounter> CreateGetAtomicCounter(int binding);
 			Ref<ShaderStorageBufferObject> CreateGetSSBO(int binding);
+			/**
+			 * \brief The binding point must be specified in GLSL
+			 */
+			Ref<UniformBufferObject> CreateGetUBO(int binding);
 
 			// EnableState getter and setter
 			Ref<EnableStateSet> CreateGetEnableStateSet() { return enableSet ? enableSet : (enableSet = MakeRef<EnableStateSet>()); }

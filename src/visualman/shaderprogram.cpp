@@ -277,6 +277,16 @@ namespace ysl
 			return location;
 		}
 
+		int GLSLProgram::GetUniformBlockIndex(const char* name) const
+		{
+			int location = -1;
+			if (handle != 0)
+			{
+				GL(location =glGetUniformBlockIndex(handle, name));
+			}
+			return location;
+		}
+
 		void GLSLProgram::BindFragDataLocation(int location, const char* name)
 		{
 			fragDataLocation[name] = location;

@@ -94,6 +94,7 @@ namespace ysl
 			int GetMVPUniformLocation()const;
 			int GetNormalMatrixUniformLocation()const;
 			int GetGenericUniformLocation(const char * name)const;
+			int GetUniformBlockIndex(const char * name)const;
 
 			void BindFragDataLocation(int location, const char * name);
 			void UnbindFragDataLocation(const char * name);

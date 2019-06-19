@@ -37,6 +37,23 @@ namespace ysl
 			std::string atomicName;
 		};
 
+		/**
+		 * \brief Only Support std140 layout
+		 */
+		class VISUALMAN_EXPORT_IMPORT UniformBufferObject:public RenderStateIndexed
+		{
+		public:
+			UniformBufferObject():RenderStateIndexed(RS_UniformBuffer){}
+
+			void Apply(int index, const Camera* camera, RenderContext* context) const override;
+
+			void SetBufferObject(Ref<BufferObject> buffer) { bufferObject = std::move(buffer); }
+			Ref<const BufferObject> GetBufferObject()const { return bufferObject; }
+			Ref<BufferObject> GetBufferObject() { return bufferObject; }
+		private:
+			Ref<BufferObject> bufferObject;
+		};
+
 		class VISUALMAN_EXPORT_IMPORT ShaderStorageBufferObject :public RenderStateIndexed
 		{
 		public:

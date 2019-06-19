@@ -37,6 +37,20 @@ namespace ysl
 			//	GL_INVALID_VALUE is generated if buffer does not have an associated data store, or if the size of that store is zero.
 		}
 
+		void UniformBufferObject::Apply(int index, const Camera* camera, RenderContext* context) const
+		{
+			assert(context);
+			assert(index >= 0 && index < RS_AtomicCounterBuffer7 - RS_UniformBuffer0);
+			if(bufferObject)
+			{
+				assert(bufferObject->Handle());
+				GL(glBindBufferBase(GL_UNIFORM_BUFFER,index,bufferObject->Handle()));
+			}else
+			{
+				GL(glBindBufferBase(GL_UNIFORM_BUFFER,index,0));
+			}
+		}
+
 		void ShaderStorageBufferObject::Apply(int index, const Camera* camera, RenderContext* context) const
 		{
 			assert(context);
