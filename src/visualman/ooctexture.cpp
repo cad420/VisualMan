@@ -146,6 +146,12 @@ namespace ysl
 		{
 			// Open the volume data file
 			cpuVolumeData = MakeRef<CPUVolumeDataCache>(fileName, Size3{ 32,32,32 });
+
+			if(cpuVolumeData->IsValid() == false)
+			{
+				throw std::runtime_error("can not load lvd data");
+			}
+
 			memoryEvalator = MakeRef<DefaultMemoryParamsEvaluator>(cpuVolumeData->BlockDim(), cpuVolumeData->BlockSize());
 
 			InitVolumeTextures();

@@ -4,6 +4,7 @@
 
 #include <visualman.h>
 #include "config.h"
+#include "oocprimitive.h"
 
 namespace ysl
 {
@@ -14,9 +15,14 @@ namespace ysl
 		public:
 			void InitEvent() override;
 			void UpdateScene() override;
+			void FileDropEvent(const std::vector<std::string>& fileNames) override;
 		private:
 			void SetupShading();
-			void SetupResources();
+			void SetupResources(const std::string& fileName);
+			void SetupTF(const std::string & fileName);
+
+			Ref<Shading> rayCastShading;
+			Ref<OutOfCorePrimitive> oocPrimitive;
 		};
 	}
 }

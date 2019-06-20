@@ -33,7 +33,6 @@ namespace ysl
 			UpdateScene();
 			// execute rendering
 			assert(abstraAggregate);
-
 			abstraAggregate->Render();
 			// swap buffer
 			if (Context()->HasDoubleBuffer())
@@ -51,7 +50,6 @@ namespace ysl
 		void VisualMan::DeletedEvent(RenderContext* context)
 		{
 			// Here, you need to do something done at AddedEvent(RenderContext*) in contrary manners
-
 			assert(context);
 			assert(manipulator);
 			context->RemoveEventListener(manipulator);
@@ -93,6 +91,11 @@ namespace ysl
 			//if(frame->GetCamera())
 			//frame->GetCamera()->GetViewport()->SetViewportSize(w, h);
 			//frame->GetCamera()->GetViewport()->Activate();
+		}
+
+		void VisualMan::FileDropEvent(const std::vector<std::string>& fileNames)
+		{
+			(void)fileNames;
 		}
 
 		void VisualMan::BindCameraEvent(Ref<Camera> camera)

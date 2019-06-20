@@ -50,6 +50,7 @@ namespace ysl
 			static void glfwWindowSizeCallback(GLFWwindow * window, int width, int height);
 			static void glfwMouseScrollCallback(GLFWwindow * window, double xoffset, double yoffset);
 			static void glfwKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
+			static void glfwDropFileCallback(GLFWwindow * window,int count ,const char **df);
 			static void glfw_error_callback(int error, const char* description);
 
 

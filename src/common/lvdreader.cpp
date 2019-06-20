@@ -10,7 +10,6 @@ namespace ysl
 
 	LVDReader::LVDReader(const std::string& fileName) : validFlag(true),lvdIO(nullptr)
 	{
-
 		std::ifstream fileHandle;
 
 		fileHandle.open(fileName, std::fstream::binary);
@@ -96,16 +95,6 @@ namespace ysl
 		lvdPtr = lvdIO->FileMemPointer(0, bytes);
 		if (!lvdPtr) throw std::runtime_error("LVDReader: bad mapping");
 
-//#ifdef _WIN32
-//		lvdIO = std::make_unique<WindowsFileMapping>(fileName, bytes,
-//			WindowsFileMapping::FileAccess::Read,
-//			WindowsFileMapping::MapAccess::ReadOnly);
-//		lvdPtr = lvdIO->FileMemPointer(0, bytes);
-//		if (!lvdPtr)
-//			throw std::runtime_error("LVDReader: bad mapping");
-//#elif 
-//		static_assert(false);
-//#endif
 	}
 
 	LVDReader::LVDReader(const std::vector<std::string>& fileName, const std::vector<int>& lods)

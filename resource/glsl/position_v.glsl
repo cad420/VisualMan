@@ -19,5 +19,5 @@ out vec3 texCoord;
 void main()
 {
 	gl_Position = vpl_MVPMatrix * vpl_VertexPosition;
-	texCoord = vec3(vpl_VertexTexCoord0);
+	texCoord = vec3(vpl_VertexTexCoord0);            //(0,0,0)<--->(1,1,1)
 }

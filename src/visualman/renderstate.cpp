@@ -40,7 +40,7 @@ namespace ysl
 		void UniformBufferObject::Apply(int index, const Camera* camera, RenderContext* context) const
 		{
 			assert(context);
-			assert(index >= 0 && index < RS_AtomicCounterBuffer7 - RS_UniformBuffer0);
+			assert(index >= 0 && index < RS_UniformBuffer7 - RS_UniformBuffer0);
 			if(bufferObject)
 			{
 				assert(bufferObject->Handle());

@@ -43,6 +43,7 @@ namespace ysl
 					}
 					context->MakeCurrent(); // Redundant ??
 					context->SetContextState(Context_OnRenderingStarted);
+					GL_CHECK;
 					aggr->DispatchRenderStartedEvent();
 					GL_CHECK
 				}

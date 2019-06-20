@@ -23,7 +23,6 @@ namespace ysl
 			 * exitTexture:
 			 * intermediateResult:
 			 */
-
 			Vec2i vSize{ 800,600 };
 			auto texParam = MakeRef<TexCreateParams>();
 			texParam->SetSize(vSize.x, vSize.y, 0);
@@ -76,10 +75,13 @@ namespace ysl
 			auto artist = MakeRef<Artist>();
 			artist->GetLOD(0)->push_back(positionShading);
 
-			//auto scale = MakeRef<Transform>();
-			//scale->SetScale(Vec3f(160, 240, 40).Normalized());
 
-			auto geometryActor = MakeRef<Actor>(nullptr, artist, nullptr);
+			auto t = Translate(-0.5,-0.5,-0.5);
+			auto s = Scale(4, 4, 24);
+
+			auto scale = MakeRef<Transform>(s*t);
+
+			const auto geometryActor = MakeRef<Actor>(nullptr, artist, scale);
 			auto geometryActorCallback = MakeRef<RayCast2ActorEventCallback>();
 			geometryActorCallback->BindToActor(geometryActor);
 
@@ -95,18 +97,15 @@ namespace ysl
 			 * Intermediate result is saved in a texture between the intervals of
 			 * resources swapping.
 			 *********************************************************************************/
+
+
 			auto raycastAgt = MakeRef<Aggregate>();
-			auto intermediateFBO = Context()->CreateFramebufferObject(800, 600, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
+			auto intermediateFBO = Context()->CreateFramebufferObject(vSize.x, vSize.y, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
 			intermediateFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(intermediateResult));
 			intermediateFBO->SetDrawBuffers(RDB_COLOR_ATTACHMENT0);
 			intermediateFBO->CheckFramebufferStatus();
-			Vec3i volSize{ 160,240,40 };
-			//auto volumeTex = MakeVolumeTexture(R"(data\mixfrac160x240x40.raw)", volSize.x, volSize.y, volSize.z);
-			auto tfTex = MakeTransferFunction1DTexture(R"(C:\data\std_tf1d.TF1D)");
 
-			//auto tfTex = MakeTransferFunction1DTexture({ Color::transparent,Color::blue,Color::transparent});
-
-			auto rayCastShading = MakeRef<Shading>();
+			rayCastShading = MakeRef<Shading>();
 			auto raycastGLSL = rayCastShading->CreateGetProgram();
 			auto fs = MakeRef<GLSLFragmentShader>();
 			fs->SetFromFile(R"(glsl\blockraycasting_f.glsl)");
@@ -114,74 +113,49 @@ namespace ysl
 			vs->SetFromFile(R"(glsl\raycast_vs.glsl)");
 			raycastGLSL->AttachShader(fs);
 			raycastGLSL->AttachShader(vs);
-
-			auto oocResources = MakeRef<OutOfCoreVolumeTexture>(R"(C:\data\s1_3968_3968_3968_2_128.lvd)");
-
-			rayCastShading->CreateGetUBO(0)->SetBufferObject(oocResources->GetSamplerUBO());
-
-			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture(0));
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume0")->SetUniformValue(1);
-
-			rayCastShading->CreateGetTextureSampler(2)->SetTexture(oocResources->GetVolumeTexture(1));
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume1")->SetUniformValue(2);
-
-			rayCastShading->CreateGetTextureSampler(3)->SetTexture(oocResources->GetVolumeTexture(2));
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume2")->SetUniformValue(3);
-
-			rayCastShading->CreateGetTextureSampler(4)->SetTexture(tfTex);
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texTransfunc")->SetUniformValue(4);
-
+			rayCastShading->CreateGetTextureImageUnit(4)->SetTexture(intermediateResult);
 			rayCastShading->CreateGetTextureImageUnit(2)->SetTexture(entryTexture);
 			rayCastShading->CreateGetTextureImageUnit(3)->SetTexture(exitTexture);
-			rayCastShading->CreateGetTextureImageUnit(1)->SetTexture(oocResources->GetMappingTableTexture());
-			rayCastShading->CreateGetTextureImageUnit(4)->SetTexture(intermediateResult);
 
-			rayCastShading->CreateGetAtomicCounter(3)->SetBufferObject(oocResources->GetAtomicCounterBuffer());
-			rayCastShading->CreateGetSSBO(0)->SetBufferObject(oocResources->GetHashBuffer());
-			rayCastShading->CreateGetSSBO(1)->SetBufferObject(oocResources->GetBlockIDBuffer());
-
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.001f);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("texTransfunc")->SetUniformValue(4);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume0")->SetUniformValue(1);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume1")->SetUniformValue(2);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume2")->SetUniformValue(3);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.0001f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ka")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("kd")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ks")->SetUniformValue(50.f);
 
-			auto v = oocResources->VirtualBlockDim();
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("totalPageTableSize")->SetUniform3i(1,v.Data());
-			v = oocResources->DataResolution();
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("volumeDataSizeNoRepeat")->SetUniform3i(1,v.Data());
-			v = oocResources->BlockSize() - 2*oocResources->Padding();
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("blockDataSizeNoRepeat")->SetUniform3i(1,v.Data());
-			v = oocResources->Padding();
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("repeatOffset")->SetUniform3i(1,v.Data());
-
 			auto effect2 = MakeRef<Artist>();
 			effect2->GetLOD(0)->push_back(rayCastShading);
 
-			auto screenActor = MakeRef<Actor>(nullptr, effect2, nullptr);
+			const auto screenActor = MakeRef<Actor>(nullptr, effect2, nullptr);
 			auto screenActorCallback = MakeRef<ScreenActorEventCallback>();
-			auto oocPrimitive = MakeRef<OutOfCorePrimitive>();
+			oocPrimitive = MakeRef<OutOfCorePrimitive>();
 			screenActorCallback->SetPrimitive(oocPrimitive);// Out Of Core
-			//oocResources->BindToOutOfCorePrimitive(oocPrimitive);
-			oocPrimitive->SetOutOfCoreResources(oocResources);
+
+			//SetupResources("");
+			//SetupTF("");
 
 			screenActorCallback->BindToActor(screenActor);
 			sceneManager = MakeRef<TrivialSceneManager>();
 			sceneManager->AddActor(screenActor);
-			raycastAgt->SceneManager().push_back(sceneManager);
 
+			raycastAgt->SceneManager().push_back(sceneManager);
 			raycastAgt->Renderers().at(0)->SetFramebuffer(intermediateFBO);
 			auto rect = Bound2i{ {0,0},{vSize.x,vSize.y} };
 
+			// This object will blit the final redering result into default framebuffer
 			auto blit = MakeRef<BlitFramebufferEvent>(intermediateFBO, rect, Context()->GetFramebuffer(), rect, BufferBits::VM_BB_COLOR_BUFFER_BIT);
 			raycastAgt->Renderers().at(0)->AddRenderFinishedEventCallback(blit);
 			raycastAgt->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR);
 			raycastAgt->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 0.f,0.f,0.f,0.f });
 
-			auto serializedAgts= MakeRef<SerializedAggregates>();
-			SetAggregation(serializedAgts);
+			auto outOfCoreAgts = MakeRef<SerializedAggregates>();
+			SetAggregation(outOfCoreAgts);
+			outOfCoreAgts->GetAggregates().push_back(mrtAgt);
+			outOfCoreAgts->GetAggregates().push_back(raycastAgt);
 
-			serializedAgts->GetAggregates().push_back(mrtAgt);
-			serializedAgts->GetAggregates().push_back(raycastAgt);
 		}
 
 		void VM_LargeVolumeRayCast::UpdateScene()
@@ -189,14 +163,78 @@ namespace ysl
 
 		}
 
+		void VM_LargeVolumeRayCast::FileDropEvent(const std::vector<std::string>& fileNames)
+		{
+			for (const auto & each : fileNames)
+			{
+				auto extension = each.substr(each.find_last_of('.'));
+				bool found = false;
+				if (extension == ".lvd")
+				{
+					SetupResources(each);
+					found = true;
+				}
+				else if (extension == ".tf")
+				{
+					SetupTF(each);
+					found = true;
+				}
+				if (found)
+					break;
+			}
+		}
 		void VM_LargeVolumeRayCast::SetupShading()
 		{
 
 		}
 
-		void VM_LargeVolumeRayCast::SetupResources()
+		void VM_LargeVolumeRayCast::SetupResources(const std::string& fileName)
 		{
+			assert(oocPrimitive);
+			assert(rayCastShading);
+			Ref<OutOfCoreVolumeTexture> oocResources;
 
+			try
+			{
+				oocResources= MakeRef<OutOfCoreVolumeTexture>(fileName);
+			}catch(std::runtime_error &e){
+				Warning("Can not load lvd file");
+				return;
+			}
+
+			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture(0));
+			rayCastShading->CreateGetTextureSampler(2)->SetTexture(oocResources->GetVolumeTexture(1));
+			rayCastShading->CreateGetTextureSampler(3)->SetTexture(oocResources->GetVolumeTexture(2));
+			rayCastShading->CreateGetTextureImageUnit(1)->SetTexture(oocResources->GetMappingTableTexture());
+			rayCastShading->CreateGetAtomicCounter(3)->SetBufferObject(oocResources->GetAtomicCounterBuffer());
+			rayCastShading->CreateGetSSBO(0)->SetBufferObject(oocResources->GetHashBuffer());
+			rayCastShading->CreateGetSSBO(1)->SetBufferObject(oocResources->GetBlockIDBuffer());
+
+			auto v = oocResources->VirtualBlockDim();
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("totalPageTableSize")->SetUniform3i(1, v.Data());
+			v = oocResources->DataResolution();
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("volumeDataSizeNoRepeat")->SetUniform3i(1, v.Data());
+			v = oocResources->BlockSize() - 2 * oocResources->Padding();
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("blockDataSizeNoRepeat")->SetUniform3i(1, v.Data());
+			v = oocResources->Padding();
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("repeatOffset")->SetUniform3i(1, v.Data());
+
+			oocPrimitive->SetOutOfCoreResources(oocResources);
+		}
+
+		void VM_LargeVolumeRayCast::SetupTF(const std::string& fileName)
+		{
+			assert(rayCastShading);
+			try
+			{
+			auto tfTex = MakeTransferFunction1DTexture(fileName);
+				
+			rayCastShading->CreateGetTextureSampler(4)->SetTexture(tfTex);
+			}catch (std::runtime_error & e)
+			{
+				Warning("Can not load .tf file");
+				return;
+			}
 		}
 	}
 }

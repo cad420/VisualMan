@@ -93,6 +93,7 @@ namespace ysl {
 			glfwSetMouseButtonCallback(glfwWindow, glfwMouseButtonCallback);
 			glfwSetScrollCallback(glfwWindow, glfwMouseScrollCallback);
 			glfwSetKeyCallback(glfwWindow, glfwKeyCallback);
+			glfwSetDropCallback(glfwWindow, glfwDropFileCallback);
 #ifndef NDEBUG
 			//glDebugMessageCallback((GLDEBUGPROC)gl_debug_msg_callback, nullptr);
 			//glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
@@ -237,6 +238,18 @@ namespace ysl {
 			case GLFW_RELEASE:app->DispatchKeyReleasedEvent(TranslateKey(key, scancode, mods)); break;
 			default:Debug("Unsupported callback"); break;
 			}
+		}
+
+		void VMGLFWWindow::glfwDropFileCallback(GLFWwindow* window, int count, const char** df)
+		{
+			const auto app = Instance();
+			assert(app->glfwWindow == window);
+			std::vector<std::string> fileNames;
+			for(int i = 0 ; i < count;i++)
+			{
+				fileNames.emplace_back(df[i]);
+			}
+			app->DispatchFileDropEvent(fileNames);
 		}
 
 		void VMGLFWWindow::glfw_error_callback(int error, const char* description)

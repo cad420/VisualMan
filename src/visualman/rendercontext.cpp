@@ -238,6 +238,18 @@ namespace ysl {
 			}
 		}
 
+		void RenderContext::DispatchFileDropEvent(const std::vector<std::string>& fileNames)
+		{
+			MakeCurrent();
+			for(const auto &each:listeners)
+			{
+				if(each->Enabled())
+				{
+					each->FileDropEvent(fileNames);
+				}
+			}
+		}
+
 		void RenderContext::UseProgram(Ref<const GLSLProgram> program)
 		{
 			assert(program);

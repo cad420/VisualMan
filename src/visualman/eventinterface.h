@@ -2,6 +2,8 @@
 #ifndef _EVENTINTERFACE_H_
 #define _EVENTINTERFACE_H_
 #include "graphictype.h"
+#include <vector>
+
 namespace ysl
 {
 	namespace vm
@@ -75,6 +77,7 @@ namespace ysl
 			virtual void DestroyEvent() = 0;
 
 			virtual void ResizeEvent(int w, int h) = 0;
+
 			virtual void UpdateEvent() = 0;
 
 			/**
@@ -94,6 +97,8 @@ namespace ysl
 			virtual void MouseReleaseEvent(MouseButton button, int xpos, int ypos) = 0;
 
 			virtual void MouseWheelEvent(int ydegree,int xdegree) = 0;
+
+			virtual void FileDropEvent(const std::vector<std::string> & fileNames) = 0;
 
 			virtual void KeyPressEvent(KeyButton key) = 0;
 

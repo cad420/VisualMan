@@ -1,7 +1,18 @@
 #version 430 core
 
+/**
+* This shader is use to implement a out-of-core volume rendering
+*/
 
-//
+
+/**
+* texTransfunc: A 1D texture represent the transfer function. OPTIONAL:False
+* cacheVolume0: A 3D texture represent the in-memory volume data. OPTIONAL:False
+* cacheVolume1: A 3D texture represent the in-memory volume data. OPTIONAL:True
+* cacheVolume2: A 3D texture represent the in-memory volume data. OPTIONAL:True
+* cacheVolume3: A 3D texture represent the in-memory volume data. OPTIONAL:True
+*/
+
 uniform sampler1D texTransfunc;
 uniform sampler3D cacheVolume0;
 uniform sampler3D cacheVolume1;
@@ -25,7 +36,6 @@ uniform float ks;
 in vec2 screenCoord;
 out vec4 fragColor;
 // Out-Of-Core uniforms
-
 uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (no repeat)
 uniform ivec3 blockDataSizeNoRepeat;				// block data size (no repeat)
 uniform ivec3 repeatOffset;							// repeat boarder size

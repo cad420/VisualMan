@@ -142,6 +142,8 @@ namespace ysl
 
 			void MouseWheelEvent(int ydegree, int xdegree) override{}
 
+			void FileDropEvent(const std::vector<std::string>& fileNames) override {};
+
 			void KeyPressEvent(KeyButton key) override{}
 
 			void KeyReleaseEvent(KeyButton key) override{}

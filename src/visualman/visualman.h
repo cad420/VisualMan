@@ -42,6 +42,8 @@ namespace ysl
 
 			void ResizeEvent(int w, int h) override;
 
+			void FileDropEvent(const std::vector<std::string>& fileNames) override;
+
 			virtual void UpdateScene(){}
 
 			Ref<AbstraAggregate> GetAggregate()const { return abstraAggregate; }

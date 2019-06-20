@@ -134,6 +134,7 @@ namespace ysl
 			virtual void DispatchMouseWheelEvent(int ydegree, int xdegree);
 			virtual void DispatchKeyReleasedEvent(KeyButton key);
 			virtual void DispatchKeyPressedEvent(KeyButton key);
+			virtual void DispatchFileDropEvent(const std::vector<std::string> & fileNames);
 
 			//Rendering State 
 
