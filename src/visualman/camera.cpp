@@ -1,8 +1,7 @@
 
 #include "camera.h"
 #include "viewport.h"
-#include "../common/error.h"
-#include <iostream>
+#include "rendercontext.h"
 
 namespace ysl
 {
@@ -72,28 +71,29 @@ namespace ysl
 			m_up.Normalize();
 		}
 
-
 		void CameraManipulator::ResizeEvent(int w, int h)
 		{
 			//assert(camera);
-			if (camera) 
-			{
-				auto viewport = camera->GetViewport();
-				assert(viewport);
-				if (viewport)
-				{
-					viewport->SetViewportSize(w, h);
-					Transform proj;
-					proj.SetGLPerspective(45.f, float(w) / float(h), 0.01, 100);
-					camera->SetProjectionMatrix(proj);
-				}
-			}
-
+			//if (camera) 
+			//{
+			//	auto viewport = camera->GetViewport();
+			//	assert(viewport);
+			//	if (viewport)
+			//	{
+			//		viewport->SetViewportSize(w, h);
+			//		Transform proj;
+			//		proj.SetGLPerspective(60.f, float(w) / float(h), 0.01, 100);
+			//		camera->SetProjectionMatrix(proj);
+			//	}
+			//}
+			(void)w;
+			(void)h;
 		}
 
 		void CameraManipulator::AddedEvent(RenderContext* context)
 		{
 			SetContext(context);
+			// Setup Viewport Size
 		}
 
 		void CameraManipulator::DeletedEvent(RenderContext* context)

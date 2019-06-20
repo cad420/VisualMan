@@ -11,6 +11,7 @@ namespace ysl
 		class Viewport
 		{
 		public:
+			Viewport() = default;
 			Viewport(int w,int h):width(w),height(h){}
 			Viewport(int x,int y,int w,int h):width(w),height(h),xpos(x),ypos(y){}
 			void Activate()const;

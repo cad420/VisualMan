@@ -240,12 +240,12 @@ namespace ysl
 
 		Size3 DefaultMemoryParamsEvaluator::EvalPhysicalTextureSize() const
 		{
-			return Size3{ 10,10,10 } *blockSize;
+			return Size3{ 12,12,12 } *blockSize;
 		}
 
 		Size3 DefaultMemoryParamsEvaluator::EvalPhysicalBlockDim() const
 		{
-			return Size3{ 10,10,10 };
+			return Size3{ 12,12,12 };
 		}
 
 		int DefaultMemoryParamsEvaluator::EvalPhysicalTextureCount() const

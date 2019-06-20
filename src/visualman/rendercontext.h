@@ -85,6 +85,7 @@ namespace ysl
 		{
 		public:
 			RenderContext();
+			RenderContext(int w, int h);
 			virtual ~RenderContext() = default;
 			RenderContext(const RenderContext &) = delete;
 			RenderContext & operator=(const RenderContext&) = delete;
@@ -94,15 +95,15 @@ namespace ysl
 
 
 			bool InitContext();			// We use gl3w
-			bool EnableUpdate()const { return enableUpdate; }
-			void SetEnableUpdate(bool update) { enableUpdate = update; }
+			bool GetAutomaticallyUpdate()const { return enableUpdate; }
+			void SetAutomaticallyUpdate(bool update) { enableUpdate = update; }
 			void SetContextFormat(const RenderContextFormat& fmt);
 			bool HasDoubleBuffer()const { return format.HasDoubleBuffer(); }
 			bool IsInitialized()const { return initialized; }
-
 			void SetContextState(ContextState state) {  contextState = state; }
 			ContextState GetContextState()const { return contextState; }
 
+			virtual void SetWindowTitle(const std::string & title) {}
 			/**
 			 * \brief  Returns default framebuffer
 			 */
@@ -116,14 +117,9 @@ namespace ysl
 
 
 			virtual void DestroyGLResources();
-			
-
 			void AddEventListener(Ref<IEventListener> listener);
 			void RemoveEventListener(Ref<IEventListener> listener);
-
-
 			// Event Call
-
 			virtual void DispatchInitEvent();
 			virtual void DispatchUpdateEvent();
 			virtual void DispatchDestroyEvent();
@@ -135,13 +131,11 @@ namespace ysl
 			virtual void DispatchKeyReleasedEvent(KeyButton key);
 			virtual void DispatchKeyPressedEvent(KeyButton key);
 			virtual void DispatchFileDropEvent(const std::vector<std::string> & fileNames);
-
 			//Rendering State 
 
 			// glUseProgram
 			void UseProgram(Ref<const GLSLProgram> program);
 			Ref<const GLSLProgram> GetCurrentProgram()const { return curProgram; }
-
 
 			// glVertexAttribArray
 			void BindVertexArray(const IVertexAttribSet * vas);

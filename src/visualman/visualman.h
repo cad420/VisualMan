@@ -4,6 +4,7 @@
 
 #include "eventinterface.h"
 #include "renderstudio.h"
+#include "timer.h"
 
 namespace ysl
 {
@@ -52,10 +53,15 @@ namespace ysl
 
 			void BindCameraEvent(Ref<Camera> camera);
 
+			double GetFPS()const { return FPS; }
+
 		protected:
 			Ref<AbstraAggregate> abstraAggregate;
 			Ref<CameraManipulator> manipulator;
-			double FPS;
+			double FPS = 0;
+			int frameCount = 0;
+			Timer timer;
+
 		};
 	}
 }

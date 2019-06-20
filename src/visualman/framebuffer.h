@@ -21,9 +21,9 @@ namespace ysl
 				int height,
 				ReadDrawBuffer readBuffer,
 				ReadDrawBuffer drawBuffer):
-			context(context), 
 			width(width), 
 			height(height),
+			context(context), 
 			readBuffer(readBuffer)
 			{
 				drawBuffers.push_back(drawBuffer);
@@ -45,20 +45,12 @@ namespace ysl
 			void Activate(FramebufferBind target);
 			void BindReadBuffer();
 			void BindDrawBuffers();
-			//void BindFramebuffer();
-			//void SetDrawBuffer(ReadDrawBuffer drawBuffer);
-			//void SetDrawBuffers(ReadDrawBuffer drawBuffer0, ReadDrawBuffer drawBuffer1);
-			//void SetDrawBuffers(ReadDrawBuffer drawBuffer0, ReadDrawBuffer drawBuffer1, ReadDrawBuffer drawBuffer2);
-			//void SetDrawBuffers(ReadDrawBuffer drawBuffer0, ReadDrawBuffer drawBuffer1, ReadDrawBuffer drawBuffer2, ReadDrawBuffer drawBuffer3);
 			template<typename ...Args>
 			void SetDrawBuffers(Args&&...);
-
 			ReadDrawBuffer ReadBuffer()const { return readBuffer; }
 			const std::vector<ReadDrawBuffer> & DrawBuffers()const { return drawBuffers; }
-
 			RenderContext * Context() { return context; }
 			const RenderContext * Context()const { return context; }
-
 		private:
 			int width = -1;
 			int height = -1;

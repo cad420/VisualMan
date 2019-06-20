@@ -19,6 +19,7 @@ public:
 		end_ = std::chrono::system_clock::now();
 		duration_ = std::chrono::duration_cast<std::chrono::microseconds>(end_ - begin_);
 	}
+	auto last_begin_time_point()const { return begin_; }
 	void print()const
 	{
 		std::cout << "Duration:" << duration_.count() << "ms.\n";

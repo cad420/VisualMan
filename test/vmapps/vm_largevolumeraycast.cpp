@@ -22,8 +22,15 @@ namespace ysl
 			 * entryTexture:
 			 * exitTexture:
 			 * intermediateResult:
+			 *
 			 */
-			Vec2i vSize{ 800,600 };
+
+			Context()->SetAutomaticallyUpdate(false);
+
+			int w = Context()->GetFramebuffer()->Width();
+			int h = Context()->GetFramebuffer()->Height();
+
+			Vec2i vSize{ w,h };
 			auto texParam = MakeRef<TexCreateParams>();
 			texParam->SetSize(vSize.x, vSize.y, 0);
 			texParam->SetTextureFormat(TF_RGBA32F);
@@ -49,7 +56,7 @@ namespace ysl
 			 * control this camera to interact.
 			 *****************************************************************************/
 
-			auto mrtAgt = MakeRef<Aggregate>();
+			mrtAgt = MakeRef<Aggregate>();
 			auto mrtFBO = Context()->CreateFramebufferObject(vSize.x, vSize.y, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
 			mrtFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(entryTexture));
 			mrtFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT1, MakeRef<FBOTextureAttachment>(exitTexture));
@@ -76,8 +83,8 @@ namespace ysl
 			artist->GetLOD(0)->push_back(positionShading);
 
 
-			auto t = Translate(-0.5,-0.5,-0.5);
-			auto s = Scale(4, 4, 24);
+			auto t = Translate(-0.5, -0.5, -0.5);
+			auto s = Scale(4, 4, 12);
 
 			auto scale = MakeRef<Transform>(s*t);
 
@@ -99,7 +106,7 @@ namespace ysl
 			 *********************************************************************************/
 
 
-			auto raycastAgt = MakeRef<Aggregate>();
+			raycastAgt = MakeRef<Aggregate>();
 			auto intermediateFBO = Context()->CreateFramebufferObject(vSize.x, vSize.y, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
 			intermediateFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(intermediateResult));
 			intermediateFBO->SetDrawBuffers(RDB_COLOR_ATTACHMENT0);
@@ -156,11 +163,20 @@ namespace ysl
 			outOfCoreAgts->GetAggregates().push_back(mrtAgt);
 			outOfCoreAgts->GetAggregates().push_back(raycastAgt);
 
+			Context()->Update();
+
 		}
 
 		void VM_LargeVolumeRayCast::UpdateScene()
 		{
 
+		}
+
+		void VM_LargeVolumeRayCast::DestroyEvent()
+		{
+			rayCastShading.reset();
+			oocPrimitive.reset();
+			VisualMan::DestroyEvent();
 		}
 
 		void VM_LargeVolumeRayCast::FileDropEvent(const std::vector<std::string>& fileNames)
@@ -182,7 +198,38 @@ namespace ysl
 				if (found)
 					break;
 			}
+			Context()->Update();
 		}
+
+		void VM_LargeVolumeRayCast::ResizeEvent(int w, int h)
+		{
+			VisualMan::ResizeEvent(w, h);
+			if (raycastAgt)
+			{
+				raycastAgt->CreateGetCamera()->GetViewport()->SetWidth(w);		// only for clear use
+				raycastAgt->CreateGetCamera()->GetViewport()->SetHeight(h);
+			}
+			if(mrtAgt)
+			{
+				mrtAgt->CreateGetCamera()->GetViewport()->SetWidth(w);
+				mrtAgt->CreateGetCamera()->GetViewport()->SetHeight(h);
+			}
+			Context()->Update();
+		}
+
+		void VM_LargeVolumeRayCast::MouseMoveEvent(MouseButton button, int xpos, int ypos)
+		{
+			VisualMan::MouseMoveEvent(button, xpos, ypos);
+			Context()->Update();
+		}
+
+		void VM_LargeVolumeRayCast::UpdateEvent()
+		{
+			VisualMan::UpdateEvent();
+			std::string title = "LVD Render -- fps:"+ std::to_string(GetFPS());
+			Context()->SetWindowTitle(title);
+		}
+
 		void VM_LargeVolumeRayCast::SetupShading()
 		{
 
@@ -196,8 +243,10 @@ namespace ysl
 
 			try
 			{
-				oocResources= MakeRef<OutOfCoreVolumeTexture>(fileName);
-			}catch(std::runtime_error &e){
+				oocResources = MakeRef<OutOfCoreVolumeTexture>(fileName);
+			}
+			catch (std::runtime_error &e)
+			{
 				Warning("Can not load lvd file");
 				return;
 			}
@@ -218,8 +267,9 @@ namespace ysl
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("blockDataSizeNoRepeat")->SetUniform3i(1, v.Data());
 			v = oocResources->Padding();
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("repeatOffset")->SetUniform3i(1, v.Data());
-
 			oocPrimitive->SetOutOfCoreResources(oocResources);
+
+			Context()->Update();
 		}
 
 		void VM_LargeVolumeRayCast::SetupTF(const std::string& fileName)
@@ -227,14 +277,16 @@ namespace ysl
 			assert(rayCastShading);
 			try
 			{
-			auto tfTex = MakeTransferFunction1DTexture(fileName);
-				
-			rayCastShading->CreateGetTextureSampler(4)->SetTexture(tfTex);
-			}catch (std::runtime_error & e)
+				const auto tfTex = MakeTransferFunction1DTexture(fileName);
+				rayCastShading->CreateGetTextureSampler(4)->SetTexture(tfTex);
+			}
+			catch (std::runtime_error & e)
 			{
 				Warning("Can not load .tf file");
 				return;
 			}
+
+			Context()->Update();
 		}
 	}
 }

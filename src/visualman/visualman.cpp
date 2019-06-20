@@ -15,7 +15,6 @@ namespace ysl
 			//We just need to bind it to the manipulator
 			manipulator->SetCamera(aggre->CreateGetCamera());
 		}
-
 		VisualMan::VisualMan()
 		{
 			manipulator = MakeRef<CameraManipulator>();
@@ -29,6 +28,15 @@ namespace ysl
 
 		void VisualMan::UpdateEvent()
 		{
+			timer.end();
+			const auto dur = timer.duration()*1.0/1000000;
+			if(dur > 0.5)
+			{
+				FPS = frameCount / dur;
+				frameCount = 0;
+				timer.begin();
+			}
+			frameCount++;
 			//Update Scene
 			UpdateScene();
 			// execute rendering
@@ -87,10 +95,12 @@ namespace ysl
 
 		void VisualMan::ResizeEvent(int w, int h)
 		{
-			//std::cout << "Assembly::ResizeEvent:"<<w<<" "<<h << std::endl;
-			//if(frame->GetCamera())
-			//frame->GetCamera()->GetViewport()->SetViewportSize(w, h);
-			//frame->GetCamera()->GetViewport()->Activate();
+			auto aggr = std::dynamic_pointer_cast<Aggregate>(GetAggregate());
+			if(aggr)
+			{
+				aggr->CreateGetCamera()->GetViewport()->SetWidth(w);
+				aggr->CreateGetCamera()->GetViewport()->SetHeight(h);
+			}
 		}
 
 		void VisualMan::FileDropEvent(const std::vector<std::string>& fileNames)

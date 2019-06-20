@@ -38,6 +38,8 @@ namespace ysl
 
 			void Update()override;
 
+			void SetWindowTitle(const std::string& title) override;
+
 			int Show();
 
 			const GLFWwindow * Handle() const { return glfwWindow; }
@@ -47,16 +49,12 @@ namespace ysl
 			
 			static void glfwCursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 			static void glfwMouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
-			static void glfwWindowSizeCallback(GLFWwindow * window, int width, int height);
+			static void glfwFramebufferSizeCallback(GLFWwindow * window, int width, int height);
 			static void glfwMouseScrollCallback(GLFWwindow * window, double xoffset, double yoffset);
 			static void glfwKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
 			static void glfwDropFileCallback(GLFWwindow * window,int count ,const char **df);
 			static void glfw_error_callback(int error, const char* description);
-
-
-
 			static vm::KeyButton TranslateKey(int key, int scancode, int mods);
-
 			void InitSingleton();
 			void Init();
 
@@ -67,6 +65,8 @@ namespace ysl
 			GLFWwindow * glfwWindow = nullptr;
 			bool mouseRightButtonPressed = false;
 			bool mouseLeftButtonPressed = false;
+			int width = 800;
+			int height = 600;
 
 			//static std::unordered_map<GLFWwindow *, VMGLFWWindow*> windowMap;
 

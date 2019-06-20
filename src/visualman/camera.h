@@ -75,11 +75,12 @@ namespace ysl
 		class VISUALMAN_EXPORT_IMPORT Camera
 		{
 		public:
-			Camera(int w = 800,int h = 600,const Point3f& position = { 0.0f, 0.0f, 5.0f }, 
+			Camera(const Point3f& position = { 0.0f, 0.0f, 5.0f }, 
 				Vector3f up = { 0.0f, 1.0f, 0.0f },
 				const Point3f& center = { 0, 0, 0 }):focusCamera(position,up,center)
 			{
-				viewport = MakeRef<Viewport>(w, h);
+				viewport = MakeRef<Viewport>();
+				projMatrix.SetGLPerspective(60.f, float(1024) / float(768), 0.01, 100);
 			}
 
 			Transform ViewMatrix()const { return focusCamera.view(); }
@@ -151,7 +152,6 @@ namespace ysl
 		private:
 			Ref<Camera> camera;
 			Vec2i lastMousePos;
-
 		};
 	}
 }

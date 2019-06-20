@@ -14,11 +14,6 @@ namespace ysl {
 		VMGLFWWindow* VMGLFWWindow::singleton = nullptr;
 		std::thread::id VMGLFWWindow::threadId;
 		std::mutex VMGLFWWindow::mutex;
-
-		//unsigned VAO;
-		//Ref<graphics::GLSLProgram> glslProgram;
-		//Ref<graphics::ArrayFloat3> triangle;
-
 		Ref<vm::Primitive> primitive;
 		Ref<vm::Aggregate> frame;
 
@@ -32,8 +27,6 @@ namespace ysl {
 				Error("GLFW cannot be initialized");
 				return false;
 			}
-
-
 
 			glfwSetErrorCallback(glfw_error_callback);
 
@@ -71,38 +64,27 @@ namespace ysl {
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifndef NDEBUG
-			//glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-#endif
-
 			glfwWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
-
 			glfwMakeContextCurrent(glfwWindow);
-
 			InitContext();		// Init OpenGL Functions for context
-
 			SetContextFormat(format);
-
 			glfwSwapInterval(1); // Enable vsync
 
-			// Add Input callback
-			DispatchResizeEvent(width, height);
 
-			glfwSetWindowSizeCallback(glfwWindow, glfwWindowSizeCallback);
+			/*Window size need to be delivered before initialization
+			 * process because many initialization depend the window size*/
+			DispatchResizeEvent(width,height);
+
+
+			glfwSetFramebufferSizeCallback(glfwWindow, glfwFramebufferSizeCallback);
 			glfwSetCursorPosCallback(glfwWindow, glfwCursorPosCallback);
 			glfwSetMouseButtonCallback(glfwWindow, glfwMouseButtonCallback);
 			glfwSetScrollCallback(glfwWindow, glfwMouseScrollCallback);
 			glfwSetKeyCallback(glfwWindow, glfwKeyCallback);
 			glfwSetDropCallback(glfwWindow, glfwDropFileCallback);
-#ifndef NDEBUG
-			//glDebugMessageCallback((GLDEBUGPROC)gl_debug_msg_callback, nullptr);
-			//glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
-#endif
 
 			DispatchInitEvent();
-
 			return true;
-
 		}
 
 		void VMGLFWWindow::DestroyWindow()
@@ -118,7 +100,7 @@ namespace ysl {
 		VMGLFWWindow::VMGLFWWindow(const std::string& title,
 			const vm::RenderContextFormat& format,
 			int width,
-			int height)
+			int height):width(width),height(height),RenderContext(width,height)
 		{
 			InitSingleton();
 			InitWindow(title, format, width, height);
@@ -126,7 +108,7 @@ namespace ysl {
 
 		VMGLFWWindow::~VMGLFWWindow()
 		{
-			//singleton = nullptr;
+			singleton = nullptr;
 			DestroyWindow();
 		}
 
@@ -147,19 +129,26 @@ namespace ysl {
 			DispatchUpdateEvent();
 		}
 
+		void VMGLFWWindow::SetWindowTitle(const std::string& title)
+		{
+			if(glfwWindow)
+			{
+				glfwSetWindowTitle(glfwWindow, title.c_str());
+			}
+		}
+
 		int VMGLFWWindow::Show()
 		{
-			DispatchResizeEvent(800, 600);
+			DispatchResizeEvent(width, height);
 			while (!glfwWindowShouldClose(glfwWindow))
 			{
-				if (EnableUpdate())
+				if (GetAutomaticallyUpdate())
 					Update();
 				glfwPollEvents();
 			}
 			DestroyWindow();
 			return 0;
 		}
-
 
 		void VMGLFWWindow::glfwCursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 		{
@@ -174,7 +163,6 @@ namespace ysl {
 			if (button)
 				ins->DispatchMouseMoveEvent((vm::MouseButton)button, xpos, ypos);
 		}
-
 
 		void VMGLFWWindow::glfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 		{
@@ -212,7 +200,7 @@ namespace ysl {
 			}
 		}
 
-		void VMGLFWWindow::glfwWindowSizeCallback(GLFWwindow* window, int width, int height)
+		void VMGLFWWindow::glfwFramebufferSizeCallback(GLFWwindow* window, int width, int height)
 		{
 			//ResizeEvent e{ {width,height} };
 			const auto app = Instance();
@@ -245,7 +233,7 @@ namespace ysl {
 			const auto app = Instance();
 			assert(app->glfwWindow == window);
 			std::vector<std::string> fileNames;
-			for(int i = 0 ; i < count;i++)
+			for (int i = 0; i < count; i++)
 			{
 				fileNames.emplace_back(df[i]);
 			}
@@ -333,7 +321,6 @@ namespace ysl {
 		}
 		threadId = std::this_thread::get_id();
 		singleton = this;
-
 	}
 
 	void app::VMGLFWWindow::Init()

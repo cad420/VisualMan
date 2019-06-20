@@ -21,7 +21,6 @@ namespace ysl
 			if (target == FBB_FRAMEBUFFER || target == FBB_DRAW_FRAMEBUFFER)
 				BindDrawBuffers();
 		}
-
 		void Framebuffer::Activate(FramebufferBind target)
 		{
 			BindFramebuffer(target);
@@ -36,46 +35,8 @@ namespace ysl
 		{
 			if (!drawBuffers.empty())
 			{
-				//assert(Handle());
 				GL(glNamedFramebufferDrawBuffers(Handle(), drawBuffers.size(), (GLenum*)drawBuffers.data()));
 			}
 		}
-
-		//void Framebuffer::BindFramebuffer()
-		//{
-
-		//}
-
-		//void Framebuffer::SetDrawBuffer(ReadDrawBuffer drawBuffer)
-		//{
-		//	drawBuffers.clear();
-		//	drawBuffers.push_back(drawBuffer);
-		//}
-
-		//void Framebuffer::SetDrawBuffers(ReadDrawBuffer drawBuffer0, ReadDrawBuffer drawBuffer1)
-		//{
-		//	drawBuffers.clear();
-		//	drawBuffers.push_back(drawBuffer0);
-		//	drawBuffers.push_back(drawBuffer1);
-		//}
-
-		//void Framebuffer::SetDrawBuffers(ReadDrawBuffer drawBuffer0, ReadDrawBuffer drawBuffer1,
-		//	ReadDrawBuffer drawBuffer2)
-		//{
-		//	drawBuffers.clear();
-		//	drawBuffers.push_back(drawBuffer0);
-		//	drawBuffers.push_back(drawBuffer1);
-		//	drawBuffers.push_back(drawBuffer2);
-		//}
-
-		//void Framebuffer::SetDrawBuffers(ReadDrawBuffer drawBuffer0, ReadDrawBuffer drawBuffer1,
-		//	ReadDrawBuffer drawBuffer2, ReadDrawBuffer drawBuffer3)
-		//{
-		//	drawBuffers.clear();
-		//	drawBuffers.push_back(drawBuffer0);
-		//	drawBuffers.push_back(drawBuffer1);
-		//	drawBuffers.push_back(drawBuffer2);
-		//	drawBuffers.push_back(drawBuffer3);
-		//}
 	}
 }

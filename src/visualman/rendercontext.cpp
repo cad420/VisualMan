@@ -20,6 +20,11 @@ namespace ysl {
 			int width = 800, height = 600;
 		}
 
+		RenderContext::RenderContext(int w, int h):framebuffer(MakeRef<Framebuffer>(this,w,h,RDB_BACK_LEFT,RDB_BACK_LEFT))
+		{
+
+		}
+
 		bool RenderContext::InitContext()			// can be seemed as InitGLResources()
 		{
 			MakeCurrent();
@@ -36,34 +41,25 @@ namespace ysl {
 
 #ifndef NDBUG
 			glEnable(GL_DEBUG_OUTPUT);
-
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-
 			glDebugMessageCallback((GLDEBUGPROC)gl_debug_msg_callback, NULL);
-
 			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
 #endif
-
 			initialized = true;
 		}
 
 		void RenderContext::DestroyGLResources()
 		{
 			// Destroy all gl resources
-
 			InitDefaultRenderEnable();
 			InitDefaultRenderEnable();
-
 
 			std::vector<Ref<IEventListener>>().swap(listeners);
-
 			std::vector<Ref<FramebufferObject>>().swap(framebufferObjects);
 			framebuffer = nullptr;
 			curProgram = nullptr;
-
 			std::unordered_map<RenderStateType, RenderStateBox>().swap(currentRenderStates);
 			std::unordered_set<EnableState>().swap(currentEnableStates);
-
 		}
 
 		void RenderContext::SetContextFormat(const RenderContextFormat& fmt)
@@ -163,6 +159,9 @@ namespace ysl {
 		{
 			//std::cout << "RenderContext::DispatchResizeEvent:" << w << " " << h << std::endl;
 			MakeCurrent();
+			// Update Frambuffer Size
+			framebuffer->SetWidth(w);
+			framebuffer->SetHeight(h);
 			for (const auto & each : listeners)
 			{
 				if (each->Enabled())
