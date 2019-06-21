@@ -1,5 +1,6 @@
 #version 430 core
 
+
 /**
 * This shader is use to implement a out-of-core volume rendering
 */
@@ -20,8 +21,8 @@ uniform sampler3D cacheVolume1;
 uniform sampler3D cacheVolume2;
 uniform sampler3D cacheVolume3;
 
-layout(binding = 1, rgba32ui) uniform volatile uimage3D pageTableTexture;
-uniform ivec3 totalPageTableSize;					// page table texture size1
+//layout(binding = 1, rgba32ui) uniform volatile uimage3D pageTableTexture;
+uniform ivec3 pageTableSize;				// page table texture size1
 layout(binding = 2, rgba32f) uniform volatile image2D entryPos;
 layout(binding = 3, rgba32f) uniform volatile image2D endPos;
 layout(binding = 4, rgba32f) uniform volatile image2DRect interResult;
@@ -45,6 +46,7 @@ uniform ivec3 repeatOffset;							// repeat boarder size
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
 layout(std430, binding = 0) buffer HashTable {int blockId[];}hashTable;
 layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
+layout(std430, binding = 2) buffer PageTable{uvec4 pageEntry[];}pageTable;
 
 //uniform int lod;
 
@@ -57,14 +59,18 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	vec4 scalar;
 	//ivec3 totalPageTableSize = imageSize(pageTableTexture);
 	// address translation
-	uvec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
+	ivec3 entry3DIndex = ivec3(samplePos*pageTableSize);
+	uint entryFlatIndex = entry3DIndex.z * pageTableSize.x*pageTableSize.y + entry3DIndex.y * pageTableSize.x + entry3DIndex.x;
+	uvec4 pageTableEntry = pageTable.pageEntry[entryFlatIndex];
+
+	//uvec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
 	vec3 voxelCoord=vec3(samplePos * (volumeDataSizeNoRepeat));
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
 
 
 	ivec3 blockCoord = ivec3(voxelCoord / blockDataSizeNoRepeat);
-	int blockId = blockCoord.z * totalPageTableSize.y*totalPageTableSize.x 
-				+blockCoord.y * totalPageTableSize.x 
+	int blockId = blockCoord.z * pageTableSize.y*pageTableSize.x 
+				+blockCoord.y * pageTableSize.x 
 				+blockCoord.x;
 	if(((pageTableEntry.w) & (0x000f)) == 2)		// Unmapped flag
 	{

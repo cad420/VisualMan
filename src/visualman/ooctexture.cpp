@@ -107,9 +107,9 @@ namespace ysl
 			texSetupParams->SetTextureFormat(TF_R8);
 			texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
 
-			volumeTexSamplerUBO = MakeRef<BufferObject>();
-			volumeTexSamplerUBO->CreateImmutableBufferObject(4 * 4, nullptr, storage_flags);
-			std::vector<int> texUnits;
+			//volumeTexSamplerUBO = MakeRef<BufferObject>();
+			//volumeTexSamplerUBO->CreateImmutableBufferObject(4 * 4, nullptr, storage_flags);
+			//std::vector<int> texUnits;
 
 			for (int i = 0; i < memoryEvalator->EvalPhysicalTextureCount(); i++)
 			{
@@ -117,29 +117,35 @@ namespace ysl
 				vTex->SetSetupParams(texSetupParams);
 				vTex->CreateTexture();
 				volumeDataTexture.push_back(vTex);
-				texUnits.push_back(i);
+				//texUnits.push_back(i);
 			}
-			const int uboSize = texUnits.size() * sizeof(int);
-			const auto ptr = volumeTexSamplerUBO->MapBufferRange(0, uboSize, mapping_flags);
-			memcpy(ptr, texUnits.data(), uboSize);
+			//const int uboSize = texUnits.size() * sizeof(int);
+			//const auto ptr = volumeTexSamplerUBO->MapBufferRange(0, uboSize, mapping_flags);
+			//memcpy(ptr, texUnits.data(), uboSize);
 		}
 
 		void OutOfCoreVolumeTexture::InitMappingTable()
 		{
 			//Create a page table texture
-			auto texSetupParams = MakeRef<TexCreateParams>();
+			//auto texSetupParams = MakeRef<TexCreateParams>();
 			const auto mappingTableSize = cpuVolumeData->BlockDim();
-			texSetupParams->SetSize(mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
-			texSetupParams->SetTextureFormat(TF_RGBA32UI);
-			texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
-			mappingTable = MakeRef<Texture>();		// gpu volume data cache size
-			mappingTable->SetSetupParams(texSetupParams);
-			mappingTable->CreateTexture();
 
-			mappingTableManager = MakeRef<MappingTableManager>(cpuVolumeData->BlockDim(), memoryEvalator->EvalPhysicalBlockDim(), memoryEvalator->EvalPhysicalTextureCount());	// It need the virtual memory space size and the block size
+		//	texSetupParams->SetSize(mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
+		//	texSetupParams->SetTextureFormat(TF_RGBA32UI);
+		//	texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
 
-			mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
+			//mappingTable = MakeRef<Texture>();		// gpu volume data cache size
+			//mappingTable->SetSetupParams(texSetupParams);
+			//mappingTable->CreateTexture();
+			pageTableBuffer = MakeRef<BufferObject>();
+			pageTableBuffer->CreateImmutableBufferObject(mappingTableSize.Prod() * sizeof(MappingTableManager::PageTableEntry),nullptr,storage_flags);
+			const auto pageTablePtr = pageTableBuffer->MapBufferRange(0, mappingTableSize.Prod() * sizeof(MappingTableManager::PageTableEntry),mapping_flags);
+			assert(pageTablePtr);
 
+			// We create the page table directly on the video memory buffer
+			mappingTableManager = MakeRef<MappingTableManager>(cpuVolumeData->BlockDim(), memoryEvalator->EvalPhysicalBlockDim(), memoryEvalator->EvalPhysicalTextureCount(),pageTablePtr);	// It need the virtual memory space size and the block size
+
+			//mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
 		}
 
 		OutOfCoreVolumeTexture::OutOfCoreVolumeTexture(const std::string& fileName)
@@ -155,6 +161,8 @@ namespace ysl
 			memoryEvalator = MakeRef<DefaultMemoryParamsEvaluator>(cpuVolumeData->BlockDim(), cpuVolumeData->BlockSize());
 
 			InitVolumeTextures();
+
+			// Create Page Table Buffer
 			InitMappingTable();
 
 			// Create Atomic Buffer
@@ -166,14 +174,13 @@ namespace ysl
 			atomicCounterBuffer->SetBufferSubDataFromLocalSubData(0, 0, 4);
 			atomicCounterBuffer->MapBufferRange(0, 4, mapping_flags);
 
-			// Create Hash Table Buffer
-
+			// Create ID Buffer
 			const auto idBufferBytes = memoryEvalator->EvalIDBufferCount() * sizeof(int32_t);
 			blockIdBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
 			blockIdBuffer->CreateImmutableBufferObject(idBufferBytes, nullptr, storage_flags);
 			blockIdBuffer->MapBufferRange(0, idBufferBytes, mapping_flags);
 
-
+			// Create Hash Buffer
 			const auto hashBufferBytes = memoryEvalator->EvalHashBufferSize() * sizeof(int);
 			hashBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
 			std::vector<uint32_t> emptyBuffer(hashBufferBytes, 0);
@@ -181,10 +188,9 @@ namespace ysl
 			hashBuffer->CreateImmutableBufferObject(hashBufferBytes, nullptr, storage_flags);
 			hashBuffer->MapBufferRange(0, hashBufferBytes, mapping_flags);
 
+			//pageTableBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
 
 			PrintVideoMemoryUsageInfo();
-
-
 
 		}
 
@@ -235,7 +241,7 @@ namespace ysl
 
 			SetSubTextureDataUsePBO(descs);			// Upload missed blocks
 
-			mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, dim.x, dim.y, dim.z);
+			//mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, dim.x, dim.y, dim.z);
 		}
 
 		Size3 DefaultMemoryParamsEvaluator::EvalPhysicalTextureSize() const
@@ -263,10 +269,13 @@ namespace ysl
 			return virtualDim.Prod();
 		}
 
-		void MappingTableManager::InitCPUPageTable(const Size3& blockDim)
+		void MappingTableManager::InitCPUPageTable(const Size3& blockDim,void * external)
 		{
 			// Only initialization flag filed, the table entry is determined by cache miss at run time using lazy evaluation policy.
-			pageTable = Linear3DArray<PageTableEntry>(blockDim, nullptr);
+			if (external == nullptr)
+				pageTable = Linear3DArray<PageTableEntry>(blockDim, nullptr);
+			else
+				pageTable = Linear3DArray<PageTableEntry>(blockDim.x, blockDim.y, blockDim.z, (PageTableEntry*)external, false);
 			for (auto z = 0; z < pageTable.Size().z; z++)
 				for (auto y = 0; y < pageTable.Size().y; y++)
 					for (auto x = 0; x < pageTable.Size().x; x++)
@@ -296,6 +305,27 @@ namespace ysl
 						}
 		}
 
+		MappingTableManager::MappingTableManager(const Size3& virtualSpaceSize, const Size3& physicalSpaceSize)
+		{
+			InitCPUPageTable(virtualSpaceSize,nullptr);
+			InitLRUList(physicalSpaceSize, 1);
+		}
+
+		MappingTableManager::MappingTableManager(const Size3& virtualSpaceSize, const Size3& physicalSpaceSize,
+		                                         int physicalSpaceCount)
+		{
+			InitCPUPageTable(virtualSpaceSize,nullptr);
+			InitLRUList(physicalSpaceSize, physicalSpaceCount);
+		}
+
+		MappingTableManager::MappingTableManager(const Size3& virtualSpaceSize, const Size3& physicalSpaceSize,
+			int physicalSpaceCount, void * external)
+		{
+			assert(external);
+			InitCPUPageTable(virtualSpaceSize, external);
+			InitLRUList(physicalSpaceSize, physicalSpaceCount);
+		}
+
 		std::vector<PhysicalMemoryBlockIndex> MappingTableManager::UpdatePageTable(
 			const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices)
 		{
@@ -312,16 +342,11 @@ namespace ysl
 				//pageTableEntry.w = EntryMapFlag::EM_MAPPED; // Map the flag of page table entry
 				pageTableEntry.SetMapFlag(EM_MAPPED);
 				// last.second is the cache block index
-
 				physicalIndices.push_back(last.second);
-
 				pageTableEntry.x = last.second.x; // fill the page table entry
 				pageTableEntry.y = last.second.y;
 				pageTableEntry.z = last.second.z;
-
 				pageTableEntry.SetTextureUnit(last.second.GetPhysicalStorageUnit());
-				//std::cout << "Get:" << pageTableEntry.GetTextureUnit() << std::endl;
-
 				if (last.first.x != -1)
 				{
 					pageTable(last.first.x, last.first.y, last.first.z).SetMapFlag(EM_UNMAPPED);
@@ -330,10 +355,8 @@ namespace ysl
 				last.first.x = index.x;
 				last.first.y = index.y;
 				last.first.z = index.z;
-				//
 				g_lruList.splice(g_lruList.begin(), g_lruList, --g_lruList.end()); // move from tail to head, LRU policy
 			}
-
 			return physicalIndices;
 		}
 

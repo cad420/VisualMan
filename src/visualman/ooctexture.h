@@ -52,7 +52,6 @@ namespace ysl
 
 		class MappingTableManager
 		{
-
 		public:
 			struct PageDirEntry
 			{
@@ -73,8 +72,8 @@ namespace ysl
 		private:
 			Linear3DArray<PageTableEntry> pageTable;
 			std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>> g_lruList;
-			void InitCPUPageTable(const Size3& blockDim);
-			//void InitLRUList(const Size3& physicalMemoryBlock, const Size3& page3DSize);
+
+			void InitCPUPageTable(const Size3& blockDim,void * external);
 			void InitLRUList(const Size3& physicalMemoryBlock,int unitCount);
 		public:
 			using size_type = std::size_t;
@@ -82,17 +81,12 @@ namespace ysl
 			 * \brief 
 			 * \param virtualSpaceSize virtual space size
 			 */
-			MappingTableManager(const Size3 & virtualSpaceSize,const Size3 & physicalSpaceSize)
-			{
-				InitCPUPageTable(virtualSpaceSize);
-				InitLRUList(physicalSpaceSize,1);
-			}
+			MappingTableManager(const Size3& virtualSpaceSize, const Size3& physicalSpaceSize);
 
-			MappingTableManager(const Size3 & virtualSpaceSize, const Size3 & physicalSpaceSize,int physicalSpaceCount)
-			{
-				InitCPUPageTable(virtualSpaceSize);
-				InitLRUList(physicalSpaceSize,physicalSpaceCount);
-			}
+			MappingTableManager(const Size3& virtualSpaceSize, const Size3& physicalSpaceSize, int physicalSpaceCount);
+
+			MappingTableManager(const Size3 & virtualSpaceSize, const Size3 & phsicalSpaceSize, int physicalSpaceCount, void * external);
+
 
 			const void * GetData()const { return pageTable.Data(); }
 
@@ -125,11 +119,12 @@ namespace ysl
 			Ref<BufferObject> GetHashBuffer() { return hashBuffer; }
 			Ref<const BufferObject> GetHashBuffer()const { return hashBuffer; }
 
-			Ref<Texture> GetMappingTableTexture() { return mappingTable; }
-			Ref<const Texture> GetMappingTableTexture()const { return mappingTable; }
+			Ref<BufferObject> GetPageTableBuffer(){ return pageTableBuffer; }
+			Ref<const BufferObject> GetPageTableBuffer()const { return pageTableBuffer; }
 
 			Ref<BufferObject> GetSamplerUBO() { return volumeTexSamplerUBO; }
 			Ref<const BufferObject> GetSamplerUBO()const { return volumeTexSamplerUBO; }
+
 
 			Vec3i DataResolution()const { return Vec3i(cpuVolumeData->OriginalDataSize()); }
 			Vec3i DataResolutionWithPadding()const { return Vec3i(cpuVolumeData->BlockDim()*cpuVolumeData->BlockSize()); }
@@ -160,9 +155,10 @@ namespace ysl
 			Ref<BufferObject> hashBuffer;
 			Ref<BufferObject> blockIdBuffer;
 			Ref<BufferObject> volumeTexSamplerUBO;
+			Ref<BufferObject> pageTableBuffer;
 
 			std::vector<int> blockIdLocalBuffer;
-			Ref<Texture> mappingTable;
+			//Ref<Texture> mappingTable;
 			Ref<MappingTableManager> mappingTableManager;
 			Ref<IVideoMemoryParamsEvaluator> memoryEvalator;
 			// CPU Volume Cache
