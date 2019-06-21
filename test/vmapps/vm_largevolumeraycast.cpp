@@ -7,6 +7,7 @@
 #include <trivialscenemanager.h>
 #include "blitframebuffer.h"
 #include "actoreventcallback.h"
+#include <transformation.h>
 
 
 namespace ysl
@@ -27,10 +28,10 @@ namespace ysl
 
 			Context()->SetAutomaticallyUpdate(false);
 
-			int w = Context()->GetFramebuffer()->Width();
-			int h = Context()->GetFramebuffer()->Height();
+			const auto w = Context()->GetFramebuffer()->Width();
+			const auto h = Context()->GetFramebuffer()->Height();
 
-			Vec2i vSize{ w,h };
+			const Vec2i vSize{ w,h };
 			auto texParam = MakeRef<TexCreateParams>();
 			texParam->SetSize(vSize.x, vSize.y, 0);
 			texParam->SetTextureFormat(TF_RGBA32F);
@@ -81,10 +82,8 @@ namespace ysl
 
 			auto artist = MakeRef<Artist>();
 			artist->GetLOD(0)->push_back(positionShading);
-
-
 			auto t = Translate(-0.5, -0.5, -0.5);
-			auto s = Scale(4, 4, 12);
+			auto s = Scale(8, 8, 12);
 
 			auto scale = MakeRef<Transform>(s*t);
 
@@ -128,10 +127,13 @@ namespace ysl
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume0")->SetUniformValue(1);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume1")->SetUniformValue(2);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume2")->SetUniformValue(3);
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.0001f);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.00001f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ka")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("kd")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ks")->SetUniformValue(50.f);
+			Vec3f lightDir{ 1.0f,1.0f,1.0f };
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("lightdir")->SetUniform3f(1,lightDir.Data());
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("halfway")->SetUniform3f(1, lightDir.Data());
 
 			auto effect2 = MakeRef<Artist>();
 			effect2->GetLOD(0)->push_back(rayCastShading);
@@ -177,6 +179,13 @@ namespace ysl
 			rayCastShading.reset();
 			oocPrimitive.reset();
 			VisualMan::DestroyEvent();
+		}
+
+		void VM_LargeVolumeRayCast::MouseWheelEvent(int ydegree, int xdegree)
+		{
+			const auto fov = mrtAgt->CreateGetCamera()->GetFov();
+			mrtAgt->CreateGetCamera()->SetFov(fov + ydegree);
+			Context()->Update();
 		}
 
 		void VM_LargeVolumeRayCast::FileDropEvent(const std::vector<std::string>& fileNames)

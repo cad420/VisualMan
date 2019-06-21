@@ -16,6 +16,7 @@ namespace ysl
 			void InitEvent() override;
 			void UpdateScene() override;
 			void DestroyEvent() override;
+			void MouseWheelEvent(int ydegree, int xdegree) override;
 			void FileDropEvent(const std::vector<std::string>& fileNames) override;
 			void ResizeEvent(int w, int h) override;
 			void MouseMoveEvent(MouseButton button, int xpos, int ypos) override;

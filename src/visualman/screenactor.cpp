@@ -2,6 +2,9 @@
 #include "screenactor.h"
 #include "abstraarray.h"
 #include "drawarray.h"
+#include "shaderprogram.h"
+#include "camera.h"
+#include "actor.h"
 
 namespace ysl
 {
@@ -13,10 +16,16 @@ namespace ysl
 			SetPrimitive(MakeRef<Primitive>());
 		}
 
-		void ScreenActorEventCallback::OnActorRenderStartedEvent(Actor*, const Camera*,
-			Renderable* , const Shading*  ,int )
+		void ScreenActorEventCallback::OnActorRenderStartedEvent(Actor*actor, const Camera*camera,
+			Renderable* , const Shading*  shading,int )
 		{
+			//const auto program = shading->GetProgram().get();
 
+			//const auto half_way_position = program->GetGenericUniformLocation("halfway");
+			//if(half_way_position != -1)
+			//{
+			//	actor->CreateGetUniformSet()->CreateGetUniform("halfway")->SetUniform3f(1, camera->Front().Data());
+			//}
 		}
 
 		void ScreenActorEventCallback::SetPrimitive(Ref<Primitive> primitive)

@@ -80,7 +80,7 @@ namespace ysl
 				const Point3f& center = { 0, 0, 0 }):focusCamera(position,up,center)
 			{
 				viewport = MakeRef<Viewport>();
-				projMatrix.SetGLPerspective(60.f, float(1024) / float(768), 0.01, 100);
+				projMatrix.SetGLPerspective(fov, aspectRatio, nearPlan, farPlan);
 			}
 
 			Transform ViewMatrix()const { return focusCamera.view(); }
@@ -89,8 +89,15 @@ namespace ysl
 			Transform ProjectViewMatrix()const { return projMatrix * ViewMatrix(); }
 			Point3f Position()const { return focusCamera.position(); }
 			void Ratation(float xoffset, float yoffset) { focusCamera.rotation(xoffset, yoffset); }
-
+			Vector3f Front()const { return focusCamera.front(); }
 			void SetViewport(Ref<Viewport> vp) { viewport = std::move(vp); }
+			float GetFov()const { return fov; }
+			void SetFov(float fov) { this->fov = Clamp(fov,1.f,89.f); UpdateProjMatrix(); }
+
+			float GetNearPlane()const { return nearPlan; }
+			void SetNearPlane(float np) { nearPlan = np; UpdateProjMatrix(); }
+			float GetFarPlane()const { return nearPlan; }
+			void SetFarPlane(float fp) { nearPlan = fp; UpdateProjMatrix(); }
 
 			Ref<Viewport> GetViewport() { return viewport; }
 
@@ -99,14 +106,18 @@ namespace ysl
 			//Ref<Viewport> CreateGetViewport() { return viewport ? viewport : viewport = MakeRef<Viewport>(800,600); }
 
 			Vec3f Up()const { return focusCamera.up(); }
-			Vec3f Front()const { return focusCamera.front(); }
 			Vec3f Right()const { return focusCamera.right(); }
 			void Movement(const Vec3f& dir, float deltaTime) { focusCamera.movement(dir, deltaTime); }
 
 		private:
+			void UpdateProjMatrix(){projMatrix.SetGLPerspective(fov, aspectRatio, nearPlan, farPlan);}
 			Camera_Impl focusCamera;
 			Transform projMatrix;
 			Ref<Viewport> viewport;
+			float fov = 60;
+			float aspectRatio = 1024.0 / 768.0;
+			float nearPlan = 0.01;
+			float farPlan = 1000;
 		};
 
 		class VISUALMAN_EXPORT_IMPORT CameraManipulator:public IEventListener

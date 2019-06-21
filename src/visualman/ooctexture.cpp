@@ -24,10 +24,10 @@ namespace ysl
 			std::cout << "Data Dimension Without Padding: " << cpuVolumeData->OriginalDataSize() << std::endl;
 			std::cout << "Block Padding: " << cpuVolumeData->Padding() << std::endl;
 			Log("------------Video Memory Usage ---------------");
-			Log("Volume Texture Memory Usage: %d Bytes = %.2fMB", volumeTextureMemoryUsage, volumeTextureMemoryUsage*1.0 / 1024 / 1024);
-			Log("Page Table Memory Usage: %d Bytes = %2.f MB", pageTableTextureMemoryUsage, pageTableTextureMemoryUsage*1.0 / 1024 / 1024);
-			Log("ID Buffer Block Memory Usage: %d Bytes = %2.f MB", blockIdBuffer->BufferObjectSize(), blockIdBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
-			Log("Hash Buffer Block Memory Usage: %d Bytes = %2.f MB", hashBuffer->BufferObjectSize(), hashBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
+			Log("Volume Texture Memory Usage: %lld Bytes = %.2f MB", volumeTextureMemoryUsage, volumeTextureMemoryUsage*1.0 / 1024 / 1024);
+			Log("Page Table Memory Usage: %lld Bytes = %2.f MB", pageTableTextureMemoryUsage, pageTableTextureMemoryUsage*1.0 / 1024 / 1024);
+			Log("ID Buffer Block Memory Usage: %lld Bytes = %2.f MB", blockIdBuffer->BufferObjectSize(), blockIdBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
+			Log("Hash Buffer Block Memory Usage: %lld Bytes = %2.f MB", hashBuffer->BufferObjectSize(), hashBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
 			Log("--------------End-----------------------------");
 		}
 

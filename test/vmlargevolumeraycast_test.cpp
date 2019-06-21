@@ -3,19 +3,19 @@
 #include "vm_largevolumeraycast.h"
 #include "cmdline.h"
 
-int main(int argc,char ** argv)
+
+int main(int argc, char ** argv)
 {
 	using namespace ysl::vm;
 	using namespace ysl::app;
 
-	cmdline::parser clp;
-	clp.add<int>("width",'w',"The width of window",false,1024);
-	clp.add<int>("height", 'h', "The height of window", false, 768);
-	clp.parse_check(argc, argv);
+	cmdline::parser a;
+	a.add<int>("width", 'w', "The width of window", false, 1024);
+	a.add<int>("height", 'h', "The height of window", false, 768);
+	a.parse_check(argc, argv);
 
-	VMGLFWWindow window("LVD Renderer", RenderContextFormat(), clp.get<int>("width"),clp.get<int>("height"));
+	VMGLFWWindow window("LVD Renderer", RenderContextFormat(), a.get<int>("width"), a.get<int>("height"));
 	auto app = MakeRef<VM_LargeVolumeRayCast>();
 	window.AddEventListener(app);
-	auto ret = window.Show();
-	return ret;
+	return window.Show();
 }

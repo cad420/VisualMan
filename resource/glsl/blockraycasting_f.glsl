@@ -4,6 +4,7 @@
 * This shader is use to implement a out-of-core volume rendering
 */
 
+//#define ILLUMINATION
 
 /**
 * texTransfunc: A 1D texture represent the transfer function. OPTIONAL:False
@@ -29,10 +30,12 @@ uniform float step;
 // illumination params
 uniform vec3 lightdir;
 uniform vec3 halfway;
+
 uniform float ka;
 uniform float kd;
 uniform float shininess;
 uniform float ks;
+
 in vec2 screenCoord;
 out vec4 fragColor;
 // Out-Of-Core uniforms
@@ -43,6 +46,11 @@ layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
 layout(std430, binding = 0) buffer HashTable {int blockId[];}hashTable;
 layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
 
+//uniform int lod;
+
+#ifdef ILLUMINATION
+vec3 N;
+#endif
 
 vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
@@ -75,47 +83,60 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 		if(texId == 0){
 			samplePoint = samplePoint/textureSize(cacheVolume0,0);
 			scalar = texture(cacheVolume0,samplePoint);
+			#ifdef ILLUMINATION
+			N.x = (texture(cacheVolume0, samplePoint+vec3(step,0,0)).r - texture(cacheVolume0, samplePoint+vec3(-step,0,0) ).r) ;
+			N.y = (texture(cacheVolume0, samplePoint+vec3(0,step,0)).r - texture(cacheVolume0, samplePoint+vec3(0,-step,0) ).r) ;
+			N.z = (texture(cacheVolume0, samplePoint+vec3(0,0,step)).r - texture(cacheVolume0, samplePoint+vec3(0,0,-step) ).r) ;
+			#endif
 		}else if(texId == 1){
 			samplePoint = samplePoint/textureSize(cacheVolume1,0);
 			scalar = texture(cacheVolume1,samplePoint);
+			#ifdef ILLUMINATION
+			N.x = (texture(cacheVolume1, samplePoint+vec3(step,0,0)).r - texture(cacheVolume1, samplePoint+vec3(-step,0,0) ).r) ;
+			N.y = (texture(cacheVolume1, samplePoint+vec3(0,step,0)).r - texture(cacheVolume1, samplePoint+vec3(0,-step,0) ).r) ;
+			N.z = (texture(cacheVolume1, samplePoint+vec3(0,0,step)).r - texture(cacheVolume1, samplePoint+vec3(0,0,-step) ).r) ;
+			#endif
 		}else if(texId == 2){
 			samplePoint = samplePoint/textureSize(cacheVolume2,0);
 			scalar = texture(cacheVolume2,samplePoint);
+			#ifdef ILLUMINATION
+			N.x = (texture(cacheVolume1, samplePoint+vec3(step,0,0)).r - texture(cacheVolume2, samplePoint+vec3(-step,0,0) ).r) ;
+			N.y = (texture(cacheVolume1, samplePoint+vec3(0,step,0)).r - texture(cacheVolume2, samplePoint+vec3(0,-step,0) ).r) ;
+			N.z = (texture(cacheVolume1, samplePoint+vec3(0,0,step)).r - texture(cacheVolume2, samplePoint+vec3(0,0,-step) ).r) ;
+			#endif
 		}else if(texId == 3){
 			samplePoint = samplePoint/textureSize(cacheVolume3,0);
 			scalar = texture(cacheVolume3,samplePoint);
+			#ifdef ILLUMINATION
+			N.x = (texture(cacheVolume2, samplePoint+vec3(step,0,0)).r - texture(cacheVolume3, samplePoint+vec3(-step,0,0) ).r) ;
+			N.y = (texture(cacheVolume2, samplePoint+vec3(0,step,0)).r - texture(cacheVolume3, samplePoint+vec3(0,-step,0) ).r) ;
+			N.z = (texture(cacheVolume2, samplePoint+vec3(0,0,step)).r - texture(cacheVolume3, samplePoint+vec3(0,0,-step) ).r) ;
+			#endif
 		}
 		mapped = true;
 	}
 	return scalar;
 }
 
-vec3 PhongShadingEx(vec3 samplePos, vec3 diffuseColor)
+#ifdef ILLUMINATION
+vec3 PhongShadingEx(vec3 diffuseColor)
 {
 	vec3 shadedValue = vec3(0, 0, 0);
-	//virtualVolumeSample(vec3 samplePos,out bool mapped)
-	vec3 N;
-//	N.x = (texture(texVolume, samplePos+vec3(step,0,0) ).w - texture(texVolume, samplePos+vec3(-step,0,0) ).w) - 1.0;
-//	N.y = (texture(texVolume, samplePos+vec3(0,step,0) ).w - texture(texVolume, samplePos+vec3(0,-step,0) ).w) - 1.0;
-//	N.z = (texture(texVolume, samplePos+vec3(0,0,step) ).w - texture(texVolume, samplePos+vec3(0,0,-step) ).w) - 1.0;
-	bool placeHolder;
-	N.x = (virtualVolumeSample(samplePos+vec3(step,0,0) ,placeHolder).w - virtualVolumeSample(samplePos+vec3(-step,0,0),placeHolder ).w) - 1.0;
-	N.y = (virtualVolumeSample(samplePos+vec3(0,step,0) ,placeHolder).w - virtualVolumeSample(samplePos+vec3(0,-step,0) ,placeHolder).w) - 1.0;
-	N.z = (virtualVolumeSample(samplePos+vec3(0,0,step) ,placeHolder).w - virtualVolumeSample(samplePos+vec3(0,0,-step) ,placeHolder).w) - 1.0;
-	N = N * 2.0 - 1.0;
+	//N = N * 2.0 - 1.0;
 	N = -normalize(N);
-	vec3 L = lightdir;
-	vec3 H = halfway;
+	vec3 L = normalize(lightdir);
+	vec3 H = normalize(halfway);
 	//specularcolor
 	//vec3 H = normalize(V+L);
 	float NdotH = pow(max(dot(N, H), 0.0), shininess);
 	float NdotL = max(dot(N, L), 0.0);
-	vec3 ambient = ka * diffuseColor.rgb;
-	vec3 specular = ks * NdotH * vec3(1.0, 1.0, 1.0);
-	vec3 diffuse = kd * NdotL * diffuseColor.rgb;
+	vec3 ambient = 0.1 * diffuseColor.rgb;
+	vec3 specular = 0.1 * NdotH * vec3(1.0, 1.0, 1.0);
+	vec3 diffuse = vec3(0);1.0 * NdotL * diffuseColor.rgb;
 	shadedValue = specular + diffuse + ambient;
 	return shadedValue;
 }
+#endif
 
 void main()
 {
@@ -153,8 +174,13 @@ void main()
 			memoryBarrier();
 			discard;
 		}
+		//return;
 		vec4 sampledColor = texture(texTransfunc, scalar.r);
+		#ifdef ILLUMINATION
+		sampledColor.rgb = PhongShadingEx(sampledColor.rgb);
+		#endif
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
+		//color = color + vec4(normalize(N),1.0) * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)
 		{
 			break;
@@ -166,4 +192,6 @@ void main()
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;
 	fragColor = color;
+	//fragColor = vec4(normalize(N),1.0);
+
 }
