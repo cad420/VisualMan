@@ -21,7 +21,7 @@ uniform sampler3D cacheVolume1;
 uniform sampler3D cacheVolume2;
 uniform sampler3D cacheVolume3;
 
-//layout(binding = 1, rgba32ui) uniform volatile uimage3D pageTableTexture;
+
 uniform ivec3 pageTableSize;				// page table texture size1
 layout(binding = 2, rgba32f) uniform volatile image2D entryPos;
 layout(binding = 3, rgba32f) uniform volatile image2D endPos;
@@ -44,15 +44,19 @@ uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (no repeat)
 uniform ivec3 blockDataSizeNoRepeat;				// block data size (no repeat)
 uniform ivec3 repeatOffset;							// repeat boarder size
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
-layout(std430, binding = 0) buffer HashTable {int blockId[];}hashTable;
-layout(std430, binding = 1) buffer MissedBlock{int blockId[];}missedBlock;
+layout(std430, binding = 0) buffer HashTable {uint blockId[];}hashTable;
+layout(std430, binding = 1) buffer MissedBlock{uint blockId[];}missedBlock;
 layout(std430, binding = 2) buffer PageTable{uvec4 pageEntry[];}pageTable;
+//layout(binding = 1, rgba32ui) uniform volatile uimage3D pageTableTexture;
 
 //uniform int lod;
 
 #ifdef ILLUMINATION
 vec3 N;
 #endif
+
+uint prevVisitedBlockID;
+bool hashPrevious = false;
 
 vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
@@ -61,25 +65,30 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 	// address translation
 	ivec3 entry3DIndex = ivec3(samplePos*pageTableSize);
 	uint entryFlatIndex = entry3DIndex.z * pageTableSize.x*pageTableSize.y + entry3DIndex.y * pageTableSize.x + entry3DIndex.x;
+
 	uvec4 pageTableEntry = pageTable.pageEntry[entryFlatIndex];
 
-	//uvec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*totalPageTableSize));
+	//uvec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*pageTableSize));
+
 	vec3 voxelCoord=vec3(samplePos * (volumeDataSizeNoRepeat));
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
 
+	//ivec3 blockCoord = ivec3(voxelCoord / blockDataSizeNoRepeat);
+	//int blockId = blockCoord.z * pageTableSize.y*pageTableSize.x 	+blockCoord.y * pageTableSize.x 	+blockCoord.x;
 
-	ivec3 blockCoord = ivec3(voxelCoord / blockDataSizeNoRepeat);
-	int blockId = blockCoord.z * pageTableSize.y*pageTableSize.x 
-				+blockCoord.y * pageTableSize.x 
-				+blockCoord.x;
 	if(((pageTableEntry.w) & (0x000f)) == 2)		// Unmapped flag
 	{
-		if(atomicCompSwap(hashTable.blockId[blockId],0,1) == 0)
-		{
-			uint index = atomicCounterIncrement(atomic_count);
-			missedBlock.blockId[index] = blockId;
-			hashTable.blockId[blockId] = 1;		// exits
-		}
+		//if(hashPrevious == false || prevVisitedBlockID != entryFlatIndex)
+	//	{
+	//		prevVisitedBlockID = entryFlatIndex;
+	//		hashPrevious = true;
+			if(atomicCompSwap(hashTable.blockId[entryFlatIndex],0,1) == 0)
+			{
+				uint index = atomicCounterIncrement(atomic_count);
+				missedBlock.blockId[index] = entryFlatIndex;
+				hashTable.blockId[entryFlatIndex] = 1;		// exits
+			}
+	//	}
 		mapped = false;
 	}
 	else
@@ -119,8 +128,11 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 			N.z = (texture(cacheVolume2, samplePoint+vec3(0,0,step)).r - texture(cacheVolume3, samplePoint+vec3(0,0,-step) ).r) ;
 			#endif
 		}
+
 		mapped = true;
 	}
+
+
 	return scalar;
 }
 
@@ -180,6 +192,7 @@ void main()
 			memoryBarrier();
 			discard;
 		}
+
 		//return;
 		vec4 sampledColor = texture(texTransfunc, scalar.r);
 		#ifdef ILLUMINATION

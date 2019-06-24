@@ -127,16 +127,17 @@ namespace ysl
 		void OutOfCoreVolumeTexture::InitMappingTable()
 		{
 			//Create a page table texture
-			//auto texSetupParams = MakeRef<TexCreateParams>();
+			auto texSetupParams = MakeRef<TexCreateParams>();
 			const auto mappingTableSize = cpuVolumeData->BlockDim();
 
-		//	texSetupParams->SetSize(mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
-		//	texSetupParams->SetTextureFormat(TF_RGBA32UI);
-		//	texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
+			texSetupParams->SetSize(mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
+			texSetupParams->SetTextureFormat(TF_RGBA32UI);
+			texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
 
 			//mappingTable = MakeRef<Texture>();		// gpu volume data cache size
 			//mappingTable->SetSetupParams(texSetupParams);
 			//mappingTable->CreateTexture();
+
 			pageTableBuffer = MakeRef<BufferObject>();
 			pageTableBuffer->CreateImmutableBufferObject(mappingTableSize.Prod() * sizeof(MappingTableManager::PageTableEntry),nullptr,storage_flags);
 			const auto pageTablePtr = pageTableBuffer->MapBufferRange(0, mappingTableSize.Prod() * sizeof(MappingTableManager::PageTableEntry),mapping_flags);
@@ -276,6 +277,7 @@ namespace ysl
 				pageTable = Linear3DArray<PageTableEntry>(blockDim, nullptr);
 			else
 				pageTable = Linear3DArray<PageTableEntry>(blockDim.x, blockDim.y, blockDim.z, (PageTableEntry*)external, false);
+			size_t blockId = 0;
 			for (auto z = 0; z < pageTable.Size().z; z++)
 				for (auto y = 0; y < pageTable.Size().y; y++)
 					for (auto x = 0; x < pageTable.Size().x; x++)
@@ -287,6 +289,7 @@ namespace ysl
 						entry.SetMapFlag(EM_UNMAPPED);
 						//entry.w = EM_UNMAPPED;
 						(pageTable)(x, y, z) = entry;
+						lruMap[blockId++] = g_lruList.end();
 					}
 		}
 
@@ -330,7 +333,6 @@ namespace ysl
 			const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices)
 		{
 			const auto missedBlocks = missedBlockIndices.size();
-
 			std::vector<PhysicalMemoryBlockIndex> physicalIndices;
 			physicalIndices.reserve(missedBlocks);
 			// Update LRU List 
@@ -338,24 +340,34 @@ namespace ysl
 			{
 				const auto& index = missedBlockIndices[i];
 				auto& pageTableEntry = pageTable(index.x, index.y, index.z);
-				auto& last = g_lruList.back();
-				//pageTableEntry.w = EntryMapFlag::EM_MAPPED; // Map the flag of page table entry
-				pageTableEntry.SetMapFlag(EM_MAPPED);
-				// last.second is the cache block index
-				physicalIndices.push_back(last.second);
-				pageTableEntry.x = last.second.x; // fill the page table entry
-				pageTableEntry.y = last.second.y;
-				pageTableEntry.z = last.second.z;
-				pageTableEntry.SetTextureUnit(last.second.GetPhysicalStorageUnit());
-				if (last.first.x != -1)
+				const size_t flatBlockID = index.z * pageTable.Size().x * pageTable.Size().y + index.y * pageTable.Size().x + index.x;
+				if(pageTableEntry.GetMapFlag() == EM_MAPPED)
 				{
-					pageTable(last.first.x, last.first.y, last.first.z).SetMapFlag(EM_UNMAPPED);
+					// move the already mapped node to the head
+					g_lruList.splice(g_lruList.begin(), g_lruList,lruMap[flatBlockID]);
+				}else
+				{
+					auto& last = g_lruList.back();
+					//pageTableEntry.w = EntryMapFlag::EM_MAPPED; // Map the flag of page table entry
+					pageTableEntry.SetMapFlag(EM_MAPPED);
+					// last.second is the cache block index
+					physicalIndices.push_back(last.second);
+					pageTableEntry.x = last.second.x;  // fill the page table entry
+					pageTableEntry.y = last.second.y;
+					pageTableEntry.z = last.second.z;
+					pageTableEntry.SetTextureUnit(last.second.GetPhysicalStorageUnit());
+					if (last.first.x != -1)		// detach previous mapped storage
+					{
+						pageTable(last.first.x, last.first.y, last.first.z).SetMapFlag(EM_UNMAPPED);
+						lruMap[flatBlockID] = g_lruList.end();
+					}
+					// critical section : last
+					last.first.x = index.x;
+					last.first.y = index.y;
+					last.first.z = index.z;
+					g_lruList.splice(g_lruList.begin(), g_lruList, --g_lruList.end()); // move from tail to head, LRU policy
+					lruMap[flatBlockID] = g_lruList.begin();
 				}
-				// critical section : last
-				last.first.x = index.x;
-				last.first.y = index.y;
-				last.first.z = index.z;
-				g_lruList.splice(g_lruList.begin(), g_lruList, --g_lruList.end()); // move from tail to head, LRU policy
 			}
 			return physicalIndices;
 		}

@@ -83,7 +83,7 @@ namespace ysl
 			auto artist = MakeRef<Artist>();
 			artist->GetLOD(0)->push_back(positionShading);
 			auto t = Translate(-0.5, -0.5, -0.5);
-			auto s = Scale(8, 8, 12);
+			auto s = Scale(1,1,1);
 
 			auto scale = MakeRef<Transform>(s*t);
 
@@ -164,9 +164,7 @@ namespace ysl
 			SetAggregation(outOfCoreAgts);
 			outOfCoreAgts->GetAggregates().push_back(mrtAgt);
 			outOfCoreAgts->GetAggregates().push_back(raycastAgt);
-
 			Context()->Update();
-
 		}
 
 		void VM_LargeVolumeRayCast::UpdateScene()
@@ -264,7 +262,8 @@ namespace ysl
 			rayCastShading->CreateGetTextureSampler(2)->SetTexture(oocResources->GetVolumeTexture(1));
 			rayCastShading->CreateGetTextureSampler(3)->SetTexture(oocResources->GetVolumeTexture(2));
 
-			//rayCastShading->CreateGetTextureImageUnit(1)->SetTexture(oocResources->GetMappingTableTexture());
+			//rayCastShading->CreateGetTextureImageUnit(1)->SetTexture(oocResources->GetPageTableTexture());
+
 			rayCastShading->CreateGetAtomicCounter(3)->SetBufferObject(oocResources->GetAtomicCounterBuffer());
 			rayCastShading->CreateGetSSBO(2)->SetBufferObject(oocResources->GetPageTableBuffer());
 			rayCastShading->CreateGetSSBO(0)->SetBufferObject(oocResources->GetHashBuffer());

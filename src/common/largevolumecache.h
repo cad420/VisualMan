@@ -93,7 +93,7 @@ namespace ysl
 
 	class COMMON_EXPORT_IMPORT CPUVolumeDataCache :public AbstrBlockedVolumeDataCPUCache
 	{
-		static constexpr int nLogBlockSize = 7;		// 64
+		static constexpr int nLogBlockSize = 6;		// 64
 		static constexpr ysl::Size3 cacheBlockSize { 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
 		static constexpr ysl::Size3 cacheDim{ 16,16,16 };
 		static constexpr ysl::Size3 cacheSize = cacheDim * (1 << nLogBlockSize);

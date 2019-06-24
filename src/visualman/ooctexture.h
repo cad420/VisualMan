@@ -70,8 +70,12 @@ namespace ysl
 				int GetTextureUnit()const { return (w >> 4)&0xF; }
 			};
 		private:
+			using LRUList = std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>>;
+			using LRUMap = std::unordered_map<size_t, LRUList::iterator>;
 			Linear3DArray<PageTableEntry> pageTable;
-			std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>> g_lruList;
+
+			LRUMap lruMap;
+			LRUList g_lruList;
 
 			void InitCPUPageTable(const Size3& blockDim,void * external);
 			void InitLRUList(const Size3& physicalMemoryBlock,int unitCount);
@@ -122,6 +126,9 @@ namespace ysl
 			Ref<BufferObject> GetPageTableBuffer(){ return pageTableBuffer; }
 			Ref<const BufferObject> GetPageTableBuffer()const { return pageTableBuffer; }
 
+			//Ref<Texture> GetPageTableTexture() { return mappingTable; }
+			//Ref<const Texture> GetPageTableTexture()const { return mappingTable; }
+
 			Ref<BufferObject> GetSamplerUBO() { return volumeTexSamplerUBO; }
 			Ref<const BufferObject> GetSamplerUBO()const { return volumeTexSamplerUBO; }
 
@@ -158,7 +165,7 @@ namespace ysl
 			Ref<BufferObject> pageTableBuffer;
 
 			std::vector<int> blockIdLocalBuffer;
-			//Ref<Texture> mappingTable;
+			Ref<Texture> mappingTable;
 			Ref<MappingTableManager> mappingTableManager;
 			Ref<IVideoMemoryParamsEvaluator> memoryEvalator;
 			// CPU Volume Cache
