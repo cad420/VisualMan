@@ -28,13 +28,13 @@ namespace ysl
 
 		void VisualMan::UpdateEvent()
 		{
-			timer.end();
+			timer.stop();
 			const auto dur = timer.duration()*1.0/1000000;
 			if(dur > 0.5)
 			{
 				FPS = frameCount / dur;
 				frameCount = 0;
-				timer.begin();
+				timer.start();
 			}
 			frameCount++;
 			//Update Scene
@@ -86,6 +86,7 @@ namespace ysl
 		void VisualMan::KeyPressEvent(KeyButton key)
 		{
 			//std::cout << "Assembly::MouseReleaseEvent:"<<key << std::endl;
+
 		}
 
 		void VisualMan::KeyReleaseEvent(KeyButton key)

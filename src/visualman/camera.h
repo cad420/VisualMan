@@ -15,7 +15,7 @@ namespace ysl
 
 		class Viewport;
 
-		class VISUALMAN_EXPORT_IMPORT  Camera_Impl
+		class ViewMatrixWrapper
 		{
 			static constexpr float YAW = -90.0f;
 			static constexpr float PITCH = 0.0f;
@@ -27,7 +27,7 @@ namespace ysl
 			Point3f m_position;
 			Vector3f m_front;
 			Vector3f m_up;
-			Vector3f m_right;
+			Vector3f m_right;		// Redundant
 			Vector3f m_worldUp;
 			Point3f m_center;
 
@@ -39,37 +39,27 @@ namespace ysl
 		public:
 
 			// Constructor with vectors
-			Camera_Impl(const ysl::Point3f& position = { 0.0f, 0.0f, 0.0f }, ysl::Vector3f up = { 0.0f, 1.0f, 0.0f },
+			ViewMatrixWrapper(const ysl::Point3f& position = { 0.0f, 0.0f, 0.0f }, ysl::Vector3f up = { 0.0f, 1.0f, 0.0f },
 				const ysl::Point3f& center = { 0, 0, 0 });
 
-			Vector3f front()const { return m_front; }
-			Vector3f right()const { return m_right; }
-			Vector3f up()const { return m_up; }
-
+			Vector3f GetFront()const { return m_front; }
+			void SetFront(const Vector3f & front) { m_front = front.Normalized();}
+			Vector3f GetRight()const { return m_right; }
+			Vector3f GetUp()const { return m_up; }
+			void UpdateCamera(const ysl::Point3f& position , ysl::Vector3f worlUp ,
+				const ysl::Point3f& center );
 			// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
-			Transform view()const
-			{
-				ysl::Transform vi;
-				vi.SetLookAt(m_position, m_position + m_front, m_up);
-				return vi;
-			}
-
-			Point3f position()const { return m_position; }
-
-			Point3f center()const { return m_center; }
-
-			void setCenter(const ysl::Point3f& center);
-
-			void movement(const ysl::Vector3f& direction, float deltaTime);
-
-			void rotation(float xoffset, float yoffset);
-
-			void processMouseScroll(float yoffset);
-
+			Transform GetViewMatrix() const;
+			Point3f GetPosition()const { return m_position; }
+			Point3f GetCenter()const { return m_center; }
+			void SetCenter(const ysl::Point3f& center);
+			void Move(const ysl::Vector3f& direction, float deltaTime);
+			void Rotate(float xOffset, float yOffset);
+			void ProcessMouseScroll(float yOffset);
 		private:
-
-			void updateCameraVectors(const ysl::Vector3f& axis, double theta);
+			void UpdateCameraVectors(const ysl::Vector3f& axis, double theta);
 		};
+
 
 
 		class VISUALMAN_EXPORT_IMPORT Camera
@@ -77,41 +67,48 @@ namespace ysl
 		public:
 			Camera(const Point3f& position = { 0.0f, 0.0f, 5.0f }, 
 				Vector3f up = { 0.0f, 1.0f, 0.0f },
-				const Point3f& center = { 0, 0, 0 }):focusCamera(position,up,center)
+				const Point3f& center = { 0, 0, 0 }):viewMatrixWrapper(position,up,center)
 			{
 				viewport = MakeRef<Viewport>();
 				projMatrix.SetGLPerspective(fov, aspectRatio, nearPlan, farPlan);
 			}
 
-			Transform ViewMatrix()const { return focusCamera.view(); }
+			Transform ViewMatrix()const { return viewMatrixWrapper.GetViewMatrix(); }
 			void SetProjectionMatrix(const Transform & projection) { this->projMatrix = projection; }
 			const Transform &ProjectionMatrix()const { return projMatrix; }
 			Transform ProjectViewMatrix()const { return projMatrix * ViewMatrix(); }
-			Point3f Position()const { return focusCamera.position(); }
-			void Ratation(float xoffset, float yoffset) { focusCamera.rotation(xoffset, yoffset); }
-			Vector3f Front()const { return focusCamera.front(); }
+			Point3f GetPosition()const { return viewMatrixWrapper.GetPosition(); }
+			void Rotation(float xoffset, float yoffset) { viewMatrixWrapper.Rotate(xoffset, yoffset); }
+			Vector3f GetFront()const { return viewMatrixWrapper.GetFront(); }
 			void SetViewport(Ref<Viewport> vp) { viewport = std::move(vp); }
+			Vector3f GetUp()const { return viewMatrixWrapper.GetUp(); }
+			Point3f GetCenter()const { return viewMatrixWrapper.GetCenter(); }
+
+			void SetCamera(const ysl::Point3f& position, ysl::Vector3f worlUp,
+				const ysl::Point3f& center) {
+				viewMatrixWrapper.UpdateCamera(position, worlUp, center);
+			}
+
 			float GetFov()const { return fov; }
 			void SetFov(float fov) { this->fov = Clamp(fov,1.f,89.f); UpdateProjMatrix(); }
 
 			float GetNearPlane()const { return nearPlan; }
 			void SetNearPlane(float np) { nearPlan = np; UpdateProjMatrix(); }
-			float GetFarPlane()const { return nearPlan; }
-			void SetFarPlane(float fp) { nearPlan = fp; UpdateProjMatrix(); }
+			float GetFarPlane()const { return farPlan; }
+			void SetFarPlane(float fp) { farPlan = fp; UpdateProjMatrix(); }
+			float GetAspectRatio()const { return aspectRatio; }
 
 			Ref<Viewport> GetViewport() { return viewport; }
-
 			Ref<const Viewport> GetViewport()const { return viewport; }
 
 			//Ref<Viewport> CreateGetViewport() { return viewport ? viewport : viewport = MakeRef<Viewport>(800,600); }
 
-			Vec3f Up()const { return focusCamera.up(); }
-			Vec3f Right()const { return focusCamera.right(); }
-			void Movement(const Vec3f& dir, float deltaTime) { focusCamera.movement(dir, deltaTime); }
-
+			Vec3f Up()const { return viewMatrixWrapper.GetUp(); }
+			Vec3f Right()const { return viewMatrixWrapper.GetRight(); }
+			void Movement(const Vec3f& dir, float deltaTime) { viewMatrixWrapper.Move(dir, deltaTime); }
 		private:
 			void UpdateProjMatrix(){projMatrix.SetGLPerspective(fov, aspectRatio, nearPlan, farPlan);}
-			Camera_Impl focusCamera;
+			ViewMatrixWrapper viewMatrixWrapper;
 			Transform projMatrix;
 			Ref<Viewport> viewport;
 			float fov = 60;
@@ -119,6 +116,10 @@ namespace ysl
 			float nearPlan = 0.01;
 			float farPlan = 1000;
 		};
+
+		VISUALMAN_EXPORT_IMPORT Ref<Camera> CreateCamera(const std::string & jsonFileName);
+		VISUALMAN_EXPORT_IMPORT void ConfigCamera(Camera * camera,const std::string & jsonFileName);
+		VISUALMAN_EXPORT_IMPORT bool SaveCameraAsJson(Ref<Camera> camera,const std::string & jsonFileName);
 
 		class VISUALMAN_EXPORT_IMPORT CameraManipulator:public IEventListener
 		{

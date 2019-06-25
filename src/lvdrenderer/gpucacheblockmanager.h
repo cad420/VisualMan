@@ -18,7 +18,7 @@ namespace ysl
 		void InitPingPongSwapPBO();
 	public:
 		PingPongTransferManager(std::shared_ptr<PageTableManager> vmm, std::shared_ptr<AbstrGPUCacheFaultHandler> gcm);
-		bool TransferData(GPUVolumeDataCache * dest, CPUVolumeDataCache* src) override;
+		bool TransferData(GPUVolumeDataCache * dest, VirtualBlockedMemory* src) override;
 		~PingPongTransferManager();
 	};
 

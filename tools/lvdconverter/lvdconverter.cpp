@@ -205,13 +205,11 @@
 
 int main(int argc, char *argv[])
 {
-	std::cout << "[filename(str), offset(std::size_t), x(int) ,y(int) ,z(int), padding(int),log(int), outfilename(str)]\n";
+	std::cout << "[filename(str), offset(std::size_t), x(int) ,y(int) ,z(int), padding(int) ,log(int), outfilename(str)]\n";
 	int x, y, z, log;
-
 	//std::cin >> x >> y >> z;
 	//ABCFlowGen(x,y,z);
 	//SimpleBlockGen(x,y,z,2,2,2);
-
 	std::string fileName;
 	std::cin >> fileName;
 

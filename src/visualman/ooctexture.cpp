@@ -54,7 +54,7 @@ namespace ysl
 			const auto blockBytes = this->bytes;
 
 			Timer t;
-			t.begin();
+			t.start();
 
 			//auto curPBO = 0;
 			//auto i = 0;
@@ -91,11 +91,11 @@ namespace ysl
 			for (int i = 0; i < data.size(); i++)
 			{
 				const auto posInCache = Vec3i(blockSize) * data[i].Value().ToVec3i();
-				GL(glTextureSubImage3D(volumeDataTexture[data[i].Value().GetPhysicalStorageUnit()]->Handle(), 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, IT_UNSIGNED_BYTE, cpuVolumeData->ReadBlockDataFromCPUCache(data[i].Key())));
+				GL(glTextureSubImage3D(volumeDataTexture[data[i].Value().GetPhysicalStorageUnit()]->Handle(), 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, IT_UNSIGNED_BYTE, cpuVolumeData->GetPage(data[i].Key())));
 			}
-			t.end();
+			t.stop();
 			totalBlocks += data.size();
-			time += t.to_seconds();
+			time += t.duration_to_seconds();
 		}
 
 		void OutOfCoreVolumeTexture::InitVolumeTextures()
@@ -152,13 +152,7 @@ namespace ysl
 		OutOfCoreVolumeTexture::OutOfCoreVolumeTexture(const std::string& fileName)
 		{
 			// Open the volume data file
-			cpuVolumeData = MakeRef<CPUVolumeDataCache>(fileName, Size3{ 32,32,32 });
-
-			if(cpuVolumeData->IsValid() == false)
-			{
-				throw std::runtime_error("can not load lvd data");
-			}
-
+			cpuVolumeData = MakeRef<VirtualBlockedMemory>(fileName);
 			memoryEvalator = MakeRef<DefaultMemoryParamsEvaluator>(cpuVolumeData->BlockDim(), cpuVolumeData->BlockSize());
 
 			InitVolumeTextures();

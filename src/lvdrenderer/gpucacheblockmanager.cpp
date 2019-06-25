@@ -27,7 +27,7 @@ namespace ysl
 	}
 
 	bool PingPongTransferManager::TransferData(GPUVolumeDataCache* dest,
-	                                           CPUVolumeDataCache* src)
+	                                           VirtualBlockedMemory* src)
 	{
 		assert(gcmHandler);
 		assert(vmManager);
@@ -46,7 +46,7 @@ namespace ysl
 		auto curPBO = 0;
 		auto i = 0;
 		const auto& idx = hits[i];
-		const auto dd = src->ReadBlockDataFromCPUCache(idx);
+		const auto dd = src->GetPage(idx);
 
 		pbo[1 - curPBO]->Bind();
 		auto pp = pbo[1 - curPBO]->Map(OpenGLBuffer::WriteOnly);
@@ -67,7 +67,7 @@ namespace ysl
 			pbo[1 - curPBO]->Unbind();
 			i++;
 			const auto& index = hits[i];
-			const auto d = src->ReadBlockDataFromCPUCache(index);
+			const auto d = src->GetPage(index);
 			pbo[curPBO]->Bind();
 			auto p = pbo[curPBO]->Map(OpenGLBuffer::WriteOnly);
 			memcpy(p, d, blockBytes);

@@ -15,7 +15,7 @@ namespace ysl
 	enum EntryFlag { Empty = 0, Unmapped = 2, Mapped = 1 };
 
 
-	class CPUVolumeDataCache;
+	class VirtualBlockedMemory;
 	class GPUVolumeDataCache;
 	class GPUPageTableDataCache;
 
@@ -41,7 +41,7 @@ namespace ysl
 		//const Size3 blockSize;
 		//CPUVolumeDataCache * const cacheData;
 
-		const std::shared_ptr<CPUVolumeDataCache> cacheData;
+		const std::shared_ptr<VirtualBlockedMemory> cacheData;
 		const std::shared_ptr<GPUVolumeDataCache> gpuCacheData;
 
 		std::shared_ptr<GPUPageTableDataCache> texPageTable;
@@ -62,7 +62,7 @@ namespace ysl
 		//	InitGPUPageTable();
 		//}
 
-		PageTableManager(std::shared_ptr<GPUVolumeDataCache>  physicalData, std::shared_ptr<CPUVolumeDataCache> virtualData):
+		PageTableManager(std::shared_ptr<GPUVolumeDataCache>  physicalData, std::shared_ptr<VirtualBlockedMemory> virtualData):
 			cacheData(std::move(virtualData)),
 			gpuCacheData(std::move(physicalData))
 		{
@@ -78,7 +78,7 @@ namespace ysl
 		Size3 BlockSize()const;
 		void BindTextureToImage(int index);
 		void UpdatePageTable();
-		std::shared_ptr<CPUVolumeDataCache> VirtualData();
+		std::shared_ptr<VirtualBlockedMemory> VirtualData();
 
 	};
 }

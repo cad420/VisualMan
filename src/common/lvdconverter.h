@@ -10,6 +10,8 @@
 #include "lvdheader.h"
 #include "rawio.h"
 #include "libraryloader.h"
+#include "timer.h"
+#include <atomic>
 
 namespace ysl
 {
@@ -29,15 +31,11 @@ namespace ysl
 	class RawToLVDConverter
 	{
 		using RawType = unsigned char;
-
-		//ysl::Size3 size;
-		//ysl::Size3 offset;
-		//ysl::Size3 blockSize;
-
-		int g_xOffset, g_yOffset, g_zOffset;
+		//int g_xOffset, g_yOffset, g_zOffset;
 		int g_xSize, g_ySize, g_zSize;
+		int m_step;
 		int g_xBlockSize, g_yBlockSize, g_zBlockSize;
-		RawType g_emptyValue;
+		RawType g_emptyValue = 0;
 		std::size_t rawPointerOffset;
 
 		void getData(RawType* dest, const RawType* src, size_t width, size_t height, size_t depth, size_t xb, size_t yb,
@@ -58,7 +56,7 @@ namespace ysl
 		std::shared_ptr<ysl::IPluginFileMap> lvdIO;
 		unsigned char * lvdPtr;
 
-		const int m_repeat;
+		const int m_padding;
 		static constexpr auto blockSize = 1 << nLogBlockSize;
 
 	public:
@@ -66,15 +64,19 @@ namespace ysl
 		auto DimensionInData()const { return m_dataSize; }
 		auto DimensionInBlock()const { return m_blockDimension; }
 		void setBoundaryValue(RawType value) { g_emptyValue = value; }
-
 		bool convert();
 		bool save(const std::string& fileName);
 	};
 
 	template <int nLogBlockSize, typename LVDTraits>
-	void RawToLVDConverter<nLogBlockSize, LVDTraits>::getData(RawType* dest, const RawType* src, size_t width,
-	                                                          size_t height, size_t depth, size_t xb, size_t yb,
-	                                                          size_t zb) const
+	void RawToLVDConverter<nLogBlockSize, LVDTraits>::getData(RawType* dest, 
+		const RawType* src,
+		size_t width,                                         
+		size_t height, 
+		size_t depth, 
+		size_t xb,
+		size_t yb,
+	    size_t zb) const
 	{
 		//#pragma omp parallel for
 
@@ -85,37 +87,32 @@ namespace ysl
 			const std::size_t bytes = std::size_t(depth) * height*width;
 			std::unique_ptr<RawType[]> buf(new RawType[bytes]);
 #endif
-
 		for (int z = 0; z < depth; z++)
 			for (int y = 0; y < height; y++)
 				for (int x = 0; x < width; x++)
 				{
-					const int gx = x + g_xOffset, gy = y + g_yOffset, gz = z + g_zOffset;
+					const int xOffset = -m_padding + xb * m_step;
+					const int yOffset = -m_padding + yb * m_step;
+					const int zOffset = -m_padding + zb * m_step;
+					const int gx = x + xOffset, gy = y + yOffset, gz = z + zOffset;
 					const size_t blockIndex = x + y * g_xBlockSize + z * g_xBlockSize * g_yBlockSize;
-
-					int blockedGlobalX = x + xb * g_xBlockSize;
-					int blockedGlobalY = y + yb * g_yBlockSize;
-					int blockedGlobalZ = z + zb * g_zBlockSize;
-
+					//int blockedGlobalX = x + xb * g_xBlockSize;
+					//int blockedGlobalY = y + yb * g_yBlockSize;
+					//int blockedGlobalZ = z + zb * g_zBlockSize;
 					if (gx >= 0 && gx < g_xSize && gy >= 0 && gy < g_ySize && gz >= 0 && gz < g_zSize)
 					{
 						const size_t linearIndex = (gx) + (gy) * std::size_t(g_xSize) + (gz) * g_xSize * std::size_t(
 							g_ySize);
 						*(dest + blockIndex) = *(src + linearIndex);
-						///TODO::
 #ifdef WRITE_SINGLE_BLOCK
 							buf[blockIndex] = *(src + linearIndex);
 #endif
-						//(*m_blockedData)(blockedGlobalX, blockedGlobalY, blockedGlobalZ) = *(src + linearIndex);
 					}
 					else
 					{
 #ifdef WRITE_SINGLE_BLOCK
 							buf[blockIndex] = g_emptyValue;
 #endif
-						//(*m_blockedData)(blockedGlobalX, blockedGlobalY, blockedGlobalZ) = g_emptyValue;
-						//assert((gx>=-2 && gx<0) || (gx >= 60 && gx<62) || (gy >= -2 && gy < 0) || (gy >= 60 && gy < 62) || (gz >= -2 && gz < 0) || (gz >= 60 && gz < 62));
-						///TODO::
 						*(dest + blockIndex) = g_emptyValue;
 					}
 				}
@@ -132,29 +129,31 @@ namespace ysl
 
 	template <int nLogBlockSize, typename LVDTraits>
 	RawToLVDConverter<nLogBlockSize, LVDTraits>::RawToLVDConverter(const std::string& fileName, int xSize, int ySize,
-	                                                               int zSize, int repeat,const std::string & outFileName,std::size_t offset):
+	                                                               int zSize, int padding,const std::string & outFileName,std::size_t offset):
 		g_xSize(xSize),
 		g_ySize(ySize),
 		g_zSize(zSize),
 		g_emptyValue(0),
-		m_repeat(repeat),
+		m_padding(padding),
 		g_xBlockSize(blockSize),
 		g_yBlockSize(blockSize),
 		g_zBlockSize(blockSize),
 		rawPointerOffset(offset)
 	{
-		if (repeat < 0 || repeat > 2)
+		if (padding < 0 || padding > 2)
 		{
 			std::cout << "Unsupported repeat\n";
 			return;
 		}
 
-		const auto blockedSize = blockSize - 2 * m_repeat;
+		const auto blockedSize = blockSize - 2 * m_padding;
 		m_blockDimension = { int(ysl::RoundUpDivide(xSize, blockedSize)), int(ysl::RoundUpDivide(ySize, blockedSize)) , int(ysl::RoundUpDivide(zSize, blockedSize)) };
 		//m_blockDimension = {int(xSize / blockedSize), int(ySize / blockedSize), int(zSize / blockedSize)};
 
 		std::cout << g_xSize << " " << g_ySize << " " << g_zSize << std::endl;
 		m_dataSize = m_blockDimension * ysl::Vector3i{blockSize, blockSize, blockSize};
+
+		m_step = blockSize - 2 * m_padding;
 
 		std::cout << "Information:" << std::endl;
 		std::cout << "block size:" << blockedSize << std::endl;
@@ -174,8 +173,7 @@ namespace ysl
 		assert(repo);
 		repo->AddLibrary("ioplugin");
 
-		std::shared_ptr<Object> io = Object::CreateObject("common.filemapio");
-		rawIO = io->As<IPluginFileMap>();
+		rawIO = ysl::Object::CreateObject<IPluginFileMap>("common.filemapio");
 		if (rawIO == nullptr)
 			throw std::runtime_error("can not load ioplugin");
 
@@ -193,13 +191,11 @@ namespace ysl
 		}
 		const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
 
-
-		io = Object::CreateObject("common.filemapio");
-		lvdIO = io->As<IPluginFileMap>();
+		lvdIO = ysl::Object::CreateObject<IPluginFileMap>("common.filemapio");
 		if (lvdIO == nullptr)
 			throw std::runtime_error("can not load ioplugin");
 
-		lvdIO->Open(fileName, lvdBytes, FileAccess::Read, MapAccess::ReadOnly);
+		lvdIO->Open(outFileName, lvdBytes+LVD_HEADER_SIZE, FileAccess::ReadWrite, MapAccess::ReadWrite);
 		lvdPtr = lvdIO->FileMemPointer(0, lvdBytes + LVD_HEADER_SIZE);
 		if (!lvdPtr)
 		{
@@ -217,21 +213,23 @@ namespace ysl
 			std::cout << "Bad lvd data pointer\n";
 			return false;
 		}
-
+		Timer timer;
+		std::atomic_size_t curBlocks = 0;
+		
 		auto const buf = lvdPtr + LVD_HEADER_SIZE;
-
 		g_emptyValue = 0;
-		const auto step = blockSize - 2 * m_repeat;
+		const auto step = blockSize - 2 * m_padding;
+		const auto totalBlocks = m_blockDimension.Prod();
+		timer.start();
+#pragma omp parallel for
 		for (int zb = 0; zb < m_blockDimension.z; zb++)
 			for (int yb = 0; yb < m_blockDimension.y; yb++)
 				for (int xb = 0; xb < m_blockDimension.x; xb++)
 				{
-					g_xOffset = -m_repeat + xb * step;
-					g_yOffset = -m_repeat + yb * step;
-					g_zOffset = -m_repeat + zb * step;
-
+				//	g_xOffset = -m_padding + xb * step;
+				//	g_yOffset = -m_padding + yb * step;
+				//	g_zOffset = -m_padding + zb * step;
 					const int blockIndex = xb + yb * m_blockDimension.x + zb * m_blockDimension.x * m_blockDimension.y;
-
 					getData(buf + blockIndex * size_t(blockSize) * blockSize * blockSize,
 						rawPtr + rawPointerOffset,
 					    blockSize,
@@ -240,13 +238,29 @@ namespace ysl
 						xb, 
 						yb, 
 						zb);
-
-
-					if (blockIndex % 100 == 0)
+					++curBlocks;
+					//curBlocks++;
+					if (curBlocks % 100 == 0)
 					{
-						std::cout << blockIndex << " " << "block completion" << std::endl;
+						std::cout << curBlocks << " " << "block completion" << std::endl;
+						const float curPercent = curBlocks * 1.0 / totalBlocks;
+						if(curPercent == 0.f)
+							continue;
+						const size_t seconds = timer.eval_remaining_time(curPercent)/1000000.0;
+						int hh = seconds / 3600;
+						int mm = (seconds - hh * 3600) / 60;
+						int ss = int(seconds) % 60;
+						printf("%.2f%% complete. Estimated Remaining Time: %02d:%02d:%02d\r",curPercent,hh,mm,ss);
 					}
 				}
+
+		printf("\n");
+		timer.stop();
+		const size_t seconds = timer.duration()/1000000.0;
+		int hh = seconds / 3600;
+		int mm = (seconds - hh * 3600) / 60;
+		int ss = int(seconds) % 60;
+		//printf("Convertion Finished. Total Time:%02d:%02d:%02d\n",hh,mm,ss);
 		return true;
 	}
 
@@ -254,7 +268,7 @@ namespace ysl
 	bool RawToLVDConverter<nLogBlockSize, LVDTraits>::save(const std::string& fileName)
 	{
 
-		const auto rep = std::to_string(m_repeat), bSize = std::to_string(1<<nLogBlockSize);
+		const auto rep = std::to_string(m_padding), bSize = std::to_string(1<<nLogBlockSize);
 		const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
 		constexpr auto logBlockSize = nLogBlockSize;
 
@@ -265,18 +279,18 @@ namespace ysl
 		lvdHeader.dataDim[0] = m_dataSize.x;
 		lvdHeader.dataDim[1] = m_dataSize.y;
 		lvdHeader.dataDim[2] = m_dataSize.z;
-		lvdHeader.padding = m_repeat;
+		lvdHeader.padding = m_padding;
 		lvdHeader.blockLengthInLog = logBlockSize;
 
-		lvdHeader.originalDataDim[0] = m_blockDimension.x * ( (1 << nLogBlockSize) - 2 * m_repeat);
-		lvdHeader.originalDataDim[1] = m_blockDimension.y * ( (1 << nLogBlockSize) - 2 * m_repeat);
-		lvdHeader.originalDataDim[2] = m_blockDimension.z * ((1 << nLogBlockSize) - 2 * m_repeat);
+		lvdHeader.originalDataDim[0] = m_blockDimension.x * ( (1 << nLogBlockSize) - 2 * m_padding);
+		lvdHeader.originalDataDim[1] = m_blockDimension.y * ( (1 << nLogBlockSize) - 2 * m_padding);
+		lvdHeader.originalDataDim[2] = m_blockDimension.z * ((1 << nLogBlockSize) - 2 * m_padding);
 
 		const auto p = lvdHeader.Encode();
 
 		std::cout << m_dataSize << " " <<
 			logBlockSize << " " <<
-			m_repeat << " " << 
+			m_padding << " " << 
 			g_xSize << " " << 
 			g_ySize << " " <<
 			g_zSize << std::endl;

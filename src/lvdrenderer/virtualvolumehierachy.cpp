@@ -139,7 +139,7 @@ namespace ysl
 		texPageTable->Unbind();
 	}
 
-	std::shared_ptr<CPUVolumeDataCache> PageTableManager::VirtualData()
+	std::shared_ptr<VirtualBlockedMemory> PageTableManager::VirtualData()
 	{
 		return cacheData;
 	}

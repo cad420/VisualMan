@@ -2,26 +2,48 @@
 #include "camera.h"
 #include "viewport.h"
 #include "rendercontext.h"
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/ostreamwrapper.h"
+#include "rapidjson/pointer.h"
+#include "rapidjson/writer.h"
 
 namespace ysl
 {
 	namespace  vm
 	{
-		Camera_Impl::Camera_Impl(const ysl::Point3f& position, ysl::Vector3f up, const ysl::Point3f& center) :
+		ViewMatrixWrapper::ViewMatrixWrapper(const ysl::Point3f& position, ysl::Vector3f worldUp, const ysl::Point3f& center):
 			m_position(position),
 			m_front(center - position),
-			m_worldUp(up),
+			m_worldUp(worldUp),
 			m_movementSpeed(SPEED),
 			m_mouseSensitivity(SENSITIVITY),
 			m_center(center),
 			m_zoom(ZOOM)
 		{
-			m_right = ysl::Vector3f::Cross(m_front, m_worldUp);
-			m_up = ysl::Vector3f::Cross(m_right, m_front);
+			m_right = ysl::Vector3f::Cross(m_front, m_worldUp).Normalized();
+			m_up = ysl::Vector3f::Cross(m_right, m_front).Normalized();
 			//updateCameraVectors(QVector3D(0,1,0),QVector3D(0,0,0),0);
 		}
 
-		void Camera_Impl::setCenter(const ysl::Point3f& center)
+		void ViewMatrixWrapper::UpdateCamera(const ysl::Point3f& position, ysl::Vector3f worldUp, const ysl::Point3f& center)
+		{
+			m_position = position;
+			m_front = center - position;
+			m_worldUp = worldUp;
+			m_right = ysl::Vector3f::Cross(m_front, m_worldUp).Normalized();
+			m_up = ysl::Vector3f::Cross(m_right, m_front).Normalized();
+			m_center = center;
+		}
+
+		Transform ViewMatrixWrapper::GetViewMatrix() const
+		{
+			ysl::Transform vi;
+			vi.SetLookAt(m_position, m_position + m_front, m_up);
+			return vi;
+		}
+
+		void ViewMatrixWrapper::SetCenter(const ysl::Point3f& center)
 		{
 			m_center = center;
 			m_front = (m_center - m_position).Normalized();
@@ -29,23 +51,23 @@ namespace ysl
 			m_up = ysl::Vector3f::Cross(m_right, m_front).Normalized();
 		}
 
-		void Camera_Impl::movement(const ysl::Vector3f& direction, float deltaTime)
+		void ViewMatrixWrapper::Move(const ysl::Vector3f& direction, float deltaTime)
 		{
 			const auto velocity = m_movementSpeed * direction * deltaTime;
 			m_position += velocity;
 		}
 
-		void Camera_Impl::rotation(float xoffset, float yoffset)
+		void ViewMatrixWrapper::Rotate(float xoffset, float yoffset)
 		{
 			xoffset *= m_mouseSensitivity;
 			yoffset *= m_mouseSensitivity;
 			const auto theta = 4.0 * (std::fabs(xoffset) + std::fabs(yoffset));
 			const auto v = ((m_right * xoffset) + (m_up * yoffset));
 			const auto axis = ysl::Vector3f::Cross(v, -m_front).Normalized();
-			updateCameraVectors(axis, theta);
+			UpdateCameraVectors(axis, theta);
 		}
 
-		void Camera_Impl::processMouseScroll(float yoffset)
+		void ViewMatrixWrapper::ProcessMouseScroll(float yoffset)
 		{
 			if (m_zoom >= 1.0f && m_zoom <= 45.0f)
 				m_zoom -= yoffset;
@@ -55,7 +77,7 @@ namespace ysl
 				m_zoom = 45.0f;
 		}
 
-		void Camera_Impl::updateCameraVectors(const ysl::Vector3f& axis, double theta)
+		void ViewMatrixWrapper::UpdateCameraVectors(const ysl::Vector3f& axis, double theta)
 		{
 			ysl::Transform rotation;
 			rotation.SetRotate(axis, theta);
@@ -69,6 +91,128 @@ namespace ysl
 			m_front.Normalize();
 			m_right.Normalize();
 			m_up.Normalize();
+		}
+
+		Ref<Camera> CreateCamera(const std::string& jsonFileName)
+		{
+			using namespace rapidjson;
+			std::ifstream ifs(jsonFileName);
+			rapidjson::IStreamWrapper isw(ifs);
+			Document d;
+			d.ParseStream(isw);
+
+			// Camera Params
+			// View Matrix: up front center
+			// Perspective Matrix: fov, nearPlane, farPlane, aspectRatio
+
+			Point3f pos;
+			Vector3f up;
+			Point3f center;
+			pos.x = GetValueByPointerWithDefault(d, "/camera/viewMatrix/pos/0", 0.0f).GetFloat();
+			pos.y = GetValueByPointerWithDefault(d, "/camera/viewMatrix/pos/1", 0.0f).GetFloat();
+			pos.z = GetValueByPointerWithDefault(d, "/camera/viewMatrix/pos/2", 10.f).GetFloat();
+
+			up.x = GetValueByPointerWithDefault(d, "/camera/viewMatrix/up/0", 0.f).GetFloat();
+			up.y = GetValueByPointerWithDefault(d, "/camera/viewMatrix/up/1", 1.f).GetFloat();
+			up.z = GetValueByPointerWithDefault(d, "/camera/viewMatrix/up/2", 0.f).GetFloat();
+			
+			center.x = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/0",0.f).GetFloat();
+			center.y = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/1",0.f).GetFloat();
+			center.z = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/2",0.f).GetFloat();
+
+			const float fov = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/fov", 60.f).GetFloat();
+			const float nearPlane = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/nearPlane", 0.01f).GetFloat();
+			const float farPlane = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/farPlane", 200.f).GetFloat();
+			const float aspectRatio= GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/aspectRatio", 1024.f/768.f).GetFloat();
+
+			auto camera = MakeRef<Camera>(pos, up, center);
+			Transform perspectiveMatrix;
+			perspectiveMatrix.SetGLPerspective(fov, aspectRatio, nearPlane, farPlane);
+			camera->SetProjectionMatrix(perspectiveMatrix);
+			return camera;
+
+		}
+
+		void ConfigCamera(Camera* camera, const std::string& jsonFileName)
+		{
+			if (!camera)return;
+			using namespace rapidjson;
+			std::ifstream ifs(jsonFileName);
+			rapidjson::IStreamWrapper isw(ifs);
+			Document d;
+			d.ParseStream(isw);
+
+			// Camera Params
+			// View Matrix: up front center
+			// Perspective Matrix: fov, nearPlane, farPlane, aspectRatio
+
+			Point3f pos;
+			Vector3f up;
+			Point3f center;
+			pos.x = GetValueByPointerWithDefault(d, "/camera/viewMatrix/pos/0", 0.0f).GetFloat();
+			pos.y = GetValueByPointerWithDefault(d, "/camera/viewMatrix/pos/1", 0.0f).GetFloat();
+			pos.z = GetValueByPointerWithDefault(d, "/camera/viewMatrix/pos/2", 10.f).GetFloat();
+
+			up.x = GetValueByPointerWithDefault(d, "/camera/viewMatrix/up/0", 0.f).GetFloat();
+			up.y = GetValueByPointerWithDefault(d, "/camera/viewMatrix/up/1", 1.f).GetFloat();
+			up.z = GetValueByPointerWithDefault(d, "/camera/viewMatrix/up/2", 0.f).GetFloat();
+
+			center.x = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/0", 0.f).GetFloat();
+			center.y = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/1", 0.f).GetFloat();
+			center.z = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/2", 0.f).GetFloat();
+
+			const float fov = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/fov", 60.f).GetFloat();
+			const float nearPlane = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/nearPlane", 0.01f).GetFloat();
+			const float farPlane = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/farPlane", 200.f).GetFloat();
+			const float aspectRatio = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/aspectRatio", 1024.f / 768.f).GetFloat();
+
+			Transform perspectiveMatrix;
+			perspectiveMatrix.SetGLPerspective(fov, aspectRatio, nearPlane, farPlane);
+
+			camera->SetCamera(pos, up, center);
+			camera->SetProjectionMatrix(perspectiveMatrix);
+		}
+
+		bool SaveCameraAsJson(Ref<Camera> camera,const std::string & jsonFileName)
+		{
+			using namespace rapidjson;
+			auto pos = camera->GetPosition();
+			auto center = camera->GetCenter();
+			auto up = camera->GetUp();
+
+			auto fov = camera->GetFov();
+			auto nearPlane = camera->GetNearPlane();
+			auto farPlane = camera->GetFarPlane();
+			auto aspectRatio = camera->GetAspectRatio();
+
+			Document d;
+
+			SetValueByPointer(d, "/camera/viewMatrix/pos/0", pos.x);
+			SetValueByPointer(d, "/camera/viewMatrix/pos/1", pos.y);
+			SetValueByPointer(d, "/camera/viewMatrix/pos/2", pos.z);
+
+			SetValueByPointer(d, "/camera/viewMatrix/up/0", up.x);
+			SetValueByPointer(d, "/camera/viewMatrix/up/1", up.y);
+			SetValueByPointer(d, "/camera/viewMatrix/up/2", up.z);
+
+			SetValueByPointer(d, "/camera/viewMatrix/center/0", center.x);
+			SetValueByPointer(d, "/camera/viewMatrix/center/1", center.y);
+			SetValueByPointer(d, "/camera/viewMatrix/center/2", center.z);
+
+			SetValueByPointer(d, "/camera/perspectiveMatrix/fov", fov);
+			SetValueByPointer(d, "/camera/perspectiveMatrix/nearPlane", nearPlane);
+			SetValueByPointer(d, "/camera/perspectiveMatrix/farPlane", farPlane);
+			SetValueByPointer(d, "/camera/perspectiveMatrix/aspectRatio", aspectRatio);
+
+
+			std::ofstream ofs(jsonFileName);
+			if (!ofs.is_open()) {
+				Log("Can not open file %s.", jsonFileName.c_str());
+				return false;
+			}
+			OStreamWrapper osw(ofs);
+			Writer<OStreamWrapper,UTF8<>,UTF8<>,CrtAllocator,kWriteDefaultFlags> writer(osw);
+			return d.Accept(writer);
 		}
 
 		void CameraManipulator::ResizeEvent(int w, int h)
@@ -124,11 +268,11 @@ namespace ysl
 				}
 				else if (button == Mouse_Left)
 				{
-					camera->Ratation(dx, dy);
+					camera->Rotation(dx, dy);
 				}
 				else if (button == Mouse_Right)
 				{
-					const auto directionEx = camera->Front()*dy;
+					const auto directionEx = camera->GetFront()*dy;
 					camera->Movement(directionEx, 0.01);
 				}
 				lastMousePos.x = xpos;

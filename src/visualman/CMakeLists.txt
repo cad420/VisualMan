@@ -31,6 +31,7 @@ ${GRAPHIC_SRC}
 ${GL3W_SRC})
 target_link_libraries(vm ${OPENGL_LIBRARIES} common graphicfoundation)
 target_include_directories(vm PUBLIC ${GL3W_INCLUDE_DIR} "../common" "../graphicfoundation")
+target_include_directories(vm PRIVATE "${CMAKE_SOURCE_DIR}/lib/3rdparty")
 
 install(TARGETS vm LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
 install(FILES ${VM_INC} DESTINATION "include")

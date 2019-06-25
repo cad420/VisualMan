@@ -157,7 +157,7 @@ namespace ysl
 			size_t bytes = 0;
 
 			std::vector<Ref<Texture>> volumeDataTexture;
-			Ref<CPUVolumeDataCache> cpuVolumeData;
+			Ref<VirtualBlockedMemory> cpuVolumeData;
 			Ref<BufferObject> atomicCounterBuffer;
 			Ref<BufferObject> hashBuffer;
 			Ref<BufferObject> blockIdBuffer;

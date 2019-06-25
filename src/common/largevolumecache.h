@@ -6,6 +6,7 @@
 #include "lvdreader.h"
 #include "geometry.h"
 #include "common.h"
+#include "genericcache.h"
 
 namespace ysl
 {
@@ -41,12 +42,12 @@ namespace ysl
 		PhysicalMemoryBlockIndex(internal_type x_ = -1,
 			internal_type y_ = -1,
 			internal_type z_ = -1) :
-			x(x_), y(y_), z(z_),unit(0) {}
+			x(x_), y(y_), z(z_), unit(0) {}
 		PhysicalMemoryBlockIndex(internal_type x_,
-			internal_type y_ ,
-			internal_type z_ ,
+			internal_type y_,
+			internal_type z_,
 			uint8_t unit) :
-			x(x_), y(y_), z(z_),unit(unit) {}
+			x(x_), y(y_), z(z_), unit(unit) {}
 		int GetPhysicalStorageUnit()const { return unit; }
 		void SetPhysicalStorageUnit(uint8_t u) { unit = u; }
 		Vec3i ToVec3i()const { return Vec3i{ x,y,z }; }
@@ -61,47 +62,68 @@ namespace ysl
 			y = (linearId - z * xb*yb) / xb;
 			x = linearId - z * xb*yb - y * xb;
 		}
-		VirtualMemoryBlockIndex(int x, int y, int z):x(x),y(y),z(z){}
+		VirtualMemoryBlockIndex(int x, int y, int z) :x(x), y(y), z(z) {}
 		Vec3i ToVec3i()const { return Vec3i{ x,y,z }; }
 
 		using index_type = int;
-		index_type x = -1, y=-1, z=-1;
+		index_type x = -1, y = -1, z = -1;
 	};
 
-	class COMMON_EXPORT_IMPORT AbstrCPUBlockCache
+	//struct PageID
+	//{
+	//	using PageIDType = int;
+	//	PageIDType * idData;
+	//	size_t count = 0;
+	//	PageIDType GetPageID(size_t index)const { return idData[index]; }
+	//	size_t GetPageIDCount()const { return count; }
+	//};
+
+
+	class CachePolicy
 	{
 	public:
-		virtual const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock) = 0;
-		virtual const unsigned char * ReadBlockDataFromCPUCache(int blockId) = 0;
-		virtual const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index) = 0;
-		virtual Size3 BlockSize() = 0;
-		virtual Size3 BlockDim() = 0;
-		//virtual std::size_t MemoryBytes()const = 0;
-		virtual ~AbstrCPUBlockCache();
+		/**
+		 * \brief Queries the page given by \a pageID if it exists in storage cache. Returns \a true if it exists or \a false if not
+		 */
+		virtual bool QueryPage(size_t pageID) = 0;
+		/**
+		 * \brief Updates the fault page given by \a pageID. Returns the actually storage ID of the page. If the page exists, the function does nothing. 
+		 */
+		virtual size_t UpdatePage(size_t pageID) = 0;
+		/**
+		 * \brief Queries and updates at the same time. It will always return a valid next-level page address. 
+		 */
+		virtual size_t QueryAndUpdate(size_t pageID) = 0;
 	};
 
-	class COMMON_EXPORT_IMPORT AbstrBlockedVolumeDataCPUCache:public AbstrCPUBlockCache
+	class COMMON_EXPORT_IMPORT AbstraVirtualMemoryArch
 	{
-		const Size3 cacheBlockDim;
+		std::shared_ptr<AbstraVirtualMemoryArch> nextLevel;
+		std::unique_ptr<CachePolicy> cachePolicy;
 	public:
-		AbstrBlockedVolumeDataCPUCache(const Size3 & blockDim) :cacheBlockDim(blockDim) {}
-		virtual int Padding() = 0;
-		virtual Size3 OriginalDataSize() = 0;
-		virtual Size3 CPUCacheSize() const= 0;
-		Size3 CacheBlockDim()const { return cacheBlockDim; }
+		void SetNextLevelCache(std::shared_ptr<AbstraVirtualMemoryArch> cache) { nextLevel = cache; }
+		void SetCachePolicy(std::unique_ptr<CachePolicy> policy) { cachePolicy = std::move(policy); }
+		virtual const void* GetPage(int xBlock, int yBlock, int zBlock) = 0;
+		virtual const void* GetPage(size_t pageID) = 0;
+		virtual const void* GetPage(const VirtualMemoryBlockIndex& index) = 0;
+		virtual size_t PageSize() = 0;
+		virtual ~AbstraVirtualMemoryArch()=default;
+	private:
+		virtual void * GetPageStorage_Implement(size_t pageID) = 0;
 	};
 
-	class COMMON_EXPORT_IMPORT CPUVolumeDataCache :public AbstrBlockedVolumeDataCPUCache
+	class COMMON_EXPORT_IMPORT DiskPage:public AbstraVirtualMemoryArch
 	{
-		static constexpr int nLogBlockSize = 6;		// 64
-		static constexpr ysl::Size3 cacheBlockSize { 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
-		static constexpr ysl::Size3 cacheDim{ 16,16,16 };
-		static constexpr ysl::Size3 cacheSize = cacheDim * (1 << nLogBlockSize);
-		static constexpr size_t totalCacheBlocks = cacheDim.x*cacheDim.y*cacheDim.z;
+	public:
 
-		using Cache = ysl::Block3DArray<unsigned char, nLogBlockSize>;
+	};
+
+	class COMMON_EXPORT_IMPORT VirtualBlockedMemory:public AbstraVirtualMemoryArch
+	{
 		struct LRUListCell;
+		using LRUList = std::list<LRUListCell>;
 		using LRUHash = std::map<int, std::list<LRUListCell>::iterator>;
+
 		struct LRUListCell
 		{
 			int blockCacheIndex;
@@ -109,11 +131,11 @@ namespace ysl
 			LRUListCell(int index, LRUHash::iterator itr) :blockCacheIndex{ index }, hashIter{ itr }{}
 		};
 
-		std::list<LRUListCell> m_lruList;
+		LRUList m_lruList;
 		LRUHash	m_blockIdInCache;		// blockId---> (blockIndex,the position of blockIndex in list)
-		bool m_valid;
-		std::unique_ptr<Cache> m_volumeCache;
-
+		std::unique_ptr<IBlock3DArrayAdapter> m_volumeCache;
+		Size3 cacheDim;
+		Size3 cacheSize;
 		LVDReader lvdReader;
 
 		int blockCoordinateToBlockId(int xBlock, int yBlock, int zBlock)const
@@ -122,27 +144,27 @@ namespace ysl
 			const auto x = size.x, y = size.y, z = size.z;
 			return zBlock * x*y + yBlock * x + xBlock;
 		}
-		void createCache();
-		void initLRU();
+		void Create();
+		void InitLRU();
+
+		void* GetPageStorage_Implement(size_t pageID) override;
+
 	public:
-		explicit CPUVolumeDataCache(const std::string& fileName,const Size3 & cacheBlockDim = {16,16,16});
-		bool IsValid()const { return m_valid; }
+		explicit VirtualBlockedMemory(const std::string& fileName);
+		Size3 CPUCacheBlockSize()const{return Size3( 1 << lvdReader.BlockSizeInLog(),1 << lvdReader.BlockSizeInLog(),1 << lvdReader.BlockSizeInLog());}
+		ysl::Size3 CPUCacheSize()const{ return CacheBlockDim()*(1 << lvdReader.BlockSizeInLog()); }
+		int Padding();
+		Size3 OriginalDataSize();
+		Size3 CacheBlockDim()const { return cacheDim; }
+		Size3 BlockDim();
+		Size3 BlockSize();
+		size_t PageSize() override { return BlockSize().Prod() * sizeof(char); }
 
-		//std::size_t CPUCacheBlockCount() const { return totalCacheBlocks; }
-		Size3 CPUCacheBlockSize()const
-		{
-			return Size3{ 1 << nLogBlockSize,1 << nLogBlockSize,1 << nLogBlockSize };
-		}
-		//ysl::Size3 CPUCacheDim()const { return cacheDim; }
+		const void* GetPage(int xBlock, int yBlock, int zBlock) override { return GetPage(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
 
-		ysl::Size3 CPUCacheSize()const override { return CacheBlockDim()*(1<<nLogBlockSize); }
-		int Padding()override;
-		Size3 OriginalDataSize()override;
-		Size3 BlockDim() override;
-		Size3 BlockSize() override;
-		const unsigned char * ReadBlockDataFromCPUCache(int xBlock, int yBlock, int zBlock)override{ return ReadBlockDataFromCPUCache(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
-		const unsigned char * ReadBlockDataFromCPUCache(int blockId)override;
-		const unsigned char * ReadBlockDataFromCPUCache(const VirtualMemoryBlockIndex & index)override { return ReadBlockDataFromCPUCache(index.x, index.y, index.z); };
+		const void* GetPage(size_t pageID) override;
+
+		const void* GetPage(const VirtualMemoryBlockIndex& index) override { return GetPage(index.x, index.y, index.z); };
 	};
 }
 

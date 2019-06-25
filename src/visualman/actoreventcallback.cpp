@@ -57,7 +57,7 @@ namespace ysl
 			if (shading)
 			{
 				auto const program = shading->GetProgram();
-				const auto eyePos = camera->Position();
+				const auto eyePos = camera->GetPosition();
 				const auto eye_position = program->GetGenericUniformLocation("eye_position");
 				if (eye_position != -1)
 					actor->CreateGetUniformSet()->CreateGetUniform("eye_position")->SetUniform3f(1, eyePos.ConstData());;
@@ -125,7 +125,7 @@ namespace ysl
 			if (shading)
 			{
 				auto const program = shading->GetProgram().get();
-				const auto eyePos = camera->Position();
+				const auto eyePos = camera->GetPosition();
 				const auto eye_position = program->GetGenericUniformLocation("viewPos");
 				if (eye_position != -1)
 					actor->CreateGetUniformSet()->CreateGetUniform("viewPos")->SetUniform3f(1, eyePos.ConstData());

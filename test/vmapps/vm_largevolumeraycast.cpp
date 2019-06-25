@@ -5,17 +5,19 @@
 #include <rendercontext.h>
 #include <screenactor.h>
 #include <trivialscenemanager.h>
+#include <transformation.h>
+#include <error.h>
 #include "blitframebuffer.h"
 #include "actoreventcallback.h"
-#include <transformation.h>
-
 
 namespace ysl
 {
 	namespace vm
 	{
 		void VM_LargeVolumeRayCast::InitEvent()
+
 		{
+			PrintInfo();
 			// Pipline Configuration
 
 			/*[0] Resources Initialization****************************************
@@ -83,7 +85,7 @@ namespace ysl
 			auto artist = MakeRef<Artist>();
 			artist->GetLOD(0)->push_back(positionShading);
 			auto t = Translate(-0.5, -0.5, -0.5);
-			auto s = Scale(1,1,1);
+			auto s = Scale(1, 1, 1);
 
 			auto scale = MakeRef<Transform>(s*t);
 
@@ -132,7 +134,7 @@ namespace ysl
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("kd")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ks")->SetUniformValue(50.f);
 			Vec3f lightDir{ 1.0f,1.0f,1.0f };
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("lightdir")->SetUniform3f(1,lightDir.Data());
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("lightdir")->SetUniform3f(1, lightDir.Data());
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("halfway")->SetUniform3f(1, lightDir.Data());
 
 			auto effect2 = MakeRef<Artist>();
@@ -202,6 +204,11 @@ namespace ysl
 					SetupTF(each);
 					found = true;
 				}
+				else if (extension == ".json")
+				{
+					SetupJSON(each);
+					found = true;
+				}
 				if (found)
 					break;
 			}
@@ -216,12 +223,21 @@ namespace ysl
 				raycastAgt->CreateGetCamera()->GetViewport()->SetWidth(w);		// only for clear use
 				raycastAgt->CreateGetCamera()->GetViewport()->SetHeight(h);
 			}
-			if(mrtAgt)
+			if (mrtAgt)
 			{
 				mrtAgt->CreateGetCamera()->GetViewport()->SetWidth(w);
 				mrtAgt->CreateGetCamera()->GetViewport()->SetHeight(h);
 			}
 			Context()->Update();
+		}
+
+		void VM_LargeVolumeRayCast::KeyPressEvent(KeyButton key)
+		{
+			// Save Camera
+			if (key == KeyButton::Key_C)
+			{
+				SaveCameraAsJson(mrtAgt->CreateGetCamera(), "vmCamera.json");
+			}
 		}
 
 		void VM_LargeVolumeRayCast::MouseMoveEvent(MouseButton button, int xpos, int ypos)
@@ -233,8 +249,18 @@ namespace ysl
 		void VM_LargeVolumeRayCast::UpdateEvent()
 		{
 			VisualMan::UpdateEvent();
-			std::string title = "LVD Render -- fps:"+ std::to_string(GetFPS());
+			std::string title = "LVD Render -- fps:" + std::to_string(GetFPS());
 			Context()->SetWindowTitle(title);
+		}
+
+		void VM_LargeVolumeRayCast::PrintInfo()
+		{
+			std::cout << "---------------Demo Info-------------------------------------------\n";
+			std::cout << "C to save camera at current directories\n";
+			std::cout << "Drag the .lvd file to the window to open the data file\n";
+			std::cout << "Drag the .tf file to the window to open the transfer function file\n";
+			std::cout << "Drag the .json file to the window to config\n";
+			std::cout << "---------------Demo Info-------------------------------------------\n";
 		}
 
 		void VM_LargeVolumeRayCast::SetupShading()
@@ -295,6 +321,14 @@ namespace ysl
 				Warning("Can not load .tf file");
 				return;
 			}
+
+			Context()->Update();
+		}
+
+		void VM_LargeVolumeRayCast::SetupJSON(const std::string& fileName)
+		{
+			//const auto camera = CreateCamera(fileName);
+			ConfigCamera(mrtAgt->CreateGetCamera().get(), fileName);
 
 			Context()->Update();
 		}

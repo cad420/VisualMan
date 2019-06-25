@@ -34,7 +34,7 @@ namespace ysl
 		bool Valid()const { return validFlag; }
 		ysl::Size3 Size(int lod = 0) const { return vSize; }
 		ysl::Size3 SizeByBlock(int lod = 0)const { return bSize; }
-		int BoundaryRepeat(int lod = 0)const { return padding; }
+		int GetBlockPadding(int lod = 0)const { return padding; }
 		int BlockSizeInLog(int lod = 0)const { return logBlockSize; }
 		int BlockSize(int lod = 0)const { return 1 << BlockSizeInLog(); }
 		int BlockDataCount(int lod = 0)const { return BlockSize()*BlockSize()*BlockSize(); }

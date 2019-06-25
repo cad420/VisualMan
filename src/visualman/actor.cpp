@@ -49,7 +49,7 @@ namespace ysl
 				const int loc = program->GetGenericUniformLocation("view_pos");
 				if (loc != -1)
 				{
-					auto view_pos = camera->Position();
+					auto view_pos = camera->GetPosition();
 					actor->CreateGetUniformSet()->CreateGetUniform("view_pos")->SetUniform3f(1, view_pos.Data());
 				}
 			}
