@@ -27,7 +27,7 @@ namespace ysl
 	}
 
 	bool PingPongTransferManager::TransferData(GPUVolumeDataCache* dest,
-	                                           VirtualBlockedMemory* src)
+	                                           MemoryPageAdapter* src)
 	{
 		assert(gcmHandler);
 		assert(vmManager);

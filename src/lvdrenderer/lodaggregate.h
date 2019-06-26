@@ -20,7 +20,7 @@ namespace ysl
 	class HashBasedGPUCacheFaultHandler;
 	class PingPongTransferManager;
 	class GPUVolumeDataCache;
-	class VirtualBlockedMemory;
+	class MemoryPageAdapter;
 	class PageTableManager;
 
 	class LODAggregate
@@ -28,7 +28,7 @@ namespace ysl
 		std::shared_ptr<HashBasedGPUCacheFaultHandler> cacheFaultHandler; // Belong to Client-end memory
 		std::shared_ptr<PingPongTransferManager> pingpongTransferManager;
 		std::shared_ptr<GPUVolumeDataCache> texCache;			 // Client-end memory
-		std::shared_ptr<VirtualBlockedMemory> largeVolumeCache;
+		std::shared_ptr<MemoryPageAdapter> largeVolumeCache;
 		std::shared_ptr<PageTableManager> pageTableManager;		// Server-end memory
 		void InitGPUPageTableBuffer();
 		void InitGPUBlockCacheTexture(const Size3 & blockDim);		// texCache
@@ -36,7 +36,7 @@ namespace ysl
 		LODAggregate(const std::string & fileName,const Size3 & blockDim);
 
 		std::shared_ptr<GPUVolumeDataCache> GPUCache()const;
-		std::shared_ptr<VirtualBlockedMemory> CPUCache()const;
+		std::shared_ptr<MemoryPageAdapter> CPUCache()const;
 
 		Size3 PageTableSize()const;
 		Size3 OriginalDataSize()const;

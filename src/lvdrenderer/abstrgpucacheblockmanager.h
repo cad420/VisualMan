@@ -8,7 +8,7 @@
 namespace ysl
 {
 	class GPUVolumeDataCache;
-	class VirtualBlockedMemory;
+	class MemoryPageAdapter;
 
 	class AbstrGPUCacheBlockManager
 	{
@@ -17,7 +17,7 @@ namespace ysl
 		std::shared_ptr<AbstrGPUCacheFaultHandler> gcmHandler;
 	public:
 		AbstrGPUCacheBlockManager(std::shared_ptr<PageTableManager> vmm, std::shared_ptr<AbstrGPUCacheFaultHandler> gcm);
-		virtual bool TransferData(GPUVolumeDataCache* dest, VirtualBlockedMemory* src) = 0;
+		virtual bool TransferData(GPUVolumeDataCache* dest, MemoryPageAdapter* src) = 0;
 		virtual ~AbstrGPUCacheBlockManager();
 	};
 }

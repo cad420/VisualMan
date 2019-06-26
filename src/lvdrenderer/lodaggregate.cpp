@@ -28,7 +28,7 @@ namespace ysl
 		return true;
 	}
 
-	LODAggregate::LODAggregate(const std::string& fileName,const Size3 & blockDim):largeVolumeCache(std::make_shared<VirtualBlockedMemory>(fileName))
+	LODAggregate::LODAggregate(const std::string& fileName,const Size3 & blockDim):largeVolumeCache(std::make_shared<MemoryPageAdapter>(fileName))
 	{
 		InitGPUBlockCacheTexture(blockDim);
 		InitGPUPageTableBuffer();
@@ -52,7 +52,7 @@ namespace ysl
 		return texCache;
 	}
 
-	std::shared_ptr<VirtualBlockedMemory> LODAggregate::CPUCache() const
+	std::shared_ptr<MemoryPageAdapter> LODAggregate::CPUCache() const
 	{
 		return largeVolumeCache;
 	}

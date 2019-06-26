@@ -152,7 +152,7 @@ namespace ysl
 		OutOfCoreVolumeTexture::OutOfCoreVolumeTexture(const std::string& fileName)
 		{
 			// Open the volume data file
-			cpuVolumeData = MakeRef<VirtualBlockedMemory>(fileName);
+			cpuVolumeData = MakeRef<MemoryPageAdapter>(fileName);
 			memoryEvalator = MakeRef<DefaultMemoryParamsEvaluator>(cpuVolumeData->BlockDim(), cpuVolumeData->BlockSize());
 
 			InitVolumeTextures();
