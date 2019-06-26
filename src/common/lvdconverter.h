@@ -214,46 +214,50 @@ namespace ysl
 			return false;
 		}
 		Timer timer;
-		std::atomic_size_t curBlocks = 0;
+		size_t curBlocks = 0;
+		//std::atomic_size_t curBlocks = 0;
 		
 		auto const buf = lvdPtr + LVD_HEADER_SIZE;
 		g_emptyValue = 0;
 		const auto step = blockSize - 2 * m_padding;
 		const auto totalBlocks = m_blockDimension.Prod();
 		timer.start();
-#pragma omp parallel for
+//#pragma omp parallel for
 		for (int zb = 0; zb < m_blockDimension.z; zb++)
+		{
+
 			for (int yb = 0; yb < m_blockDimension.y; yb++)
 				for (int xb = 0; xb < m_blockDimension.x; xb++)
 				{
-				//	g_xOffset = -m_padding + xb * step;
-				//	g_yOffset = -m_padding + yb * step;
-				//	g_zOffset = -m_padding + zb * step;
+
+					//	g_xOffset = -m_padding + xb * step;
+					//	g_yOffset = -m_padding + yb * step;
+					//	g_zOffset = -m_padding + zb * step;
+
 					const int blockIndex = xb + yb * m_blockDimension.x + zb * m_blockDimension.x * m_blockDimension.y;
 					getData(buf + blockIndex * size_t(blockSize) * blockSize * blockSize,
 						rawPtr + rawPointerOffset,
-					    blockSize,
 						blockSize,
 						blockSize,
-						xb, 
-						yb, 
+						blockSize,
+						xb,
+						yb,
 						zb);
 					++curBlocks;
 					//curBlocks++;
 					if (curBlocks % 100 == 0)
 					{
-						std::cout << curBlocks << " " << "block completion" << std::endl;
 						const float curPercent = curBlocks * 1.0 / totalBlocks;
-						if(curPercent == 0.f)
+						if (curPercent == 0.f)
 							continue;
-						const size_t seconds = timer.eval_remaining_time(curPercent)/1000000.0;
+						const size_t seconds = timer.eval_remaining_time(curPercent) / 1000000.0;
 						int hh = seconds / 3600;
 						int mm = (seconds - hh * 3600) / 60;
 						int ss = int(seconds) % 60;
-						printf("%.2f%% complete. Estimated Remaining Time: %02d:%02d:%02d\r",curPercent,hh,mm,ss);
+						printf("%d of %d complete, make up %.2f%%. Estimated Remaining Time: %02d:%02d:%02d\r", curPercent, hh, mm, ss);
 					}
 				}
-
+		}
 		printf("\n");
 		timer.stop();
 		const size_t seconds = timer.duration()/1000000.0;

@@ -43,10 +43,10 @@ namespace ysl
 	virtual Rtti & GetRtti()const{return _ms_RttiType;}	
 
 
-#define IMPLEMENT_RTTI_NoConstructor(classTypeName,baseClassTypeName)										\
+#define IMPLEMENT_RTTI_NoConstructor(classTypeName,baseClassTypeName)									\
 	Rtti classTypeName::_ms_RttiType(#classTypeName,&baseClassTypeName::_ms_RttiType,nullptr);
 
-#define IMPLEMENT_RTTI_NoParent(classTypeName)																\
+#define IMPLEMENT_RTTI_NoParent(classTypeName)															\
 	Rtti classTypeName::_ms_RttiType(#classTypeName,nullptr,nullptr);
 
 #define DECLARE_INITIAL(classTypeName)																	\

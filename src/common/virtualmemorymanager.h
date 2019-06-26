@@ -109,7 +109,11 @@ namespace ysl
 		 * \return 
 		 */
 		virtual void * GetPageStorage_Implement(size_t pageID) = 0;
+
 	};
+
+
+
 
 	class COMMON_EXPORT_IMPORT AbstrCachePolicy:public AbstrMemoryCache
 	{
