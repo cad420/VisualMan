@@ -91,13 +91,12 @@ namespace ysl
 
 			MappingTableManager(const Size3 & virtualSpaceSize, const Size3 & phsicalSpaceSize, int physicalSpaceCount, void * external);
 
-
 			const void * GetData()const { return pageTable.Data(); }
-
 			/**
 			 * \brief Translates the virtual space address to the physical address and update the mapping table by LRU policy
 			 */
 			std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices);
+			std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<size_t>& missedBlockIndices);
 		};
 
 		class VISUALMAN_EXPORT_IMPORT OutOfCoreVolumeTexture :public IOutOfCoreAdapter			// Dest

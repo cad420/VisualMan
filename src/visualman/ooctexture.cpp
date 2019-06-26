@@ -221,21 +221,16 @@ namespace ysl
 			virtualSpaceAddress.reserve(blocks);
 			std::vector<BlockDescriptor> descs;
 			descs.reserve(blocks);
-
 			for (int i = 0; i < blocks && i < physicalBlockCount; i++)
 			{
 				virtualSpaceAddress.emplace_back(blockIdLocalBuffer[i], dim.x, dim.y, dim.z);
 			}
-
 			const auto physicalSpaceAddress = mappingTableManager->UpdatePageTable(virtualSpaceAddress);
-
 			for (int i = 0; i < physicalSpaceAddress.size(); i++)
 			{
 				descs.emplace_back(physicalSpaceAddress[i], virtualSpaceAddress[i]);
 			}
-
 			SetSubTextureDataUsePBO(descs);			// Upload missed blocks
-
 			//mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, dim.x, dim.y, dim.z);
 		}
 
@@ -366,5 +361,49 @@ namespace ysl
 			return physicalIndices;
 		}
 
+		std::vector<PhysicalMemoryBlockIndex> MappingTableManager::UpdatePageTable(
+			const std::vector<size_t>& missedBlockIndices)
+		{
+			const auto missedBlocks = missedBlockIndices.size();
+			std::vector<PhysicalMemoryBlockIndex> physicalIndices;
+			physicalIndices.reserve(missedBlocks);
+			// Update LRU List 
+			for (int i = 0; i < missedBlocks; i++)
+			{
+				const auto& index = missedBlockIndices[i];
+				const auto vIndex = VirtualMemoryBlockIndex(index, pageTable.Size().x, pageTable.Size().y, pageTable.Size().z);
+				auto& pageTableEntry = pageTable(vIndex.x, vIndex.y, vIndex.z);
+				//const size_t flatBlockID = vIndex.z * pageTable.Size().x * pageTable.Size().y + vIndex.y * pageTable.Size().x + vIndex.x;
+				if (pageTableEntry.GetMapFlag() == EM_MAPPED)
+				{
+					// move the already mapped node to the head
+					g_lruList.splice(g_lruList.begin(), g_lruList, lruMap[index]);
+				}
+				else
+				{
+					auto& last = g_lruList.back();
+					//pageTableEntry.w = EntryMapFlag::EM_MAPPED; // Map the flag of page table entry
+					pageTableEntry.SetMapFlag(EM_MAPPED);
+					// last.second is the cache block index
+					physicalIndices.push_back(last.second);
+					pageTableEntry.x = last.second.x;  // fill the page table entry
+					pageTableEntry.y = last.second.y;
+					pageTableEntry.z = last.second.z;
+					pageTableEntry.SetTextureUnit(last.second.GetPhysicalStorageUnit());
+					if (last.first.x != -1)		// detach previous mapped storage
+					{
+						pageTable(last.first.x, last.first.y, last.first.z).SetMapFlag(EM_UNMAPPED);
+						lruMap[index] = g_lruList.end();
+					}
+					// critical section : last
+					last.first.x = vIndex.x;
+					last.first.y = vIndex.y;
+					last.first.z = vIndex.z;
+					g_lruList.splice(g_lruList.begin(), g_lruList, --g_lruList.end()); // move from tail to head, LRU policy
+					lruMap[index] = g_lruList.begin();
+				}
+			}
+			return physicalIndices;
+		}
 	}
 }

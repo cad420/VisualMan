@@ -67,41 +67,51 @@ namespace ysl
 	};
 
 	class AbstrCachePolicy;
+
 	class COMMON_EXPORT_IMPORT AbstrMemoryCache
 	{
 		std::shared_ptr<AbstrMemoryCache> nextLevel;
 		std::unique_ptr<AbstrCachePolicy> cachePolicy;
 	public:
 		void SetNextLevelCache(std::shared_ptr<AbstrMemoryCache> cache);
-
 		void SetCachePolicy(std::unique_ptr<AbstrCachePolicy> policy);
-
 		std::unique_ptr<AbstrCachePolicy> TakeCachePolicy();
+		std::shared_ptr<AbstrMemoryCache> GetNextLevelCache() { return nextLevel; }
+		std::shared_ptr<const AbstrMemoryCache> GetNextLevelCache()const { return nextLevel; }
 
-		[[deprecated]]
-		virtual const void* GetPage(int xBlock, int yBlock, int zBlock) = 0;			// deprecated
 		/**
 		 * \brief Get the page give by \a pageID. If the page does not exist in the cache, it will be swapped in.
 		 * \note The page data pointed by the  pointer returned by the function is only valid at current call.
 		 * It could be invalid when next call because its data has been swapped out.
 		 */
-		virtual const void* GetPage(size_t pageID) = 0;
-
-		[[deprecated]] 
-		virtual const void* GetPage(const VirtualMemoryBlockIndex& index) = 0;			// deprecated
+		virtual const void* GetPage(size_t pageID);
 
 		/**
 		 * \brief Returns the page size by bytes
 		 */
 		virtual size_t GetPageSize() = 0;
+		/**
+		 * \brief 
+		 * \return 
+		 */
 		virtual size_t GetPhysicalPageCount() = 0;
+		/**
+		 * \brief 
+		 * \return 
+		 */
 		virtual size_t GetVirtualPageCount() = 0;
+
 		virtual ~AbstrMemoryCache() = default;
 	private:
+		/**
+		 * \brief 
+		 * \param pageID 
+		 * \return 
+		 */
 		virtual void * GetPageStorage_Implement(size_t pageID) = 0;
 	};
 
-	class AbstrCachePolicy:public AbstrMemoryCache
+	class COMMON_EXPORT_IMPORT AbstrCachePolicy:public AbstrMemoryCache
 	{
 	public:
 		/**
@@ -118,19 +128,25 @@ namespace ysl
 		virtual size_t QueryAndUpdate(size_t pageID) = 0;
 
 		AbstrMemoryCache* GetOwnerCache() { return ownerCache; }
+
 		const AbstrMemoryCache * GetOwnerCache()const { return ownerCache; }
-		const void* GetPage(int xBlock, int yBlock, int zBlock) override { return nullptr; }
+
 		const void * GetPage(size_t pageID) override { return nullptr; }
-		const void * GetPage(const VirtualMemoryBlockIndex& index) override { return nullptr; }
+
 		size_t GetPageSize() override { return 0; }
+
 		size_t GetPhysicalPageCount() override { return 0; }
+
 		size_t GetVirtualPageCount() override { return 0; }
 	protected:
 		void * GetPageStorage_Implement(size_t pageID) override { return nullptr; }
+
 		virtual void InitEvent(AbstrMemoryCache * cache) = 0;
 	private:
 		friend AbstrMemoryCache;
+
 		AbstrMemoryCache * ownerCache = nullptr;
+
 		void SetOwnerCache(AbstrMemoryCache * cache) { ownerCache = cache; }
 	};
 }
