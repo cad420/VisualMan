@@ -203,13 +203,13 @@
 
 
 
+
+
+
 int main(int argc, char *argv[])
 {
 	std::cout << "[filename(str), offset(std::size_t), x(int) ,y(int) ,z(int), padding(int) ,log(int), outfilename(str)]\n";
 	int x, y, z, log;
-	//std::cin >> x >> y >> z;
-	//ABCFlowGen(x,y,z);
-	//SimpleBlockGen(x,y,z,2,2,2);
 	std::string fileName;
 	std::cin >> fileName;
 
@@ -223,12 +223,14 @@ int main(int argc, char *argv[])
 
 	if(log == 6)
 	{
-		ysl::RawToLVDConverter<6> converter(fileName, x, y, z, repeat, outFileName,offset);
+		ysl::RawToLVDConverterEx<6> converter(fileName, x, y, z, repeat, outFileName,offset);
+		//ysl::RawToLVDConverter<6> converter(fileName, x, y, z, repeat, outFileName,offset);
 		converter.convert();
 		converter.save(fileName);
 	}else if(log == 7)
 	{
-		ysl::RawToLVDConverter<7> converter(fileName, x, y, z, repeat, outFileName,offset);
+		ysl::RawToLVDConverterEx<7> converter(fileName, x, y, z, repeat, outFileName,offset);
+		//ysl::RawToLVDConverter<7> converter(fileName, x, y, z, repeat, outFileName,offset);
 		converter.convert();
 		converter.save(fileName);
 	}else
@@ -237,7 +239,6 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	system("pause");
 	return 0;
 }
 

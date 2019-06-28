@@ -127,7 +127,7 @@ namespace ysl
 
 		if (!addr)
 		{
-			printf("MapViewOfFile failed:");
+			printf("MapViewOfFile failed ");
 			PrintLastErrorMsg();
 			return nullptr;
 		}
