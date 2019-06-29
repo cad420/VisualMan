@@ -22,6 +22,8 @@ namespace ysl
 			const VirtualMemoryBlockIndex & Key()const { return key; }
 		};
 
+
+
 		enum EntryMapFlag { EM_UNKNOWN = 0, EM_UNMAPPED = 2, EM_MAPPED = 1 };
 
 
@@ -44,6 +46,7 @@ namespace ysl
 			DefaultMemoryParamsEvaluator(const Size3 & virtualDim, const Size3 & blockSize) :virtualDim(virtualDim), blockSize(blockSize) {}
 			Size3 EvalPhysicalTextureSize() const override;
 			Size3 EvalPhysicalBlockDim() const override;
+
 			int EvalPhysicalTextureCount() const override;
 			int EvalHashBufferSize() const override;
 			int EvalIDBufferCount() const override;
@@ -128,8 +131,8 @@ namespace ysl
 			//Ref<Texture> GetPageTableTexture() { return mappingTable; }
 			//Ref<const Texture> GetPageTableTexture()const { return mappingTable; }
 
-			Ref<BufferObject> GetSamplerUBO() { return volumeTexSamplerUBO; }
-			Ref<const BufferObject> GetSamplerUBO()const { return volumeTexSamplerUBO; }
+			//Ref<BufferObject> GetSamplerUBO() { return volumeTexSamplerUBO; }
+			//Ref<const BufferObject> GetSamplerUBO()const { return volumeTexSamplerUBO; }
 
 
 			Vec3i DataResolution()const { return Vec3i(cpuVolumeData->OriginalDataSize()); }
@@ -157,14 +160,15 @@ namespace ysl
 
 			std::vector<Ref<Texture>> volumeDataTexture;
 			Ref<MemoryPageAdapter> cpuVolumeData;
+
 			Ref<BufferObject> atomicCounterBuffer;
 			Ref<BufferObject> hashBuffer;
 			Ref<BufferObject> blockIdBuffer;
-			Ref<BufferObject> volumeTexSamplerUBO;
+			//Ref<BufferObject> volumeTexSamplerUBO;
 			Ref<BufferObject> pageTableBuffer;
 
 			std::vector<int> blockIdLocalBuffer;
-			Ref<Texture> mappingTable;
+			//Ref<Texture> mappingTable;
 			Ref<MappingTableManager> mappingTableManager;
 			Ref<IVideoMemoryParamsEvaluator> memoryEvalator;
 			// CPU Volume Cache

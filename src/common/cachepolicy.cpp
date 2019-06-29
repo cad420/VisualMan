@@ -1,5 +1,6 @@
 
 #include "cachepolicy.h"
+#include <cassert>
 
 namespace ysl
 {

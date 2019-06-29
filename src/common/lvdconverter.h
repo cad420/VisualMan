@@ -621,9 +621,9 @@ namespace ysl
 		Timer t;
 		t.start();
 
-		ThreadArena readThreadPool(1);
+		ThreadPool readThreadPool(1);
 
-		readThreadPool.Start();
+		//readThreadPool.Start();
 
 
 		for (int i = 0; i < m_blockDimension.z; i++)
@@ -634,11 +634,13 @@ namespace ysl
 			const Size3 size(g_xSize, g_ySize,Clamp(g_zSize - startz, 0, blockSize));
 			//const Size3 size(g_xSize, g_ySize,i!=0?Clamp(g_zSize - startz, 0, blockSize):62);
 			//std::cout << size << std::endl;
-			readThreadPool.AppendTask([&rawReader,coreNums,
+			std::atomic_size_t totalBlocks = 0;
+			readThreadPool.enqueue([&rawReader,coreNums,
 				start,			// start position of the whole raw data
 				size,			// size of the sub region
-				i,		//task id
+				i,		        //task id
 				this,
+				&totalBlocks,
 				&readBuffer,
 				&writeBuffer]
 				()
@@ -656,8 +658,7 @@ namespace ysl
 
 						const int offset = (i == 0) ? -m_padding : 0;
 
-#pragma omp parallel for num_threads(2*coreNums - 2)
-
+#pragma omp parallel for
 						for (int yb = 0; yb < m_blockDimension.y; yb++)
 							for (int xb = 0; xb < m_blockDimension.x; xb++)
 							{
@@ -681,6 +682,8 @@ namespace ysl
 									m_step,
 									m_step,
 									0);
+								++totalBlocks;
+								printf("%10lld of %10lld complete.\r",totalBlocks.load(),m_blockDimension.Prod());
 							}
 
 						//Debug("Compute Task %d has been finished.", i);
@@ -694,15 +697,15 @@ namespace ysl
 
 				});
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			//std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		}
 
 		size_t totalBlocks = 0;
-		ThreadArena writeThreadPool(1);
-		writeThreadPool.Start();
+		ThreadPool writeThreadPool(1);
+		//writeThreadPool.Start();
 		for (int i = 0; i < m_blockDimension.z; i++)
 		{
-			writeThreadPool.AppendTask([this,&totalBlocks,&t,
+			writeThreadPool.enqueue([this,&totalBlocks,&t,
 				&writeBuffer]
 				()
 				{
@@ -711,13 +714,8 @@ namespace ysl
 						writeBuffer.cond_notify_write.wait(lk, [&writeBuffer] {return writeBuffer.ready == true; });
 						const auto bytes = m_lvdDataSize.x * m_lvdDataSize.y * blockSize * sizeof(RawType);
 						///TODO:: write to file
-
-						//auto lvdPtr = lvdIO->FileMemPointer(LVD_HEADER_SIZE + writeBuffer.index*bytes, bytes);
-						//memcpy(lvdPtr, writeBuffer.buffer.get(), bytes);
-						//memcpy(lvdPtr + LVD_HEADER_SIZE + writeBuffer.index*bytes, writeBuffer.buffer.get(), bytes);
 						m_lvdFile.seekp(LVD_HEADER_SIZE + writeBuffer.index*bytes, std::ios_base::beg);
 						m_lvdFile.write((char*)writeBuffer.buffer.get(), bytes);
-
 						totalBlocks += m_blockDimension.x*m_blockDimension.y;
 
 						float curPercent = totalBlocks * 1.0 / m_blockDimension.Prod();
@@ -725,17 +723,17 @@ namespace ysl
 						const int hh = seconds / 3600;
 						const int mm = (seconds - hh * 3600) / 60;
 						const int ss = int(seconds) % 60;
-						printf("%20lld blocks finished, made up %.2f%%. Estimated remaining time: %02d:%02d:%02d\r", totalBlocks, totalBlocks*1.0 / m_blockDimension.Prod(),hh,mm,ss);
+						printf("%20lld blocks finished, made up %.2f%%. Estimated remaining time: %02d:%02d:%02d\n", totalBlocks, totalBlocks*100.0 / m_blockDimension.Prod(),hh,mm,ss);
 						writeBuffer.ready = false;		// prepare for next compute	
 					}
 					writeBuffer.cond_notify_read_compute.notify_one();			// notify to the read thread for the next read and computation
 				});
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			//std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 		}
 
-		readThreadPool.Stop();
-		writeThreadPool.Stop();
+		//readThreadPool.Stop();
+		//writeThreadPool.Stop();
 		return true;
 	}
 

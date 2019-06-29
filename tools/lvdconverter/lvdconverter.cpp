@@ -221,7 +221,14 @@ int main(int argc, char *argv[])
 	std::string outFileName;
 	std::cin >> outFileName;
 
-	if(log == 6)
+	if (log == 5)
+	{
+		ysl::RawToLVDConverterEx<5> converter(fileName, x, y, z, repeat, outFileName, offset);
+		//ysl::RawToLVDConverter<6> converter(fileName, x, y, z, repeat, outFileName,offset);
+		converter.convert();
+		converter.save(fileName);
+	}
+	else if(log == 6)
 	{
 		ysl::RawToLVDConverterEx<6> converter(fileName, x, y, z, repeat, outFileName,offset);
 		//ysl::RawToLVDConverter<6> converter(fileName, x, y, z, repeat, outFileName,offset);

@@ -41,6 +41,7 @@ namespace ysl
 		Size3 cacheDim;
 		std::unique_ptr<IBlock3DArrayAdapter> m_volumeCache;
 		std::shared_ptr<Disk3DPageAdapter> adapter;
+
 		[[deprecated]] int blockCoordinateToBlockId(int xBlock, int yBlock, int zBlock) const;
 		void Create();
 	public:

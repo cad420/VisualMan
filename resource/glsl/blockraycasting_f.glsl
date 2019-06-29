@@ -40,13 +40,15 @@ uniform float ks;
 in vec2 screenCoord;
 out vec4 fragColor;
 // Out-Of-Core uniforms
-uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (no repeat)
-uniform ivec3 blockDataSizeNoRepeat;				// block data size (no repeat)
+uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (without padding)
+uniform ivec3 blockDataSizeNoRepeat;				// block data size (without padding)
 uniform ivec3 repeatOffset;							// repeat boarder size
 layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
 layout(std430, binding = 0) buffer HashTable {uint blockId[];}hashTable;
 layout(std430, binding = 1) buffer MissedBlock{uint blockId[];}missedBlock;
 layout(std430, binding = 2) buffer PageTable{uvec4 pageEntry[];}pageTable;
+layout(std430, binding = 3) buffer LODInfo{int lodNumber;}logInfo;
+
 //layout(binding = 1, rgba32ui) uniform volatile uimage3D pageTableTexture;
 
 //uniform int lod;

@@ -3,6 +3,7 @@
 #include <GL/gl3w.h>
 #include <cstring>
 #include "timer.h"
+#include <iostream>
 
 //#include "../lvdrenderer/virtualvolumehierachy.h"
 
@@ -107,9 +108,6 @@ namespace ysl
 			texSetupParams->SetTextureFormat(TF_R8);
 			texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
 
-			//volumeTexSamplerUBO = MakeRef<BufferObject>();
-			//volumeTexSamplerUBO->CreateImmutableBufferObject(4 * 4, nullptr, storage_flags);
-			//std::vector<int> texUnits;
 
 			for (int i = 0; i < memoryEvalator->EvalPhysicalTextureCount(); i++)
 			{
@@ -117,11 +115,7 @@ namespace ysl
 				vTex->SetSetupParams(texSetupParams);
 				vTex->CreateTexture();
 				volumeDataTexture.push_back(vTex);
-				//texUnits.push_back(i);
 			}
-			//const int uboSize = texUnits.size() * sizeof(int);
-			//const auto ptr = volumeTexSamplerUBO->MapBufferRange(0, uboSize, mapping_flags);
-			//memcpy(ptr, texUnits.data(), uboSize);
 		}
 
 		void OutOfCoreVolumeTexture::InitMappingTable()
@@ -213,9 +207,12 @@ namespace ysl
 			blockIdLocalBuffer.resize(blocks);
 
 			memcpy(blockIdLocalBuffer.data(), blockIdBuffer->MappedPointer<int*>(), sizeof(int) * blocks);
+
+
 			memset(hashBuffer->MappedPointer<void*>(), 0, hashBuffer->BufferObjectSize()); // reset hash
 
 			const auto dim = cpuVolumeData->BlockDim();
+
 			const auto physicalBlockCount = dim.Prod();
 			std::vector<VirtualMemoryBlockIndex> virtualSpaceAddress;
 			virtualSpaceAddress.reserve(blocks);
