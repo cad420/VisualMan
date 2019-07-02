@@ -129,19 +129,11 @@ namespace ysl
 		if (offset != startRead)
 		{
 			seekAmt += startRead - offset;
-			//std::cout << seekAmt << std::endl;
-
 			seekAmt = startRead - offset;
 			if (!file.seekg(seekAmt, std::ios_base::cur))
 			{
 				throw std::runtime_error("ImportRAW: Error seeking file");
 			}
-
-			//if (fseek(file, seekAmt, SEEK_CUR) != 0)
-			//{
-			//	throw std::runtime_error("ImportRAW: Error seeking file");
-			//}
-
 			offset = startRead;
 		}
 

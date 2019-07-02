@@ -4,6 +4,10 @@
 #include <cstring>
 #include "timer.h"
 #include <iostream>
+#include <rapidjson/document.h>
+#include <fstream>
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/pointer.h"
 
 //#include "../lvdrenderer/virtualvolumehierachy.h"
 
@@ -14,21 +18,34 @@ namespace ysl
 		void OutOfCoreVolumeTexture::PrintVideoMemoryUsageInfo()
 		{
 
-			size_t volumeTextureMemoryUsage = memoryEvalator->EvalPhysicalTextureSize().Prod()*memoryEvalator->EvalPhysicalTextureCount();
-			size_t pageTableTextureMemoryUsage = cpuVolumeData->BlockDim().Prod() * sizeof(MappingTableManager::PageTableEntry);
+			const size_t volumeTextureMemoryUsage = memoryEvaluators->EvalPhysicalTextureSize().Prod()*memoryEvaluators->EvalPhysicalTextureCount();
 
-			std::cout << "--------------- LVD Data Info---------------\n";
-			std::cout << "Data Block Dimension: " << cpuVolumeData->BlockDim() << std::endl;
-			std::cout << "Data Block Size: " << cpuVolumeData->BlockSize() << std::endl;
-			std::cout << "Data Block Dimension In Host Memory: " << cpuVolumeData->CPUCacheBlockSize() << std::endl;
-			std::cout << "Data Block Storage In Host Memory: " << cpuVolumeData->CPUCacheSize() << std::endl;
-			std::cout << "Data Dimension Without Padding: " << cpuVolumeData->OriginalDataSize() << std::endl;
-			std::cout << "Block Padding: " << cpuVolumeData->Padding() << std::endl;
-			Log("------------Video Memory Usage ---------------");
+			//size_t idBufferBytes = 0;
+		//	size_t hashBufferBytes = 0;
+			size_t pageTableBufferBytes = 0;
+			for(int i = 0;i<lodCount;i++)
+			{
+				std::cout << "------------- LVD Data Info---LOD # "<<std::to_string(i)<<"----------\n";
+				std::cout << "Data Block Dimension: " << cpuVolumeData[i]->BlockDim() << std::endl;
+				std::cout << "Data Block Size: " << cpuVolumeData[i]->BlockSize() << std::endl;
+				std::cout << "Data Block Dimension In Host Memory: " << cpuVolumeData[i]->CPUCacheBlockSize() << std::endl;
+				std::cout << "Data Block Storage In Host Memory: " << cpuVolumeData[i]->CPUCacheSize() << std::endl;
+				std::cout << "Data Dimension Without Padding: " << cpuVolumeData[i]->OriginalDataSize() << std::endl;
+				std::cout << "Block Padding: " << cpuVolumeData[i]->Padding() << std::endl;
+
+				const auto blocks = cpuVolumeData[i]->BlockDim().Prod();
+				std::cout << "Hash Table Memory Usage: " << blocks * sizeof(uint32_t) << " bytes. Offset in buffer: " << lodInfo[i].hashBufferOffset << std::endl;
+				std::cout << "ID Buffer Table Memory Usage: " << blocks * sizeof(uint32_t) <<" bytes. Offset in buffer: " << lodInfo[i].idBufferOffset << std::endl;
+				std::cout << "Page Table Memory Usage: " << mappingTableManager->GetBytes(i) <<" bytes. Offset in buffer: " << lodInfo[i].pageTableOffset << std::endl;
+				pageTableBufferBytes += mappingTableManager->GetBytes(i);
+
+			}
+
+			Log("------------Summary Memory Usage ---------------");
 			Log("Volume Texture Memory Usage: %lld Bytes = %.2f MB", volumeTextureMemoryUsage, volumeTextureMemoryUsage*1.0 / 1024 / 1024);
-			Log("Page Table Memory Usage: %lld Bytes = %2.f MB", pageTableTextureMemoryUsage, pageTableTextureMemoryUsage*1.0 / 1024 / 1024);
-			Log("ID Buffer Block Memory Usage: %lld Bytes = %2.f MB", blockIdBuffer->BufferObjectSize(), blockIdBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
-			Log("Hash Buffer Block Memory Usage: %lld Bytes = %2.f MB", hashBuffer->BufferObjectSize(), hashBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
+			Log("Page Table Memory Usage: %lld Bytes = %2.f MB", pageTableBufferBytes, pageTableBufferBytes*1.0 / 1024 / 1024);
+			Log("Total ID Buffer Block Memory Usage: %lld Bytes = %2.f MB", blockIdBuffer->BufferObjectSize(), blockIdBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
+			Log("Total Hash Buffer Block Memory Usage: %lld Bytes = %2.f MB", hashBuffer->BufferObjectSize(), hashBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
 			Log("--------------End-----------------------------");
 		}
 
@@ -50,49 +67,17 @@ namespace ysl
 			// Ping-Pong PBO Transfer
 			assert(volumeDataTexture[0]->Handle());
 
-			const auto blockSize = cpuVolumeData->BlockSize();
+			const auto blockSize = cpuVolumeData[0]->BlockSize();
 			const auto textureId = volumeDataTexture[0]->Handle();
 			const auto blockBytes = this->bytes;
 
 			Timer t;
 			t.start();
 
-			//auto curPBO = 0;
-			//auto i = 0;
-			//const auto dd = cpuVolumeData->ReadBlockDataFromCPUCache(data[i].Key());
-			//GL(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos->Handle()));
-			//	auto pp = pboPtrs[curPBO];
-			//memcpy(pp, dd, blockBytes);
-			//for (; i < data.size() - 1;)
-			//{
-			//	const auto & blockIndex = data[i].Value();
-			//	const auto posInCache = Vec3i(blockIndex.x*blockSize.x, blockIndex.y*blockSize.y, blockIndex.z*blockSize.z);
-			//	GL(glTextureSubImage3D(textureId, 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, GL_UNSIGNED_BYTE, offset[curPBO]));
-			//	GL(fences[curPBO] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
-			//	i++;
-			//	const auto nextPBO = i % pboCount;
-
-			//	int is = 0;
-			//	GL(is = glIsSync(fences[nextPBO]));
-			//	if (is == GL_TRUE)
-			//	{
-			//		//GL(s = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
-			//		GL(glClientWaitSync(fences[nextPBO], 0, 100000000));
-			//		GL(glDeleteSync(fences[nextPBO]));
-			//	}
-			//	const auto d = cpuVolumeData->ReadBlockDataFromCPUCache(data[i].Key());
-			//	memcpy(pboPtrs[nextPBO], d, blockBytes);
-			//	curPBO = nextPBO;
-			//}
-			//const auto & blockIndex = data[i].Value();
-			//const auto posInCache = Vec3i(blockIndex.x*blockSize.x, blockIndex.y*blockSize.y, blockIndex.z*blockSize.z);
-			//GL(glTextureSubImage3D(textureId, 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, GL_UNSIGNED_BYTE, offset[curPBO]));
-			//GL(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
-
 			for (int i = 0; i < data.size(); i++)
 			{
 				const auto posInCache = Vec3i(blockSize) * data[i].Value().ToVec3i();
-				GL(glTextureSubImage3D(volumeDataTexture[data[i].Value().GetPhysicalStorageUnit()]->Handle(), 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, IT_UNSIGNED_BYTE, cpuVolumeData->GetPage(data[i].Key())));
+				GL(glTextureSubImage3D(volumeDataTexture[data[i].Value().GetPhysicalStorageUnit()]->Handle(), 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, IT_UNSIGNED_BYTE, cpuVolumeData[0]->GetPage(data[i].Key())));
 			}
 			t.stop();
 			totalBlocks += data.size();
@@ -102,14 +87,13 @@ namespace ysl
 		void OutOfCoreVolumeTexture::InitVolumeTextures()
 		{
 			auto texSetupParams = MakeRef<TexCreateParams>();
-			const auto texSize = memoryEvalator->EvalPhysicalTextureSize();
+			const auto texSize = memoryEvaluators->EvalPhysicalTextureSize();
 
 			texSetupParams->SetSize(texSize.x, texSize.y, texSize.z);
 			texSetupParams->SetTextureFormat(TF_R8);
 			texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
 
-
-			for (int i = 0; i < memoryEvalator->EvalPhysicalTextureCount(); i++)
+			for (int i = 0; i < memoryEvaluators->EvalPhysicalTextureCount(); i++)
 			{
 				auto vTex = MakeRef<Texture>();		// gpu volume data cache size
 				vTex->SetSetupParams(texSetupParams);
@@ -118,69 +102,133 @@ namespace ysl
 			}
 		}
 
-		void OutOfCoreVolumeTexture::InitMappingTable()
+	
+		LVDFileInfo GetLVDFileInfoFromJson(const std::string& fileName)
 		{
-			//Create a page table texture
-			auto texSetupParams = MakeRef<TexCreateParams>();
-			const auto mappingTableSize = cpuVolumeData->BlockDim();
+			using namespace rapidjson;
 
-			texSetupParams->SetSize(mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
-			texSetupParams->SetTextureFormat(TF_RGBA32UI);
-			texSetupParams->SetTextureTarget(TD_TEXTURE_3D);
+			std::ifstream ifs(fileName);
+			rapidjson::IStreamWrapper isw(ifs);
+			Document d;
+			d.ParseStream(isw);
 
-			//mappingTable = MakeRef<Texture>();		// gpu volume data cache size
-			//mappingTable->SetSetupParams(texSetupParams);
-			//mappingTable->CreateTexture();
+			LVDFileInfo lvdInfo;
+			
 
-			pageTableBuffer = MakeRef<BufferObject>();
-			pageTableBuffer->CreateImmutableBufferObject(mappingTableSize.Prod() * sizeof(MappingTableManager::PageTableEntry),nullptr,storage_flags);
-			const auto pageTablePtr = pageTableBuffer->MapBufferRange(0, mappingTableSize.Prod() * sizeof(MappingTableManager::PageTableEntry),mapping_flags);
-			assert(pageTablePtr);
+			auto lvdIter = d.FindMember("lvd");
+			if (lvdIter == d.MemberEnd() || !lvdIter->value.IsObject())
+			{
+				std::cout << "an invalid lod json file\n";
+				return lvdInfo;
+			}
 
-			// We create the page table directly on the video memory buffer
-			mappingTableManager = MakeRef<MappingTableManager>(cpuVolumeData->BlockDim(), memoryEvalator->EvalPhysicalBlockDim(), memoryEvalator->EvalPhysicalTextureCount(),pageTablePtr);	// It need the virtual memory space size and the block size
+			const auto fileNamesIter = lvdIter->value.FindMember("fileNames");
 
-			//mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, mappingTableSize.x, mappingTableSize.y, mappingTableSize.z);
+			if(fileNamesIter == lvdIter->value.MemberEnd() || lvdIter->value.IsArray())
+			{
+				return lvdInfo;
+			}
+
+			for(auto & n:fileNamesIter->value.GetArray())
+			{
+				lvdInfo.fileNames.push_back(n.GetString());
+			}
+
+			lvdInfo.samplingRate = GetValueByPointerWithDefault(d, "/lvd/samplingRate", 0.01).GetFloat();
+			lvdInfo.spacing.x = GetValueByPointerWithDefault(d, "/lvd/spacing/0", 1.0).GetFloat();
+			lvdInfo.spacing.y = GetValueByPointerWithDefault(d, "/lvd/spacing/1", 1.0).GetFloat();
+			lvdInfo.spacing.z = GetValueByPointerWithDefault(d, "/lvd/spacing/2", 1.0).GetFloat();
+
+			return lvdInfo;
 		}
+
 
 		OutOfCoreVolumeTexture::OutOfCoreVolumeTexture(const std::string& fileName)
 		{
+			auto fileInfo = GetLVDFileInfoFromJson(fileName);
+
 			// Open the volume data file
-			cpuVolumeData = MakeRef<MemoryPageAdapter>(fileName);
-			memoryEvalator = MakeRef<DefaultMemoryParamsEvaluator>(cpuVolumeData->BlockDim(), cpuVolumeData->BlockSize());
+			lodCount = fileInfo.fileNames.size();
+			cpuVolumeData.resize(lodCount);
+			lodInfo.resize(lodCount);
+			for(int i = 0 ;i<lodCount;i++)
+			{
+				cpuVolumeData[i] = MakeRef<MemoryPageAdapter>(fileInfo.fileNames[i]);
+			}
+			memoryEvaluators = MakeRef<DefaultMemoryParamsEvaluator>(cpuVolumeData[0]->BlockDim(), cpuVolumeData[0]->BlockSize());
+		
 
 			InitVolumeTextures();
+			///[0] Gather buffer size before creating buffers
 
-			// Create Page Table Buffer
-			InitMappingTable();
+			size_t pageTableTotalBytes = 0;
+			size_t hashBufferTotalBytes = 0;
+			size_t idBufferTotalBytes = 0;
+			std::vector<LODPageTableInfo> pageTableInfos;
+			for (int i = 0; i < cpuVolumeData.size(); i++)
+			{
+				LODPageTableInfo info;
+				info.virtualSpaceSize = Vec3i(cpuVolumeData[i]->BlockDim());
+				info.offset = pageTableTotalBytes;
+				pageTableInfos.push_back(info);
 
-			// Create Atomic Buffer
+				lodInfo[i].pageTableSize = info.virtualSpaceSize;			// __std430
+				lodInfo[i].pageTableOffset = pageTableTotalBytes;
+				lodInfo[i].idBufferOffset = idBufferTotalBytes;
+				lodInfo[i].hashBufferOffset = hashBufferTotalBytes;
 
+				const auto blocks = cpuVolumeData[i]->BlockDim().Prod();
+				pageTableTotalBytes += blocks * sizeof(MappingTableManager::PageTableEntry);
+				hashBufferTotalBytes += blocks * sizeof(uint32_t); 
+				idBufferTotalBytes += blocks * sizeof(uint32_t);
+			}
+			/// [1] Create Page Table Buffer and mapping table mananger
+			pageTableBuffer = MakeRef<BufferObject>();
+			pageTableBuffer->CreateImmutableBufferObject(pageTableTotalBytes, nullptr, storage_flags);
+			const auto pageTablePtr = pageTableBuffer->MapBufferRange(0, pageTableTotalBytes, mapping_flags);
+			assert(pageTablePtr);
+
+			for (int i = 0; i < lodCount; i++)
+			{
+				pageTableInfos[i].external = (char*)pageTablePtr + pageTableInfos[i].offset;
+			}
+
+			mappingTableManager = MakeRef<MappingTableManager>(pageTableInfos,		// Create Mapping table for lods
+				memoryEvaluators->EvalPhysicalBlockDim(), 
+				memoryEvaluators->EvalPhysicalTextureCount());
+
+
+			///[2] Create Atomic Buffer
+
+			const size_t atomicBufferBytes = lodCount * sizeof(uint32_t);
 			atomicCounterBuffer = MakeRef<BufferObject>(VM_BT_ATOMIC_COUNTER_BUFFER);
-			int zero = 0;
-			atomicCounterBuffer->SetLocalData(&zero, sizeof(int));
-			atomicCounterBuffer->CreateImmutableBufferObject(4, nullptr, storage_flags);
-			atomicCounterBuffer->SetBufferSubDataFromLocalSubData(0, 0, 4);
-			atomicCounterBuffer->MapBufferRange(0, 4, mapping_flags);
+			std::vector<uint32_t> zeroBuffer(lodCount, 0);
+			atomicCounterBuffer->SetLocalData(zeroBuffer.data(), atomicBufferBytes);
+			atomicCounterBuffer->CreateImmutableBufferObject(atomicBufferBytes, nullptr, storage_flags);
+			atomicCounterBuffer->SetBufferSubDataFromLocalSubData(0, 0, atomicBufferBytes);
+			atomicCounterBuffer->MapBufferRange(0, atomicBufferBytes, mapping_flags);
 
-			// Create ID Buffer
-			const auto idBufferBytes = memoryEvalator->EvalIDBufferCount() * sizeof(int32_t);
+			///[3] Create ID Buffer
+
+			//const auto idBufferBytes = memoryEvaluators->EvalIDBufferCount() * sizeof(int32_t);
+
 			blockIdBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
-			blockIdBuffer->CreateImmutableBufferObject(idBufferBytes, nullptr, storage_flags);
-			blockIdBuffer->MapBufferRange(0, idBufferBytes, mapping_flags);
+			blockIdBuffer->CreateImmutableBufferObject(idBufferTotalBytes, nullptr, storage_flags);
+			blockIdBuffer->MapBufferRange(0, idBufferTotalBytes, mapping_flags);
 
-			// Create Hash Buffer
-			const auto hashBufferBytes = memoryEvalator->EvalHashBufferSize() * sizeof(int);
+			///[4] Create Hash Buffer
 			hashBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
-			std::vector<uint32_t> emptyBuffer(hashBufferBytes, 0);
+			std::vector<uint32_t> emptyBuffer(hashBufferTotalBytes, 0);
 			hashBuffer->SetLocalData(emptyBuffer.data(), emptyBuffer.size());
-			hashBuffer->CreateImmutableBufferObject(hashBufferBytes, nullptr, storage_flags);
-			hashBuffer->MapBufferRange(0, hashBufferBytes, mapping_flags);
+			hashBuffer->CreateImmutableBufferObject(hashBufferTotalBytes, nullptr, storage_flags);
+			hashBuffer->MapBufferRange(0, hashBufferTotalBytes, mapping_flags);
 
-			//pageTableBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
+			///[5] Create LOD Info Buffer
+			lodInfoBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
+			const auto lodInfoBytes = sizeof(_std430_layout_LODInfo) * lodInfo.size();
+			lodInfoBuffer->CreateImmutableBufferObject(lodInfoBytes,lodInfo.data(),storage_flags);
 
 			PrintVideoMemoryUsageInfo();
-
 		}
 
 		void OutOfCoreVolumeTexture::OnDrawCallStart(OutOfCorePrimitive* p)
@@ -207,11 +255,9 @@ namespace ysl
 			blockIdLocalBuffer.resize(blocks);
 
 			memcpy(blockIdLocalBuffer.data(), blockIdBuffer->MappedPointer<int*>(), sizeof(int) * blocks);
-
-
 			memset(hashBuffer->MappedPointer<void*>(), 0, hashBuffer->BufferObjectSize()); // reset hash
 
-			const auto dim = cpuVolumeData->BlockDim();
+			const auto dim = cpuVolumeData[0]->BlockDim();
 
 			const auto physicalBlockCount = dim.Prod();
 			std::vector<VirtualMemoryBlockIndex> virtualSpaceAddress;
@@ -222,7 +268,7 @@ namespace ysl
 			{
 				virtualSpaceAddress.emplace_back(blockIdLocalBuffer[i], dim.x, dim.y, dim.z);
 			}
-			const auto physicalSpaceAddress = mappingTableManager->UpdatePageTable(virtualSpaceAddress);
+			const auto physicalSpaceAddress = mappingTableManager->UpdatePageTable(0,virtualSpaceAddress);
 			for (int i = 0; i < physicalSpaceAddress.size(); i++)
 			{
 				descs.emplace_back(physicalSpaceAddress[i], virtualSpaceAddress[i]);
@@ -246,15 +292,15 @@ namespace ysl
 			return 3;
 		}
 
-		int DefaultMemoryParamsEvaluator::EvalHashBufferSize() const
-		{
-			return virtualDim.Prod();
-		}
+		//int DefaultMemoryParamsEvaluator::EvalHashBufferSize() const
+		//{
+		//	return virtualDim.Prod();
+		//}
 
-		int DefaultMemoryParamsEvaluator::EvalIDBufferCount() const
-		{
-			return virtualDim.Prod();
-		}
+		//int DefaultMemoryParamsEvaluator::EvalIDBufferCount() const
+		//{
+		//	return virtualDim.Prod();
+		//}
 
 		void MappingTableManager::InitCPUPageTable(const Size3& blockDim,void * external)
 		{
@@ -275,7 +321,7 @@ namespace ysl
 						entry.SetMapFlag(EM_UNMAPPED);
 						//entry.w = EM_UNMAPPED;
 						(pageTable)(x, y, z) = entry;
-						lruMap[blockId++] = g_lruList.end();
+						lruMap[blockId++] = lruList.end();
 					}
 		}
 
@@ -286,7 +332,7 @@ namespace ysl
 					for (auto y = 0; y < physicalMemoryBlock.y; y++)
 						for (auto x = 0; x < physicalMemoryBlock.x; x++)
 						{
-							g_lruList.emplace_back
+							lruList.emplace_back
 							(
 								PageTableEntryAbstractIndex(-1, -1, -1),
 								PhysicalMemoryBlockIndex(x, y, z, i)
@@ -315,6 +361,52 @@ namespace ysl
 			InitLRUList(physicalSpaceSize, physicalSpaceCount);
 		}
 
+		MappingTableManager::MappingTableManager(const std::vector<LODPageTableInfo>& infos, const Size3& physicalSpaceSize,int physicalSpaceCount)
+		{
+			const int lod = infos.size();
+			lodPageTables.resize(lod);
+
+			// lod page table
+			for (int i = 0; i < lod; i++) 
+			{
+				if (infos[i].external == nullptr)
+					lodPageTables[i] = Linear3DArray<PageTableEntry>(Size3(infos[i].virtualSpaceSize), nullptr);
+				else
+					lodPageTables[i] = Linear3DArray<PageTableEntry>(infos[i].virtualSpaceSize.x, infos[i].virtualSpaceSize.y, infos[i].virtualSpaceSize.z, (PageTableEntry*)infos[i].external, false);
+				size_t blockId = 0;
+
+				for (auto z = 0; z < lodPageTables[i].Size().z; z++)
+					for (auto y = 0; y < lodPageTables[i].Size().y; y++)
+						for (auto x = 0; x < lodPageTables[i].Size().x; x++)
+						{
+							PageTableEntry entry;
+							entry.x = -1;
+							entry.y = -1;
+							entry.z = -1;
+							entry.SetMapFlag(EM_UNMAPPED);
+							//entry.w = EM_UNMAPPED;
+							(lodPageTables[i])(x, y, z) = entry;
+
+							lruMap[blockId++] = lruList.end();
+						}
+			}
+
+			// lod lru list
+
+			for (int i = 0; i < physicalSpaceCount; i++)
+				for (auto z = 0; z < physicalSpaceSize.z; z++)
+					for (auto y = 0; y < physicalSpaceSize.y; y++)
+						for (auto x = 0; x < physicalSpaceSize.x; x++)
+						{
+							lruList.emplace_back
+							(
+								PageTableEntryAbstractIndex(-1, -1, -1),
+								PhysicalMemoryBlockIndex(x, y, z, i)
+							);
+						}
+
+		}
+
 		std::vector<PhysicalMemoryBlockIndex> MappingTableManager::UpdatePageTable(
 			const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices)
 		{
@@ -330,10 +422,10 @@ namespace ysl
 				if(pageTableEntry.GetMapFlag() == EM_MAPPED)
 				{
 					// move the already mapped node to the head
-					g_lruList.splice(g_lruList.begin(), g_lruList,lruMap[flatBlockID]);
+					lruList.splice(lruList.begin(), lruList,lruMap[flatBlockID]);
 				}else
 				{
-					auto& last = g_lruList.back();
+					auto& last = lruList.back();
 					//pageTableEntry.w = EntryMapFlag::EM_MAPPED; // Map the flag of page table entry
 					pageTableEntry.SetMapFlag(EM_MAPPED);
 					// last.second is the cache block index
@@ -345,21 +437,21 @@ namespace ysl
 					if (last.first.x != -1)		// detach previous mapped storage
 					{
 						pageTable(last.first.x, last.first.y, last.first.z).SetMapFlag(EM_UNMAPPED);
-						lruMap[flatBlockID] = g_lruList.end();
+						lruMap[flatBlockID] = lruList.end();
 					}
 					// critical section : last
 					last.first.x = index.x;
 					last.first.y = index.y;
 					last.first.z = index.z;
-					g_lruList.splice(g_lruList.begin(), g_lruList, --g_lruList.end()); // move from tail to head, LRU policy
-					lruMap[flatBlockID] = g_lruList.begin();
+					lruList.splice(lruList.begin(), lruList, --lruList.end()); // move from tail to head, LRU policy
+					lruMap[flatBlockID] = lruList.begin();
 				}
 			}
 			return physicalIndices;
 		}
 
-		std::vector<PhysicalMemoryBlockIndex> MappingTableManager::UpdatePageTable(
-			const std::vector<size_t>& missedBlockIndices)
+		std::vector<PhysicalMemoryBlockIndex> MappingTableManager::UpdatePageTable(int lod,
+			const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices)
 		{
 			const auto missedBlocks = missedBlockIndices.size();
 			std::vector<PhysicalMemoryBlockIndex> physicalIndices;
@@ -368,17 +460,15 @@ namespace ysl
 			for (int i = 0; i < missedBlocks; i++)
 			{
 				const auto& index = missedBlockIndices[i];
-				const auto vIndex = VirtualMemoryBlockIndex(index, pageTable.Size().x, pageTable.Size().y, pageTable.Size().z);
-				auto& pageTableEntry = pageTable(vIndex.x, vIndex.y, vIndex.z);
-				//const size_t flatBlockID = vIndex.z * pageTable.Size().x * pageTable.Size().y + vIndex.y * pageTable.Size().x + vIndex.x;
-				if (pageTableEntry.GetMapFlag() == EM_MAPPED)
+				auto& pageTableEntry = lodPageTables[lod](index.x, index.y, index.z);
+				const size_t flatBlockID = index.z * lodPageTables[lod].Size().x * lodPageTables[lod].Size().y + index.y * lodPageTables[lod].Size().x + index.x;
+				if(pageTableEntry.GetMapFlag() == EM_MAPPED)
 				{
 					// move the already mapped node to the head
-					g_lruList.splice(g_lruList.begin(), g_lruList, lruMap[index]);
-				}
-				else
+					lruList.splice(lruList.begin(), lruList,lruMap[flatBlockID]);
+				}else
 				{
-					auto& last = g_lruList.back();
+					auto& last = lruList.back();
 					//pageTableEntry.w = EntryMapFlag::EM_MAPPED; // Map the flag of page table entry
 					pageTableEntry.SetMapFlag(EM_MAPPED);
 					// last.second is the cache block index
@@ -389,18 +479,22 @@ namespace ysl
 					pageTableEntry.SetTextureUnit(last.second.GetPhysicalStorageUnit());
 					if (last.first.x != -1)		// detach previous mapped storage
 					{
-						pageTable(last.first.x, last.first.y, last.first.z).SetMapFlag(EM_UNMAPPED);
-						lruMap[index] = g_lruList.end();
+						lodPageTables[lod](last.first.x, last.first.y, last.first.z).SetMapFlag(EM_UNMAPPED);
+						lruMap[flatBlockID] = lruList.end();
 					}
 					// critical section : last
-					last.first.x = vIndex.x;
-					last.first.y = vIndex.y;
-					last.first.z = vIndex.z;
-					g_lruList.splice(g_lruList.begin(), g_lruList, --g_lruList.end()); // move from tail to head, LRU policy
-					lruMap[index] = g_lruList.begin();
+					last.first.x = index.x;
+					last.first.y = index.y;
+					last.first.z = index.z;
+
+					last.first.lod = lod;		// 
+
+					lruList.splice(lruList.begin(), lruList, --lruList.end()); // move from tail to head, LRU policy
+					lruMap[flatBlockID] = lruList.begin();
 				}
 			}
 			return physicalIndices;
 		}
+
 	}
 }

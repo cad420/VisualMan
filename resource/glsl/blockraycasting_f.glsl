@@ -47,9 +47,17 @@ layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
 layout(std430, binding = 0) buffer HashTable {uint blockId[];}hashTable;
 layout(std430, binding = 1) buffer MissedBlock{uint blockId[];}missedBlock;
 layout(std430, binding = 2) buffer PageTable{uvec4 pageEntry[];}pageTable;
-layout(std430, binding = 3) buffer LODInfo{int lodNumber;}logInfo;
 
-//layout(binding = 1, rgba32ui) uniform volatile uimage3D pageTableTexture;
+
+uniform int lodNum;
+struct LODInfo
+{
+	ivec3 pageTableSize;			// offset
+	int hashBufferOffset;			// offset
+	int idBufferOffset;				// offset
+};
+layout(std430, binding = 3) buffer LODInfoBuf{LODInfo lod[];}lodInfoBuf;
+
 
 //uniform int lod;
 

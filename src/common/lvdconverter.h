@@ -635,7 +635,7 @@ namespace ysl
 			//const Size3 size(g_xSize, g_ySize,i!=0?Clamp(g_zSize - startz, 0, blockSize):62);
 			//std::cout << size << std::endl;
 			std::atomic_size_t totalBlocks = 0;
-			readThreadPool.enqueue([&rawReader,coreNums,
+			readThreadPool.AppendTask([&rawReader,coreNums,
 				start,			// start position of the whole raw data
 				size,			// size of the sub region
 				i,		        //task id
@@ -705,7 +705,7 @@ namespace ysl
 		//writeThreadPool.Start();
 		for (int i = 0; i < m_blockDimension.z; i++)
 		{
-			writeThreadPool.enqueue([this,&totalBlocks,&t,
+			writeThreadPool.AppendTask([this,&totalBlocks,&t,
 				&writeBuffer]
 				()
 				{

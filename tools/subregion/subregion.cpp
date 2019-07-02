@@ -12,6 +12,7 @@ int main()
 	auto size = ysl::Size3(w, h, d);
 	auto subsize = ysl::Size3(w0, h0, d0);
 	auto begin = ysl::Size3(x, y, z);
+
 	ysl::RawReader raw(inFileName, size, vs);
 
 	std::cout << "Read From " << begin << ". Size is " << subsize << std::endl;
@@ -36,12 +37,14 @@ int main()
 		std::cout << "Map pointer is nullptr\n";
 		return 3;
 	}
-	auto readBytes = raw.readRegion(begin, subsize, ptr);
+	const auto readBytes = raw.readRegion(begin, subsize, ptr);
 	if(readBytes != bytes)
 	{
 		std::cout << " Read byte do not match expected bytes\n";
 		return 4;
 	}
 	io->Close();
+
+
 	return 0;
 }

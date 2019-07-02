@@ -194,12 +194,12 @@ namespace ysl
 			{
 				auto extension = each.substr(each.find_last_of('.'));
 				bool found = false;
-				if (extension == ".lvd")
-				{
-					SetupResources(each);
-					found = true;
-				}
-				else if (extension == ".tf")
+				//if (extension == ".lvd")
+				//{
+				//	SetupResources(each);
+				//	found = true;
+				//}
+				if (extension == ".tf")
 				{
 					SetupTF(each);
 					found = true;
@@ -207,6 +207,7 @@ namespace ysl
 				else if (extension == ".json")
 				{
 					SetupJSON(each);
+					SetupResources(each);
 					found = true;
 				}
 				if (found)
@@ -294,6 +295,7 @@ namespace ysl
 			rayCastShading->CreateGetSSBO(2)->SetBufferObject(oocResources->GetPageTableBuffer());
 			rayCastShading->CreateGetSSBO(0)->SetBufferObject(oocResources->GetHashBuffer());
 			rayCastShading->CreateGetSSBO(1)->SetBufferObject(oocResources->GetBlockIDBuffer());
+			rayCastShading->CreateGetSSBO(3)->SetBufferObject(oocResources->GetLODInfoBuffer());
 
 			auto v = oocResources->VirtualBlockDim();
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("pageTableSize")->SetUniform3i(1, v.Data());
@@ -303,6 +305,8 @@ namespace ysl
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("blockDataSizeNoRepeat")->SetUniform3i(1, v.Data());
 			v = oocResources->Padding();
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("repeatOffset")->SetUniform3i(1, v.Data());
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("lodNum")->SetUniformValue(oocResources->GetLODCount());
+
 			oocPrimitive->SetOutOfCoreResources(oocResources);
 
 			Context()->Update();

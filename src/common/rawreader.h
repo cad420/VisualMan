@@ -32,6 +32,7 @@ namespace ysl
 
 		size_t readRegion(const ysl::Size3 & start,
 			const ysl::Size3 &size, unsigned char *buffer);
+
 	private:
 		std::size_t readRegion__(const ysl::Size3 & start, const ysl::Size3 & size, unsigned char * buffer);
 		bool convexRead(const ysl::Size3 & size) {

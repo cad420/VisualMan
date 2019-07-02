@@ -5,7 +5,7 @@
 #include <combaseapi.h>
 #include "error.h"
 #include "cachepolicy.h"
-
+#include <rapidjson/document.h>
 
 #define SHOW_LIST_STATE																										\
 		std::cout << "LRU State:" << std::endl;																				\
@@ -26,7 +26,6 @@ namespace ysl
 		const auto x = size.x, y = size.y, z = size.z;
 		return zBlock * x * y + yBlock * x + xBlock;
 	}
-
 
 	void MemoryPageAdapter::Create()
 	{
@@ -50,11 +49,6 @@ namespace ysl
 		}
 	}
 
-	//void MemoryPageAdapter::InitLRU()
-	//{
-	//	for (auto i = std::size_t(0); i < cacheDim.Prod(); i++)
-	//		m_lruList.push_front(LRUListCell(i, m_blockIdInCache.end()));
-	//}
 
 	int MemoryPageAdapter::GetLog() const
 	{
@@ -62,6 +56,7 @@ namespace ysl
 		const int log = p->Get3DPageSizeInLog();
 		return log;
 	}
+
 
 	void* MemoryPageAdapter::GetPageStorage_Implement(size_t pageID)
 	{
@@ -72,8 +67,11 @@ namespace ysl
 		//lvdReader(fileName),
 		cacheDim(16,16,16)
 	{
+
+
 		//Create();
 		SetDiskFileCache(std::make_shared<Disk3DPageAdapter>(fileName));
+
 		SetCachePolicy(std::make_unique<LRUCachePolicy>());
 		//InitLRU();
 	}

@@ -5,6 +5,7 @@
 #include <vector>
 #include "largevolumecache.h"
 #include "oocprimitive.h"
+//#include "rapidjson/reader.h"
 
 namespace ysl
 {
@@ -32,10 +33,12 @@ namespace ysl
 			virtual Size3 EvalPhysicalTextureSize()const = 0;
 			virtual int EvalPhysicalTextureCount()const = 0;
 			virtual Size3 EvalPhysicalBlockDim()const = 0;
-			virtual int EvalHashBufferSize()const = 0;
-			virtual int EvalIDBufferCount()const = 0;
+		//	virtual int EvalHashBufferSize()const = 0;
+		//	virtual int EvalIDBufferCount()const = 0;
 			virtual ~IVideoMemoryParamsEvaluator()=default;
 		};
+
+
 
 		struct DefaultMemoryParamsEvaluator:IVideoMemoryParamsEvaluator
 		{
@@ -48,9 +51,16 @@ namespace ysl
 			Size3 EvalPhysicalBlockDim() const override;
 
 			int EvalPhysicalTextureCount() const override;
-			int EvalHashBufferSize() const override;
-			int EvalIDBufferCount() const override;
+			//int EvalHashBufferSize() const override;
+		//	int EvalIDBufferCount() const override;
 			~DefaultMemoryParamsEvaluator() = default;
+		};
+
+		struct LODPageTableInfo
+		{
+			Vec3i virtualSpaceSize;
+			void * external = nullptr;
+			size_t offset = 0;
 		};
 
 		class MappingTableManager
@@ -75,13 +85,19 @@ namespace ysl
 		private:
 			using LRUList = std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>>;
 			using LRUMap = std::unordered_map<size_t, LRUList::iterator>;
+
 			Linear3DArray<PageTableEntry> pageTable;
 
+			std::vector<Linear3DArray<PageTableEntry>> lodPageTables;
+
 			LRUMap lruMap;
-			LRUList g_lruList;
+			LRUList lruList;
 
 			void InitCPUPageTable(const Size3& blockDim,void * external);
 			void InitLRUList(const Size3& physicalMemoryBlock,int unitCount);
+
+			//void InitCPUPageTable();
+
 		public:
 			using size_type = std::size_t;
 			/**
@@ -94,16 +110,42 @@ namespace ysl
 
 			MappingTableManager(const Size3 & virtualSpaceSize, const Size3 & phsicalSpaceSize, int physicalSpaceCount, void * external);
 
+			MappingTableManager(const std::vector<LODPageTableInfo> &infos, const Size3& physicalSpaceSize,int physicalSpaceCount);
+
+
 			const void * GetData()const { return pageTable.Data(); }
+
+			size_t GetBytes(int lod) { return lodPageTables[lod].Size().Prod() * sizeof(PageTableEntry); }
 			/**
 			 * \brief Translates the virtual space address to the physical address and update the mapping table by LRU policy
 			 */
-			std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex>& missedBlockIndices);
-			std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<size_t>& missedBlockIndices);
+			std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex> & missedBlockIndices);
+			std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(int lod,const std::vector<VirtualMemoryBlockIndex> & missedBlockIndices);
+
+			//std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<size_t> & missedBlockIndices);
 		};
+
+		struct LVDFileInfo
+		{
+			std::vector<std::string> fileNames;
+			float samplingRate = 0.001;
+			Vec3f spacing = Vec3f{ 1.f,1.f,1.f };
+		};
+
+		struct _std430_layout_LODInfo
+		{
+			Vec3i pageTableSize;
+			uint32_t pageTableOffset;
+			uint32_t hashBufferOffset;
+			uint32_t idBufferOffset;
+		};
+
+		VISUALMAN_EXPORT_IMPORT LVDFileInfo GetLVDFileInfoFromJson(const std::string & fileName);
 
 		class VISUALMAN_EXPORT_IMPORT OutOfCoreVolumeTexture :public IOutOfCoreAdapter			// Dest
 		{
+
+
 		public:
 			explicit OutOfCoreVolumeTexture(const std::string & fileName);
 
@@ -128,18 +170,26 @@ namespace ysl
 			Ref<BufferObject> GetPageTableBuffer(){ return pageTableBuffer; }
 			Ref<const BufferObject> GetPageTableBuffer()const { return pageTableBuffer; }
 
-			//Ref<Texture> GetPageTableTexture() { return mappingTable; }
-			//Ref<const Texture> GetPageTableTexture()const { return mappingTable; }
+			Ref<BufferObject> GetLODInfoBuffer() { return lodInfoBuffer; }
+			Ref<const BufferObject> GetLODInfoBuffer()const { return lodInfoBuffer; }
 
-			//Ref<BufferObject> GetSamplerUBO() { return volumeTexSamplerUBO; }
-			//Ref<const BufferObject> GetSamplerUBO()const { return volumeTexSamplerUBO; }
+			int GetLODCount()const { return lodCount; };
 
 
-			Vec3i DataResolution()const { return Vec3i(cpuVolumeData->OriginalDataSize()); }
-			Vec3i DataResolutionWithPadding()const { return Vec3i(cpuVolumeData->BlockDim()*cpuVolumeData->BlockSize()); }
-			Vec3i Padding()const {return Vec3i( cpuVolumeData->Padding(),cpuVolumeData->Padding(),cpuVolumeData->Padding()); }
-			Vec3i VirtualBlockDim()const { return Vec3i(cpuVolumeData->BlockDim()); }
-			Vec3i BlockSize()const { return Vec3i(cpuVolumeData->BlockSize());}
+			[[deprecated]]
+			Vec3i DataResolution()const { return Vec3i(cpuVolumeData[0]->OriginalDataSize()); }
+
+			[[deprecated]]
+			Vec3i DataResolutionWithPadding()const { return Vec3i(cpuVolumeData[0]->BlockDim()*cpuVolumeData[0]->BlockSize()); }
+
+			[[deprecated]]
+			Vec3i Padding()const {return Vec3i( cpuVolumeData[0]->Padding(),cpuVolumeData[0]->Padding(),cpuVolumeData[0]->Padding()); }
+
+			[[deprecated]]
+			Vec3i VirtualBlockDim()const { return Vec3i(cpuVolumeData[0]->BlockDim()); }
+
+			[[deprecated]]
+			Vec3i BlockSize()const { return Vec3i(cpuVolumeData[0]->BlockSize());}
 
 			void PrintVideoMemoryUsageInfo();
 
@@ -152,26 +202,79 @@ namespace ysl
 			void SetSubTextureDataUsePBO(const std::vector<BlockDescriptor> & data);
 
 			void InitVolumeTextures();
-			void InitMappingTable();
+
 
 			double time = 0;
 			size_t totalBlocks = 0;
 			size_t bytes = 0;
 
-			std::vector<Ref<Texture>> volumeDataTexture;
-			Ref<MemoryPageAdapter> cpuVolumeData;
 
+
+
+			std::vector<Ref<Texture>> volumeDataTexture;
+
+			std::vector<Ref<MemoryPageAdapter>> cpuVolumeData;
+
+
+			/**
+			 * \brief Stores the atomic counters for every lod data
+			 * 
+			 * Using the first 4 bytes to store the atomic counter storage for the LOD0, 
+			 * and the second 4 bytes for the second LOD, etc.
+			 *  
+			 */
 			Ref<BufferObject> atomicCounterBuffer;
+			/**
+			 * \brief Stores the hash table for every lod data.
+			 * 
+			 * Using the first section of the hash buffer to store the hash table for the LOD0, 
+			 * and the second section of the hash buffer for the second LOD, etc.
+			 */
 			Ref<BufferObject> hashBuffer;
+			/**
+			 * \brief Stores the missed block id for every lod data
+			 * 
+			 * Using the first section of the id buffer to store the missed block id for the LOD0, 
+			 * and the second section of the hash buffer for the second LOD, etc.
+			 */
 			Ref<BufferObject> blockIdBuffer;
-			//Ref<BufferObject> volumeTexSamplerUBO;
+			/**
+			 * \brief Stores the page table for every lod data
+			 *
+			 * Using the first section of the page table buffer to store the page table for the LOD0, 
+			 * and the second section of the page table buffer for the second LOD, etc.
+			 */
 			Ref<BufferObject> pageTableBuffer;
+			/**
+			 * \brief Stores all the lod information.
+			 * 
+			 * 
+			 * 
+			 * \note The memory layout of the buffer is GLSL-dependent. See the definition of \a LODInfo in the fragment shader blockraycasting_f.glsl
+			 */
+			Ref<BufferObject> lodInfoBuffer;
 
 			std::vector<int> blockIdLocalBuffer;
-			//Ref<Texture> mappingTable;
+
+			/**
+			 * \brief Manages and updates the LOD mapping tables.
+			 */
 			Ref<MappingTableManager> mappingTableManager;
-			Ref<IVideoMemoryParamsEvaluator> memoryEvalator;
+
+			//std::vector<LODPageTableInfo> pageTableInfos;
+
+			//std::vector<Ref<IVideoMemoryParamsEvaluator>> memoryEvaluators;
+			Ref<IVideoMemoryParamsEvaluator> memoryEvaluators;
 			// CPU Volume Cache
+
+			/**
+			 * \brief See the definition of the LODInfo in blockraycasting_f.glsl
+			 *
+			 */
+
+
+			std::vector<_std430_layout_LODInfo> lodInfo;
+			int lodCount = 1;
 		};
 	}
 }

@@ -22,6 +22,7 @@ namespace ysl
 	{
 		using internal_type = int;
 		internal_type x, y, z;
+		internal_type lod = 0;
 		PageTableEntryAbstractIndex(internal_type x_ = -1,
 			internal_type y_ = -1,
 			internal_type z_ = -1) :

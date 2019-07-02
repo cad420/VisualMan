@@ -7,6 +7,7 @@
 
 #include <random>
 #include <ctime>
+#include "numeric.h"
 
 namespace ysl
 {
@@ -119,7 +120,7 @@ namespace ysl
 			}
 			Ray newRay = isect.spawnRay(wi);
 			indirectIllumination = bsdf * trace(scene, newRay, depth - 1, di, gi, intensity);
-			indirectIllumination = clamp(indirectIllumination, RGBASpectrum(0.0f), RGBASpectrum(255.f));
+			indirectIllumination = Clamp(indirectIllumination, RGBASpectrum(0.0f), RGBASpectrum(255.f));
 		}
 
 #endif

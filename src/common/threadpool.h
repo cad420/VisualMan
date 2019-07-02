@@ -15,12 +15,15 @@ namespace ysl
 {
 	class COMMON_EXPORT_IMPORT ThreadArena
 	{
+
 	public:
 		using Task = std::function<void()>;
 		ThreadArena(int tNum) :threadNum(tNum),running(false) {}
 		ThreadArena(const ThreadArena &) = delete;
 		ThreadArena & operator=(const ThreadArena&) = delete;
+
 		void Start();
+
 		void Stop();
 
 		void AppendTask(const Task & t)
@@ -103,18 +106,13 @@ namespace ysl
 	public:
 		ThreadPool(size_t);
 		template<class F, class... Args>
-		auto enqueue(F&& f, Args&&... args)
-			->std::future<typename std::result_of<F(Args...)>::type>;
+		auto AppendTask(F&& f, Args&&... args);
 		~ThreadPool();
 	private:
-		// need to keep track of threads so we can join them
-		std::vector< std::thread > workers;
-		// the task queue
-		std::queue< std::function<void()> > tasks;
-
-		// synchronization
-		std::mutex queue_mutex;
-		std::condition_variable condition;
+		std::vector<std::thread> workers;
+		std::queue<std::function<void()>> tasks;
+		std::mutex mut;
+		std::condition_variable cond;
 		bool stop;
 	};
 
@@ -131,8 +129,8 @@ namespace ysl
 						std::function<void()> task;
 
 						{
-							std::unique_lock<std::mutex> lock(this->queue_mutex);
-							this->condition.wait(lock,
+							std::unique_lock<std::mutex> lock(this->mut);
+							this->cond.wait(lock,
 								[this] { return this->stop || !this->tasks.empty(); });
 							if (this->stop && this->tasks.empty())
 								return;
@@ -148,40 +146,31 @@ namespace ysl
 
 	// add new work item to the pool
 	template<class F, class... Args>
-	auto ThreadPool::enqueue(F&& f, Args&&... args)
-		-> std::future<typename std::result_of<F(Args...)>::type>
+	auto ThreadPool::AppendTask(F&& f, Args&&... args)
 	{
-		using return_type = typename std::result_of<F(Args...)>::type;
-
-		auto task = std::make_shared< std::packaged_task<return_type()> >(
-			std::bind(std::forward<F>(f), std::forward<Args>(args)...)
-			);
-
+		using return_type = std::invoke_result_t<F,Args...>;
+		auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 		std::future<return_type> res = task->get_future();
 		{
-			std::unique_lock<std::mutex> lock(queue_mutex);
-
+			std::unique_lock<std::mutex> lock(mut);
 			// don't allow enqueueing after stopping the pool
 			if (stop)
 				throw std::runtime_error("enqueue on stopped ThreadPool");
-
 			tasks.emplace([task]() { (*task)(); });
 		}
-		condition.notify_one();
+		cond.notify_one();
 		return res;
 	}
-
 	// the destructor joins all threads
 	inline ThreadPool::~ThreadPool()
 	{
 		{
-			std::unique_lock<std::mutex> lock(queue_mutex);
+			std::unique_lock<std::mutex> lock(mut);
 			stop = true;
 		}
-		condition.notify_all();
+		cond.notify_all();
 		for (std::thread &worker : workers)
 			worker.join();
 	}
-
 }
 #endif

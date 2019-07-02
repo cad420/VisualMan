@@ -5,6 +5,7 @@ file(GLOB COMMON_INC "*.h")
 
 add_library(common ${VM_SHARED_OR_STATIC})
 target_sources(common PRIVATE ${COMMON_SRC})
+target_include_directories(common PRIVATE "${CMAKE_SOURCE_DIR}/lib/3rdparty")
 
 install(TARGETS common LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
 install(FILES ${COMMON_INC} DESTINATION "include")
