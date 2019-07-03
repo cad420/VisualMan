@@ -22,7 +22,7 @@ uniform sampler3D cacheVolume2;
 uniform sampler3D cacheVolume3;
 
 
-uniform ivec3 pageTableSize;				// page table texture size1
+//uniform ivec3 pageTableSize;				// page table texture size1
 layout(binding = 2, rgba32f) uniform volatile image2D entryPos;
 layout(binding = 3, rgba32f) uniform volatile image2D endPos;
 layout(binding = 4, rgba32f) uniform volatile image2DRect interResult;
@@ -52,11 +52,13 @@ layout(std430, binding = 2) buffer PageTable{uvec4 pageEntry[];}pageTable;
 uniform int lodNum;
 struct LODInfo
 {
-	ivec3 pageTableSize;			// offset
+	ivec3 pageTableSize;			// offset, considering alignment.
+	int pageTableOffset;			// pageTable Offset,
 	int hashBufferOffset;			// offset
 	int idBufferOffset;				// offset
 };
-layout(std430, binding = 3) buffer LODInfoBuf{LODInfo lod[];}lodInfoBuf;
+
+layout(std140, binding = 3) buffer LODInfoBuffer{LODInfo lod[];}lodInfoBuffer;
 
 
 //uniform int lod;
@@ -68,37 +70,38 @@ vec3 N;
 uint prevVisitedBlockID;
 bool hashPrevious = false;
 
-vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
+vec4 virtualVolumeSample(vec3 samplePos,out int curLod,out bool mapped)
 {
 	vec4 scalar;
-	//ivec3 totalPageTableSize = imageSize(pageTableTexture);
+	ivec3 pageTableSize = ivec3(lodInfoBuffer.lod[curLod].pageTableSize);
+
 	// address translation
 	ivec3 entry3DIndex = ivec3(samplePos*pageTableSize);
 	uint entryFlatIndex = entry3DIndex.z * pageTableSize.x*pageTableSize.y + entry3DIndex.y * pageTableSize.x + entry3DIndex.x;
 
-	uvec4 pageTableEntry = pageTable.pageEntry[entryFlatIndex];
+	uint pageTableOffset = lodInfoBuffer.lod[curLod].pageTableOffset;
+	uvec4 pageTableEntry = pageTable.pageEntry[pageTableOffset+entryFlatIndex];
 
 	//uvec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*pageTableSize));
 
-	vec3 voxelCoord=vec3(samplePos * (volumeDataSizeNoRepeat));
+	vec3 voxelCoord = vec3(samplePos * (volumeDataSizeNoRepeat));
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
 
 	//ivec3 blockCoord = ivec3(voxelCoord / blockDataSizeNoRepeat);
-	//int blockId = blockCoord.z * pageTableSize.y*pageTableSize.x 	+blockCoord.y * pageTableSize.x 	+blockCoord.x;
+	//int blockId = blockCoord.z * pageTableSize.y*pageTableSize.x 	+blockCoord.y * pageTableSize.x +blockCoord.x;
 
 	if(((pageTableEntry.w) & (0x000f)) == 2)		// Unmapped flag
 	{
-		//if(hashPrevious == false || prevVisitedBlockID != entryFlatIndex)
-	//	{
-	//		prevVisitedBlockID = entryFlatIndex;
-	//		hashPrevious = true;
-			if(atomicCompSwap(hashTable.blockId[entryFlatIndex],0,1) == 0)
-			{
-				uint index = atomicCounterIncrement(atomic_count);
-				missedBlock.blockId[index] = entryFlatIndex;
-				hashTable.blockId[entryFlatIndex] = 1;		// exits
-			}
-	//	}
+		// search coarser lod
+		uint hashTableOffset = lodInfoBuffer.lod[curLod].hashBufferOffset;
+		if(atomicCompSwap(hashTable.blockId[hashTableOffset + entryFlatIndex],0,1) == 0)
+		{
+			
+			uint index = atomicCounterIncrement(atomic_count);
+			uint idBufferOffset = lodInfoBuffer.lod[curLod].idBufferOffset;
+			missedBlock.blockId[idBufferOffset + index] = entryFlatIndex;
+			hashTable.blockId[hashTableOffset + entryFlatIndex] = 1;		// exits
+		}
 		mapped = false;
 	}
 	else
@@ -138,7 +141,6 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 			N.z = (texture(cacheVolume2, samplePoint+vec3(0,0,step)).r - texture(cacheVolume3, samplePoint+vec3(0,0,-step) ).r) ;
 			#endif
 		}
-
 		mapped = true;
 	}
 
@@ -179,6 +181,8 @@ void main()
 	int steps = int(distance / step);
 	vec3 samplePoint = rayStart;
 
+	int curLod = 0;
+
 	for (int i = 0; i < steps; ++i) 
 	{
 		samplePoint = rayStart + direction * step * (float(i) + 0.5);
@@ -192,11 +196,11 @@ void main()
 		continue;
 		//sample a scalar at samplePoint
 		bool mapped;
-		vec4 scalar = virtualVolumeSample(samplePoint,mapped);
+		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped);
 		//count++;
 		if (mapped == false) 
 		{
-			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
+			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,curLod));
 			memoryBarrier();
 			imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
 			memoryBarrier();

@@ -132,12 +132,13 @@ namespace ysl
 			Vec3f spacing = Vec3f{ 1.f,1.f,1.f };
 		};
 
-		struct _std430_layout_LODInfo
+		struct _std140_layout_LODInfo
 		{
 			Vec3i pageTableSize;
 			uint32_t pageTableOffset;
 			uint32_t hashBufferOffset;
 			uint32_t idBufferOffset;
+			uint32_t pad[2];
 		};
 
 		VISUALMAN_EXPORT_IMPORT LVDFileInfo GetLVDFileInfoFromJson(const std::string & fileName);
@@ -273,7 +274,7 @@ namespace ysl
 			 */
 
 
-			std::vector<_std430_layout_LODInfo> lodInfo;
+			std::vector<_std140_layout_LODInfo> lodInfo;
 			int lodCount = 1;
 		};
 	}

@@ -904,13 +904,12 @@ namespace ysl
 	public:
 		T x, y, z,w;
 		constexpr Vector4() :x(0), y(0), z(0),w(0) {}
-		constexpr Vector4(const T &x, const T &y, const T& z,const T &w) : x(x), y(y), z(z),w(w)
-		{
-			//assert(!HasNaN());
-		}
+		constexpr Vector4(const T &x, const T &y, const T& z,const T &w) : x(x), y(y), z(z),w(w){}
 
-		//constexpr Vector3(const Normal3<T> & n):x(n.x),y(n.y),z(n.z){}
-		//Vector3D(const Vector3D<T> & v) :x(T(v.x)), y(T(v.y)), z(T(v.z)) {}
+		template<typename U> constexpr Vector4(const Vector3<U> & v):x(v.x),y(v.y),z(v.z),w(0.0){}
+
+		template<typename U> constexpr Vector4(const Vector2<U> & v):x(v.x), y(v.y), z(0.0), w(0.0) {}
+
 		bool HasNaN()const
 		{
 			return IsNaN(x) || IsNaN(y) || IsNaN(z) || IsNaN(w);
@@ -918,15 +917,9 @@ namespace ysl
 
 		constexpr Vector4<T> operator+(const Vector4<T> & v)const
 		{
-			//assert(!v.HasNaN());
+			assert(!v.HasNaN());
 			return Vector4<T>(x + v.x, y + v.y, z + v.z,w+v.w);
 		}
-
-		//constexpr Point3<T> operator+(const Point3<T> & p)const
-		//{
-		//	//assert(!p.HasNaN());
-		//	return Point3<T>{x + p.x, y + p.y, z + p.z};
-		//}
 
 		constexpr Vector4<T> & operator+=(const Vector4<T> & v) 
 		{
@@ -956,11 +949,22 @@ namespace ysl
 
 
 		template<typename U>
-		explicit operator Vector4<U>()const
+		constexpr explicit operator Vector4<U>()const
 		{
 			return Vector4<U>(U(x), U(y), U(z),U(w));
 		}
 
+		template<typename U>
+		constexpr explicit operator Vector3<U>()const
+		{
+			return Vector3<U>(U(x), U(y), U(z));
+		}
+
+		template<typename U>
+		constexpr explicit operator Vector2<U>()const
+		{
+			return Vector2<U>(U(x), U(y));
+		}
 
 		//unary operator
 		constexpr Vector4<T> operator-()const

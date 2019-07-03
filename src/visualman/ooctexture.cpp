@@ -172,7 +172,7 @@ namespace ysl
 				info.offset = pageTableTotalBytes;
 				pageTableInfos.push_back(info);
 
-				lodInfo[i].pageTableSize = info.virtualSpaceSize;			// __std430
+				lodInfo[i].pageTableSize = (info.virtualSpaceSize);			// __std430
 				lodInfo[i].pageTableOffset = pageTableTotalBytes;
 				lodInfo[i].idBufferOffset = idBufferTotalBytes;
 				lodInfo[i].hashBufferOffset = hashBufferTotalBytes;
@@ -225,7 +225,7 @@ namespace ysl
 
 			///[5] Create LOD Info Buffer
 			lodInfoBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
-			const auto lodInfoBytes = sizeof(_std430_layout_LODInfo) * lodInfo.size();
+			const auto lodInfoBytes = sizeof(_std140_layout_LODInfo) * lodInfo.size();
 			lodInfoBuffer->CreateImmutableBufferObject(lodInfoBytes,lodInfo.data(),storage_flags);
 
 			PrintVideoMemoryUsageInfo();
