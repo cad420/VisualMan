@@ -112,7 +112,6 @@ namespace ysl
 
 			MappingTableManager(const std::vector<LODPageTableInfo> &infos, const Size3& physicalSpaceSize,int physicalSpaceCount);
 
-
 			const void * GetData()const { return pageTable.Data(); }
 
 			size_t GetBytes(int lod) { return lodPageTables[lod].Size().Prod() * sizeof(PageTableEntry); }
@@ -122,7 +121,6 @@ namespace ysl
 			std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<VirtualMemoryBlockIndex> & missedBlockIndices);
 			std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(int lod,const std::vector<VirtualMemoryBlockIndex> & missedBlockIndices);
 
-			//std::vector<PhysicalMemoryBlockIndex> UpdatePageTable(const std::vector<size_t> & missedBlockIndices);
 		};
 
 		struct LVDFileInfo
@@ -134,11 +132,13 @@ namespace ysl
 
 		struct _std140_layout_LODInfo
 		{
-			Vec3i pageTableSize;
+			Vec4i pageTableSize;
+			Vec4i volumeDataSizeNoRepeat;
+			Vec4i blockDataSizeNoRepeat;
 			uint32_t pageTableOffset;
 			uint32_t hashBufferOffset;
 			uint32_t idBufferOffset;
-			uint32_t pad[2];
+			uint32_t pad[1];
 		};
 
 		VISUALMAN_EXPORT_IMPORT LVDFileInfo GetLVDFileInfoFromJson(const std::string & fileName);
@@ -200,7 +200,7 @@ namespace ysl
 			static constexpr int pboCount = 3;
 			static constexpr GLbitfield mapping_flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
 			static constexpr GLbitfield	storage_flags = GL_DYNAMIC_STORAGE_BIT | mapping_flags;
-			void SetSubTextureDataUsePBO(const std::vector<BlockDescriptor> & data);
+			void SetSubTextureDataUsePBO(const std::vector<BlockDescriptor> & data, int lod);
 
 			void InitVolumeTextures();
 

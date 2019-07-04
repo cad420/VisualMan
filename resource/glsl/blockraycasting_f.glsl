@@ -15,11 +15,14 @@
 * cacheVolume3: A 3D texture represent the in-memory volume data. OPTIONAL:True
 */
 
+
 uniform sampler1D texTransfunc;
 uniform sampler3D cacheVolume0;
 uniform sampler3D cacheVolume1;
 uniform sampler3D cacheVolume2;
 uniform sampler3D cacheVolume3;
+
+//uniform sampler3D cacheVolumes[5];
 
 
 //uniform ivec3 pageTableSize;				// page table texture size1
@@ -40,27 +43,32 @@ uniform float ks;
 in vec2 screenCoord;
 out vec4 fragColor;
 // Out-Of-Core uniforms
-uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (without padding)
-uniform ivec3 blockDataSizeNoRepeat;				// block data size (without padding)
+//uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (without padding)
+//uniform ivec3 blockDataSizeNoRepeat;				// block data size (without padding)
 uniform ivec3 repeatOffset;							// repeat boarder size
-layout(binding = 3, offset = 0) uniform atomic_uint atomic_count;
+layout(binding = 3, offset = 0) uniform atomic_uint atomic_count0;
+layout(binding = 3, offset = 4) uniform atomic_uint atomic_count1;
+layout(binding = 3, offset = 8) uniform atomic_uint atomic_count2;
+layout(binding = 3, offset = 12) uniform atomic_uint atomic_count3;
+layout(binding = 3, offset = 16) uniform atomic_uint atomic_count4;
+uniform int lodNum;
+//layout(binding = 3) uniform atomic_uint atomic_count[10];
 layout(std430, binding = 0) buffer HashTable {uint blockId[];}hashTable;
 layout(std430, binding = 1) buffer MissedBlock{uint blockId[];}missedBlock;
 layout(std430, binding = 2) buffer PageTable{uvec4 pageEntry[];}pageTable;
 
-
-uniform int lodNum;
 struct LODInfo
 {
-	ivec3 pageTableSize;			// offset, considering alignment.
+	ivec4 pageTableSize;			// offset, considering alignment.
+	ivec4 volumeDataSizeNoRepeat;
+	ivec4 blockDataSizeNoRepeat;
 	int pageTableOffset;			// pageTable Offset,
 	int hashBufferOffset;			// offset
 	int idBufferOffset;				// offset
+	int padding;
 };
 
 layout(std140, binding = 3) buffer LODInfoBuffer{LODInfo lod[];}lodInfoBuffer;
-
-
 //uniform int lod;
 
 #ifdef ILLUMINATION
@@ -69,10 +77,11 @@ vec3 N;
 
 uint prevVisitedBlockID;
 bool hashPrevious = false;
-
-vec4 virtualVolumeSample(vec3 samplePos,out int curLod,out bool mapped)
+vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 {
+	int curLod = 2;
 	vec4 scalar;
+
 	ivec3 pageTableSize = ivec3(lodInfoBuffer.lod[curLod].pageTableSize);
 
 	// address translation
@@ -82,22 +91,31 @@ vec4 virtualVolumeSample(vec3 samplePos,out int curLod,out bool mapped)
 	uint pageTableOffset = lodInfoBuffer.lod[curLod].pageTableOffset;
 	uvec4 pageTableEntry = pageTable.pageEntry[pageTableOffset+entryFlatIndex];
 
-	//uvec4 pageTableEntry= imageLoad(pageTableTexture,ivec3(samplePos*pageTableSize));
+	ivec3 blockDataSizeNoRepeat = lodInfoBuffer.lod[curLod].blockDataSizeNoRepeat.xyz;
+	ivec3 volumeDataSizeNoRepeat =  lodInfoBuffer.lod[curLod].volumeDataSizeNoRepeat.xyz;
 
 	vec3 voxelCoord = vec3(samplePos * (volumeDataSizeNoRepeat));
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
 
-	//ivec3 blockCoord = ivec3(voxelCoord / blockDataSizeNoRepeat);
-	//int blockId = blockCoord.z * pageTableSize.y*pageTableSize.x 	+blockCoord.y * pageTableSize.x +blockCoord.x;
 
 	if(((pageTableEntry.w) & (0x000f)) == 2)		// Unmapped flag
 	{
 		// search coarser lod
-		uint hashTableOffset = lodInfoBuffer.lod[curLod].hashBufferOffset;
+		uint hashTableOffset =lodInfoBuffer.lod[curLod].hashBufferOffset;
 		if(atomicCompSwap(hashTable.blockId[hashTableOffset + entryFlatIndex],0,1) == 0)
 		{
-			
-			uint index = atomicCounterIncrement(atomic_count);
+		    uint index;
+			if(curLod == 0){
+				index = atomicCounterIncrement(atomic_count0);
+			}else if(curLod == 1){
+				index = atomicCounterIncrement(atomic_count1);	
+			}else if(curLod == 2){
+				index = atomicCounterIncrement(atomic_count2);		
+			}else if(curLod == 3){
+				index = atomicCounterIncrement(atomic_count3);	
+			}else if(curLod == 4){
+				index = atomicCounterIncrement(atomic_count4);	
+			}
 			uint idBufferOffset = lodInfoBuffer.lod[curLod].idBufferOffset;
 			missedBlock.blockId[idBufferOffset + index] = entryFlatIndex;
 			hashTable.blockId[hashTableOffset + entryFlatIndex] = 1;		// exits
@@ -106,7 +124,7 @@ vec4 virtualVolumeSample(vec3 samplePos,out int curLod,out bool mapped)
 	}
 	else
 	{
-		int texId = int((pageTableEntry.w  >> 4)&0xf);
+		int texId = int((pageTableEntry.w  >> 4) & 0xf);
 		vec3 samplePoint = pageTableEntry.xyz * (blockDataSizeNoRepeat + 2*repeatOffset) + blockOffset + (repeatOffset);
 		if(texId == 0){
 			samplePoint = samplePoint/textureSize(cacheVolume0,0);
@@ -143,8 +161,6 @@ vec4 virtualVolumeSample(vec3 samplePos,out int curLod,out bool mapped)
 		}
 		mapped = true;
 	}
-
-
 	return scalar;
 }
 
@@ -181,7 +197,7 @@ void main()
 	int steps = int(distance / step);
 	vec3 samplePoint = rayStart;
 
-	int curLod = 0;
+	//int curLod = 1;
 
 	for (int i = 0; i < steps; ++i) 
 	{
@@ -196,11 +212,11 @@ void main()
 		continue;
 		//sample a scalar at samplePoint
 		bool mapped;
-		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped);
+		vec4 scalar = virtualVolumeSample(samplePoint,mapped);
 		//count++;
 		if (mapped == false) 
 		{
-			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,curLod));
+			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
 			memoryBarrier();
 			imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
 			memoryBarrier();

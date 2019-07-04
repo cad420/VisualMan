@@ -62,13 +62,13 @@ namespace ysl
 		{
 		}
 
-		void OutOfCoreVolumeTexture::SetSubTextureDataUsePBO(const std::vector<BlockDescriptor>& data)
+		void OutOfCoreVolumeTexture::SetSubTextureDataUsePBO(const std::vector<BlockDescriptor>& data, int lod)
 		{
 			// Ping-Pong PBO Transfer
 			assert(volumeDataTexture[0]->Handle());
 
-			const auto blockSize = cpuVolumeData[0]->BlockSize();
-			const auto textureId = volumeDataTexture[0]->Handle();
+			const auto blockSize = cpuVolumeData[lod]->BlockSize();
+			const auto textureId = volumeDataTexture[lod]->Handle();
 			const auto blockBytes = this->bytes;
 
 			Timer t;
@@ -77,7 +77,7 @@ namespace ysl
 			for (int i = 0; i < data.size(); i++)
 			{
 				const auto posInCache = Vec3i(blockSize) * data[i].Value().ToVec3i();
-				GL(glTextureSubImage3D(volumeDataTexture[data[i].Value().GetPhysicalStorageUnit()]->Handle(), 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, IT_UNSIGNED_BYTE, cpuVolumeData[0]->GetPage(data[i].Key())));
+				GL(glTextureSubImage3D(volumeDataTexture[data[i].Value().GetPhysicalStorageUnit()]->Handle(), 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, IT_UNSIGNED_BYTE, cpuVolumeData[lod]->GetPage(data[i].Key())));
 			}
 			t.stop();
 			totalBlocks += data.size();
@@ -155,42 +155,45 @@ namespace ysl
 			{
 				cpuVolumeData[i] = MakeRef<MemoryPageAdapter>(fileInfo.fileNames[i]);
 			}
+
 			memoryEvaluators = MakeRef<DefaultMemoryParamsEvaluator>(cpuVolumeData[0]->BlockDim(), cpuVolumeData[0]->BlockSize());
-		
 
 			InitVolumeTextures();
 			///[0] Gather buffer size before creating buffers
 
-			size_t pageTableTotalBytes = 0;
-			size_t hashBufferTotalBytes = 0;
-			size_t idBufferTotalBytes = 0;
+			size_t pageTableTotalEntries = 0;
+			size_t hashBufferTotalBlocks = 0;
+			size_t idBufferTotalBlocks = 0;
 			std::vector<LODPageTableInfo> pageTableInfos;
 			for (int i = 0; i < cpuVolumeData.size(); i++)
 			{
 				LODPageTableInfo info;
 				info.virtualSpaceSize = Vec3i(cpuVolumeData[i]->BlockDim());
-				info.offset = pageTableTotalBytes;
+				info.offset = pageTableTotalEntries;
 				pageTableInfos.push_back(info);
 
-				lodInfo[i].pageTableSize = (info.virtualSpaceSize);			// __std430
-				lodInfo[i].pageTableOffset = pageTableTotalBytes;
-				lodInfo[i].idBufferOffset = idBufferTotalBytes;
-				lodInfo[i].hashBufferOffset = hashBufferTotalBytes;
+				lodInfo[i].volumeDataSizeNoRepeat = Vec3i(cpuVolumeData[i]->OriginalDataSize());
+				const int padding = cpuVolumeData[i]->Padding();
+				lodInfo[i].blockDataSizeNoRepeat = Vec3i(cpuVolumeData[i]->BlockSize() - Size3(2*padding,2*padding,2*padding));
+				lodInfo[i].pageTableSize = (info.virtualSpaceSize);			// GLSL std140 layout
+				lodInfo[i].pageTableOffset = pageTableTotalEntries;
+				lodInfo[i].idBufferOffset = idBufferTotalBlocks;
+				lodInfo[i].hashBufferOffset = hashBufferTotalBlocks;
 
 				const auto blocks = cpuVolumeData[i]->BlockDim().Prod();
-				pageTableTotalBytes += blocks * sizeof(MappingTableManager::PageTableEntry);
-				hashBufferTotalBytes += blocks * sizeof(uint32_t); 
-				idBufferTotalBytes += blocks * sizeof(uint32_t);
+				pageTableTotalEntries += blocks;// *sizeof(MappingTableManager::PageTableEntry);
+				hashBufferTotalBlocks += blocks;// *sizeof(uint32_t);
+				idBufferTotalBlocks += blocks;// *sizeof(uint32_t);
 			}
 			/// [1] Create Page Table Buffer and mapping table mananger
 			pageTableBuffer = MakeRef<BufferObject>();
-			pageTableBuffer->CreateImmutableBufferObject(pageTableTotalBytes, nullptr, storage_flags);
-			const auto pageTablePtr = pageTableBuffer->MapBufferRange(0, pageTableTotalBytes, mapping_flags);
+			pageTableBuffer->CreateImmutableBufferObject(pageTableTotalEntries*sizeof(MappingTableManager::PageTableEntry), nullptr, storage_flags);
+			const auto pageTablePtr = pageTableBuffer->MapBufferRange(0, pageTableTotalEntries*sizeof(MappingTableManager::PageTableEntry), mapping_flags);
 			assert(pageTablePtr);
 
 			for (int i = 0; i < lodCount; i++)
 			{
-				pageTableInfos[i].external = (char*)pageTablePtr + pageTableInfos[i].offset;
+				pageTableInfos[i].external = (MappingTableManager::PageTableEntry*)pageTablePtr + pageTableInfos[i].offset;
 			}
 
 			mappingTableManager = MakeRef<MappingTableManager>(pageTableInfos,		// Create Mapping table for lods
@@ -213,15 +216,15 @@ namespace ysl
 			//const auto idBufferBytes = memoryEvaluators->EvalIDBufferCount() * sizeof(int32_t);
 
 			blockIdBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
-			blockIdBuffer->CreateImmutableBufferObject(idBufferTotalBytes, nullptr, storage_flags);
-			blockIdBuffer->MapBufferRange(0, idBufferTotalBytes, mapping_flags);
+			blockIdBuffer->CreateImmutableBufferObject(idBufferTotalBlocks*sizeof(uint32_t), nullptr, storage_flags);
+			blockIdBuffer->MapBufferRange(0, idBufferTotalBlocks, mapping_flags);
 
 			///[4] Create Hash Buffer
 			hashBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
-			std::vector<uint32_t> emptyBuffer(hashBufferTotalBytes, 0);
+			std::vector<uint32_t> emptyBuffer(hashBufferTotalBlocks, 0);
 			hashBuffer->SetLocalData(emptyBuffer.data(), emptyBuffer.size());
-			hashBuffer->CreateImmutableBufferObject(hashBufferTotalBytes, nullptr, storage_flags);
-			hashBuffer->MapBufferRange(0, hashBufferTotalBytes, mapping_flags);
+			hashBuffer->CreateImmutableBufferObject(hashBufferTotalBlocks * sizeof(uint32_t), nullptr, storage_flags);
+			hashBuffer->MapBufferRange(0, hashBufferTotalBlocks, mapping_flags);
 
 			///[5] Create LOD Info Buffer
 			lodInfoBuffer = MakeRef<BufferObject>(VM_BT_SHADER_STORAGE_BUFFER);
@@ -239,41 +242,60 @@ namespace ysl
 		void OutOfCoreVolumeTexture::OnDrawCallFinished(OutOfCorePrimitive* p)
 		{
 			glFinish();		// wait the memory to be done
-			blockIdLocalBuffer.clear();
-			const auto counter = (atomicCounterBuffer->MappedPointer<int*>());
-			const auto blocks = *counter;
-			*(counter) = 0;
-			if (blocks == 0)  // render finished
+			bool render_finished = true;
+			for(int curLod = 0 ; curLod < lodCount;curLod++)
 			{
-				p->SetRenderFinished(true);
+
+				blockIdLocalBuffer.clear();
+				const auto counter = (atomicCounterBuffer->MappedPointer<int*>());
+				const auto blocks = *(counter + curLod);
+
+				std::cout << "LOD:" << curLod << " Blocks:" << blocks << std::endl;
+
+				*(counter+ curLod ) = 0;
+
+				if (blocks == 0)  // render finished
+					continue;
+
+				render_finished = false;
+				blockIdLocalBuffer.resize(blocks);
+
+				memcpy(blockIdLocalBuffer.data(), blockIdBuffer->MappedPointer<int*>() + lodInfo[curLod].idBufferOffset, sizeof(int) * blocks);
+
+				memset(hashBuffer->MappedPointer<void*>(), 0, hashBuffer->BufferObjectSize()); // reset hash
+
+				const auto dim = cpuVolumeData[curLod]->BlockDim();
+
+				const auto physicalBlockCount = dim.Prod();
+
+				std::vector<VirtualMemoryBlockIndex> virtualSpaceAddress;
+				virtualSpaceAddress.reserve(blocks);
+				std::vector<BlockDescriptor> descs;
+				descs.reserve(blocks);
+				for (int i = 0; i < blocks && i < physicalBlockCount; i++)
+				{
+					virtualSpaceAddress.emplace_back(blockIdLocalBuffer[i], dim.x, dim.y, dim.z);
+				}
+
+				const auto physicalSpaceAddress = mappingTableManager->UpdatePageTable(curLod, virtualSpaceAddress);
+
+				for (int i = 0; i < physicalSpaceAddress.size(); i++)
+				{
+					descs.emplace_back(physicalSpaceAddress[i], virtualSpaceAddress[i]);
+				}
+
+				SetSubTextureDataUsePBO(descs,curLod);			// Upload missed blocks	
+			}
+
+			if(render_finished)
+			{
+				p->SetRenderFinished(render_finished);
 				Log("Time:%f, BandWidth:%.2fGb/s, blocks:%d", time, totalBlocks*2.0 / 1024.0 / time, totalBlocks);
 				time = 0;
 				totalBlocks = 0;
-				return;
 			}
-
-			blockIdLocalBuffer.resize(blocks);
-
-			memcpy(blockIdLocalBuffer.data(), blockIdBuffer->MappedPointer<int*>(), sizeof(int) * blocks);
-			memset(hashBuffer->MappedPointer<void*>(), 0, hashBuffer->BufferObjectSize()); // reset hash
-
-			const auto dim = cpuVolumeData[0]->BlockDim();
-
-			const auto physicalBlockCount = dim.Prod();
-			std::vector<VirtualMemoryBlockIndex> virtualSpaceAddress;
-			virtualSpaceAddress.reserve(blocks);
-			std::vector<BlockDescriptor> descs;
-			descs.reserve(blocks);
-			for (int i = 0; i < blocks && i < physicalBlockCount; i++)
-			{
-				virtualSpaceAddress.emplace_back(blockIdLocalBuffer[i], dim.x, dim.y, dim.z);
-			}
-			const auto physicalSpaceAddress = mappingTableManager->UpdatePageTable(0,virtualSpaceAddress);
-			for (int i = 0; i < physicalSpaceAddress.size(); i++)
-			{
-				descs.emplace_back(physicalSpaceAddress[i], virtualSpaceAddress[i]);
-			}
-			SetSubTextureDataUsePBO(descs);			// Upload missed blocks
+			
+	
 			//mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, dim.x, dim.y, dim.z);
 		}
 
