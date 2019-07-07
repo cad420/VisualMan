@@ -129,8 +129,6 @@ namespace ysl
 				const auto eye_position = program->GetGenericUniformLocation("viewPos");
 				if (eye_position != -1)
 					actor->CreateGetUniformSet()->CreateGetUniform("viewPos")->SetUniform3f(1, eyePos.ConstData());
-				// update light dir and halfway 
-
 				
 			}
 		}

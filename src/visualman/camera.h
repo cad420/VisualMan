@@ -19,8 +19,8 @@ namespace ysl
 		{
 			static constexpr float YAW = -90.0f;
 			static constexpr float PITCH = 0.0f;
-			static constexpr float SPEED = 2.5f;
-			static constexpr float SENSITIVITY = 0.1f;
+			static constexpr float SPEED = 1.0f;
+			static constexpr float SENSITIVITY = .1f;
 			static constexpr float ZOOM = 45.0f;
 
 			// Camera Attributes
@@ -65,51 +65,80 @@ namespace ysl
 		class VISUALMAN_EXPORT_IMPORT Camera
 		{
 		public:
-			Camera(const Point3f& position = { 0.0f, 0.0f, 5.0f }, 
-				Vector3f up = { 0.0f, 1.0f, 0.0f },
-				const Point3f& center = { 0, 0, 0 }):viewMatrixWrapper(position,up,center)
-			{
-				viewport = MakeRef<Viewport>();
-				projMatrix.SetGLPerspective(fov, aspectRatio, nearPlan, farPlan);
-			}
+			Camera(const Point3f& position = {0.0f, 0.0f, 5.0f},
+			       Vector3f up = {0.0f, 1.0f, 0.0f},
+			       const Point3f& center = {0, 0, 0}) //:viewMatrixWrapper(position,up,center)
+			;
 
-			Transform ViewMatrix()const { return viewMatrixWrapper.GetViewMatrix(); }
-			void SetProjectionMatrix(const Transform & projection) { this->projMatrix = projection; }
-			const Transform &ProjectionMatrix()const { return projMatrix; }
-			Transform ProjectViewMatrix()const { return projMatrix * ViewMatrix(); }
-			Point3f GetPosition()const { return viewMatrixWrapper.GetPosition(); }
-			void Rotation(float xoffset, float yoffset) { viewMatrixWrapper.Rotate(xoffset, yoffset); }
-			Vector3f GetFront()const { return viewMatrixWrapper.GetFront(); }
+			Transform ViewMatrix()const { return viewMatrixWrapper->GetViewMatrix(); }
+
+			Ref<ViewMatrixWrapper> GetViewMatrixWrapper() { return viewMatrixWrapper; }
+
+			Ref<const ViewMatrixWrapper> GetViewMatrixWrapper()const { return viewMatrixWrapper; }
+
+			void SetViewMatrixWrapper(Ref<ViewMatrixWrapper> viewMatrixWrapper) { this->viewMatrixWrapper = std::move(viewMatrixWrapper); }
+
+			void SetProjectionMatrix(const Transform& projection);
+
+			const Transform& ProjectionMatrix() const;
+			
+			Transform ProjectViewMatrix()const { return (*projMatrix)*ViewMatrix(); }
+
+			Ref<Transform> GetPerspectiveMatrix() { return projMatrix; }
+
+			Ref<const Transform> GetPerspectiveMatrix()const { return projMatrix; }
+
+			void SetPerspectiveMatrix(Ref<Transform> persp) { projMatrix = std::move(persp); }
+
+
+			Point3f GetPosition()const { return viewMatrixWrapper->GetPosition(); }
+
+			void Rotation(float xoffset, float yoffset) { viewMatrixWrapper->Rotate(xoffset, yoffset); }
+
+			Vector3f GetFront()const { return viewMatrixWrapper->GetFront(); }
+
 			void SetViewport(Ref<Viewport> vp) { viewport = std::move(vp); }
-			Vector3f GetUp()const { return viewMatrixWrapper.GetUp(); }
-			Point3f GetCenter()const { return viewMatrixWrapper.GetCenter(); }
+
+			Vector3f GetUp()const { return viewMatrixWrapper->GetUp(); }
+
+			Point3f GetCenter()const { return viewMatrixWrapper->GetCenter(); }
+
+			void SetCamera(Ref<ViewMatrixWrapper> viewMatrixWrapper, Ref<Transform> projMatrix);
 
 			void SetCamera(const ysl::Point3f& position, ysl::Vector3f worlUp,
-				const ysl::Point3f& center) {
-				viewMatrixWrapper.UpdateCamera(position, worlUp, center);
-			}
+			               const ysl::Point3f& center, float nearPlane, float farPlane, float aspectRatio, float fov);
 
 			float GetFov()const { return fov; }
+
 			void SetFov(float fov) { this->fov = Clamp(fov,1.f,89.f); UpdateProjMatrix(); }
 
 			float GetNearPlane()const { return nearPlan; }
+
 			void SetNearPlane(float np) { nearPlan = np; UpdateProjMatrix(); }
+
 			float GetFarPlane()const { return farPlan; }
+
 			void SetFarPlane(float fp) { farPlan = fp; UpdateProjMatrix(); }
+
 			float GetAspectRatio()const { return aspectRatio; }
 
+			void SetAspectRation(float aspect) { aspectRatio = aspect; }
+
 			Ref<Viewport> GetViewport() { return viewport; }
+
 			Ref<const Viewport> GetViewport()const { return viewport; }
 
-			//Ref<Viewport> CreateGetViewport() { return viewport ? viewport : viewport = MakeRef<Viewport>(800,600); }
+			Vec3f Up()const { return viewMatrixWrapper->GetUp(); }
 
-			Vec3f Up()const { return viewMatrixWrapper.GetUp(); }
-			Vec3f Right()const { return viewMatrixWrapper.GetRight(); }
-			void Movement(const Vec3f& dir, float deltaTime) { viewMatrixWrapper.Move(dir, deltaTime); }
+			Vec3f Right()const { return viewMatrixWrapper->GetRight(); }
+
+			void Movement(const Vec3f& dir, float deltaTime) { viewMatrixWrapper->Move(dir, deltaTime); }
+
 		private:
-			void UpdateProjMatrix(){projMatrix.SetGLPerspective(fov, aspectRatio, nearPlan, farPlan);}
-			ViewMatrixWrapper viewMatrixWrapper;
-			Transform projMatrix;
+			void UpdateProjMatrix(){ projMatrix->SetGLPerspective(fov, aspectRatio, nearPlan, farPlan);}
+			Ref<ViewMatrixWrapper> viewMatrixWrapper;
+			Ref<Transform> projMatrix;
+
 			Ref<Viewport> viewport;
 			float fov = 60;
 			float aspectRatio = 1024.0 / 768.0;

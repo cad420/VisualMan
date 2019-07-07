@@ -21,38 +21,35 @@ uniform sampler3D cacheVolume0;
 uniform sampler3D cacheVolume1;
 uniform sampler3D cacheVolume2;
 uniform sampler3D cacheVolume3;
-
 //uniform sampler3D cacheVolumes[5];
 
-
-//uniform ivec3 pageTableSize;				// page table texture size1
 layout(binding = 2, rgba32f) uniform volatile image2D entryPos;
 layout(binding = 3, rgba32f) uniform volatile image2D endPos;
 layout(binding = 4, rgba32f) uniform volatile image2DRect interResult;
 
 uniform float step;
 // illumination params
-uniform vec3 lightdir;
-uniform vec3 halfway;
+//uniform vec3 lightdir;
+//uniform vec3 halfway;
 
 uniform float ka;
 uniform float kd;
 uniform float shininess;
 uniform float ks;
+uniform mat4 vpl_ModelMatrix;
 
+uniform vec3 fuckPos;
 in vec2 screenCoord;
 out vec4 fragColor;
 // Out-Of-Core uniforms
-//uniform ivec3 volumeDataSizeNoRepeat;				// real volume data size (without padding)
-//uniform ivec3 blockDataSizeNoRepeat;				// block data size (without padding)
 uniform ivec3 repeatOffset;							// repeat boarder size
-layout(binding = 3, offset = 0) uniform atomic_uint atomic_count0;
-layout(binding = 3, offset = 4) uniform atomic_uint atomic_count1;
-layout(binding = 3, offset = 8) uniform atomic_uint atomic_count2;
-layout(binding = 3, offset = 12) uniform atomic_uint atomic_count3;
-layout(binding = 3, offset = 16) uniform atomic_uint atomic_count4;
 uniform int lodNum;
-//layout(binding = 3) uniform atomic_uint atomic_count[10];
+uniform int CUR_LOD;
+
+uniform float fov;
+
+layout(binding = 3) uniform atomic_uint atomic_count[10];		// most 10 lods
+
 layout(std430, binding = 0) buffer HashTable {uint blockId[];}hashTable;
 layout(std430, binding = 1) buffer MissedBlock{uint blockId[];}missedBlock;
 layout(std430, binding = 2) buffer PageTable{uvec4 pageEntry[];}pageTable;
@@ -69,17 +66,70 @@ struct LODInfo
 };
 
 layout(std140, binding = 3) buffer LODInfoBuffer{LODInfo lod[];}lodInfoBuffer;
-//uniform int lod;
+
+vec2 vSize =vec2(1024,768);
+float aspectRatio = vSize.x/vSize.y;
+float lodTables[10]=
+{
+0.00000000745f,
+0.0000000596f,
+0.000000476f,
+0.00000381f,
+0.0000305175f,
+0.0002441f,
+0.001953125f,
+0.15625f,
+0.125f,
+1.f
+};
+
+float stepTable[7]=
+{
+	0.00005,
+	0.00010,
+	0.0002,
+	0.0004,
+	0.0008,
+	0.0016,
+	0.0032,
+
+};
+
+//
+int evalLOD(vec3 samplePos)
+{
+	
+	float d = length(vec3(vpl_ModelMatrix*vec4(samplePos,1.0))-fuckPos);
+	const float fovRadian =  fov * 3.1415926535/180.0;
+	const float a = fovRadian*fovRadian*1.33333 / (1024*768*1.0);
+	const float r =  (a * (d * step/* + d * step*step + step*step*step/ 3.0*/));
+	for(int i = 0 ; i < 10;i++)
+	{
+		if (r < lodTables[i])
+		{
+			return clamp(i,0,lodNum-1);
+		}
+	}
+}
+
+//int evalLOD(vec3 samplePos)
+//{
+//	float d = length(vec3(vpl_ModelMatrix*vec4(samplePos,1)) - fuckPos);
+//	if(d < 100)return 0;
+//	if(d < 300)return 1;
+//	if(d < 500)return 2;
+//	if(d < 800)return 3;
+//	if(d < 1300)return 4;
+//	return 4;
+//}
+
 
 #ifdef ILLUMINATION
 vec3 N;
 #endif
 
-uint prevVisitedBlockID;
-bool hashPrevious = false;
-vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
+vec4 virtualVolumeSample(vec3 samplePos,in out int curLod,out bool mapped)
 {
-	int curLod = 2;
 	vec4 scalar;
 
 	ivec3 pageTableSize = ivec3(lodInfoBuffer.lod[curLod].pageTableSize);
@@ -104,18 +154,8 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 		uint hashTableOffset =lodInfoBuffer.lod[curLod].hashBufferOffset;
 		if(atomicCompSwap(hashTable.blockId[hashTableOffset + entryFlatIndex],0,1) == 0)
 		{
-		    uint index;
-			if(curLod == 0){
-				index = atomicCounterIncrement(atomic_count0);
-			}else if(curLod == 1){
-				index = atomicCounterIncrement(atomic_count1);	
-			}else if(curLod == 2){
-				index = atomicCounterIncrement(atomic_count2);		
-			}else if(curLod == 3){
-				index = atomicCounterIncrement(atomic_count3);	
-			}else if(curLod == 4){
-				index = atomicCounterIncrement(atomic_count4);	
-			}
+		    uint index = atomicCounterIncrement(atomic_count[curLod]);
+
 			uint idBufferOffset = lodInfoBuffer.lod[curLod].idBufferOffset;
 			missedBlock.blockId[idBufferOffset + index] = entryFlatIndex;
 			hashTable.blockId[hashTableOffset + entryFlatIndex] = 1;		// exits
@@ -146,17 +186,17 @@ vec4 virtualVolumeSample(vec3 samplePos,out bool mapped)
 			samplePoint = samplePoint/textureSize(cacheVolume2,0);
 			scalar = texture(cacheVolume2,samplePoint);
 			#ifdef ILLUMINATION
-			N.x = (texture(cacheVolume1, samplePoint+vec3(step,0,0)).r - texture(cacheVolume2, samplePoint+vec3(-step,0,0) ).r) ;
-			N.y = (texture(cacheVolume1, samplePoint+vec3(0,step,0)).r - texture(cacheVolume2, samplePoint+vec3(0,-step,0) ).r) ;
-			N.z = (texture(cacheVolume1, samplePoint+vec3(0,0,step)).r - texture(cacheVolume2, samplePoint+vec3(0,0,-step) ).r) ;
+			N.x = (texture(cacheVolume2, samplePoint+vec3(step,0,0)).r - texture(cacheVolume2, samplePoint+vec3(-step,0,0) ).r) ;
+			N.y = (texture(cacheVolume2, samplePoint+vec3(0,step,0)).r - texture(cacheVolume2, samplePoint+vec3(0,-step,0) ).r) ;
+			N.z = (texture(cacheVolume2, samplePoint+vec3(0,0,step)).r - texture(cacheVolume2, samplePoint+vec3(0,0,-step) ).r) ;
 			#endif
 		}else if(texId == 3){
 			samplePoint = samplePoint/textureSize(cacheVolume3,0);
 			scalar = texture(cacheVolume3,samplePoint);
 			#ifdef ILLUMINATION
-			N.x = (texture(cacheVolume2, samplePoint+vec3(step,0,0)).r - texture(cacheVolume3, samplePoint+vec3(-step,0,0) ).r) ;
-			N.y = (texture(cacheVolume2, samplePoint+vec3(0,step,0)).r - texture(cacheVolume3, samplePoint+vec3(0,-step,0) ).r) ;
-			N.z = (texture(cacheVolume2, samplePoint+vec3(0,0,step)).r - texture(cacheVolume3, samplePoint+vec3(0,0,-step) ).r) ;
+			N.x = (texture(cacheVolume3, samplePoint+vec3(step,0,0)).r - texture(cacheVolume3, samplePoint+vec3(-step,0,0) ).r) ;
+			N.y = (texture(cacheVolume3, samplePoint+vec3(0,step,0)).r - texture(cacheVolume3, samplePoint+vec3(0,-step,0) ).r) ;
+			N.z = (texture(cacheVolume3, samplePoint+vec3(0,0,step)).r - texture(cacheVolume3, samplePoint+vec3(0,0,-step) ).r) ;
 			#endif
 		}
 		mapped = true;
@@ -184,6 +224,7 @@ vec3 PhongShadingEx(vec3 diffuseColor)
 }
 #endif
 
+
 void main()
 {
 
@@ -191,18 +232,19 @@ void main()
 	vec3 rayEnd = imageLoad(endPos,ivec2(gl_FragCoord)).xyz;
 	vec3 start2end = rayEnd - rayStart;
 	vec4 color = imageLoad(interResult,ivec2(gl_FragCoord));
-	int count = 0;
+
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
 	vec3 samplePoint = rayStart;
 
-	//int curLod = 1;
 
 	for (int i = 0; i < steps; ++i) 
 	{
-		samplePoint = rayStart + direction * step * (float(i) + 0.5);
-		//fragColor = vec4(samplePoint,1.0);
+		int curLod = evalLOD(samplePoint);
+
+		samplePoint = rayStart + direction * stepTable[curLod] * (float(i) + 0.5);
+
 		if(samplePoint.x <= 0.01 ||
 		samplePoint.y <= 0.01 ||
 		samplePoint.z <= 0.01 || 
@@ -211,9 +253,8 @@ void main()
 		samplePoint.z >= 0.99)
 		continue;
 		//sample a scalar at samplePoint
-		bool mapped;
-		vec4 scalar = virtualVolumeSample(samplePoint,mapped);
-		//count++;
+		bool mapped = true;
+		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped);
 		if (mapped == false) 
 		{
 			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
@@ -237,10 +278,9 @@ void main()
 	}
 	imageStore(entryPos,ivec2(gl_FragCoord),vec4(rayEnd ,0.0));		// Terminating flag
 	memoryBarrier();
-	vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
+	//vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
+	vec4 bg = vec4(1.f,1.f,1.f, 1.00f);
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;
 	fragColor = color;
-	//fragColor = vec4(normalize(N),1.0);
-
 }

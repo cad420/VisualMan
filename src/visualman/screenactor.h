@@ -17,6 +17,7 @@ namespace ysl
 			void BindToActor(Ref<Actor> actor);
 		private:
 			Ref<Primitive> screenRect;
+			std::vector<float> lodTable;
 		};
 	}
 }

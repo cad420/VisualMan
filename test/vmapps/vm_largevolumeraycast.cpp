@@ -27,13 +27,12 @@ namespace ysl
 			 * intermediateResult:
 			 *
 			 */
-
 			Context()->SetAutomaticallyUpdate(false);
 
 			const auto w = Context()->GetFramebuffer()->Width();
 			const auto h = Context()->GetFramebuffer()->Height();
+			vSize = Vec2i{ w,h };
 
-			const Vec2i vSize{ w,h };
 			auto texParam = MakeRef<TexCreateParams>();
 			texParam->SetSize(vSize.x, vSize.y, 0);
 			texParam->SetTextureFormat(TF_RGBA32F);
@@ -47,7 +46,7 @@ namespace ysl
 			exitTexture->SetSetupParams(texParam);
 			exitTexture->CreateTexture();
 			// intermediate result texture
-			auto intermediateResult = MakeRef<Texture>();
+			intermediateResult = MakeRef<Texture>();
 			intermediateResult->SetSetupParams(texParam);
 			intermediateResult->CreateTexture();
 
@@ -85,10 +84,9 @@ namespace ysl
 			auto artist = MakeRef<Artist>();
 			artist->GetLOD(0)->push_back(positionShading);
 			auto t = Translate(-0.5, -0.5, -0.5);
-			auto s = Scale(1, 1, 1);
+			auto s = Scale(1,1,1);
 
-			auto scale = MakeRef<Transform>(s*t);
-
+			scale = MakeRef<Transform>(s*t);
 			const auto geometryActor = MakeRef<Actor>(nullptr, artist, scale);
 			auto geometryActorCallback = MakeRef<RayCast2ActorEventCallback>();
 			geometryActorCallback->BindToActor(geometryActor);
@@ -98,6 +96,7 @@ namespace ysl
 			mrtAgt->SceneManager().push_back(sceneManager);
 			mrtAgt->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
 			mrtAgt->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 0.f,0.f,0.f,1.f });
+			
 
 			/*[2] Ray Cast Aggregation ********************************************************
 			 *
@@ -129,7 +128,7 @@ namespace ysl
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume0")->SetUniformValue(1);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume1")->SetUniformValue(2);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume2")->SetUniformValue(3);
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.001f);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.0001f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ka")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("kd")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ks")->SetUniformValue(50.f);
@@ -140,7 +139,7 @@ namespace ysl
 			auto effect2 = MakeRef<Artist>();
 			effect2->GetLOD(0)->push_back(rayCastShading);
 
-			const auto screenActor = MakeRef<Actor>(nullptr, effect2, nullptr);
+			const auto screenActor = MakeRef<Actor>(nullptr, effect2, scale);
 			auto screenActorCallback = MakeRef<ScreenActorEventCallback>();
 			oocPrimitive = MakeRef<OutOfCorePrimitive>();
 			screenActorCallback->SetPrimitive(oocPrimitive);// Out Of Core
@@ -159,6 +158,9 @@ namespace ysl
 			// This object will blit the final redering result into default framebuffer
 			auto blit = MakeRef<BlitFramebufferEvent>(intermediateFBO, rect, Context()->GetFramebuffer(), rect, BufferBits::VM_BB_COLOR_BUFFER_BIT);
 			raycastAgt->Renderers().at(0)->AddRenderFinishedEventCallback(blit);
+			//raycastAgt->SetCamera(camera);
+			raycastAgt->CreateGetCamera()->SetViewMatrixWrapper(mrtAgt->CreateGetCamera()->GetViewMatrixWrapper());
+			raycastAgt->CreateGetCamera()->SetPerspectiveMatrix(mrtAgt->CreateGetCamera()->GetPerspectiveMatrix());
 			raycastAgt->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR);
 			raycastAgt->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 0.f,0.f,0.f,0.f });
 
@@ -166,18 +168,20 @@ namespace ysl
 			SetAggregation(outOfCoreAgts);
 			outOfCoreAgts->GetAggregates().push_back(mrtAgt);
 			outOfCoreAgts->GetAggregates().push_back(raycastAgt);
+
 			Context()->Update();
 		}
 
 		void VM_LargeVolumeRayCast::UpdateScene()
 		{
-
 		}
 
 		void VM_LargeVolumeRayCast::DestroyEvent()
 		{
 			rayCastShading.reset();
 			oocPrimitive.reset();
+			scale = nullptr;
+			intermediateResult = nullptr;
 			VisualMan::DestroyEvent();
 		}
 
@@ -194,11 +198,6 @@ namespace ysl
 			{
 				auto extension = each.substr(each.find_last_of('.'));
 				bool found = false;
-				//if (extension == ".lvd")
-				//{
-				//	SetupResources(each);
-				//	found = true;
-				//}
 				if (extension == ".tf")
 				{
 					SetupTF(each);
@@ -288,26 +287,23 @@ namespace ysl
 			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture(0));
 			rayCastShading->CreateGetTextureSampler(2)->SetTexture(oocResources->GetVolumeTexture(1));
 			rayCastShading->CreateGetTextureSampler(3)->SetTexture(oocResources->GetVolumeTexture(2));
-
-			//rayCastShading->CreateGetTextureImageUnit(1)->SetTexture(oocResources->GetPageTableTexture());
-
 			rayCastShading->CreateGetAtomicCounter(3)->SetBufferObject(oocResources->GetAtomicCounterBuffer());
 			rayCastShading->CreateGetSSBO(2)->SetBufferObject(oocResources->GetPageTableBuffer());
 			rayCastShading->CreateGetSSBO(0)->SetBufferObject(oocResources->GetHashBuffer());
 			rayCastShading->CreateGetSSBO(1)->SetBufferObject(oocResources->GetBlockIDBuffer());
 			rayCastShading->CreateGetSSBO(3)->SetBufferObject(oocResources->GetLODInfoBuffer());
 
-			auto v = oocResources->VirtualBlockDim();
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("pageTableSize")->SetUniform3i(1, v.Data());
-			v = oocResources->DataResolution();
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("volumeDataSizeNoRepeat")->SetUniform3i(1, v.Data());
-			v = oocResources->BlockSize() - 2 * oocResources->Padding();
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("blockDataSizeNoRepeat")->SetUniform3i(1, v.Data());
-			v = oocResources->Padding();
+			auto v = oocResources->Padding();
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("repeatOffset")->SetUniform3i(1, v.Data());
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("lodNum")->SetUniformValue(oocResources->GetLODCount());
-
 			oocPrimitive->SetOutOfCoreResources(oocResources);
+
+			int lodCount = oocResources->GetLODCount();
+			const auto resolution = oocResources->DataResolutionWithPadding(0);
+			auto t = Translate(-0.5, -0.5, -0.5);
+			auto s = Scale(Vec3f(resolution));
+			//auto spacing = Scale(Vec3f(1, 1, 6).Normalized());
+			*scale = Transform(s*t);
 
 			Context()->Update();
 		}

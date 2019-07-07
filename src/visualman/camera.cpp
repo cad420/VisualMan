@@ -51,7 +51,7 @@ namespace ysl
 			m_up = ysl::Vector3f::Cross(m_right, m_front).Normalized();
 		}
 
-		void ViewMatrixWrapper::Move(const ysl::Vector3f& direction, float deltaTime)
+		void ViewMatrixWrapper::Move(const ysl::Vector3f & direction, float deltaTime)
 		{
 			const auto velocity = m_movementSpeed * direction * deltaTime;
 			m_position += velocity;
@@ -93,6 +93,47 @@ namespace ysl
 			m_up.Normalize();
 		}
 
+		Camera::Camera(const Point3f& position, Vector3f up, const Point3f& center)
+		{
+			viewMatrixWrapper = MakeRef<ViewMatrixWrapper>(position, up, center);
+			viewport = MakeRef<Viewport>();
+			projMatrix = MakeRef<Transform>();
+			projMatrix->SetGLPerspective(fov, aspectRatio, nearPlan, farPlan);
+		}
+
+		void Camera::SetProjectionMatrix(const Transform& projection)
+		{
+			*(this->projMatrix) = projection;
+		}
+
+		const Transform& Camera::ProjectionMatrix() const
+		{
+			return *projMatrix;
+		}
+
+		void Camera::SetCamera(Ref<ViewMatrixWrapper> viewMatrixWrapper, Ref<Transform> projMatrix)
+		{
+			if (viewMatrixWrapper)
+				this->viewMatrixWrapper = viewMatrixWrapper;
+			if (projMatrix)
+				this->projMatrix = projMatrix;
+		}
+
+		void Camera::SetCamera(const ysl::Point3f& position, ysl::Vector3f worlUp, const ysl::Point3f& center,
+		                       float nearPlane, float farPlane, float aspectRatio, float fov)
+		{
+			viewMatrixWrapper->UpdateCamera(position, worlUp, center);
+
+			this->nearPlan = nearPlane;
+			this->farPlan = farPlane;
+			this->aspectRatio = aspectRatio;
+			this->fov = fov;
+
+			Transform perspectiveMatrix;
+			perspectiveMatrix.SetGLPerspective(fov, aspectRatio, nearPlane, farPlane);
+			SetProjectionMatrix(perspectiveMatrix);
+		}
+
 		Ref<Camera> CreateCamera(const std::string& jsonFileName)
 		{
 			using namespace rapidjson;
@@ -126,9 +167,10 @@ namespace ysl
 			const float aspectRatio= GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/aspectRatio", 1024.f/768.f).GetFloat();
 
 			auto camera = MakeRef<Camera>(pos, up, center);
-			Transform perspectiveMatrix;
-			perspectiveMatrix.SetGLPerspective(fov, aspectRatio, nearPlane, farPlane);
-			camera->SetProjectionMatrix(perspectiveMatrix);
+			//Transform perspectiveMatrix;
+			//perspectiveMatrix.SetGLPerspective(fov, aspectRatio, nearPlane, farPlane);
+			//camera->SetProjectionMatrix(perspectiveMatrix);
+			camera->SetCamera(pos, up, center, nearPlane, farPlane, aspectRatio, fov);
 			return camera;
 
 		}
@@ -169,8 +211,10 @@ namespace ysl
 			Transform perspectiveMatrix;
 			perspectiveMatrix.SetGLPerspective(fov, aspectRatio, nearPlane, farPlane);
 
-			camera->SetCamera(pos, up, center);
-			camera->SetProjectionMatrix(perspectiveMatrix);
+			camera->SetCamera(pos, up, center,nearPlane,farPlane,aspectRatio,fov);
+			//camera->SetProjectionMatrix(perspectiveMatrix);
+			//camera->SetNearPlane(nearPlane);
+			//camera->SetFarPlane(farPlane);
 		}
 
 		bool SaveCameraAsJson(Ref<Camera> camera,const std::string & jsonFileName)
@@ -259,6 +303,7 @@ namespace ysl
 				// Update Camera
 				const float dx = xpos - lastMousePos.x;
 				const float dy = lastMousePos.y - ypos;
+
 				if (dx == 0.0 && dy == 0.0)
 					return;
 				if ((button & Mouse_Left) && (button & Mouse_Right))
@@ -270,10 +315,10 @@ namespace ysl
 				{
 					camera->Rotation(dx, dy);
 				}
-				else if (button == Mouse_Right)
+				else if (button == Mouse_Right && dy != 0.0)
 				{
 					const auto directionEx = camera->GetFront()*dy;
-					camera->Movement(directionEx, 0.01);
+					camera->Movement(directionEx, 1.0);
 				}
 				lastMousePos.x = xpos;
 				lastMousePos.y = ypos;

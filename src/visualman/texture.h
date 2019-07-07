@@ -115,6 +115,8 @@ namespace ysl
 			Ref<BufferObject> GetBufferObject() { return bufferObject; }
 			Ref<const BufferObject> GetBufferObject() const { return bufferObject; }
 
+			void SaveTextureAs(const std::string & fileName);
+
 
 			int Width()const { return w; }
 			int Height()const { return h; }

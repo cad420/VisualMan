@@ -68,8 +68,8 @@ namespace ysl
 			assert(volumeDataTexture[0]->Handle());
 
 			const auto blockSize = cpuVolumeData[lod]->BlockSize();
-			const auto textureId = volumeDataTexture[lod]->Handle();
-			const auto blockBytes = this->bytes;
+			//const auto textureId = volumeDataTexture[lod]->Handle();
+			//const auto blockBytes = this->bytes;
 
 			Timer t;
 			t.start();
@@ -249,13 +249,12 @@ namespace ysl
 				blockIdLocalBuffer.clear();
 				const auto counter = (atomicCounterBuffer->MappedPointer<int*>());
 				const auto blocks = *(counter + curLod);
-
-				std::cout << "LOD:" << curLod << " Blocks:" << blocks << std::endl;
-
 				*(counter+ curLod ) = 0;
 
 				if (blocks == 0)  // render finished
 					continue;
+
+				std::cout << "Lod:" << curLod << " Blocks:" << blocks << std::endl;
 
 				render_finished = false;
 				blockIdLocalBuffer.resize(blocks);
@@ -286,17 +285,13 @@ namespace ysl
 
 				SetSubTextureDataUsePBO(descs,curLod);			// Upload missed blocks	
 			}
-
 			if(render_finished)
 			{
 				p->SetRenderFinished(render_finished);
-				Log("Time:%f, BandWidth:%.2fGb/s, blocks:%d", time, totalBlocks*2.0 / 1024.0 / time, totalBlocks);
+				//Log("Time:%f, BandWidth:%.2fGb/s, blocks:%d", time, totalBlocks*2.0 / 1024.0 / time, totalBlocks);
 				time = 0;
 				totalBlocks = 0;
 			}
-			
-	
-			//mappingTable->SetSubTextureData(mappingTableManager->GetData(), 0, 0, 0, dim.x, dim.y, dim.z);
 		}
 
 		Size3 DefaultMemoryParamsEvaluator::EvalPhysicalTextureSize() const
@@ -313,16 +308,6 @@ namespace ysl
 		{
 			return 3;
 		}
-
-		//int DefaultMemoryParamsEvaluator::EvalHashBufferSize() const
-		//{
-		//	return virtualDim.Prod();
-		//}
-
-		//int DefaultMemoryParamsEvaluator::EvalIDBufferCount() const
-		//{
-		//	return virtualDim.Prod();
-		//}
 
 		void MappingTableManager::InitCPUPageTable(const Size3& blockDim,void * external)
 		{
@@ -501,7 +486,7 @@ namespace ysl
 					pageTableEntry.SetTextureUnit(last.second.GetPhysicalStorageUnit());
 					if (last.first.x != -1)		// detach previous mapped storage
 					{
-						lodPageTables[lod](last.first.x, last.first.y, last.first.z).SetMapFlag(EM_UNMAPPED);
+						lodPageTables[last.first.lod](last.first.x, last.first.y, last.first.z).SetMapFlag(EM_UNMAPPED);
 						lruMap[flatBlockID] = lruList.end();
 					}
 					// critical section : last

@@ -1,9 +1,10 @@
-
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "graphictype.h"
 #include "texture.h"
 #include <interpulator.h>
 #include <cassert>
 #include <rawreader.h>
+#include <stb_image_write.h>
 
 namespace ysl
 {
@@ -310,6 +311,23 @@ namespace ysl
 			this->bufferObject = std::move(bufferObject);
 
 			return true;
+		}
+
+		void Texture::SaveTextureAs(const std::string& fileName)
+		{
+			int texDim[2];
+			glGetTextureLevelParameteriv(handle, 0, GL_TEXTURE_WIDTH, texDim);
+			glGetTextureLevelParameteriv(handle, 0, GL_TEXTURE_HEIGHT, texDim + 1);
+			//GL_ERROR_REPORT;
+			const auto bufSize = std::size_t(texDim[0])*texDim[1] * 4 * sizeof(char);
+			std::unique_ptr<char[]> imageBuf(new char[bufSize]);
+			if (!imageBuf)
+			{
+				throw std::runtime_error("Create buffer failed\n");
+			}
+			glGetTextureImage(handle, 0, GL_RGBA, GL_UNSIGNED_BYTE, bufSize, imageBuf.get());
+			//GL_ERROR_REPORT;
+			stbi_write_jpg(fileName.c_str(), texDim[0], texDim[1], 4, imageBuf.get(), 100);
 		}
 
 		void Texture::DestroyTexture()

@@ -174,14 +174,13 @@ namespace ysl
 			Ref<BufferObject> GetLODInfoBuffer() { return lodInfoBuffer; }
 			Ref<const BufferObject> GetLODInfoBuffer()const { return lodInfoBuffer; }
 
-			int GetLODCount()const { return lodCount; };
-
-
-			[[deprecated]]
-			Vec3i DataResolution()const { return Vec3i(cpuVolumeData[0]->OriginalDataSize()); }
+			int GetLODCount()const { return lodCount; }
 
 			[[deprecated]]
-			Vec3i DataResolutionWithPadding()const { return Vec3i(cpuVolumeData[0]->BlockDim()*cpuVolumeData[0]->BlockSize()); }
+			Vec3i DataResolution(int lod = 0)const { return Vec3i(cpuVolumeData[lod]->OriginalDataSize()); }
+
+			[[deprecated]]
+			Vec3i DataResolutionWithPadding(int lod = 0)const { return Vec3i(cpuVolumeData[lod]->BlockDim()*cpuVolumeData[0]->BlockSize()); }
 
 			[[deprecated]]
 			Vec3i Padding()const {return Vec3i( cpuVolumeData[0]->Padding(),cpuVolumeData[0]->Padding(),cpuVolumeData[0]->Padding()); }
@@ -193,7 +192,6 @@ namespace ysl
 			Vec3i BlockSize()const { return Vec3i(cpuVolumeData[0]->BlockSize());}
 
 			void PrintVideoMemoryUsageInfo();
-
 			void BindToOutOfCorePrimitive(Ref<OutOfCorePrimitive> oocPrimitive);
 			~OutOfCoreVolumeTexture();
 		private:
@@ -208,9 +206,6 @@ namespace ysl
 			double time = 0;
 			size_t totalBlocks = 0;
 			size_t bytes = 0;
-
-
-
 
 			std::vector<Ref<Texture>> volumeDataTexture;
 

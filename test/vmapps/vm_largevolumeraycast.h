@@ -31,6 +31,9 @@ namespace ysl
 			Ref<Shading> rayCastShading;
 			Ref<Aggregate> mrtAgt, raycastAgt;
 			Ref<OutOfCorePrimitive> oocPrimitive;
+			Ref<Texture> intermediateResult;
+			Vec2i vSize;
+			Ref<Transform> scale;
 		};
 	}
 }

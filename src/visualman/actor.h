@@ -75,10 +75,7 @@ namespace ysl
 
 			void SetPriority(int p) { priority = p; }
 			int GetPriority()const { return priority; }
-
-
 			int EvalLod(const Camera * camera);
-
 			void RemoveUniform(const char * name) { return uniformSet->RemoveUniform(name); }
 			void RemoveUniform(Ref<Uniform> uniform) { return uniformSet->RemoveUniform(uniform); }
 		protected:

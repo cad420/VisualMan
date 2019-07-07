@@ -31,9 +31,9 @@ namespace ysl
 
 				if (modelLoc != -1)
 				{
-					//Debug("%s %d\n", __FILE__, __LINE__);
 					if (transform)
 					{
+						//Debug("%s %d\n", __FILE__, __LINE__);
 						GL(glUniformMatrix4fv(modelLoc, 1, GL_TRUE, transform->Matrix().m[0]));
 					}
 
