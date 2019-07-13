@@ -1457,6 +1457,28 @@ namespace ysl
 				p.z >= min.z && p.z < max.z);
 		}
 
+
+		/**
+		 * \brief Check whether the given \a bound is inside the bound
+		 */
+		bool Inside(const Bound3<T> & bound)const
+		{
+			return (
+				bound.min.x >= min.x && bound.max.x < max.x
+				&& bound.min.y >= min.y && bound.max.y < max.y
+				&& bound.min.z >= min.z && bound.max.z < max.z
+				);
+		}
+
+		bool InsideEx(const Bound3<T> & bound)const
+		{
+			return (
+				bound.min.x >= min.x && bound.max.x <= max.x
+				&& bound.min.y >= min.y && bound.max.y <= max.y
+				&& bound.min.z >= min.z && bound.max.z <= max.z
+				);
+		}
+
 		/*
 		* Check whether the bounding box is
 		* intersected with another bounding box

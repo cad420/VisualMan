@@ -115,6 +115,7 @@ namespace ysl
 			const void * GetData()const { return pageTable.Data(); }
 
 			size_t GetBytes(int lod) { return lodPageTables[lod].Size().Prod() * sizeof(PageTableEntry); }
+
 			/**
 			 * \brief Translates the virtual space address to the physical address and update the mapping table by LRU policy
 			 */

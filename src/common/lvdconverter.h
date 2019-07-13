@@ -629,7 +629,7 @@ namespace ysl
 		for (int i = 0; i < m_blockDimension.z; i++)
 		{
 			const int startz = (-m_padding + i * (blockSize - 2 * m_padding)) > 0 ? (-m_padding + i * (blockSize - 2 * m_padding)) : 0;
-			const Size3 start(0, 0, startz);
+			const Vec3i start(0, 0, startz);
 
 			const Size3 size(g_xSize, g_ySize,Clamp(g_zSize - startz, 0, blockSize));
 			//const Size3 size(g_xSize, g_ySize,i!=0?Clamp(g_zSize - startz, 0, blockSize):62);

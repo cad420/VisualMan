@@ -56,10 +56,11 @@ namespace ysl
 		ysl::Size3 dimensions;
 		size_t voxelSize;
 		uint64_t offset;
-		//std::shared_ptr<IPluginFileMap> io;
 		std::ifstream file;
 		unsigned char * ptr;
 		uint64_t seekAmt;
+		uint64_t totalBytes;
+		Bound3i bound;
 	public:
 
 		using PosType = unsigned long long;
@@ -73,10 +74,10 @@ namespace ysl
 		// It's assumed the buffer passed has enough room. Returns the
 		// number voxels read
 
-		size_t readRegion(const ysl::Size3 & start,
-			const ysl::Size3 &size, unsigned char *buffer);
+		size_t readRegion(const ysl::Vec3i& start,
+		                  const ysl::Size3& size, unsigned char *buffer);
 	private:
-		std::size_t readRegion__(const ysl::Size3 & start, const ysl::Size3 & size, unsigned char * buffer);
+		std::size_t readRegion__(const ysl::Vec3i& start, const ysl::Size3 & size, unsigned char * buffer);
 		bool convexRead(const ysl::Size3 & size) {
 
 			/// A minimum continuous unit for reading
@@ -89,7 +90,13 @@ namespace ysl
 				|| (size.x == dimensions.x && size.z == 1)
 				|| (size.y == 1 && size.z == 1);
 		}
+		bool inside(const ysl::Vec3i& start, const ysl::Size3 & size)const
+		{
+			const Bound3i t(Point3i(start.x, start.y, start.z), Point3i{start.x+size.x,start.y+size.y,start.z+size.z});
+			return bound.InsideEx(t);
+		}
 	};
+
 
 }
 #endif

@@ -105,10 +105,12 @@ namespace ysl
 	{
 		const auto rawBytes = dimensions.x * dimensions.y * dimensions.z * voxelSize;
 		file.open(fileName, std::ios::binary);
+		totalBytes = dimensions.Prod()*voxelSize;
 		if(!file.is_open())
 		{
 			throw std::runtime_error("RawReaderIO::RawReaderIO()::can not open file");
 		}
+		bound = Bound3i({ 0,0,0 }, Point3i{ dimensions.x,dimensions.y,dimensions.z });
 	}
 
 	RawReaderIO::~RawReaderIO()
@@ -116,19 +118,20 @@ namespace ysl
 
 	}
 
-	size_t RawReaderIO::readRegion(const ysl::Size3& start, const ysl::Size3& size, unsigned char* buffer)
+	size_t RawReaderIO::readRegion(const ysl::Vec3i& start, const ysl::Size3& size, unsigned char* buffer)
 	{
 		seekAmt = 0;
+		offset = 0;
 		return readRegion__(start, size, buffer);
 	}
 
-	std::size_t RawReaderIO::readRegion__(const ysl::Size3& start, const ysl::Size3& size, unsigned char* buffer)
+	std::size_t RawReaderIO::readRegion__(const ysl::Vec3i& start, const ysl::Size3& size, unsigned char* buffer)
 	{
 		assert(size.x > 0 && size.y > 0 && size.z > 0);
 		const uint64_t startRead = (start.x + dimensions.x * (start.y + dimensions.y * start.z)) * voxelSize;
 		if (offset != startRead)
 		{
-			seekAmt += startRead - offset;
+			//seekAmt += startRead - offset;
 			seekAmt = startRead - offset;
 			if (!file.seekg(seekAmt, std::ios_base::cur))
 			{
@@ -140,35 +143,44 @@ namespace ysl
 		// Figure out how to actually read the region since it may not be a full X/Y slice and
 		// we'll need to read the portions in X & Y and seek around to skip regions
 		size_t read = 0;
-		if (convexRead(size))		// continuous read 
+		if(inside(start,size))
 		{
-			//read = fread(buffer, voxelSize, size.x * size.y * size.z, file);
+			if (convexRead(size))		// continuous read 
+			{
+				//read = fread(buffer, voxelSize, size.x * size.y * size.z, file);
 
-			file.read(reinterpret_cast<char*>(buffer), voxelSize* size.x * size.y * size.z);
-			read = file.gcount()/voxelSize;
+				file.read(reinterpret_cast<char*>(buffer), voxelSize* size.x * size.y * size.z);
+				read = file.gcount() / voxelSize;
 
-			//memcpy(reinterpret_cast<void*>(buffer), ptr + offset, voxelSize* size.x * size.y * size.z);
+				read = size.x * size.y * size.z;	// voxel count
 
-			read = size.x * size.y * size.z;	// voxel count
-
-			offset = startRead + read * voxelSize;
-		}
-		else if (size.x == dimensions.x) {		// read by slice
-			for (auto z = start.z; z < start.z + size.z; ++z) {
-				const ysl::Size3 startSlice(start.x, start.y, z);
-				const ysl::Size3 sizeSlice(size.x, size.y, 1);
-				read += readRegion__(startSlice, sizeSlice, buffer + read * voxelSize);
+				offset = startRead + read * voxelSize;
 			}
-		}
-		else {
-			for (auto z = start.z; z < start.z + size.z; ++z) {
-				for (auto y = start.y; y < start.y + size.y; ++y) {
-					const ysl::Size3 startLine(start.x, y, z);
-					const ysl::Size3 sizeLine(size.x, 1, 1);
-					read += readRegion__(startLine, sizeLine, buffer + read * voxelSize);
+			else if (size.x == dimensions.x) {		// read by slice
+				size_t z = start.z;
+				for (; z < std::min(start.z + size.z, dimensions.z); ++z) {
+					const ysl::Vec3i startSlice(start.x, start.y, z);
+					const ysl::Size3 sizeSlice(size.x, size.y, 1);
+					read += readRegion__(startSlice, sizeSlice, buffer + read * voxelSize);
+				}
+
+			}
+			else {
+
+				for (auto z = start.z; z < start.z + size.z; ++z) {
+					for (auto y = start.y; y < start.y + size.y; ++y) {
+						const ysl::Vec3i startLine(start.x, y, z);
+						const ysl::Size3 sizeLine(size.x, 1, 1);
+						read += readRegion__(startLine, sizeLine, buffer + read * voxelSize);
+					}
 				}
 			}
+
+		}else
+		{
+
 		}
+	
 		return read;
 	}
 }
