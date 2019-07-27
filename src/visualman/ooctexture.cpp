@@ -30,7 +30,7 @@ namespace ysl
 				std::cout << "Data Block Size: " << cpuVolumeData[i]->BlockSize() << std::endl;
 				std::cout << "Data Block Dimension In Host Memory: " << cpuVolumeData[i]->CPUCacheBlockSize() << std::endl;
 				std::cout << "Data Block Storage In Host Memory: " << cpuVolumeData[i]->CPUCacheSize() << std::endl;
-				std::cout << "Data Dimension Without Padding: " << cpuVolumeData[i]->OriginalDataSize() << std::endl;
+				std::cout << "Data Dimension Without Padding: " << cpuVolumeData[i]->DataSizeWithoutPadding() << std::endl;
 				std::cout << "Block Padding: " << cpuVolumeData[i]->Padding() << std::endl;
 
 				const auto blocks = cpuVolumeData[i]->BlockDim().Prod();
@@ -172,7 +172,7 @@ namespace ysl
 				info.offset = pageTableTotalEntries;
 				pageTableInfos.push_back(info);
 
-				lodInfo[i].volumeDataSizeNoRepeat = Vec3i(cpuVolumeData[i]->OriginalDataSize());
+				lodInfo[i].volumeDataSizeNoRepeat = Vec3i(cpuVolumeData[i]->DataSizeWithoutPadding());
 				const int padding = cpuVolumeData[i]->Padding();
 				lodInfo[i].blockDataSizeNoRepeat = Vec3i(cpuVolumeData[i]->BlockSize() - Size3(2*padding,2*padding,2*padding));
 				lodInfo[i].pageTableSize = (info.virtualSpaceSize);			// GLSL std140 layout

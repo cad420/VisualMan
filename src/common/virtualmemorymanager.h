@@ -114,8 +114,6 @@ namespace ysl
 	};
 
 
-
-
 	class COMMON_EXPORT_IMPORT AbstrCachePolicy:public AbstrMemoryCache
 	{
 	public:

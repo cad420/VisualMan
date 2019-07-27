@@ -178,7 +178,7 @@ namespace ysl
 			int GetLODCount()const { return lodCount; }
 
 			[[deprecated]]
-			Vec3i DataResolution(int lod = 0)const { return Vec3i(cpuVolumeData[lod]->OriginalDataSize()); }
+			Vec3i DataResolution(int lod = 0)const { return Vec3i(cpuVolumeData[lod]->DataSizeWithoutPadding()); }
 
 			[[deprecated]]
 			Vec3i DataResolutionWithPadding(int lod = 0)const { return Vec3i(cpuVolumeData[lod]->BlockDim()*cpuVolumeData[0]->BlockSize()); }

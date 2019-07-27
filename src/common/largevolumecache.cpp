@@ -103,7 +103,7 @@ namespace ysl
 		return adapter->GetPadding();
 	}
 
-	Size3 MemoryPageAdapter::OriginalDataSize()
+	Size3 MemoryPageAdapter::DataSizeWithoutPadding()
 	{
 		return adapter->GetDataSizeWithoutPadding();
 	}

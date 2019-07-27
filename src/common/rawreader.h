@@ -60,7 +60,7 @@ namespace ysl
 		unsigned char * ptr;
 		uint64_t seekAmt;
 		uint64_t totalBytes;
-		Bound3i bound;
+		//Bound3i bound;
 	public:
 
 		using PosType = unsigned long long;
@@ -90,11 +90,11 @@ namespace ysl
 				|| (size.x == dimensions.x && size.z == 1)
 				|| (size.y == 1 && size.z == 1);
 		}
-		bool inside(const ysl::Vec3i& start, const ysl::Size3 & size)const
-		{
-			const Bound3i t(Point3i(start.x, start.y, start.z), Point3i{start.x+size.x,start.y+size.y,start.z+size.z});
-			return bound.InsideEx(t);
-		}
+		//bool inside(const ysl::Vec3i& start, const ysl::Size3 & size)const
+		//{
+		//	const Bound3i t(Point3i(start.x, start.y, start.z), Point3i{start.x+size.x,start.y+size.y,start.z+size.z});
+		//	return bound.InsideEx(t);
+		//}
 	};
 
 

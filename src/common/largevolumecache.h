@@ -53,7 +53,7 @@ namespace ysl
 		ysl::Size3 CPUCacheSize() const;
 
 		[[deprecated]] int Padding();
-		[[deprecated]] Size3 OriginalDataSize();
+		[[deprecated]] Size3 DataSizeWithoutPadding();
 		[[deprecated]] Size3 BlockDim();
 		[[deprecated]] Size3 BlockSize();
 

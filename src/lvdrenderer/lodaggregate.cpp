@@ -64,7 +64,7 @@ namespace ysl
 
 	Size3 LODAggregate::OriginalDataSize() const
 	{
-		return largeVolumeCache->OriginalDataSize();
+		return largeVolumeCache->DataSizeWithoutPadding();
 	}
 
 	Size3 LODAggregate::BlockSize() const

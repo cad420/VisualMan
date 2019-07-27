@@ -503,6 +503,7 @@ namespace ysl
 			0.0f,0.0f,-(farPlane + nearPlane) / clip,-2.f * farPlane*nearPlane / clip,
 			0.0f,0.0f,-1.0f,0.0f
 		};
+
 		m_inv = m_m.Inversed();
 	}
 
