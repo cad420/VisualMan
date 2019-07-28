@@ -712,10 +712,15 @@ namespace ysl
 					{
 						std::unique_lock<std::mutex> lk(writeBuffer.mtx);
 						writeBuffer.cond_notify_write.wait(lk, [&writeBuffer] {return writeBuffer.ready == true; });
-						const auto bytes = m_lvdDataSize.x * m_lvdDataSize.y * blockSize * sizeof(RawType);
+						const auto bytes = (uint64_t)m_lvdDataSize.x * (uint64_t)m_lvdDataSize.y * (uint64_t)blockSize * sizeof(RawType);
 						///TODO:: write to file
 						m_lvdFile.seekp(LVD_HEADER_SIZE + writeBuffer.index*bytes, std::ios_base::beg);
+						std::cout << "Write "<<bytes<<" Byte(s) To Disk:\n";
+						Timer pt;
+						pt.start();
 						m_lvdFile.write((char*)writeBuffer.buffer.get(), bytes);
+						pt.stop();
+						std::cout << "Write To Disk Finished. Time:"<< pt.duration_to_seconds()<<"s.\n";
 						totalBlocks += m_blockDimension.x*m_blockDimension.y;
 
 						float curPercent = totalBlocks * 1.0 / m_blockDimension.Prod();

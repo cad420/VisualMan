@@ -112,6 +112,17 @@ int evalLOD(vec3 samplePos)
 	}
 }
 
+vec4 lodColors[7]=
+{
+vec4(1.0,0,0.0,1.0),
+vec4(0.0,1,0.0,1.0),
+vec4(0.0,0,1.0,1.0),
+vec4(1.0,1.0,0.0,1.0),
+vec4(1.0,0.0,1.0,1.0),
+vec4(0.0,1.0,1.0,1.0),
+vec4(1.0,0.0,0.0,1.0)
+};
+
 //int evalLOD(vec3 samplePos)
 //{
 //	float d = length(vec3(vpl_ModelMatrix*vec4(samplePos,1)) - fuckPos);
@@ -134,15 +145,16 @@ vec4 virtualVolumeSample(vec3 samplePos,in out int curLod,out bool mapped)
 
 	ivec3 pageTableSize = ivec3(lodInfoBuffer.lod[curLod].pageTableSize);
 
+	ivec3 volumeDataSizeNoRepeat =  lodInfoBuffer.lod[curLod].volumeDataSizeNoRepeat.xyz;
+	ivec3 blockDataSizeNoRepeat = lodInfoBuffer.lod[curLod].blockDataSizeNoRepeat.xyz;
+
 	// address translation
+	//ivec3 entry3DIndex = ivec3(samplePos*volumeDataSizeNoRepeat/vec3(blockDataSizeNoRepeat.xyz*pageTableSize.xyz)*pageTableSize);
 	ivec3 entry3DIndex = ivec3(samplePos*pageTableSize);
 	uint entryFlatIndex = entry3DIndex.z * pageTableSize.x*pageTableSize.y + entry3DIndex.y * pageTableSize.x + entry3DIndex.x;
 
 	uint pageTableOffset = lodInfoBuffer.lod[curLod].pageTableOffset;
 	uvec4 pageTableEntry = pageTable.pageEntry[pageTableOffset+entryFlatIndex];
-
-	ivec3 blockDataSizeNoRepeat = lodInfoBuffer.lod[curLod].blockDataSizeNoRepeat.xyz;
-	ivec3 volumeDataSizeNoRepeat =  lodInfoBuffer.lod[curLod].volumeDataSizeNoRepeat.xyz;
 
 	vec3 voxelCoord = vec3(samplePos * (volumeDataSizeNoRepeat));
 	vec3 blockOffset = ivec3(voxelCoord) % blockDataSizeNoRepeat + fract(voxelCoord);
@@ -225,6 +237,8 @@ vec3 PhongShadingEx(vec3 diffuseColor)
 #endif
 
 
+
+
 void main()
 {
 
@@ -241,7 +255,8 @@ void main()
 
 	for (int i = 0; i < steps; ++i) 
 	{
-		int curLod = evalLOD(samplePoint);
+		//int curLod = evalLOD(samplePoint);
+		int curLod =0;
 
 		samplePoint = rayStart + direction * stepTable[curLod] * (float(i) + 0.5);
 
@@ -269,7 +284,7 @@ void main()
 		#ifdef ILLUMINATION
 		sampledColor.rgb = PhongShadingEx(sampledColor.rgb);
 		#endif
-		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
+		color = color + lodColors[curLod]*sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		//color = color + vec4(normalize(N),1.0) * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)
 		{
