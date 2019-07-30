@@ -114,13 +114,13 @@ int evalLOD(vec3 samplePos)
 
 vec4 lodColors[7]=
 {
-vec4(1.0,0,0.0,1.0),
-vec4(0.0,1,0.0,1.0),
-vec4(0.0,0,1.0,1.0),
-vec4(1.0,1.0,0.0,1.0),
-vec4(1.0,0.0,1.0,1.0),
-vec4(0.0,1.0,1.0,1.0),
-vec4(1.0,0.0,0.0,1.0)
+vec4(1,0,0,0),
+vec4(0,1,0,1),
+vec4(0,0,1,1),
+vec4(1,1.0,0,1),
+vec4(1,0.0,1,1),
+vec4(0,1.0,1,1),
+vec4(1,0.0,0,1)
 };
 
 //int evalLOD(vec3 samplePos)
@@ -134,12 +134,11 @@ vec4(1.0,0.0,0.0,1.0)
 //	return 4;
 //}
 
-
 #ifdef ILLUMINATION
 vec3 N;
 #endif
 
-vec4 virtualVolumeSample(vec3 samplePos,in out int curLod,out bool mapped)
+vec4 virtualVolumeSample(vec3 samplePos,in out int curLod,out bool mapped,out vec3 blockColor)
 {
 	vec4 scalar;
 
@@ -149,9 +148,11 @@ vec4 virtualVolumeSample(vec3 samplePos,in out int curLod,out bool mapped)
 	ivec3 blockDataSizeNoRepeat = lodInfoBuffer.lod[curLod].blockDataSizeNoRepeat.xyz;
 
 	// address translation
-	//ivec3 entry3DIndex = ivec3(samplePos*volumeDataSizeNoRepeat/vec3(blockDataSizeNoRepeat.xyz*pageTableSize.xyz)*pageTableSize);
-	ivec3 entry3DIndex = ivec3(samplePos*pageTableSize);
+	ivec3 entry3DIndex = ivec3(samplePos*volumeDataSizeNoRepeat/vec3(blockDataSizeNoRepeat.xyz*pageTableSize.xyz)*pageTableSize);
+	//ivec3 entry3DIndex = ivec3(samplePos*pageTableSize);
 	uint entryFlatIndex = entry3DIndex.z * pageTableSize.x*pageTableSize.y + entry3DIndex.y * pageTableSize.x + entry3DIndex.x;
+
+	blockColor = vec3(entry3DIndex)/pageTableSize;
 
 	uint pageTableOffset = lodInfoBuffer.lod[curLod].pageTableOffset;
 	uvec4 pageTableEntry = pageTable.pageEntry[pageTableOffset+entryFlatIndex];
@@ -255,8 +256,8 @@ void main()
 
 	for (int i = 0; i < steps; ++i) 
 	{
-		//int curLod = evalLOD(samplePoint);
-		int curLod =0;
+		int curLod = evalLOD(samplePoint);
+		//int curLod = 0;
 
 		samplePoint = rayStart + direction * stepTable[curLod] * (float(i) + 0.5);
 
@@ -269,7 +270,8 @@ void main()
 		continue;
 		//sample a scalar at samplePoint
 		bool mapped = true;
-		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped);
+		vec3 blockColor;
+		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped,blockColor);
 		if (mapped == false) 
 		{
 			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
@@ -284,8 +286,7 @@ void main()
 		#ifdef ILLUMINATION
 		sampledColor.rgb = PhongShadingEx(sampledColor.rgb);
 		#endif
-		color = color + lodColors[curLod]*sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
-		//color = color + vec4(normalize(N),1.0) * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
+		color = color + sampledColor *lodColors[curLod]* vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)
 		{
 			break;

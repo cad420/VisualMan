@@ -761,9 +761,13 @@ namespace ysl
 		lvdHeader.padding = m_padding;
 		lvdHeader.blockLengthInLog = logBlockSize;
 
-		lvdHeader.originalDataDim[0] = m_blockDimension.x * ((1 << nLogBlockSize) - 2 * m_padding);
-		lvdHeader.originalDataDim[1] = m_blockDimension.y * ((1 << nLogBlockSize) - 2 * m_padding);
-		lvdHeader.originalDataDim[2] = m_blockDimension.z * ((1 << nLogBlockSize) - 2 * m_padding);
+		//lvdHeader.originalDataDim[0] = m_blockDimension.x * ((1 << nLogBlockSize) - 2 * m_padding);
+		//lvdHeader.originalDataDim[1] = m_blockDimension.y * ((1 << nLogBlockSize) - 2 * m_padding);
+		//lvdHeader.originalDataDim[2] = m_blockDimension.z * ((1 << nLogBlockSize) - 2 * m_padding);
+
+		lvdHeader.originalDataDim[0] = g_xSize;
+		lvdHeader.originalDataDim[1] = g_ySize;
+		lvdHeader.originalDataDim[2] = g_zSize;
 
 		const auto p = lvdHeader.Encode();
 
