@@ -83,16 +83,16 @@ float lodTables[10]=
 1.f
 };
 
+
 float stepTable[7]=
 {
-	0.00005,
-	0.00010,
-	0.0002,
-	0.0004,
-	0.0008,
-	0.0016,
-	0.0032,
-
+	0.00000001,
+	0.00000002,
+	0.00000004,
+	0.00000008,
+	0.000000016,
+	0.000000032,
+	0.000000064
 };
 
 //
@@ -102,7 +102,7 @@ int evalLOD(vec3 samplePos)
 	float d = length(vec3(vpl_ModelMatrix*vec4(samplePos,1.0))-fuckPos);
 	const float fovRadian =  fov * 3.1415926535/180.0;
 	const float a = fovRadian*fovRadian*1.33333 / (1024*768*1.0);
-	const float r =  (a * (d * step/* + d * step*step + step*step*step/ 3.0*/));
+	const float r =  (a * (d * step + d * step*step + step*step*step/ 3.0));
 	for(int i = 0 ; i < 10;i++)
 	{
 		if (r < lodTables[i])
@@ -114,13 +114,24 @@ int evalLOD(vec3 samplePos)
 
 vec4 lodColors[7]=
 {
-vec4(1,0,0,0),
+vec4(1,0,0,1),
 vec4(0,1,0,1),
 vec4(0,0,1,1),
 vec4(1,1.0,0,1),
 vec4(1,0.0,1,1),
 vec4(0,1.0,1,1),
 vec4(1,0.0,0,1)
+};
+
+float correlation[7]=
+{
+1,
+0.5,
+0.25,
+0.125,
+16,
+32,
+64
 };
 
 //int evalLOD(vec3 samplePos)
@@ -254,20 +265,21 @@ void main()
 	vec3 samplePoint = rayStart;
 
 
-	for (int i = 0; i < steps; ++i) 
+	for (int i = 0;i<10000; ++i) 
 	{
 		int curLod = evalLOD(samplePoint);
 		//int curLod = 0;
+		//samplePoint = rayStart + direction * stepTable[curLod] * (float(i) + 0.5);
+		samplePoint += direction * stepTable[curLod] * (float(i) + 0.5);
 
-		samplePoint = rayStart + direction * stepTable[curLod] * (float(i) + 0.5);
-
-		if(samplePoint.x <= 0.01 ||
-		samplePoint.y <= 0.01 ||
-		samplePoint.z <= 0.01 || 
+		if(samplePoint.x <= 0.00 ||
+		samplePoint.y <= 0.00 ||
+		samplePoint.z <= 0.00 || 
 		samplePoint.x >= 0.99 ||
 		samplePoint.y >= 0.99 || 
 		samplePoint.z >= 0.99)
-		continue;
+		break;
+
 		//sample a scalar at samplePoint
 		bool mapped = true;
 		vec3 blockColor;
@@ -286,7 +298,10 @@ void main()
 		#ifdef ILLUMINATION
 		sampledColor.rgb = PhongShadingEx(sampledColor.rgb);
 		#endif
-		color = color + sampledColor *lodColors[curLod]* vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
+
+		sampledColor.a = 1-pow((1-sampledColor.a),curLod+1);
+
+		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		if (color.a > 0.99)
 		{
 			break;
