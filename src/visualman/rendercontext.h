@@ -31,6 +31,8 @@ namespace ysl
 			Default
 		};
 
+
+
 		class RenderContextFormat
 		{
 		public:
@@ -102,6 +104,9 @@ namespace ysl
 			bool IsInitialized()const { return initialized; }
 			void SetContextState(ContextState state) {  contextState = state; }
 			ContextState GetContextState()const { return contextState; }
+			std::size_t GetDeviceTotalMemorySize() { return maxInteger.MAX_GPU_MEMORY_SIZE;}
+			void Terminate();
+			bool IsTerminate();
 
 			virtual void SetWindowTitle(const std::string & title) {}
 			/**
@@ -143,7 +148,6 @@ namespace ysl
 			void ApplyRenderState(const RenderStateSet * rss);
 			void ApplyRenderEnable(const EnableStateSet * ess);
 
-
 		private:
 
 			static void gl_debug_msg_callback(GLenum source,
@@ -155,8 +159,12 @@ namespace ysl
 				void *userParam);
 
 			void GetMaxInteger();
+
 			void InitDefaultRenderState();
 			void InitDefaultRenderEnable();
+
+			void GetOpenGLExtensions();
+			bool CheckSupportForExtension(const std::string & ext);
 
 
 			struct MAXINTEGER
@@ -168,7 +176,12 @@ namespace ysl
 				int MAX_IMAGE_UNITS = 0;
 				int MAX_3DTEXUTRE_SIZE = 0;
 				int MAX_UNIFORM_BLOCKS_COUNT = 0;
+				int MAX_GPU_MEMORY_SIZE = 0;
 			}maxInteger;
+
+
+			// extension string
+			std::vector<std::string> extensions;
 
 			//GLFWwindow * windowContext;
 			std::vector<Ref<IEventListener>> listeners;
@@ -178,6 +191,7 @@ namespace ysl
 			RenderContextFormat format;
 			bool enableUpdate = true;
 			bool initialized = false;
+			bool terminate = false;
 			ContextState contextState = Context_OnRenderingFinished;
 
 			// Render State

@@ -10,6 +10,7 @@
 #include "ogl.h"
 #include "renderstate.h"
 #include <cassert>
+#include <vector>
 
 namespace ysl {
 	namespace vm
@@ -36,6 +37,7 @@ namespace ysl {
 
 			/// TODO:: Lot of works to do here for robust.
 
+			GetOpenGLExtensions();
 			GetMaxInteger();
 			InitDefaultRenderState();
 
@@ -65,6 +67,16 @@ namespace ysl {
 		void RenderContext::SetContextFormat(const RenderContextFormat& fmt)
 		{
 			format = fmt;
+		}
+
+		void RenderContext::Terminate()
+		{
+			terminate = true;
+		}
+
+		bool RenderContext::IsTerminate()
+		{
+			return terminate;
 		}
 
 		Ref<Framebuffer> RenderContext::GetFramebuffer()
@@ -469,6 +481,25 @@ namespace ysl {
 			GL(glGetIntegerv(GL_MAX_COMBINED_UNIFORM_BLOCKS, &maxInteger.MAX_UNIFORM_BLOCKS_COUNT));
 			maxInteger.MAX_UNIFORM_BLOCKS_COUNT = std::min(int(RS_UniformBuffer7 - RS_UniformBuffer0 + 1), maxInteger.MAX_UNIFORM_BLOCKS_COUNT);
 
+			if(CheckSupportForExtension("GL_NVX_gpu_memory_info"))
+			{
+				constexpr int GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX = 0x9047;		// dedicated video memory, total size (in kb) of the GPU memory
+				constexpr int GPU_MEMORY_INFO_TOTAL_AVAILABEL_MEMORY_NVX = 0x9048;	// total available memory, total size (in Kb) of the memory available for allocations
+				constexpr int GPU_MEMORY_INFO_CURRENT_AVAILABEL_VIDEMEM_NVX = 0x9049; //current available dedicated video memory (in kb), currently unused GPU memory
+				GL(glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABEL_MEMORY_NVX, &maxInteger.MAX_GPU_MEMORY_SIZE));
+
+			}else if(CheckSupportForExtension("GL_ATI_meminfo"))
+			{
+				constexpr int GPU_VBO_FREE_MEMORY_ATI = 0x87FB;
+				constexpr int GPU_TEXTURE_FREE_MEMORY_ATI = 0x87FC;
+				constexpr int GPU_RENDERBUFFER_FREE_MEMORY_ATI = 0x87FD;
+				int texFreeMem = 0, vboFreeMem = 0, renderBufferFreeMem = 0;
+				GL(glGetIntegerv(GPU_TEXTURE_FREE_MEMORY_ATI, &texFreeMem));
+				GL(glGetIntegerv(GPU_VBO_FREE_MEMORY_ATI,&vboFreeMem));
+				GL(glGetIntegerv(GPU_RENDERBUFFER_FREE_MEMORY_ATI, &renderBufferFreeMem));
+				maxInteger.MAX_GPU_MEMORY_SIZE = texFreeMem + vboFreeMem + renderBufferFreeMem;
+			}
+
 			Log("MAX_VERTEX_ATTRIBS:%d\n", maxInteger.MAX_VERTEX_ATTRIBS);
 			Log("MAX_TEXTURE_IMAGE_UNITE:%d\n", maxInteger.MAX_TEXTURE_IMAGE_UNITE);
 			Log("MAX_SHADER_STORAGE_BINDINGS:%d\n", maxInteger.MAX_SHADER_STORAGE_BINDINGS);
@@ -476,6 +507,8 @@ namespace ysl {
 			Log("MAX_IMAGE_UNITS:%d\n", maxInteger.MAX_IMAGE_UNITS);
 			Log("MAX_3DTEXTURE_SIZE:%d\n", maxInteger.MAX_3DTEXUTRE_SIZE);
 			Log("MAX_UNIFORM_BLOCKS_COUNT:%d\n", maxInteger.MAX_UNIFORM_BLOCKS_COUNT);
+			Log("MAX_GPU_MEMORY_SIZE:%d", maxInteger.MAX_GPU_MEMORY_SIZE);
+
 		}
 
 		void RenderContext::InitDefaultRenderState()
@@ -535,6 +568,23 @@ namespace ysl {
 
 		void RenderContext::InitDefaultRenderEnable()
 		{
+		}
+
+		void RenderContext::GetOpenGLExtensions()
+		{
+			auto count = 0;
+			GL(glGetIntegerv(GL_NUM_EXTENSIONS, &count));
+			for(int i = 0 ; i < count;++i)
+				extensions.emplace_back((char*)(glGetStringi(GL_EXTENSIONS,i)));
+			GL_ERROR_REPORT;
+		}
+
+		bool RenderContext::CheckSupportForExtension(const std::string& ext)
+		{
+			for(const auto & e:extensions)
+				if (ext == e)
+					return true;
+			return false;
 		}
 	}
 }

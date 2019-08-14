@@ -15,7 +15,7 @@
       "variables": [
         {
           "name": "Qt5_DIR",
-          "value": "D:\\Qt\\5.12.1\\msvc2017_64\\lib\\cmake\\Qt5"
+          "value": "C:\\lib\\Qt\\Qt5.13.0\\5.13.0\\msvc2017_64\\lib\\cmake\\Qt5"
         },
         {
           "name": "glfw3_DIR",
@@ -63,7 +63,7 @@
       "variables": [
         {
           "name": "Qt5_DIR",
-          "value": "D:\\Qt\\5.12.1\\msvc2017_64\\lib\\cmake\\Qt5"
+          "value": "C:\\lib\\Qt\\Qt5.13.0\\5.13.0\\msvc2017_64\\lib\\cmake\\Qt5"
         },
         {
           "name": "glfw3_DIR",
@@ -112,7 +112,7 @@
       "variables": [
         {
           "name": "Qt5_DIR",
-          "value": "D:\\Qt\\5.12.1\\msvc2017_64\\lib\\cmake\\Qt5"
+          "value": "C:\\lib\\Qt\\Qt5.13.0\\5.13.0\\msvc2017_64\\lib\\cmake\\Qt5"
         },
         {
           "name": "glfw3_DIR",

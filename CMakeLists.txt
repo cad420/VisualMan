@@ -13,9 +13,6 @@ if(CMAKE_COMPILER_IS_GNUCXX)		# options for gnu compliler
 	add_compile_options(-std=c++17)
 endif()
 
-
-
-
 # Shared or static library
 option(VM_SHARED_LIBRARY "Set to On to build using dynimic linking" OFF)
 if(VM_SHARED_LIBRARY)
@@ -24,6 +21,7 @@ if(VM_SHARED_LIBRARY)
 else()
 	set(VM_SHARED_OR_STATIC "STATIC")
 endif()
+
 
 
 option(VM_BUILD_OLD_LARGE_VOLUME_RENDERER "Set to On to build the old large volume renderer")

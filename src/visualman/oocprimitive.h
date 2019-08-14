@@ -21,6 +21,7 @@ namespace ysl
 		{
 		public:
 			OutOfCorePrimitive();
+
 			void Render(const Actor* actor, const Shading* shading, const Camera* camera, RenderContext* context) override;
 			void SetOutOfCoreResources(Ref<IOutOfCoreAdapter> e);
 			void RemoveOutOfCoreResources(Ref<IOutOfCoreAdapter> e);

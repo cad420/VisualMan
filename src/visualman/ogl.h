@@ -2,7 +2,8 @@
 #ifndef _OGL_H_
 #define _OGL_H_
 
-#include "../../lib/gl3w/GL/glcorearb.h"
+//#include "../../lib/gl3w/GL/glcorearb.h"
+#include <GL/glcorearb.h>
 
 const GLenum EnableEnum2GLEnum[] = 
 {
@@ -12,5 +13,8 @@ const GLenum EnableEnum2GLEnum[] =
    GL_DEPTH_TEST,
    GL_STENCIL_TEST,
 };
+
+
+
 
 #endif

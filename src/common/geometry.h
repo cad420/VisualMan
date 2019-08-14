@@ -46,6 +46,9 @@ namespace ysl
 	using Point3i = Point3<int>;
 	using Vector4f = Vector4<Float>;
 
+	using Normal3f = Normal3<Float>;
+	using Normal3i = Normal3<int>;
+
 
 	using Vector2f = Vector2<Float>;
 	using Vector2i = Vector2<int>;
@@ -62,6 +65,8 @@ namespace ysl
 	using Vec2i = Vector2i;
 	using Vec4f = Vector4f;
 	using Vec4i = Vector4i;
+	using Nor3f = Normal3f;
+	using Nor3i = Normal3i;
 
 	template<typename T>
 	class Vector2 {
@@ -1120,6 +1125,28 @@ namespace ysl
 		return Vector3<T>((v1y * v2z) - (v1z * v2y), (v1z * v2x) - (v1x * v2z),
 			(v1x * v2y) - (v1y * v2x));
 	}
+
+	template<typename T>
+	Float Dot(const Vector3<T>& v1, const Vector3<T>& v2) 
+	{
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	}
+
+	template<typename T>
+	Float Dot(const Point3<T>& v1, const Point3<T>& v2)
+	{
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	}
+
+	template<typename T>
+	Float Dot(const Vector3<T>& v1, const Point3<T>& v2)
+	{
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	}
+
+
+
+
 
 	template<typename T>
 	T Prod(const Vector2<T> & v)

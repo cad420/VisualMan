@@ -126,9 +126,9 @@ vec4(1,0.0,0,1)
 float correlation[7]=
 {
 1,
-0.5,
-0.25,
-0.125,
+2,
+4,
+8,
 16,
 32,
 64
@@ -248,7 +248,27 @@ vec3 PhongShadingEx(vec3 diffuseColor)
 }
 #endif
 
-
+bool isboader(vec3 point)
+{
+	const float eps = 0.003;
+	float x = point.x;
+	float y = point.y;
+	float z = point.z;
+	if((abs(x)<eps && abs(y) <= eps)
+	|| (abs(x)<eps && abs(y-1) <= eps)
+	|| (abs(x-1)<eps && abs(y) <= eps)
+	|| (abs(x-1)<eps && abs(y-1) <= eps)
+	|| (abs(x)<eps && abs(z) <= eps)
+	|| (abs(x)<eps && abs(z-1) <= eps)
+	|| (abs(x-1)<eps && abs(z) <= eps)
+	|| (abs(x-1)<eps && abs(z-1) <= eps)
+	|| (abs(z)<eps && abs(y) <= eps)
+	|| (abs(z)<eps && abs(y-1) <= eps)
+	|| (abs(z-1)<eps && abs(y) <= eps)
+	|| (abs(z-1)<eps && abs(y-1) <= eps))
+	return true;
+	else return false;
+}
 
 
 void main()
@@ -258,12 +278,19 @@ void main()
 	vec3 rayEnd = imageLoad(endPos,ivec2(gl_FragCoord)).xyz;
 	vec3 start2end = rayEnd - rayStart;
 	vec4 color = imageLoad(interResult,ivec2(gl_FragCoord));
-
+	vec4 bg = vec4(1.f,1.f,1.f, 1.00f);
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
 	vec3 samplePoint = rayStart;
 
+	vec4 boundingBoxColor = vec4(0.3,0,0,0.1);
+
+	if(start2end.x == 0 && start2end.y == 0 && start2end.z == 0)
+	{
+		fragColor = bg;
+		return;
+	}
 
 	for (int i = 0;i<10000; ++i) 
 	{
@@ -272,45 +299,43 @@ void main()
 		//samplePoint = rayStart + direction * stepTable[curLod] * (float(i) + 0.5);
 		samplePoint += direction * stepTable[curLod] * (float(i) + 0.5);
 
-		if(samplePoint.x <= 0.00 ||
-		samplePoint.y <= 0.00 ||
-		samplePoint.z <= 0.00 || 
-		samplePoint.x >= 0.99 ||
-		samplePoint.y >= 0.99 || 
-		samplePoint.z >= 0.99)
+		if(samplePoint.x < 0.00 ||
+		samplePoint.y < 0.00 ||
+		samplePoint.z < 0.00 || 
+		samplePoint.x > 1.0 ||
+		samplePoint.y > 1.0 || 
+		samplePoint.z > 1.0)
 		break;
 
+		if(isboader(samplePoint) == true)
+			color = color + boundingBoxColor * vec4(boundingBoxColor.aaa, 1.0) * (1.0 - color.a);
+
+
 		//sample a scalar at samplePoint
-		bool mapped = true;
-		vec3 blockColor;
-		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped,blockColor);
-		if (mapped == false) 
-		{
-			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
-			memoryBarrier();
-			imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
-			memoryBarrier();
-			discard;
-		}
+//		bool mapped = true;
+//		vec3 blockColor;
+//		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped,blockColor);
+//		if (mapped == false) 
+//		{
+//			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
+//			//memoryBarrier();
+//			imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
+//			//memoryBarrier();
+//			discard;
+//		}
+//		vec4 sampledColor = texture(texTransfunc, scalar.r);
+//		sampledColor.a = 1-pow((1-sampledColor.a),curLod+1);
+//		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
+//		if (color.a > 0.99)
+//		{
+//			break;
+//		}
 
-		//return;
-		vec4 sampledColor = texture(texTransfunc, scalar.r);
-		#ifdef ILLUMINATION
-		sampledColor.rgb = PhongShadingEx(sampledColor.rgb);
-		#endif
-
-		sampledColor.a = 1-pow((1-sampledColor.a),curLod+1);
-
-		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
-		if (color.a > 0.99)
-		{
-			break;
-		}
 	}
+
 	imageStore(entryPos,ivec2(gl_FragCoord),vec4(rayEnd ,0.0));		// Terminating flag
-	memoryBarrier();
+	//memoryBarrier();
 	//vec4 bg = vec4(0.45f, 0.55f, 0.60f, 1.00f);
-	vec4 bg = vec4(1.f,1.f,1.f, 1.00f);
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;
 	fragColor = color;

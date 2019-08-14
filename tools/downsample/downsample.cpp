@@ -173,7 +173,7 @@ int main()
 	const auto bytes = sampleSize.x*sampleSize.y*sliceStep;
 	std::unique_ptr<unsigned char[]> downsampleData(new unsigned char[bytes]);
 	std::ofstream out(outFileName, std::ios::binary);
-//#pragma omp parallel for
+#pragma omp parallel for
 	for(int zz = 0 ;zz < sampleSize.z;zz+=sliceStep)
 	{
 		std::size_t actualSlice;

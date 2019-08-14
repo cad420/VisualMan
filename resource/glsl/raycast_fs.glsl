@@ -1,5 +1,4 @@
 #version 430 core
-
 // struct LIGHT_SOURCE {
 //     vec3 position_;        // light position in world space
 //     vec3 ambientColor_;    // ambient color (r,g,b)

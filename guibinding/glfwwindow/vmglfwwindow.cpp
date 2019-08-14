@@ -140,7 +140,7 @@ namespace ysl {
 		int VMGLFWWindow::Show()
 		{
 			DispatchResizeEvent(width, height);
-			while (!glfwWindowShouldClose(glfwWindow))
+			while (!glfwWindowShouldClose(glfwWindow) && IsTerminate() == false)
 			{
 				if (GetAutomaticallyUpdate())
 					Update();

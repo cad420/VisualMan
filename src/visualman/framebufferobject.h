@@ -77,7 +77,13 @@ namespace ysl
 		class VISUALMAN_EXPORT_IMPORT FBODepthAttachment:public FBORenderBufferAttachment
 		{
 			friend class FramebufferObject;
+		private:
+			DepthBufferFormat format = DBF_DEPTH_COMPONENT24;
 		public:
+			FBODepthAttachment(DepthBufferFormat format) :format(format) {};
+			DepthBufferFormat Type()const { return format; }
+			void SetFormat(DepthBufferFormat format) { this->format = format; }
+
 		};
 
 		/**

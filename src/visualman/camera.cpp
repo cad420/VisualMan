@@ -12,7 +12,7 @@ namespace ysl
 {
 	namespace  vm
 	{
-		ViewMatrixWrapper::ViewMatrixWrapper(const ysl::Point3f& position, ysl::Vector3f worldUp, const ysl::Point3f& center):
+		ViewMatrixWrapper::ViewMatrixWrapper(const ysl::Point3f& position, ysl::Vector3f worldUp, const ysl::Point3f& center) :
 			m_position(position),
 			m_front(center - position),
 			m_worldUp(worldUp),
@@ -51,7 +51,7 @@ namespace ysl
 			m_up = ysl::Vector3f::Cross(m_right, m_front).Normalized();
 		}
 
-		void ViewMatrixWrapper::Move(const ysl::Vector3f & direction, float deltaTime)
+		void ViewMatrixWrapper::Move(const ysl::Vector3f& direction, float deltaTime)
 		{
 			const auto velocity = m_movementSpeed * direction * deltaTime;
 			m_position += velocity;
@@ -120,7 +120,7 @@ namespace ysl
 		}
 
 		void Camera::SetCamera(const ysl::Point3f& position, ysl::Vector3f worlUp, const ysl::Point3f& center,
-		                       float nearPlane, float farPlane, float aspectRatio, float fov)
+			float nearPlane, float farPlane, float aspectRatio, float fov)
 		{
 			viewMatrixWrapper->UpdateCamera(position, worlUp, center);
 
@@ -134,6 +134,53 @@ namespace ysl
 			SetProjectionMatrix(perspectiveMatrix);
 		}
 
+		Ref<ArrayFloat3> Camera::GetFrustumLines() const
+		{
+			/*
+			 *
+			 * 7------6
+			 * |\	 /|
+			 * | 3--2 |
+			 * | |	| |
+			 * | 0--1 |
+			 * 4------5
+			 *
+			 * Frustum
+			 */
+
+			const auto pos = GetPosition();
+			const auto direction = GetFront().Normalized();
+			const auto right = Right().Normalized();
+			const auto up = Up().Normalized();
+			const auto nearPlane = GetNearPlane();
+			const auto farPlane = GetFarPlane();
+			const auto tanfov2 = 2.0 * std::tan(GetFov() / 2.0);
+			const auto atanfov2 = GetAspectRatio() * tanfov2;
+			const auto nearCenter = pos + direction * nearPlane;
+			const auto farCenter = pos + direction * farPlane;
+			const auto nearHalfHeight = tanfov2 * nearPlane;
+			const auto nearHalfWidth = atanfov2 * nearPlane;
+			const auto farHalfHeight = tanfov2 * farPlane;
+			const auto farHalfWidth = atanfov2 * farPlane;
+
+			auto lines = MakeRef<ArrayFloat3>();
+			auto bufferObject = MakeRef<BufferObject>();
+			bufferObject->Resize(8 * sizeof(Point2f));
+			auto ptr = reinterpret_cast<Point3f*>(bufferObject->LocalData());
+
+			// 0
+			ptr[0] = nearCenter + nearHalfWidth * (-right) + nearHalfHeight * (-up);
+			ptr[1] = nearCenter + nearHalfWidth * (right)+nearHalfHeight * (-up);
+			ptr[2] = nearCenter + nearHalfWidth * (right)+nearHalfHeight * (up);
+			ptr[3] = nearCenter + nearHalfWidth * (-right) + nearHalfHeight * (up);
+
+			ptr[0] = farCenter + farHalfWidth * (-right) + farHalfHeight * (-up);
+			ptr[1] = farCenter + farHalfWidth * (right)+farHalfHeight * (-up);
+			ptr[2] = farCenter + farHalfWidth * (right)+farHalfHeight * (up);
+			ptr[3] = farCenter + farHalfWidth * (-right) + farHalfHeight * (up);
+
+
+		}
 		Ref<Camera> CreateCamera(const std::string& jsonFileName)
 		{
 			using namespace rapidjson;
@@ -156,15 +203,15 @@ namespace ysl
 			up.x = GetValueByPointerWithDefault(d, "/camera/viewMatrix/up/0", 0.f).GetFloat();
 			up.y = GetValueByPointerWithDefault(d, "/camera/viewMatrix/up/1", 1.f).GetFloat();
 			up.z = GetValueByPointerWithDefault(d, "/camera/viewMatrix/up/2", 0.f).GetFloat();
-			
-			center.x = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/0",0.f).GetFloat();
-			center.y = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/1",0.f).GetFloat();
-			center.z = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/2",0.f).GetFloat();
+
+			center.x = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/0", 0.f).GetFloat();
+			center.y = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/1", 0.f).GetFloat();
+			center.z = GetValueByPointerWithDefault(d, "/camera/viewMatrix/center/2", 0.f).GetFloat();
 
 			const float fov = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/fov", 60.f).GetFloat();
 			const float nearPlane = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/nearPlane", 0.01f).GetFloat();
 			const float farPlane = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/farPlane", 200.f).GetFloat();
-			const float aspectRatio= GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/aspectRatio", 1024.f/768.f).GetFloat();
+			const float aspectRatio = GetValueByPointerWithDefault(d, "/camera/perspectiveMatrix/aspectRatio", 1024.f / 768.f).GetFloat();
 
 			auto camera = MakeRef<Camera>(pos, up, center);
 			//Transform perspectiveMatrix;
@@ -211,13 +258,13 @@ namespace ysl
 			Transform perspectiveMatrix;
 			perspectiveMatrix.SetGLPerspective(fov, aspectRatio, nearPlane, farPlane);
 
-			camera->SetCamera(pos, up, center,nearPlane,farPlane,aspectRatio,fov);
+			camera->SetCamera(pos, up, center, nearPlane, farPlane, aspectRatio, fov);
 			//camera->SetProjectionMatrix(perspectiveMatrix);
 			//camera->SetNearPlane(nearPlane);
 			//camera->SetFarPlane(farPlane);
 		}
 
-		bool SaveCameraAsJson(Ref<Camera> camera,const std::string & jsonFileName)
+		bool SaveCameraAsJson(Ref<Camera> camera, const std::string& jsonFileName)
 		{
 			using namespace rapidjson;
 			auto pos = camera->GetPosition();
@@ -255,7 +302,7 @@ namespace ysl
 				return false;
 			}
 			OStreamWrapper osw(ofs);
-			Writer<OStreamWrapper,UTF8<>,UTF8<>,CrtAllocator,kWriteDefaultFlags> writer(osw);
+			Writer<OStreamWrapper, UTF8<>, UTF8<>, CrtAllocator, kWriteDefaultFlags> writer(osw);
 			return d.Accept(writer);
 		}
 
@@ -308,7 +355,7 @@ namespace ysl
 					return;
 				if ((button & Mouse_Left) && (button & Mouse_Right))
 				{
-					const auto directionEx = camera->Up()*dy + dx * camera->Right();
+					const auto directionEx = camera->Up() * dy + dx * camera->Right();
 					camera->Movement(directionEx, 0.002);
 				}
 				else if (button == Mouse_Left)
@@ -317,7 +364,7 @@ namespace ysl
 				}
 				else if (button == Mouse_Right && dy != 0.0)
 				{
-					const auto directionEx = camera->GetFront()*dy;
+					const auto directionEx = camera->GetFront() * dy;
 					camera->Movement(directionEx, 1.0);
 				}
 				lastMousePos.x = xpos;

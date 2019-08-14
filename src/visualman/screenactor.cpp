@@ -25,26 +25,8 @@ namespace ysl
 		{
 			if (camera)
 			{
-
 				actor->CreateGetUniformSet()->CreateGetUniform("fov")->SetUniformValue(camera->GetFov());
 				actor->CreateGetUniformSet()->CreateGetUniform("fuckPos")->SetUniform3f(1, camera->GetPosition().Data());
-
-				//const auto d = (camera->GetPosition() - Point3f(0, 0, 0)).Length();
-				//const float fov = camera->GetFov();
-				//const float fovRadian = fov * Pi / 180.0;
-				//const Vec2i vSize(camera->GetViewport()->GetWidth(), camera->GetViewport()->GetHeight());
-				//const float a = fovRadian * fovRadian*camera->GetAspectRatio() / (vSize.x*vSize.y*1.0);
-				//const auto samplingRate = 0.01;
-				//const auto r = (a * (d*d*samplingRate + d * samplingRate*samplingRate + samplingRate * samplingRate*samplingRate / 3.0));
-				//for (int i = 0; i < 10; i++)
-				//{
-				//	if (r < lodTable[i])
-				//	{
-				//		//actor->CreateGetUniformSet()->CreateGetUniform("CUR_LOD")->SetUniformValue(i);
-				//		std::cout << ":" << i << std::endl;
-				//		return;
-				//	}
-				//}
 			}
 		}
 

@@ -7,6 +7,7 @@
 #include "graphictype.h"
 #include "eventinterface.h"
 #include "viewport.h"
+#include "abstraarray.h"
 
 namespace ysl
 {
@@ -134,11 +135,12 @@ namespace ysl
 
 			void Movement(const Vec3f& dir, float deltaTime) { viewMatrixWrapper->Move(dir, deltaTime); }
 
+			Ref<ArrayFloat3> GetFrustumLines() const;
+
 		private:
 			void UpdateProjMatrix(){ projMatrix->SetGLPerspective(fov, aspectRatio, nearPlan, farPlan);}
 			Ref<ViewMatrixWrapper> viewMatrixWrapper;
 			Ref<Transform> projMatrix;
-
 			Ref<Viewport> viewport;
 			float fov = 60;
 			float aspectRatio = 1024.0 / 768.0;

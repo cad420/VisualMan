@@ -13,6 +13,8 @@ namespace ysl
 		class VMAPPS_EXPORT_IMPORT VM_LargeVolumeRayCast:public VisualMan
 		{
 		public:
+			VM_LargeVolumeRayCast() = default;
+			VM_LargeVolumeRayCast(bool offline,const std::string & outFileName,const std::string & jsonFileName,const std::string & tfFilename);
 			void InitEvent() override;
 			void UpdateScene() override;
 			void DestroyEvent() override;
@@ -28,6 +30,13 @@ namespace ysl
 			void SetupResources(const std::string& fileName);
 			void SetupTF(const std::string & fileName);
 			void SetupJSON(const std::string & fileName);
+			void SetupConfigurationFiles(const std::vector<std::string> &fileNames);
+
+			bool offlineRendering = false;
+			std::string outFileName;
+			std::string jsonFile;
+			std::string tfFunctionFile;
+
 			Ref<Shading> rayCastShading;
 			Ref<Aggregate> mrtAgt, raycastAgt;
 			Ref<OutOfCorePrimitive> oocPrimitive;

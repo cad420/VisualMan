@@ -9,11 +9,18 @@
 #include <error.h>
 #include "blitframebuffer.h"
 #include "actoreventcallback.h"
+#include <framebuffer.h>
 
 namespace ysl
 {
 	namespace vm
 	{
+		VM_LargeVolumeRayCast::VM_LargeVolumeRayCast(bool offline, const std::string& outFileName,
+			const std::string& jsonFileName, const std::string& tfFilename):offlineRendering(offline),outFileName(outFileName),jsonFile(jsonFileName),tfFunctionFile(tfFilename)
+		{
+
+		}
+
 		void VM_LargeVolumeRayCast::InitEvent()
 
 		{
@@ -27,6 +34,7 @@ namespace ysl
 			 * intermediateResult:
 			 *
 			 */
+
 			Context()->SetAutomaticallyUpdate(false);
 
 			const auto w = Context()->GetFramebuffer()->Width();
@@ -59,9 +67,12 @@ namespace ysl
 			 *****************************************************************************/
 
 			mrtAgt = MakeRef<Aggregate>();
+			//auto depthAttachment = MakeRef<vm::FBODepthAttachment>(DepthBufferFormat::DBF_DEPTH_COMPONENT24);
 			auto mrtFBO = Context()->CreateFramebufferObject(vSize.x, vSize.y, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
 			mrtFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(entryTexture));
 			mrtFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT1, MakeRef<FBOTextureAttachment>(exitTexture));
+			//mrtFBO->AddDepthAttachment(depthAttachment);
+
 			mrtFBO->SetDrawBuffers(RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT1);
 			mrtAgt->Renderers().at(0)->SetFramebuffer(mrtFBO);
 			BindCameraEvent(mrtAgt->CreateGetCamera());
@@ -110,6 +121,7 @@ namespace ysl
 			auto intermediateFBO = Context()->CreateFramebufferObject(vSize.x, vSize.y, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0);
 			intermediateFBO->AddTextureAttachment(AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>(intermediateResult));
 			intermediateFBO->SetDrawBuffers(RDB_COLOR_ATTACHMENT0);
+			//intermediateFBO->AddDepthAttachment(depthAttachment);
 			intermediateFBO->CheckFramebufferStatus();
 
 			rayCastShading = MakeRef<Shading>();
@@ -143,7 +155,6 @@ namespace ysl
 			auto screenActorCallback = MakeRef<ScreenActorEventCallback>();
 			oocPrimitive = MakeRef<OutOfCorePrimitive>();
 			screenActorCallback->SetPrimitive(oocPrimitive);// Out Of Core
-
 			//SetupResources("");
 			//SetupTF("");
 
@@ -169,7 +180,8 @@ namespace ysl
 			outOfCoreAgts->GetAggregates().push_back(mrtAgt);
 			outOfCoreAgts->GetAggregates().push_back(raycastAgt);
 
-			Context()->Update();
+			SetupConfigurationFiles({ jsonFile,tfFunctionFile });
+			//Context()->Update();
 		}
 
 		void VM_LargeVolumeRayCast::UpdateScene()
@@ -179,6 +191,8 @@ namespace ysl
 		void VM_LargeVolumeRayCast::DestroyEvent()
 		{
 			rayCastShading.reset();
+			mrtAgt = nullptr;
+			raycastAgt = nullptr;
 			oocPrimitive.reset();
 			scale = nullptr;
 			intermediateResult = nullptr;
@@ -189,30 +203,17 @@ namespace ysl
 		{
 			const auto fov = mrtAgt->CreateGetCamera()->GetFov();
 			mrtAgt->CreateGetCamera()->SetFov(fov + ydegree);
+			raycastAgt->CreateGetCamera()->SetFov(fov + ydegree);
+			raycastAgt->CreateGetCamera()->SetNearPlane(mrtAgt->CreateGetCamera()->GetNearPlane());
+			raycastAgt->CreateGetCamera()->SetFarPlane(mrtAgt->CreateGetCamera()->GetFarPlane());
+			raycastAgt->CreateGetCamera()->SetAspectRation(mrtAgt->CreateGetCamera()->GetAspectRatio());
 			Context()->Update();
 		}
 
 		void VM_LargeVolumeRayCast::FileDropEvent(const std::vector<std::string>& fileNames)
 		{
-			for (const auto & each : fileNames)
-			{
-				auto extension = each.substr(each.find_last_of('.'));
-				bool found = false;
-				if (extension == ".tf")
-				{
-					SetupTF(each);
-					found = true;
-				}
-				else if (extension == ".json")
-				{
-					SetupJSON(each);
-					SetupResources(each);
-					found = true;
-				}
-				if (found)
-					break;
-			}
-			Context()->Update();
+			SetupConfigurationFiles(fileNames);
+			//Context()->Update();
 		}
 
 		void VM_LargeVolumeRayCast::ResizeEvent(int w, int h)
@@ -228,7 +229,7 @@ namespace ysl
 				mrtAgt->CreateGetCamera()->GetViewport()->SetWidth(w);
 				mrtAgt->CreateGetCamera()->GetViewport()->SetHeight(h);
 			}
-			Context()->Update();
+			//Context()->Update();
 		}
 
 		void VM_LargeVolumeRayCast::KeyPressEvent(KeyButton key)
@@ -249,8 +250,14 @@ namespace ysl
 		void VM_LargeVolumeRayCast::UpdateEvent()
 		{
 			VisualMan::UpdateEvent();
+
 			std::string title = "LVD Render -- fps:" + std::to_string(GetFPS());
 			Context()->SetWindowTitle(title);
+			if(outFileName.empty() == false)
+			{
+				intermediateResult->SaveTextureAs("D:\\Desktop\\res.png");
+				Context()->Terminate();
+			}
 		}
 
 		void VM_LargeVolumeRayCast::PrintInfo()
@@ -276,7 +283,7 @@ namespace ysl
 
 			try
 			{
-				oocResources = MakeRef<OutOfCoreVolumeTexture>(fileName);
+				oocResources = MakeRef<OutOfCoreVolumeTexture>(fileName,Context()->GetDeviceTotalMemorySize());
 			}
 			catch (std::runtime_error &e)
 			{
@@ -284,9 +291,14 @@ namespace ysl
 				return;
 			}
 
-			rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture(0));
-			rayCastShading->CreateGetTextureSampler(2)->SetTexture(oocResources->GetVolumeTexture(1));
-			rayCastShading->CreateGetTextureSampler(3)->SetTexture(oocResources->GetVolumeTexture(2));
+			for(int i = 0 ; i < oocResources->GetTextureUnitCount();i++)
+			{
+				rayCastShading->CreateGetTextureSampler(i+1)->SetTexture(oocResources->GetVolumeTexture(i));
+			}
+
+			//rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture(0));
+			//rayCastShading->CreateGetTextureSampler(2)->SetTexture(oocResources->GetVolumeTexture(1));
+			//rayCastShading->CreateGetTextureSampler(3)->SetTexture(oocResources->GetVolumeTexture(2));
 			rayCastShading->CreateGetAtomicCounter(3)->SetBufferObject(oocResources->GetAtomicCounterBuffer());
 			rayCastShading->CreateGetSSBO(2)->SetBufferObject(oocResources->GetPageTableBuffer());
 			rayCastShading->CreateGetSSBO(0)->SetBufferObject(oocResources->GetHashBuffer());
@@ -321,7 +333,6 @@ namespace ysl
 				Warning("Can not load .tf file");
 				return;
 			}
-
 			Context()->Update();
 		}
 
@@ -329,8 +340,31 @@ namespace ysl
 		{
 			//const auto camera = CreateCamera(fileName);
 			ConfigCamera(mrtAgt->CreateGetCamera().get(), fileName);
-
 			Context()->Update();
+		}
+
+		void VM_LargeVolumeRayCast::SetupConfigurationFiles(const std::vector<std::string>& fileNames)
+		{
+			for (const auto & each : fileNames)
+			{
+				if(each.empty())
+					continue;
+				auto extension = each.substr(each.find_last_of('.'));
+				bool found = false;
+				if (extension == ".tf")
+				{
+					SetupTF(each);
+					found = true;
+				}
+				else if (extension == ".json")
+				{
+					SetupJSON(each);
+					SetupResources(each);
+					found = true;
+				}
+				if (found)
+					break;
+			}
 		}
 	}
 }

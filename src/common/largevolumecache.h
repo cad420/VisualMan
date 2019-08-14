@@ -9,8 +9,6 @@
 
 namespace ysl
 {
-
-
 	class COMMON_EXPORT_IMPORT Disk3DPageAdapter:public AbstrMemoryCache
 	{
 		LVDReader lvdReader;
