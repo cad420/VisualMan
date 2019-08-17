@@ -10,7 +10,14 @@ namespace ysl
 		{
 			GL(glViewport(xpos, ypos, width, height));
 			GL(glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w));
-
+			if(scissor)
+			{
+				GL(glEnable(GL_SCISSOR_TEST));
+				GL(glScissor(xpos, ypos, width, height));
+			}else
+			{
+				GL(glDisable(GL_SCISSOR_TEST));
+			}
 			if(clearWhat)
 			{
 				GLboolean color_write_mask[4] = { 0,0,0,0 };

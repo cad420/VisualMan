@@ -10,15 +10,90 @@
 #include "blitframebuffer.h"
 #include "actoreventcallback.h"
 #include <framebuffer.h>
+#include "drawelements.h"
 
 namespace ysl
 {
 	namespace vm
 	{
-		VM_LargeVolumeRayCast::VM_LargeVolumeRayCast(bool offline, const std::string& outFileName,
-			const std::string& jsonFileName, const std::string& tfFilename):offlineRendering(offline),outFileName(outFileName),jsonFile(jsonFileName),tfFunctionFile(tfFilename)
+		FrustumEventCallback::FrustumEventCallback(Ref<Camera> camera) :camera(camera)
 		{
+			frustum = MakeRef<Primitive>();
+			if (camera)
+			{
+				const auto vertexIndex = MakeRef<ArrayUInt>();
+				unsigned int indices[24] = { 0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7 };
+				vertexIndex->GetBufferObject()->SetLocalData(indices, sizeof(indices));
+				vertexIndex->GetBufferObject()->ReallocBufferData(sizeof(indices), indices, BU_STATIC_DRAW);
+				vertexIndex->SetbufferObjectDataDirty(false);
+				auto drawCall = MakeRef<DrawElementsUInt>();
+				drawCall->SetPrimitiveType(PT_LINES);
+				drawCall->SetIndexBuffer(vertexIndex);
+				drawCall->SetLineWidth(2.f);
+				const auto vertexPositionArray = MakeRef<ArrayFloat3>();
+				frustum->SetVertexPositionArray(vertexPositionArray);
+				frustum->DrawCalls().push_back(drawCall);
+				UpdateFrustum();
+			}
+		}
 
+		void FrustumEventCallback::BindFrustumActor(Ref<Actor> actor)
+		{
+			if (actor)
+			{
+				auto shared_this = std::static_pointer_cast<FrustumEventCallback>(shared_from_this());
+				actor->RemoveActorRenderEventCallback(shared_this);
+				actor->AddActorRenderEventCallback(shared_this);
+				actor->SetRenderable(frustum, 0);
+			}
+		}
+
+		void FrustumEventCallback::OnActorRenderStartedEvent(Actor* actor,
+			const Camera* camera,
+			Renderable* renderable,
+			const Shading* shading,
+			int pass)
+		{
+			UpdateFrustum();
+		}
+
+		Ref<Primitive> FrustumEventCallback::GetFrustumPrimitive()
+		{
+			return frustum;
+		}
+
+		void FrustumEventCallback::UpdateFrustum()
+		{
+			const auto lines = camera->GetFrustumLines();
+			frustum->GetVertexArray()->GetBufferObject()->SetLocalData(lines.data(), sizeof(Point3f) * lines.size());
+			frustum->GetVertexArray()->SetbufferObjectDataDirty(true);
+			frustum->SetBufferObjectDirty(true);
+		}
+
+		BoundingBoxEventCallback::BoundingBoxEventCallback()
+		{
+			boundingBox = MakeCubeLines(Bound3f{ {0,0,0},{1,1,1} });
+			boundingBox->DrawCalls().at(0)->SetLineWidth(3.f);
+		}
+
+		void BoundingBoxEventCallback::BindBoundingBoxActor(Ref<Actor> actor)
+		{
+			if (actor) {
+				auto shared_this = std::static_pointer_cast<BoundingBoxEventCallback>(shared_from_this());
+				actor->RemoveActorRenderEventCallback(shared_this);
+				actor->AddActorRenderEventCallback(shared_this);
+				actor->SetRenderable(boundingBox, 0);
+			}
+		}
+
+		void BoundingBoxEventCallback::OnActorRenderStartedEvent(Actor* actor, const Camera* camera,
+			Renderable* renderable, const Shading* shading, int pass)
+		{
+		}
+
+		VM_LargeVolumeRayCast::VM_LargeVolumeRayCast(bool offline, const std::string& outFileName,
+			const std::string& jsonFileName, const std::string& tfFilename) :outFileName(outFileName), jsonFile(jsonFileName), tfFunctionFile(tfFilename)
+		{
 		}
 
 		void VM_LargeVolumeRayCast::InitEvent()
@@ -35,7 +110,8 @@ namespace ysl
 			 *
 			 */
 
-			Context()->SetAutomaticallyUpdate(false);
+			//
+			//Context()->SetAutomaticallyUpdate(false);
 
 			const auto w = Context()->GetFramebuffer()->Width();
 			const auto h = Context()->GetFramebuffer()->Height();
@@ -57,6 +133,7 @@ namespace ysl
 			intermediateResult = MakeRef<Texture>();
 			intermediateResult->SetSetupParams(texParam);
 			intermediateResult->CreateTexture();
+
 
 
 			/*[1]Multi Render Targets Aggregation*****************************************
@@ -95,10 +172,12 @@ namespace ysl
 			auto artist = MakeRef<Artist>();
 			artist->GetLOD(0)->push_back(positionShading);
 			auto t = Translate(-0.5, -0.5, -0.5);
-			auto s = Scale(1,1,1);
+			auto s = Scale(1, 1, 1);
 
-			scale = MakeRef<Transform>(s*t);
-			const auto geometryActor = MakeRef<Actor>(nullptr, artist, scale);
+
+
+			proxyGemoryScaleTrans = MakeRef<Transform>(s * t);
+			const auto geometryActor = MakeRef<Actor>(nullptr, artist, proxyGemoryScaleTrans);
 			auto geometryActorCallback = MakeRef<RayCast2ActorEventCallback>();
 			geometryActorCallback->BindToActor(geometryActor);
 
@@ -107,7 +186,63 @@ namespace ysl
 			mrtAgt->SceneManager().push_back(sceneManager);
 			mrtAgt->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
 			mrtAgt->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 0.f,0.f,0.f,1.f });
-			
+
+
+			// Thumbnail aggregation
+			navigationAgt = MakeRef<Aggregate>();
+			auto frustumShading = MakeRef<Shading>();
+			frustumShading->CreateGetEnableStateSet()->Enable(EN_DEPTH_TEST);
+			frustumShading->CreateGetUniformSet()->CreateGetUniform("object_color")->SetUniform4f(1, Vec4f{ 0,0,1,1 }.ConstData());
+
+
+			//navigationShading->CreateGetUniformSet()->CreateGetUniform("view_pos")->SetUniform3f(1, Vec3f{ 1,1,1 }.ConstData());
+
+			auto navigationGLSL = frustumShading->CreateGetProgram();
+			auto navigationVertShader = MakeRef<GLSLVertexShader>();
+			navigationVertShader->SetFromFile(R"(glsl/trivial_no_illumination_vs.glsl)");
+			auto navigationFragShader = MakeRef<GLSLFragmentShader>();
+			navigationFragShader->SetFromFile(R"(glsl/trivial_no_illumination_fs.glsl)");
+			navigationGLSL->AttachShader(navigationFragShader);
+			navigationGLSL->AttachShader(navigationVertShader);
+
+
+			auto frustumArtist = MakeRef<Artist>();
+			frustumArtist->GetLOD(0)->push_back(frustumShading);
+			auto frustumActor = MakeRef<Actor>(nullptr, frustumArtist, nullptr);
+			auto frustumActorEventCallback = MakeRef<FrustumEventCallback>(mrtAgt->CreateGetCamera());
+			frustumActorEventCallback->BindFrustumActor(frustumActor);
+
+			auto boundingboxShading = MakeRef<Shading>();
+			boundingboxShading->CreateGetProgram()->AttachShader(navigationFragShader);
+			boundingboxShading->CreateGetProgram()->AttachShader(navigationVertShader);
+			boundingboxShading->CreateGetUniformSet()->CreateGetUniform("object_color")->SetUniform4f(1, Vec4f{ 1,0,0,1 }.ConstData());
+
+			auto boundingBoxArtist = MakeRef<Artist>();
+			boundingBoxArtist->GetLOD(0)->push_back(boundingboxShading);
+
+			navigationScale = MakeRef<Transform>();
+			boundingboxActor = MakeRef<Actor>(nullptr, boundingBoxArtist, proxyGemoryScaleTrans);
+			auto boundingboxEventCallback = MakeRef<BoundingBoxEventCallback>();
+			boundingboxEventCallback->BindBoundingBoxActor(boundingboxActor);
+
+			/*
+			 * TODO:: Some memory crash will emerge when above variables are destructed.
+			 * maybe there is something wrong when using smart pointer. such as circular reference
+			 */
+
+			auto navigationSceneManager = MakeRef<TrivialSceneManager>();
+			navigationSceneManager->AddActor(frustumActor);
+			navigationSceneManager->AddActor(boundingboxActor);
+			navigationAgt->SceneManager().push_back(navigationSceneManager);
+			navigationAgt->Renderers().at(0)->SetFramebuffer(Context()->GetFramebuffer());
+			navigationCameraViewMatrix = MakeRef<ViewMatrixWrapper>(Point3f{ 5,5,5 }, Vec3f{ 0,1,0 }, Point3f{ 0,0,0 });
+			navigationAgt->CreateGetCamera()->SetViewMatrixWrapper(navigationCameraViewMatrix);
+			navigationAgt->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
+			navigationAgt->CreateGetCamera()->GetViewport()->SetClearColor(Vec4f{ 1.f,1.f,1.f,1.f });
+			navigationAgt->CreateGetCamera()->GetViewport()->SetPosition(0, 0);
+			navigationAgt->CreateGetCamera()->SetNearPlane(1.0);
+			navigationAgt->CreateGetCamera()->SetNearPlane(20000.f);
+			navigationAgt->CreateGetCamera()->GetViewport()->SetEnableScissor(true);
 
 			/*[2] Ray Cast Aggregation ********************************************************
 			 *
@@ -151,8 +286,8 @@ namespace ysl
 			auto effect2 = MakeRef<Artist>();
 			effect2->GetLOD(0)->push_back(rayCastShading);
 
-			const auto screenActor = MakeRef<Actor>(nullptr, effect2, scale);
-			auto screenActorCallback = MakeRef<ScreenActorEventCallback>();
+			const auto screenActor = MakeRef<Actor>(nullptr, effect2, proxyGemoryScaleTrans);
+			auto screenActorCallback = MakeRef<ScreenActorEventCallback>(mrtAgt->CreateGetCamera());
 			oocPrimitive = MakeRef<OutOfCorePrimitive>();
 			screenActorCallback->SetPrimitive(oocPrimitive);// Out Of Core
 			//SetupResources("");
@@ -178,14 +313,21 @@ namespace ysl
 			auto outOfCoreAgts = MakeRef<SerializedAggregates>();
 			SetAggregation(outOfCoreAgts);
 			outOfCoreAgts->GetAggregates().push_back(mrtAgt);
+
 			outOfCoreAgts->GetAggregates().push_back(raycastAgt);
 
+			//outOfCoreAgts->GetAggregates().push_back(navigationAgt);
+
 			SetupConfigurationFiles({ jsonFile,tfFunctionFile });
-			//Context()->Update();
+
 		}
 
 		void VM_LargeVolumeRayCast::UpdateScene()
 		{
+			const auto cam = mrtAgt->CreateGetCamera();
+			//cam->GetViewMatrixWrapper()->RotateCamera(cam->GetUp(), 10);
+			//cam->Movement(cam->GetFront().Normalized(),100);
+			cam->SetFov(int(cam->GetFov())-2);
 		}
 
 		void VM_LargeVolumeRayCast::DestroyEvent()
@@ -194,7 +336,7 @@ namespace ysl
 			mrtAgt = nullptr;
 			raycastAgt = nullptr;
 			oocPrimitive.reset();
-			scale = nullptr;
+			proxyGemoryScaleTrans = nullptr;
 			intermediateResult = nullptr;
 			VisualMan::DestroyEvent();
 		}
@@ -229,6 +371,7 @@ namespace ysl
 				mrtAgt->CreateGetCamera()->GetViewport()->SetWidth(w);
 				mrtAgt->CreateGetCamera()->GetViewport()->SetHeight(h);
 			}
+			navigationAgt->CreateGetCamera()->GetViewport()->SetViewportSize(w*3.0/10,h*3.0/10);
 			//Context()->Update();
 		}
 
@@ -238,6 +381,11 @@ namespace ysl
 			if (key == KeyButton::Key_C)
 			{
 				SaveCameraAsJson(mrtAgt->CreateGetCamera(), "vmCamera.json");
+			}else if(key == KeyButton::Key_R)
+			{
+				mrtAgt->CreateGetCamera()->GetViewMatrixWrapper()->SetPosition(Point3f{ 4320.2120971679688, -600.7951545715332, -13442.992797851563 });
+				mrtAgt->CreateGetCamera()->SetFov(60);
+				mrtAgt->CreateGetCamera()->GetViewMatrixWrapper()->SetCenter(Point3f{ 0,0,0 });
 			}
 		}
 
@@ -253,7 +401,7 @@ namespace ysl
 
 			std::string title = "LVD Render -- fps:" + std::to_string(GetFPS());
 			Context()->SetWindowTitle(title);
-			if(outFileName.empty() == false)
+			if (outFileName.empty() == false)
 			{
 				intermediateResult->SaveTextureAs("D:\\Desktop\\res.png");
 				Context()->Terminate();
@@ -283,17 +431,18 @@ namespace ysl
 
 			try
 			{
-				oocResources = MakeRef<OutOfCoreVolumeTexture>(fileName,Context()->GetDeviceTotalMemorySize());
+				oocResources = MakeRef<OutOfCoreVolumeTexture>(fileName, Context()->GetDeviceTotalMemorySize());
 			}
-			catch (std::runtime_error &e)
+			catch (std::runtime_error& e)
 			{
 				Warning("Can not load lvd file");
 				return;
 			}
 
-			for(int i = 0 ; i < oocResources->GetTextureUnitCount();i++)
+
+			for (int i = 0; i < oocResources->GetTextureUnitCount(); i++)
 			{
-				rayCastShading->CreateGetTextureSampler(i+1)->SetTexture(oocResources->GetVolumeTexture(i));
+				rayCastShading->CreateGetTextureSampler(i + 1)->SetTexture(oocResources->GetVolumeTexture(i));
 			}
 
 			//rayCastShading->CreateGetTextureSampler(1)->SetTexture(oocResources->GetVolumeTexture(0));
@@ -314,9 +463,9 @@ namespace ysl
 			const auto resolution = oocResources->DataResolutionWithPadding(0);
 			auto t = Translate(-0.5, -0.5, -0.5);
 			auto s = Scale(Vec3f(resolution));
-			//auto spacing = Scale(Vec3f(1, 1, 6).Normalized());
-			*scale = Transform(s*t);
-
+			auto spacing = Scale(Vec3f(1, 1, 6));
+			*proxyGemoryScaleTrans = Transform(spacing*s * t);
+			*navigationCameraViewMatrix = ViewMatrixWrapper(Point3f(MinComponent(resolution), MinComponent(resolution), MaxComponent(resolution*2) ), Vec3f{ 0,1,0 }, Point3f{ 0,0,0 });
 			Context()->Update();
 		}
 
@@ -328,13 +477,14 @@ namespace ysl
 				const auto tfTex = MakeTransferFunction1DTexture(fileName);
 				rayCastShading->CreateGetTextureSampler(4)->SetTexture(tfTex);
 			}
-			catch (std::runtime_error & e)
+			catch (std::runtime_error& e)
 			{
 				Warning("Can not load .tf file");
 				return;
 			}
 			Context()->Update();
 		}
+
 
 		void VM_LargeVolumeRayCast::SetupJSON(const std::string& fileName)
 		{
@@ -345,9 +495,9 @@ namespace ysl
 
 		void VM_LargeVolumeRayCast::SetupConfigurationFiles(const std::vector<std::string>& fileNames)
 		{
-			for (const auto & each : fileNames)
+			for (const auto& each : fileNames)
 			{
-				if(each.empty())
+				if (each.empty())
 					continue;
 				auto extension = each.substr(each.find_last_of('.'));
 				bool found = false;

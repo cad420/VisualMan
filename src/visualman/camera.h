@@ -16,7 +16,7 @@ namespace ysl
 
 		class Viewport;
 
-		class ViewMatrixWrapper
+		class VISUALMAN_EXPORT_IMPORT ViewMatrixWrapper
 		{
 			static constexpr float YAW = -90.0f;
 			static constexpr float PITCH = 0.0f;
@@ -52,13 +52,14 @@ namespace ysl
 			// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
 			Transform GetViewMatrix() const;
 			Point3f GetPosition()const { return m_position; }
+			void SetPosition(const Point3f& pos);
 			Point3f GetCenter()const { return m_center; }
 			void SetCenter(const ysl::Point3f& center);
 			void Move(const ysl::Vector3f& direction, float deltaTime);
 			void Rotate(float xOffset, float yOffset);
 			void ProcessMouseScroll(float yOffset);
+			void RotateCamera(const ysl::Vector3f& axis, double theta);
 		private:
-			void UpdateCameraVectors(const ysl::Vector3f& axis, double theta);
 		};
 
 
@@ -135,7 +136,7 @@ namespace ysl
 
 			void Movement(const Vec3f& dir, float deltaTime) { viewMatrixWrapper->Move(dir, deltaTime); }
 
-			Ref<ArrayFloat3> GetFrustumLines() const;
+			std::vector<Point3f> GetFrustumLines() const;
 
 		private:
 			void UpdateProjMatrix(){ projMatrix->SetGLPerspective(fov, aspectRatio, nearPlan, farPlan);}

@@ -31,7 +31,6 @@ namespace ysl
 
 			manipulator->SetCamera(std::static_pointer_cast<Aggregate>(GetAggregate())->CreateGetCamera());
 
-
 			// Open a Test File 
 
 			RawReader reader(R"(D:\scidata\head.raw)", Size3{ 256,256,225 }, 1);

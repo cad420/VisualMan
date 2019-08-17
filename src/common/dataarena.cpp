@@ -1,4 +1,6 @@
 #include "dataarena.h"
+#include <ostream>
+#include <iostream>
 //#include <cmalloc>
 
 //#include <malloc.h>
@@ -19,6 +21,11 @@ void FreeAligned(void * ptr)
 //#if defined(_WIN32)
 	//_aligned_free(ptr);
 //#else
-	free(ptr);
+	if(ptr!=nullptr)
+	{
+		free(ptr);
+	}
 //#endif
 }
+
+

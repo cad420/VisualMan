@@ -174,8 +174,10 @@ namespace ysl
 
 		void SerializedAggregates::Render()
 		{
-			for (auto & aggregate : aggregates)
-				aggregate->Render();
+			for(int i = 0 ; i < aggregates.size();i++)
+			{
+				aggregates[i]->Render();
+			}
 		}
 	}
 }

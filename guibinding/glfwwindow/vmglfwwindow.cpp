@@ -84,6 +84,7 @@ namespace ysl {
 			glfwSetDropCallback(glfwWindow, glfwDropFileCallback);
 
 			DispatchInitEvent();
+			glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 			return true;
 		}
 

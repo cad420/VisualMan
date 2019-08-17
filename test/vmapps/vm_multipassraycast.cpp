@@ -98,7 +98,7 @@ namespace ysl {
 			effect2->GetLOD(0)->push_back(rayCastShading);
 
 			auto screenActor = MakeRef<Actor>(nullptr, effect2, nullptr);
-			auto screenActorCallback = MakeRef<ScreenActorEventCallback>();
+			auto screenActorCallback = MakeRef<ScreenActorEventCallback>(nullptr);
 			screenActorCallback->BindToActor(screenActor);
 			std::static_pointer_cast<TrivialSceneManager>(mainAggregate->SceneManager().at(0))->AddActor(screenActor);
 			/// Step 3. Pipline Configuraion

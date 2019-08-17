@@ -88,7 +88,6 @@ namespace ysl
 				Warning("This is am imutable buffer. It is not able to be resized.");
 				return;
 			}
-
 			ReallocBufferData(Bytes(), LocalData(), usage);
 			if (discard)
 				Resize(0);

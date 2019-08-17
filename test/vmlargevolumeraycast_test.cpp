@@ -10,8 +10,8 @@ int main(int argc, char ** argv)
 	using namespace ysl::app;
 
 	cmdline::parser a;
-	a.add<int>("width", 'w', "The width of window", false, 1024);
-	a.add<int>("height", 'h', "The height of window", false, 768);
+	a.add<int>("width", 'w', "The width of window", false, 2560);
+	a.add<int>("height", 'h', "The height of window", false, 1440);
 
 	a.add<int>("of", 'f', "output image file name", false);
 	a.add("offline", 'o', "offline rendering");

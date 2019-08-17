@@ -6,6 +6,7 @@
 #include "dataarena.h"
 #include "geometry.h"
 #include <cstring>
+#include <iostream>
 
 namespace ysl
 {
@@ -13,17 +14,15 @@ namespace ysl
 	class LocalBuffer
 	{
 		using size_type = std::size_t;
-		size_type bytes;
-		uint8_t * data;
-		bool own;
+		size_type bytes=0;
+		uint8_t * data=nullptr;
+		bool own = true;
 	public:
 		LocalBuffer() :bytes(0), data(nullptr), own(true)
 		{
-
 		}
 		LocalBuffer(size_type x, uint8_t * data, bool own) :bytes(x), data(data), own(own)
 		{
-
 		}
 
 		LocalBuffer(size_type x, const uint8_t * data) :LocalBuffer(x, nullptr, true)
@@ -31,34 +30,34 @@ namespace ysl
 			this->data = (uint8_t*)AllocAligned<uint8_t>(x);
 			if (!this->data)
 				throw std::runtime_error("Bad Alloc");
-			if (data)
+			if (this->data)
 				memcpy(this->data, data, x * sizeof(uint8_t));
 		}
 
 		LocalBuffer(const LocalBuffer & array) :LocalBuffer(array.bytes, array.data, array.own)
 		{
-
 		}
 		LocalBuffer & operator=(const LocalBuffer & array)
 		{
-			Clear(); // clear previous data
-
-			this->bytes = array.bytes;
-			this->own = own;
-			memcpy(data, array.data, sizeof(uint8_t) * bytes);
+			//Clear(); // clear previous dat
+			//this->bytes = array.bytes;
+			this->own = true;
+			Resize(array.bytes);
+			memcpy(data, array.data,  bytes);
 			return *this;
 		}
 
 		LocalBuffer(LocalBuffer && array)noexcept :
 			LocalBuffer(array.bytes, array.data, array.own)
 		{
-			array.data = nullptr;
+			//array.data = nullptr;
+			
+			//std::cout << "LocalBuffer(const LocalBuffer && array) :LocalBuffer(array.bytes, array.data, array.own)" << std::endl;
 		}
 
 		LocalBuffer & operator=(LocalBuffer && array)noexcept
 		{
 			Clear(); // clear previous data
-
 			bytes = array.bytes;
 			data = array.data;
 			own = array.own;
@@ -82,7 +81,7 @@ namespace ysl
 
 		void SetLocalData(const void* data, size_t bytes)
 		{
-			Resize(bytes / sizeof(char));
+			Resize(bytes);
 			memcpy(LocalData(), data, bytes);
 		}
 
@@ -99,15 +98,20 @@ namespace ysl
 					return false;
 
 				auto * ptr = (uint8_t*)AllocAligned<uint8_t>(x);
-				if (x > bytes)
+				if(this->data != nullptr)
 				{
-					memcpy(ptr, data, bytes);
+					if (x > bytes)
+					{
+						memcpy(ptr, data, bytes);
+					}
+					else if (x < bytes)
+					{
+						memcpy(ptr, data, x);
+					}
 				}
-				else if (x < bytes)
-				{
-					memcpy(ptr, data, x);
-				}
+
 				Clear();
+				
 				bytes = x;
 				data = ptr;
 				return true;

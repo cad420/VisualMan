@@ -74,25 +74,37 @@ float lodTables[10]=
 0.00000000745f,
 0.0000000596f,
 0.000000476f,
-0.00000381f,
-0.0000305175f,
-0.0002441f,
+0.00000201f,
+0.000006175f,
+0.0001441f,
 0.001953125f,
 0.15625f,
 0.125f,
 1.f
 };
-
+//float lodTables[10]=
+//{
+//0.00000000149f,
+//0.000000001192f,
+//0.0000000952f,
+//0.000000402f,
+//0.000001235f,
+//0.00002882f,
+//0.001953125f,
+//0.15625f,
+//0.125f,
+//1.f
+//};
 
 float stepTable[7]=
 {
-	0.00000001,
-	0.00000002,
-	0.00000004,
-	0.00000008,
-	0.000000016,
-	0.000000032,
-	0.000000064
+	0.0000001,
+	0.0000002,
+	0.0000004,
+	0.0000008,
+	0.0000016,
+	0.0000032,
+	0.0000064
 };
 
 //
@@ -284,21 +296,16 @@ void main()
 	int steps = int(distance / step);
 	vec3 samplePoint = rayStart;
 
-	vec4 boundingBoxColor = vec4(0.3,0,0,0.1);
+	vec4 boundingBoxColor = vec4(1,0,0,0.1);
 
-	if(start2end.x == 0 && start2end.y == 0 && start2end.z == 0)
-	{
-		fragColor = bg;
-		return;
-	}
+//	if(start2end.x == 0 && start2end.y == 0 && start2end.z == 0)
+//	{
+//		fragColor = bg;
+//		return;
+//	}
 
 	for (int i = 0;i<10000; ++i) 
 	{
-		int curLod = evalLOD(samplePoint);
-		//int curLod = 0;
-		//samplePoint = rayStart + direction * stepTable[curLod] * (float(i) + 0.5);
-		samplePoint += direction * stepTable[curLod] * (float(i) + 0.5);
-
 		if(samplePoint.x < 0.00 ||
 		samplePoint.y < 0.00 ||
 		samplePoint.z < 0.00 || 
@@ -307,29 +314,35 @@ void main()
 		samplePoint.z > 1.0)
 		break;
 
+		int curLod = evalLOD(samplePoint);
+		//int curLod = 5;
+		samplePoint += direction * stepTable[curLod] * (float(i) + 0.5);
+		//samplePoint += direction * 0.00001 * (float(i) + 0.5);
+
 		if(isboader(samplePoint) == true)
 			color = color + boundingBoxColor * vec4(boundingBoxColor.aaa, 1.0) * (1.0 - color.a);
 
-
 		//sample a scalar at samplePoint
-//		bool mapped = true;
-//		vec3 blockColor;
-//		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped,blockColor);
-//		if (mapped == false) 
-//		{
-//			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
-//			//memoryBarrier();
-//			imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
-//			//memoryBarrier();
-//			discard;
-//		}
-//		vec4 sampledColor = texture(texTransfunc, scalar.r);
-//		sampledColor.a = 1-pow((1-sampledColor.a),curLod+1);
-//		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
-//		if (color.a > 0.99)
-//		{
-//			break;
-//		}
+		bool mapped = true;
+		vec3 blockColor;
+		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped,blockColor);
+		if (mapped == false) 
+		{
+			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
+			//memoryBarrier();
+			imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
+			//memoryBarrier();
+			discard;
+		}
+		vec4 sampledColor = texture(texTransfunc, scalar.r);
+		sampledColor.a = 1-pow((1-sampledColor.a),correlation[curLod]);
+		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
+		color.a = color.a + (1-color.a) * sampledColor.a;
+
+		if (color.a > 0.99)
+		{
+			break;
+		}
 
 	}
 

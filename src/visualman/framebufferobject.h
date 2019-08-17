@@ -79,6 +79,8 @@ namespace ysl
 			friend class FramebufferObject;
 		private:
 			DepthBufferFormat format = DBF_DEPTH_COMPONENT24;
+		protected:
+			int InternalType() override { return format; }
 		public:
 			FBODepthAttachment(DepthBufferFormat format) :format(format) {};
 			DepthBufferFormat Type()const { return format; }

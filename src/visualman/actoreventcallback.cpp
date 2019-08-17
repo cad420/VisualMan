@@ -32,7 +32,7 @@ namespace ysl
 				0,4,2,2,4,6,
 				1,3,5,3,7,5
 			};
-
+			
 			auto vertexIndex = MakeRef<ArrayUInt>();
 			vertexIndex->GetBufferObject()->SetLocalData(indices, sizeof(indices));
 			vertexArray = MakeRef<ArrayFloat3>();
@@ -61,7 +61,6 @@ namespace ysl
 				const auto eye_position = program->GetGenericUniformLocation("eye_position");
 				if (eye_position != -1)
 					actor->CreateGetUniformSet()->CreateGetUniform("eye_position")->SetUniform3f(1, eyePos.ConstData());;
-
 				// update light dir and halfway 
 			}
 		}
@@ -131,13 +130,14 @@ namespace ysl
 					actor->CreateGetUniformSet()->CreateGetUniform("viewPos")->SetUniform3f(1, eyePos.ConstData());
 				
 			}
+
 		}
 
 		void RayCast2ActorEventCallback::BindToActor(Ref<Actor> actor)
 		{
 			if (actor)
 			{
-				const auto shared_this = std::static_pointer_cast<RayCastActorEventCallback>(shared_from_this());
+				const auto shared_this = std::static_pointer_cast<RayCast2ActorEventCallback>(shared_from_this());
 				actor->RemoveActorRenderEventCallback(shared_this);
 				actor->AddActorRenderEventCallback(shared_this);
 				actor->SetRenderable(proxyGeometry, 0);

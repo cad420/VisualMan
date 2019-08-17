@@ -10,7 +10,8 @@ namespace ysl
 {
 	namespace vm
 	{
-		ScreenActorEventCallback::ScreenActorEventCallback()
+
+		ScreenActorEventCallback::ScreenActorEventCallback(Ref<Camera> cam)
 		{
 			// Init a screen primitive
 			SetPrimitive(MakeRef<Primitive>());
@@ -18,15 +19,16 @@ namespace ysl
 			{
 				lodTable.push_back(1.0 / std::pow(8, 10 - i - 1));
 			}
+			mrtCamera = std::move(cam);
 		}
 
 		void ScreenActorEventCallback::OnActorRenderStartedEvent(Actor*actor, const Camera * camera,
 			Renderable*, const Shading*  shading, int)
 		{
-			if (camera)
+			if (mrtCamera)
 			{
-				actor->CreateGetUniformSet()->CreateGetUniform("fov")->SetUniformValue(camera->GetFov());
-				actor->CreateGetUniformSet()->CreateGetUniform("fuckPos")->SetUniform3f(1, camera->GetPosition().Data());
+				actor->CreateGetUniformSet()->CreateGetUniform("fov")->SetUniformValue(mrtCamera->GetFov());
+				actor->CreateGetUniformSet()->CreateGetUniform("fuckPos")->SetUniform3f(1, mrtCamera->GetPosition().Data());
 			}
 		}
 

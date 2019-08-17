@@ -43,6 +43,12 @@ namespace ysl
 			return vi;
 		}
 
+		void ViewMatrixWrapper::SetPosition(const Point3f& pos)
+		{
+			m_position = pos;
+		}
+
+
 		void ViewMatrixWrapper::SetCenter(const ysl::Point3f& center)
 		{
 			m_center = center;
@@ -64,7 +70,7 @@ namespace ysl
 			const auto theta = 4.0 * (std::fabs(xoffset) + std::fabs(yoffset));
 			const auto v = ((m_right * xoffset) + (m_up * yoffset));
 			const auto axis = ysl::Vector3f::Cross(v, -m_front).Normalized();
-			UpdateCameraVectors(axis, theta);
+			RotateCamera(axis, theta);
 		}
 
 		void ViewMatrixWrapper::ProcessMouseScroll(float yoffset)
@@ -77,7 +83,7 @@ namespace ysl
 				m_zoom = 45.0f;
 		}
 
-		void ViewMatrixWrapper::UpdateCameraVectors(const ysl::Vector3f& axis, double theta)
+		void ViewMatrixWrapper::RotateCamera(const ysl::Vector3f& axis, double theta)
 		{
 			ysl::Transform rotation;
 			rotation.SetRotate(axis, theta);
@@ -134,7 +140,7 @@ namespace ysl
 			SetProjectionMatrix(perspectiveMatrix);
 		}
 
-		Ref<ArrayFloat3> Camera::GetFrustumLines() const
+		std::vector<Point3f> Camera::GetFrustumLines() const
 		{
 			/*
 			 *
@@ -152,9 +158,9 @@ namespace ysl
 			const auto direction = GetFront().Normalized();
 			const auto right = Right().Normalized();
 			const auto up = Up().Normalized();
-			const auto nearPlane = GetNearPlane();
-			const auto farPlane = GetFarPlane();
-			const auto tanfov2 = 2.0 * std::tan(GetFov() / 2.0);
+			const auto farPlane = (GetFarPlane() + GetNearPlane())/2.0;
+			const auto nearPlane = (GetNearPlane());
+			const auto tanfov2 = 2.0 * std::tan(GetFov()*Pi/180 / 2.0);
 			const auto atanfov2 = GetAspectRatio() * tanfov2;
 			const auto nearCenter = pos + direction * nearPlane;
 			const auto farCenter = pos + direction * farPlane;
@@ -163,23 +169,22 @@ namespace ysl
 			const auto farHalfHeight = tanfov2 * farPlane;
 			const auto farHalfWidth = atanfov2 * farPlane;
 
-			auto lines = MakeRef<ArrayFloat3>();
-			auto bufferObject = MakeRef<BufferObject>();
-			bufferObject->Resize(8 * sizeof(Point2f));
-			auto ptr = reinterpret_cast<Point3f*>(bufferObject->LocalData());
+			//lines->GetBufferObject()->Resize(8 * sizeof(Point3f));
+			std::vector<Point3f> ptr(8);
+			//auto ptr = reinterpret_cast<Point3f*>(lines->GetBufferObject()->LocalData());
 
-			// 0
 			ptr[0] = nearCenter + nearHalfWidth * (-right) + nearHalfHeight * (-up);
 			ptr[1] = nearCenter + nearHalfWidth * (right)+nearHalfHeight * (-up);
 			ptr[2] = nearCenter + nearHalfWidth * (right)+nearHalfHeight * (up);
 			ptr[3] = nearCenter + nearHalfWidth * (-right) + nearHalfHeight * (up);
 
-			ptr[0] = farCenter + farHalfWidth * (-right) + farHalfHeight * (-up);
-			ptr[1] = farCenter + farHalfWidth * (right)+farHalfHeight * (-up);
-			ptr[2] = farCenter + farHalfWidth * (right)+farHalfHeight * (up);
-			ptr[3] = farCenter + farHalfWidth * (-right) + farHalfHeight * (up);
-
-
+			ptr[4] = farCenter + farHalfWidth * (-right) + farHalfHeight * (-up);
+			ptr[5] = farCenter + farHalfWidth * (right)+farHalfHeight * (-up);
+			ptr[6] = farCenter + farHalfWidth * (right)+farHalfHeight * (up);
+			ptr[7] = farCenter + farHalfWidth * (-right) + farHalfHeight * (up);
+			//auto lines = MakeRef<ArrayFloat3>();
+			//lines->GetBufferObject()->SetLocalData(ptr, sizeof(ptr));
+			return ptr;
 		}
 		Ref<Camera> CreateCamera(const std::string& jsonFileName)
 		{

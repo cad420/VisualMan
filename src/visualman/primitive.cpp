@@ -80,6 +80,7 @@ namespace ysl
 				{
 					// Is it possible that a vertex attribute array don't have a buffer object?
 					// and what it mean?
+					//std::cout << i << std::endl;
 					assert(vertexAttribArrays[i]->GetBufferObject());
 					vertexAttribArrays[i]->GetBufferObject()->ReallocBufferData(BU_STATIC_DRAW, discard);
 					vertexAttribArrays[i]->SetbufferObjectDataDirty(false);
@@ -284,6 +285,34 @@ namespace ysl
 			primitive->DrawCalls().push_back(drawElemUi);
 
 			return primitive;
+		}
+
+		Ref<Primitive> MakeCubeLines(const Bound3f & bound)
+		{
+			auto proxyGeometry = MakeRef<Primitive>();
+
+			Point3f points[8];
+
+			for (int i = 0; i < 8; i++)
+			{
+				points[i] = bound.Corner(i);
+			}
+
+			unsigned int indices[] = {0,1,1,3,3,2,2,0,4,5,5,7,7,6,6,4,0,4,1,5,3,7,2,6};
+
+			auto vertexIndex = MakeRef<ArrayUInt>();
+			vertexIndex->GetBufferObject()->SetLocalData(indices, sizeof(indices));
+			auto vertexArray = MakeRef<ArrayFloat3>();
+			
+			vertexArray->GetBufferObject()->SetLocalData(points, sizeof(points));
+			proxyGeometry->SetVertexPositionArray(vertexArray);
+
+			auto drawCall = MakeRef<DrawElementsUInt>();
+			drawCall->SetPrimitiveType(PT_LINES);
+			
+			drawCall->SetIndexBuffer(vertexIndex);
+			proxyGeometry->DrawCalls().push_back(drawCall);
+			return proxyGeometry;
 		}
 
 		Ref<Primitive> MakeCube(const Bound3f &bound)

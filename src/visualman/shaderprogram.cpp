@@ -223,7 +223,7 @@ namespace ysl
 				case UT_INT_VEC4: GL(glUniform4iv(loc, uniform->Count(), uniform->Data<int>()));  break;
 
 				case UT_UNSIGNED_INT:      GL(glUniform1uiv(loc, uniform->Count(), uniform->Data<unsigned int>()));  break;
-				case UT_UNSIGNED_INT_VEC2: GL(glUniform2uiv(loc, uniform->Count(), uniform->Data<unsigned int>()));
+				case UT_UNSIGNED_INT_VEC2: GL(glUniform2uiv(loc, uniform->Count(), uniform->Data<unsigned int>())); break;
 				case UT_UNSIGNED_INT_VEC3: GL(glUniform3uiv(loc, uniform->Count(), uniform->Data<unsigned int>())); break;
 				case UT_UNSIGNED_INT_VEC4: GL(glUniform4uiv(loc, uniform->Count(), uniform->Data<unsigned int>())); break;
 

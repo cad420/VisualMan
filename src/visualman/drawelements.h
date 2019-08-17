@@ -22,6 +22,7 @@ namespace ysl
 			int GetInstanceCount()const { return instanceCount; }
 			void SetBaseVertex(int baseVertex) { this->baseVertex = baseVertex; }
 			unsigned int GetBaseVertex()const { return this->baseVertex; }
+			
 		private:
 			int instanceCount = 0;
 			bool enablePrimitiveRestart = false;
@@ -84,6 +85,7 @@ namespace ysl
 			{
 				// We only support that vertex indices are stored in GPU/
 				// If they are not in gpu, just return.
+				ysl::Warning("There is no bufferobject in DrawElements call");
 				return;
 			}
 
@@ -112,8 +114,9 @@ namespace ysl
 				endPtr = reinterpret_cast<const char *>(beginPtr) + sizeof(IndexType)*count;
 			}
 			const auto cnt = (GLsizei)(reinterpret_cast<IndexType>(endPtr) - reinterpret_cast<IndexType>(beginPtr));
+			//std::cout << "cnt:" << cnt << std::endl;
+			GL(glLineWidth(GetLineWidth()));
 			GL(glDrawElements(GetPrimitiveType(),cnt,ArrayType::TypeFlag,beginPtr));
-
 		}
 
 		class VISUALMAN_EXPORT_IMPORT DrawElementsUInt:public DrawElements<ArrayUInt>

@@ -16,11 +16,14 @@ namespace ysl
 			virtual void Render()const = 0;
 			virtual void UpdateDirtyBufferObject(BufferObjectUpdateMode mode) = 0;
 			virtual void DestroyBufferObject() = 0;
+			void SetLineWidth(float width) { lineWidth = width; }
+			float GetLineWidth()const { return lineWidth; }
 			void SetPrimitiveType(PrimitiveType type) { drawType = type; }
 			PrimitiveType GetPrimitiveType()const { return drawType; }
 			virtual ~AbstrDrawCall() = default;
 		private:
 			PrimitiveType drawType;
+			float lineWidth = 1.0f;
 			//std::vector<Ref<IDrawCallEvent>> events;
 		};
 	}

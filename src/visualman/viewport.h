@@ -38,6 +38,9 @@ namespace ysl
 			void SetClearFlag(ClearFlag what) { clearWhat = what; }
 			ClearFlag GetClearFlag()const { return clearWhat; }
 
+			void SetEnableScissor(bool enable) { scissor = enable; }
+			bool GetEnableScissor()const { return scissor; }
+
 		private:
 			int width = 0;
 			int height = 0;
@@ -47,6 +50,7 @@ namespace ysl
 			ClearFlag clearWhat = CF_DO_NOT_CLEAR;
 			float clearDepth = 1.0f;
 			int clearStencil = 0;
+			bool scissor = false;
 		};
 
 	}

@@ -246,7 +246,7 @@ namespace ysl
 				*(counter+ curLod ) = 0;
 				if (blocks == 0)  // render finished
 					continue;
-				blocks =std::min(memoryEvaluators->EvalPhysicalBlockDim().Prod() * memoryEvaluators->EvalPhysicalTextureCount(),blocks);
+				blocks =(std::min)(memoryEvaluators->EvalPhysicalBlockDim().Prod() * memoryEvaluators->EvalPhysicalTextureCount(),blocks);
 				//std::cout << "Lod:" << curLod << " Blocks:" << blocks << std::endl;
 
 				render_finished = false;
@@ -294,10 +294,10 @@ namespace ysl
 		                                                                                     blockSize(blockSize),
 		                                                                                     videoMem(videoMemory)
 		{
-			if(videoMem ==0 )
-			{
-				ysl::Error("No enough video memory");
-			}
+			//if(videoMem ==0 )
+			//{
+			//	ysl::Error("No enough video memory");
+			//}
 			std::size_t d = 0;
 			textureUnitCount = 1;
 			while (++d)

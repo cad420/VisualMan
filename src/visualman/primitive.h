@@ -96,6 +96,7 @@ namespace ysl
 			const unsigned* index, size_t indexCount);
 
 		Ref<Primitive> VISUALMAN_EXPORT_IMPORT MakeCube(const Bound3f& bound);
+		Ref<Primitive> VISUALMAN_EXPORT_IMPORT MakeCubeLines(const Bound3f& bound);
 
 	}
 

@@ -10,6 +10,32 @@ namespace ysl
 {
 	namespace vm
 	{
+		class Primitive;
+		class ArrayFloat3;
+		class FrustumEventCallback:public IActorEvent
+		{
+		public:
+			FrustumEventCallback(Ref<Camera> camera);
+			void BindFrustumActor(Ref<Actor> actor);
+			void OnActorRenderStartedEvent(Actor* actor, const Camera* camera, Renderable* renderable, const Shading* shading, int pass) override;
+			Ref<Primitive> GetFrustumPrimitive();
+		private:
+			void UpdateFrustum();
+			Ref<Primitive> frustum;
+			Ref<Camera> camera;
+			Ref<ArrayFloat3> vertexArray;
+		};
+
+		class BoundingBoxEventCallback:public IActorEvent
+		{
+		public:
+			BoundingBoxEventCallback();
+			void BindBoundingBoxActor(Ref<Actor> actor);
+			void OnActorRenderStartedEvent(Actor* actor, const Camera* camera, Renderable* renderable, const Shading* shading, int pass) override;
+		private:
+			Ref<Primitive> boundingBox;
+		};
+		
 		class VMAPPS_EXPORT_IMPORT VM_LargeVolumeRayCast:public VisualMan
 		{
 		public:
@@ -32,17 +58,24 @@ namespace ysl
 			void SetupJSON(const std::string & fileName);
 			void SetupConfigurationFiles(const std::vector<std::string> &fileNames);
 
-			bool offlineRendering = false;
+			//bool offlineRendering = false;
+
 			std::string outFileName;
 			std::string jsonFile;
 			std::string tfFunctionFile;
 
 			Ref<Shading> rayCastShading;
-			Ref<Aggregate> mrtAgt, raycastAgt;
+			Ref<Aggregate> mrtAgt, raycastAgt,navigationAgt;
 			Ref<OutOfCorePrimitive> oocPrimitive;
 			Ref<Texture> intermediateResult;
 			Vec2i vSize;
-			Ref<Transform> scale;
+			Ref<Transform> proxyGemoryScaleTrans;
+			Ref<Transform> navigationScale;
+			Ref<ViewMatrixWrapper> navigationCameraViewMatrix;
+
+
+			Ref<Actor> boundingboxActor;
+			
 		};
 	}
 }
