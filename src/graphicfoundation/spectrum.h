@@ -204,6 +204,12 @@ namespace ysl
 		return is;
 	}
 
+	class SampledSpectrum :public CoefficientSpectrum<60> {
+	public:
+
+	private:
+	};
+
 
 	//class RGBSpectrum: public CoefficientSpectrum<3>
 	//{
