@@ -1368,8 +1368,8 @@ namespace ysl
 		Point3<T> min;
 		Point3<T> max;
 	
-		constexpr Bound3():min(MAX_Float_VALUE, MAX_Float_VALUE, MAX_Float_VALUE),
-			max(LOWEST_Float_VALUE, LOWEST_Float_VALUE, LOWEST_Float_VALUE)
+		constexpr Bound3():min(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), std::numeric_limits<T>::max()),
+						   max(std::numeric_limits<T>::lowest(), std::numeric_limits<T>::lowest(), std::numeric_limits<T>::lowest())
 		{
 		};
 

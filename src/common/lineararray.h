@@ -76,7 +76,7 @@ namespace ysl
 
 		const char & operator()(int x)const
 		{
-			return data[x];
+			return reinterpret_cast<const char &>(data[x]);
 		}
 
 		void SetLocalData(const void* data, size_t bytes)

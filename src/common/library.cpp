@@ -42,7 +42,8 @@ namespace ysl
 #else
 #if defined(__MACOSX__) || defined(__APPLE__)
 		fullName = "lib" + name + ".dylib";		// mac extension
-#else defined(__linux__)
+#else
+// #elseif defined(__linux__)
 		fullName = "lib" + name + ".so";			// linux extension
 #endif	/*defined(__MACOSX__) || defined(__APPLE__)*/
 		lib = dlopen(fullName.c_str(), RTLD_NOW | RTLD_GLOBAL);

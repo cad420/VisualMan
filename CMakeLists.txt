@@ -64,6 +64,11 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}
 message(STATUS ${OpenMP_EXE_LINKER_FLAGS})
 endif()
 
+if (UNIX AND NOT APPLE)
+  # link dl for linux
+  link_libraries(dl)
+endif()
+
 add_subdirectory("src")
 
 add_subdirectory("guibinding")
