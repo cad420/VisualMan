@@ -3,12 +3,6 @@
 #include <lvdconverter.h>
 #include <cmdline.h>
 
-
-void convert()
-{
-
-}
-
 int main(int argc, char *argv[])
 {
 
@@ -18,8 +12,9 @@ int main(int argc, char *argv[])
 	a.add<int>("width", 'w', "width of the raw file", true);
 	a.add<int>("height", 'h', "height of the raw file", true);
 	a.add<int>("depth", 'd', "depth of the raw file", true);
+	a.add<int>("memlimit", 'm', "maximum memory limit in Gb", false, 128);
 	a.add<int>("padding",'p',"padding of the block, just support for 0, 1 or 2. the default value is 2", false, 2,cmdline::oneof<int>(0,1,2));
-	a.add<int>("side", 's', "the side length of the block, which is represented in logarithm, only support 5 ,6 and 7. The Default value is 6", false ,6,cmdline::oneof<int>(5,6,7));
+	a.add<int>("side", 's', "the side length of the block, which is represented in logarithm. The Default value is 6.", false, 6, cmdline::oneof<int>(5,6,7,8,9,10,11,12,13,14));
 	a.add<std::string>("of", 'f', ".lvd output filename", true);
 
 
@@ -37,36 +32,27 @@ int main(int argc, char *argv[])
 	auto repeat= a.get<int>("padding");
 	auto outFileName = a.get<std::string>("of");
 	auto log = a.get<int>("side");
+	
+#define IMPL_RAW_TO_LVD_LOG(N)											\
+	case N: {															\
+		ysl::RawToLVDConverterEx<N>										\
+			converter(fileName, x, y, z, repeat, outFileName, offset);	\
+		converter.convert();											\
+		converter.save();												\
+	} break
 
-
-	if (log == 5)
-	{
-		ysl::RawToLVDConverterEx<5> converter(fileName, x, y, z, repeat, outFileName, offset);
-		//ysl::RawToLVDConverter<6> converter(fileName, x, y, z, repeat, outFileName,offset);
-		converter.convert();
-		converter.save(fileName);
-	}
-	else if (log == 6)
-	{
-		ysl::RawToLVDConverterEx<6> converter(fileName, x, y, z, repeat, outFileName, offset);
-		//ysl::RawToLVDConverter<6> converter(fileName, x, y, z, repeat, outFileName,offset);
-		converter.convert();
-		converter.save(fileName);
-	}
-	else if (log == 7)
-	{
-		ysl::RawToLVDConverterEx<7> converter(fileName, x, y, z, repeat, outFileName, offset);
-		//ysl::RawToLVDConverter<7> converter(fileName, x, y, z, repeat, outFileName,offset);
-		converter.convert();
-		converter.save(fileName);
-	}
-	else
-	{
-		std::cout << "Unsupported block size\n";
+	switch (log) {
+	IMPL_RAW_TO_LVD_LOG(5);
+	IMPL_RAW_TO_LVD_LOG(6);
+	IMPL_RAW_TO_LVD_LOG(7);
+	IMPL_RAW_TO_LVD_LOG(8);
+	IMPL_RAW_TO_LVD_LOG(9);
+	IMPL_RAW_TO_LVD_LOG(10);
+	IMPL_RAW_TO_LVD_LOG(11);
+	IMPL_RAW_TO_LVD_LOG(12);
+	IMPL_RAW_TO_LVD_LOG(13);
+	IMPL_RAW_TO_LVD_LOG(14);
+	default: std::cout << "Unsupported block size\n";
 	}
 }
-
-
-
-
 
