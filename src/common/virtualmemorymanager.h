@@ -1,10 +1,12 @@
 
 #ifndef _VIRTUALMEMORYMANAGER_H_
 #define _VIRTUALMEMORYMANAGER_H_
+
 //#include "largevolumecache.h"
 #include "common.h"
 #include "geometry.h"
 #include <memory>
+#include <cstring>
 
 namespace ysl
 {
