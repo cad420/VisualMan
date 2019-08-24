@@ -21,11 +21,8 @@ namespace ysl
 		ThreadArena(int tNum) :threadNum(tNum),running(false) {}
 		ThreadArena(const ThreadArena &) = delete;
 		ThreadArena & operator=(const ThreadArena&) = delete;
-
 		void Start();
-
 		void Stop();
-
 		void AppendTask(const Task & t)
 		{
 			if (running)
@@ -137,7 +134,6 @@ namespace ysl
 							task = std::move(this->tasks.front());
 							this->tasks.pop();
 						}
-
 						task();
 					}
 				}

@@ -2,7 +2,6 @@
 #include "largevolumecache.h"
 #include <iostream>
 #include <cassert>
-#include <combaseapi.h>
 #include "error.h"
 #include "cachepolicy.h"
 #include <rapidjson/document.h>

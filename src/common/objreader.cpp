@@ -35,7 +35,6 @@ namespace ysl
 
 		ysl::Log("Number of Shader contained in .Obj: %d\n",shapes.size());
 
-
 		// reserve
 
 		///TODO:: For better performance, the memory of vectors should be reserved before data wrote in it.

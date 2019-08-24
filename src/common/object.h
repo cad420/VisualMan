@@ -11,16 +11,12 @@ namespace ysl
 
 	class Object;
 	using ObjectCtorFunc = std::function<std::unique_ptr<Object>()>;
-	//using ObjectCtorFunc = std::unique_ptr<Object>(*)();
-
-	//IObjectFactory* GetObjectFactory();
 
 	/**
 	 * \brief Rtti
 	 */
 	class COMMON_EXPORT_IMPORT Rtti final
 	{
-
 	public:
 		Rtti(const std::string & rttiName, Rtti * pBase, ObjectCtorFunc ctor);
 		~Rtti();
@@ -80,11 +76,9 @@ namespace ysl
 		virtual ~Object() = default;
 		template<typename Ty>
 		std::shared_ptr<Ty> As() { return Shared_Object_Dynamic_Cast<Ty>(shared_from_this()); }
-
 		static std::unique_ptr<Object> CreateObject(const std::string& name);
 		template<typename Ty>
 		static std::unique_ptr<Ty> CreateObject(const std::string & name);
-
 		template<typename Ty> friend class __init__dummy;
 		DECLARE_RTTI
 	protected:
@@ -133,6 +127,48 @@ namespace ysl
 		}
 	};
 
+
+	template<typename Ty>
+	Ty* Object_Dynamic_Cast(Object * obj)
+	{
+		if (obj == nullptr)
+			return nullptr;
+		return Ty::_ms_RttiType.DerivedFrom(obj->GetRtti()) || obj->GetRtti().DerivedFrom(Ty::_ms_RttiType) ? static_cast<Ty*>(obj) : nullptr;
+	}
+
+	template<typename Ty>
+	const Ty* Object_Dynamic_Cast(const Object * obj)
+	{
+		if (obj == nullptr)
+			return nullptr;
+		return Ty::_ms_RttiType == (obj->GetRtti()) ? (Ty*)(obj) : nullptr;
+	}
+
+	template<typename Ty>
+	Ty * Object_Static_Cast(Object * obj)
+	{
+		return static_cast<Ty>(obj);
+	}
+
+	template<typename Ty>
+	const Ty * Object_Static_Cast(const Object * obj)
+	{
+		return static_cast<Ty>(obj);
+	}
+	
+	template<typename Ty>
+	std::shared_ptr<Ty> Shared_Object_Dynamic_Cast(const std::shared_ptr<Object> &obj)
+	{
+		if (obj == nullptr)
+			return nullptr;
+		return Ty::_ms_RttiType == obj->GetRtti() ? std::static_pointer_cast<Ty>(obj) : nullptr;
+	}
+
+	template<typename Ty>
+	std::shared_ptr<Ty> Shared_Object_Static_Cast(const std::shared_ptr<Object> & obj)
+	{
+		return std::static_pointer_cast<Ty>(obj);
+	}
 
 }
 

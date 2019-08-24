@@ -19,7 +19,6 @@ namespace ysl
 {
 	namespace vm
 	{
-
 		enum UniformType
 		{
 			UT_NONE = 0x0,

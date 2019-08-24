@@ -126,20 +126,6 @@ namespace ysl {
 		return Vector3f(p.x, p.y, p.z);
 	}
 
-	//inline
-	//RGBSpectrum
-	//	Lerp(Float t, const RGBSpectrum & s1, const RGBSpectrum & s2)
-	//{
-	//	return s1 * (1 - t) + s2 * t;
-	//}
-
-	//inline
-	//RGBASpectrum
-	//	Lerp(Float t, const RGBASpectrum & s1, const RGBASpectrum & s2)
-	//{
-	//	return (1 - t)*s1 + t * s2;
-	//}
-
 	inline
 		Float
 		DegreesToRadians(Float degrees)
@@ -161,11 +147,6 @@ namespace ysl {
 		return p.x + dimension.x*(p.y + p.z*dimension.y);
 	}
 
-	//inline std::size_t
-	//Linear(const Vector3i &v, const Size2 &dimension)
-	//{
-	//	return Linear(Point3i{v.x,v.y,v.z},dimension);
-	//}
 
 	inline
 	std::size_t
@@ -173,13 +154,6 @@ namespace ysl {
 	{
 		return p.x + p.y * width;
 	}
-
-	//	inline
-	//	std::size_t
-	//	Linear(const Vector2i &v, std::size_t width)
-	//	{
-	//		return Linear(Point2i{v.x,v.y},width);
-	//	}
 
 	inline
 		ysl::Point3i
