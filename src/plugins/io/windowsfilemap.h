@@ -1,7 +1,7 @@
 
 #ifndef _WINDOWSFILEMAP_H_
 #define _WINDOWSFILEMAP_H_
-#include <rawio.h>
+#include <filemappingplugininterface.h>
 #include <unordered_set>
 #include "config.h"
 
@@ -10,7 +10,7 @@
 
 namespace ysl
 {
-	class IO_EXPORT_IMPORT WindowsFileMapping:public IPluginFileMap
+	class IO_EXPORT_IMPORT WindowsFileMapping:public IFileMappingPluginInterface
 	{
 
 		DECLARE_RTTI

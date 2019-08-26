@@ -5,10 +5,9 @@
 
 #include <memory>
 #include "lvdheader.h"
-#include "rawio.h"
 #include "blockarray.h"
 #include "geometry.h"
-
+#include "filemappingplugininterface.h"
 
 
 namespace ysl
@@ -46,7 +45,7 @@ namespace ysl
 		unsigned char* ReadBlock(int blockId, int lod = 0);
 		~LVDReader();
 	private:
-		std::shared_ptr<IPluginFileMap> lvdIO;		// the declaration must be behind the declaration of ~LVDReader()
+		std::shared_ptr<IFileMappingPluginInterface> lvdIO;		// the declaration must be behind the declaration of ~LVDReader()
 	};
 
 	template <typename T, int nLogBlockSize>

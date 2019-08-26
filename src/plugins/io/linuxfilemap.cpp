@@ -5,7 +5,7 @@
 
 namespace ysl
 {
-    IMPLEMENT_RTTI_NoConstructor(LinuxFileMapping,IPluginFileMap)
+    IMPLEMENT_RTTI_NoConstructor(LinuxFileMapping,IFileMappingPluginInterface)
     IMPLEMENT_INITIAL(LinuxFileMapping,common.filemapio)
 
 	    bool LinuxFileMapping::Open(const std::string & fileName,size_t fileSize,FileAccess fileFlags,MapAccess mapFlags)

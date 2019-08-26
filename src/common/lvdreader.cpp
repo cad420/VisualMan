@@ -87,7 +87,7 @@ namespace ysl
 		assert(repo);
 		repo->AddLibrary("ioplugin");
 
-		lvdIO = Object::CreateObject<ysl::IPluginFileMap>("common.filemapio");
+		lvdIO = Object::CreateObject<ysl::IFileMappingPluginInterface>("common.filemapio");
 		if (lvdIO == nullptr)
 			throw std::runtime_error("can not load ioplugin");
 		lvdIO->Open(fileName, bytes, FileAccess::Read, MapAccess::ReadOnly);

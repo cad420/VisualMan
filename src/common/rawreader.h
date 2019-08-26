@@ -3,8 +3,8 @@
 #define _RAWREADER_H_
 #include "geometry.h"
 #include "common.h"
-#include "rawio.h"
 #include <fstream>
+#include "filemappingplugininterface.h"
 
 namespace ysl
 {
@@ -14,7 +14,7 @@ namespace ysl
 		ysl::Size3 dimensions;
 		size_t voxelSize;
 		uint64_t offset;
-		std::shared_ptr<IPluginFileMap> io;
+		std::shared_ptr<IFileMappingPluginInterface> io;
 		unsigned char * ptr;
 		uint64_t seekAmt;
 	public:

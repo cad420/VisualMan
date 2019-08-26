@@ -4,8 +4,7 @@
 
 #ifdef __linux__
 #include "config.h"
-#include <rawio.h>
-
+#include <filemappingplugininterface.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -13,12 +12,10 @@
 
 namespace ysl
 {
-
-    class IO_EXPORT_IMPORT LinuxFileMapping:public IPluginFileMap
+    class IO_EXPORT_IMPORT LinuxFileMapping:public IFileMappingPluginInterface
     {
         DECLARE_RTTI
         DECLARE_INITIAL(LinuxFileMapping)
-
         std::set<std::pair<void*,size_t>> ptrs;
         int fd = -1;
         FileAccess fileAccess;

@@ -67,7 +67,7 @@ namespace ysl
 		cacheDim(16,16,16)
 	{
 
-
+		
 		//Create();
 		SetDiskFileCache(std::make_shared<Disk3DPageAdapter>(fileName));
 
@@ -92,22 +92,22 @@ namespace ysl
 		return CacheBlockDim() * (1 << GetLog());
 	}
 
-	Size3 MemoryPageAdapter::BlockSize()
+	Size3 MemoryPageAdapter::BlockSize()const
 	{
 		return adapter->Get3DPageSize();
 	}
 
-	int MemoryPageAdapter::Padding()
+	int MemoryPageAdapter::Padding()const
 	{
 		return adapter->GetPadding();
 	}
 
-	Size3 MemoryPageAdapter::DataSizeWithoutPadding()
+	Size3 MemoryPageAdapter::DataSizeWithoutPadding()const
 	{
 		return adapter->GetDataSizeWithoutPadding();
 	}
 
-	Size3 MemoryPageAdapter::BlockDim()
+	Size3 MemoryPageAdapter::BlockDim()const
 	{
 		return adapter->Get3DPageCount();
 	}

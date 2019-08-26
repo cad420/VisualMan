@@ -144,12 +144,12 @@ int main()
 	std::cout << "Step:" << step << std::endl;
 
 	//std::unique_ptr<unsigned char> buf(new unsigned char[x*y*z]);
-	//std::shared_ptr<ysl::IPluginFileMap> rm(new ysl::WindowsFileMapping(inFileName, offset+x*y*z, ysl::WindowsFileMapping::FileAccess::Read,ysl::WindowsFileMapping::MapAccess::ReadOnly));
+	//std::shared_ptr<ysl::IFileMappingPluginInterface> rm(new ysl::WindowsFileMapping(inFileName, offset+x*y*z, ysl::WindowsFileMapping::FileAccess::Read,ysl::WindowsFileMapping::MapAccess::ReadOnly));
 
 
 	auto repo = ysl::LibraryReposity::GetLibraryRepo();
 	repo->AddLibrary("ioplugin");
-	std::shared_ptr<ysl::IPluginFileMap> rm = ysl::Object::CreateObject<ysl::IPluginFileMap>("common.filemapio");
+	std::shared_ptr<ysl::IFileMappingPluginInterface> rm = ysl::Object::CreateObject<ysl::IFileMappingPluginInterface>("common.filemapio");
 
 
 	if (rm == nullptr)

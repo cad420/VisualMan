@@ -1,8 +1,9 @@
 
 #include "rawreader.h"
-#include "rawio.h"
-#include <cstring> // memcpy
+#include "filemappingplugininterface.h"
 #include "libraryloader.h"
+
+#include <cstring> // memcpy
 #include <cassert>
 #include <iostream>
 
@@ -18,7 +19,7 @@ namespace ysl
 		auto repo = LibraryReposity::GetLibraryRepo();
 		assert(repo);
 		repo->AddLibrary("ioplugin");
-		io = Object::CreateObject<IPluginFileMap>("common.filemapio");
+		io = Object::CreateObject<IFileMappingPluginInterface>("common.filemapio");
 		if (io == nullptr)
 			throw std::runtime_error("can not load ioplugin");
 		io->Open(fileName, rawBytes, FileAccess::Read, MapAccess::ReadOnly);

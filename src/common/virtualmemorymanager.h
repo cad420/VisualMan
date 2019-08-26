@@ -5,6 +5,7 @@
 #include "common.h"
 #include "geometry.h"
 #include <memory>
+#include "pagefileinterface.h"
 
 namespace ysl
 {
@@ -69,16 +70,28 @@ namespace ysl
 
 	class AbstrCachePolicy;
 
-	class COMMON_EXPORT_IMPORT AbstrMemoryCache
+	/**
+	 * \brief This class is used to represent a generic cache abstraction layer.
+	 * 
+	 */
+	class AbstrMemoryCache;
+
+	class COMMON_EXPORT_IMPORT AbstrMemoryCache:public IPageFile
 	{
-		std::shared_ptr<AbstrMemoryCache> nextLevel;
+		std::shared_ptr<IPageFile> nextLevel;
 		std::unique_ptr<AbstrCachePolicy> cachePolicy;
+		std::shared_ptr<IPageFaultEventCallback> callback;
 	public:
-		void SetNextLevelCache(std::shared_ptr<AbstrMemoryCache> cache);
+		void SetNextLevelCache(std::shared_ptr<IPageFile> cache);
+		/**
+		 * \brief Sets a cache policy 
+		 * \param policy 
+		 */
 		void SetCachePolicy(std::unique_ptr<AbstrCachePolicy> policy);
 		std::unique_ptr<AbstrCachePolicy> TakeCachePolicy();
-		std::shared_ptr<AbstrMemoryCache> GetNextLevelCache() { return nextLevel; }
-		std::shared_ptr<const AbstrMemoryCache> GetNextLevelCache()const { return nextLevel; }
+		std::shared_ptr<IPageFile> GetNextLevelCache() { return nextLevel; }
+		void SetPageFaultEventCallback(std::shared_ptr<IPageFaultEventCallback> callback) { this->callback = std::move(callback); }
+		std::shared_ptr<const IPageFile> GetNextLevelCache() const { return nextLevel; }
 
 		/**
 		 * \brief Get the page give by \a pageID. If the page does not exist in the cache, it will be swapped in.
@@ -90,17 +103,17 @@ namespace ysl
 		/**
 		 * \brief Returns the page size by bytes
 		 */
-		virtual size_t GetPageSize() = 0;
+		virtual size_t GetPageSize()const = 0;
 		/**
 		 * \brief 
 		 * \return 
 		 */
-		virtual size_t GetPhysicalPageCount() = 0;
+		virtual size_t GetPhysicalPageCount()const = 0;
 		/**
 		 * \brief 
 		 * \return 
 		 */
-		virtual size_t GetVirtualPageCount() = 0;
+		virtual size_t GetVirtualPageCount()const = 0;
 
 		virtual ~AbstrMemoryCache() = default;
 	private:
@@ -136,11 +149,11 @@ namespace ysl
 
 		const void * GetPage(size_t pageID) override { return nullptr; }
 
-		size_t GetPageSize() override { return 0; }
+		size_t GetPageSize()const override { return 0; }
 
-		size_t GetPhysicalPageCount() override { return 0; }
+		size_t GetPhysicalPageCount()const override { return 0; }
 
-		size_t GetVirtualPageCount() override { return 0; }
+		size_t GetVirtualPageCount()const override { return 0; }
 	protected:
 		void * GetPageStorage_Implement(size_t pageID) override { return nullptr; }
 

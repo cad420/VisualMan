@@ -4,7 +4,7 @@
 namespace ysl
 {
 
-	IMPLEMENT_RTTI_NoConstructor(WindowsFileMapping, IPluginFileMap)
+	IMPLEMENT_RTTI_NoConstructor(WindowsFileMapping, IFileMappingPluginInterface)
 	IMPLEMENT_INITIAL(WindowsFileMapping, common.filemapio)
 
 

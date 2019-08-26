@@ -8,7 +8,7 @@
 #include "geometry.h"
 #include "numeric.h"
 #include "lvdheader.h"
-#include "rawio.h"
+#include "filemappingplugininterface.h"
 #include "libraryloader.h"
 #include "timer.h"
 #include "error.h"
@@ -79,11 +79,11 @@ namespace ysl
 		ysl::Vector3i m_blockDimension;
 
 		//std::unique_ptr<RawType[]> m_rawBuf;
-		std::shared_ptr<ysl::IPluginFileMap> rawIO;
+		std::shared_ptr<ysl::IFileMappingPluginInterface> rawIO;
 		unsigned char * rawPtr;
 
 		//std::unique_ptr<RawType[]> m_lvdBuf;
-		std::shared_ptr<ysl::IPluginFileMap> lvdIO;
+		std::shared_ptr<ysl::IFileMappingPluginInterface> lvdIO;
 		unsigned char * lvdPtr;
 
 		const int m_padding;
@@ -225,7 +225,7 @@ namespace ysl
 		assert(repo);
 		repo->AddLibrary("ioplugin");
 
-		rawIO = ysl::Object::CreateObject<IPluginFileMap>("common.filemapio");
+		rawIO = ysl::Object::CreateObject<IFileMappingPluginInterface>("common.filemapio");
 		if (rawIO == nullptr)
 			throw std::runtime_error("can not load ioplugin");
 
@@ -243,7 +243,7 @@ namespace ysl
 		}
 		const auto lvdBytes = size_t(m_dataSize.x) * size_t(m_dataSize.y) * size_t(m_dataSize.z) * sizeof(RawType);
 
-		lvdIO = ysl::Object::CreateObject<IPluginFileMap>("common.filemapio");
+		lvdIO = ysl::Object::CreateObject<IFileMappingPluginInterface>("common.filemapio");
 		if (lvdIO == nullptr)
 			throw std::runtime_error("can not load ioplugin");
 
@@ -428,7 +428,7 @@ namespace ysl
 		ysl::Vector3i m_blockDimension;
 
 		std::unique_ptr<RawType[]> m_rawBuf;
-		std::shared_ptr<ysl::IPluginFileMap> lvdIO;
+		std::shared_ptr<ysl::IFileMappingPluginInterface> lvdIO;
 		unsigned char * lvdPtr;
 		const int m_padding;
 		static constexpr auto blockSize = 1 << nLogBlockSize;
@@ -568,7 +568,7 @@ namespace ysl
 		//auto repo = ysl::LibraryReposity::GetLibraryRepo();
 		//assert(repo);
 		//repo->AddLibrary("ioplugin");
-		//lvdIO = ysl::Object::CreateObject<IPluginFileMap>("common.filemapio");
+		//lvdIO = ysl::Object::CreateObject<IFileMappingPluginInterface>("common.filemapio");
 		//if (lvdIO == nullptr)
 		//	throw std::runtime_error("can not load ioplugin");
 		//lvdIO->Open(outFileName, lvdBytes + LVD_HEADER_SIZE, FileAccess::ReadWrite, MapAccess::ReadWrite);

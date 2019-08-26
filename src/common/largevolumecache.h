@@ -9,15 +9,18 @@
 
 namespace ysl
 {
+	/**
+	 * \brief This class is an adapter for the LVDReader.
+	 */
 	class COMMON_EXPORT_IMPORT Disk3DPageAdapter:public AbstrMemoryCache
 	{
 		LVDReader lvdReader;
 	public:
 		Disk3DPageAdapter(const std::string & fileName):lvdReader(fileName){}
 		const void * GetPage(size_t pageID) override { return lvdReader.ReadBlock(pageID); }
-		size_t GetPageSize() override { return lvdReader.BlockSize(); }
-		size_t GetPhysicalPageCount() override { return lvdReader.BlockCount(); }
-		size_t GetVirtualPageCount() override { return lvdReader.BlockCount(); }
+		size_t GetPageSize()const override { return lvdReader.BlockSize(); }
+		size_t GetPhysicalPageCount()const override { return lvdReader.BlockCount(); }
+		size_t GetVirtualPageCount()const override { return lvdReader.BlockCount(); }
 
 		int GetPadding()const { return lvdReader.GetBlockPadding(); }
 		Size3 GetDataSizeWithoutPadding()const { return lvdReader.OriginalDataSize(); }
@@ -32,6 +35,8 @@ namespace ysl
 		void * GetPageStorage_Implement(size_t pageID) override { return nullptr; }
 	};
 
+	
+	
 	class COMMON_EXPORT_IMPORT MemoryPageAdapter:public AbstrMemoryCache
 	{
 
@@ -50,15 +55,15 @@ namespace ysl
 
 		ysl::Size3 CPUCacheSize() const;
 
-		[[deprecated]] int Padding();
-		[[deprecated]] Size3 DataSizeWithoutPadding();
-		[[deprecated]] Size3 BlockDim();
-		[[deprecated]] Size3 BlockSize();
+		[[deprecated]] int Padding()const;
+		[[deprecated]] Size3 DataSizeWithoutPadding()const;
+		[[deprecated]] Size3 BlockDim()const;
+		[[deprecated]] Size3 BlockSize()const;
 
 		Size3 CacheBlockDim()const { return cacheDim; }
-		size_t GetPhysicalPageCount() override { return CacheBlockDim().Prod(); }
-		size_t GetVirtualPageCount() override { return BlockDim().Prod(); }
-		size_t GetPageSize() override { return BlockSize().Prod() * sizeof(char); }
+		size_t GetPhysicalPageCount()const override { return CacheBlockDim().Prod(); }
+		size_t GetVirtualPageCount()const override { return BlockDim().Prod(); }
+		size_t GetPageSize()const override { return BlockSize().Prod() * sizeof(char); }
 		const void* GetPage(int xBlock, int yBlock, int zBlock)  { return AbstrMemoryCache::GetPage(blockCoordinateToBlockId(xBlock, yBlock, zBlock)); }
 		const void* GetPage(const VirtualMemoryBlockIndex& index) { return GetPage(index.x, index.y, index.z); };
 

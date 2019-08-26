@@ -14,6 +14,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)		# options for gnu compliler
 endif()
 
 # Shared or static library
+
 option(VM_SHARED_LIBRARY "Set to On to build using dynimic linking" OFF)
 if(VM_SHARED_LIBRARY)
 	add_definitions(-DVM_SHARED_LIBRARY)
@@ -21,6 +22,8 @@ if(VM_SHARED_LIBRARY)
 else()
 	set(VM_SHARED_OR_STATIC "STATIC")
 endif()
+
+
 
 
 

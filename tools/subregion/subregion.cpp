@@ -22,7 +22,7 @@ int main()
 
 
 
-	auto io = ysl::Object::CreateObject<ysl::IPluginFileMap>("common.filemapio");
+	auto io = ysl::Object::CreateObject<ysl::IFileMappingPluginInterface>("common.filemapio");
 	if (io == nullptr)
 	{
 		std::cout << "Can not load io plugin\n";

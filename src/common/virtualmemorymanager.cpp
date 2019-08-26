@@ -2,15 +2,14 @@
 #include "virtualmemorymanager.h"
 namespace ysl
 {
-	void AbstrMemoryCache::SetNextLevelCache(std::shared_ptr<AbstrMemoryCache> cache)
+	void AbstrMemoryCache::SetNextLevelCache(std::shared_ptr<IPageFile> cache)
 	{
 		nextLevel = cache;
 	}
 
 	void AbstrMemoryCache::SetCachePolicy(std::unique_ptr<AbstrCachePolicy> policy)
 	{
-		if (!policy)
-			return;
+		if (!policy) return;
 		if (cachePolicy)
 		{
 			cachePolicy->SetOwnerCache(nullptr);
@@ -25,10 +24,12 @@ namespace ysl
 		if (cachePolicy)
 		{
 			cachePolicy->SetOwnerCache(nullptr);
+
 			return std::move(cachePolicy);
 		}
 		return nullptr;
 	}
+
 
 	const void* AbstrMemoryCache::GetPage(size_t pageID)
 	{
@@ -38,8 +39,20 @@ namespace ysl
 		{
 			const auto storageID = cachePolicy->QueryAndUpdate(pageID);
 			// Read block from next level to the storage cache
-			memcpy(GetPageStorage_Implement(storageID), nextLevel->GetPage(pageID), GetPageSize());
-			return GetPageStorage_Implement(storageID);
+			const auto storage = GetPageStorage_Implement(storageID);
+
+			if (callback)
+			{
+				callback->OnBeforePageSwapInEvent(this, storage, pageID);
+				memcpy(storage, nextLevel->GetPage(pageID), GetPageSize());
+				callback->OnAfterPageSwapInEvent(this, storage, pageID);
+
+			}
+			else
+			{
+				memcpy(storage, nextLevel->GetPage(pageID), GetPageSize());
+			}
+			return storage;
 		}
 		else {
 			const auto storageID = cachePolicy->QueryAndUpdate(pageID);
