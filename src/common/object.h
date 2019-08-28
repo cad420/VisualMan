@@ -3,7 +3,6 @@
 #include <functional>
 #include "common.h"
 
-#include "objectfactory.h"
 
 
 namespace ysl
@@ -15,6 +14,17 @@ namespace ysl
 	/**
 	 * \brief Rtti
 	 */
+
+	class Rtti;
+	
+	struct pImplRtti
+	{
+		std::string rttiName;
+		Rtti* pBase;
+		ObjectCtorFunc ctor;
+		pImplRtti(const std::string& rttiName, Rtti* pBase, ObjectCtorFunc ctor);
+	};
+	
 	class COMMON_EXPORT_IMPORT Rtti final
 	{
 	public:
@@ -27,10 +37,43 @@ namespace ysl
 		bool DerivedFrom(const Rtti& rtti)const;
 		Rtti* GetBase() const;
 	private:
-		std::string rttiName;
-		Rtti * pBase = nullptr;
-		ObjectCtorFunc ctor;
+		//std::string rttiName;
+		//Rtti * pBase = nullptr;
+		//ObjectCtorFunc ctor;
+		pImplRtti* const pimpl;
 	};
+
+	
+	struct IObjectFactory
+	{
+		virtual ~IObjectFactory() = default;
+		template<typename T>
+		std::shared_ptr<T> CreateInstance(const std::string & uid)
+		{
+			//auto ptr = CreateInstance_Implement(uid).release();
+			//auto pp = Object_Dynamic_Cast<T>(ptr);
+			//return std::unique_ptr<T>(pp);
+			return Shared_Object_Dynamic_Cast<T>(CreateInstance_Implement(uid));
+		}
+	protected:
+		virtual std::unique_ptr<Object> CreateInstance_Implement(const std::string & uid) = 0;
+	};
+
+	class COMMON_EXPORT_IMPORT ObjectFactory :public IObjectFactory
+	{
+	public:
+		ObjectFactory() = default;
+		ObjectFactory(const ObjectFactory &) = delete;
+		ObjectFactory & operator=(const ObjectFactory &) = delete;
+		virtual ~ObjectFactory() = default;
+		bool RegisterClass(const std::string& uid, std::function<std::unique_ptr<Object>()> ctor);
+		void UnregisterClass(const std::string& uid);
+	protected:
+		std::unique_ptr<Object> CreateInstance_Implement(const std::string& uid) override;
+	private:
+		std::unordered_map<std::string, std::function<std::unique_ptr<Object>()>> constructors;
+	};
+
 
 	
 
@@ -78,9 +121,9 @@ namespace ysl
 		virtual ~Object() = default;
 		template<typename Ty>
 		std::shared_ptr<Ty> As() { return Shared_Object_Dynamic_Cast<Ty>(shared_from_this()); }
-		static std::unique_ptr<Object> CreateObject(const std::string& name);
+		static std::shared_ptr<Object> CreateObject(const std::string& name);
 		template<typename Ty>
-		static std::unique_ptr<Ty> CreateObject(const std::string & name);
+		static std::shared_ptr<Ty> CreateObject(const std::string& name);
 		template<typename Ty> friend class __init__dummy;
 		DECLARE_RTTI
 	protected:
@@ -98,7 +141,7 @@ namespace ysl
 	};
 
 	template <typename Ty>
-	std::unique_ptr<Ty> Object::CreateObject(const std::string& name)
+	std::shared_ptr<Ty> Object::CreateObject(const std::string& name)
 	{
 		auto factory = GetObjectFactory();
 		if (factory)
@@ -121,11 +164,6 @@ namespace ysl
 			auto factory = static_cast<ObjectFactory*>(GetObjectFactory());
 			factory->RegisterClass(uid, ctor);
 			Ty::__ms_registered = true;
-			//if (iter == Object::ms_pClassFactory->end())
-			//{
-			//	(*Object::ms_pClassFactory)[name] = ctor;
-			//	Ty::__ms_registered = true;
-			//}
 		}
 	};
 
@@ -143,7 +181,7 @@ namespace ysl
 	{
 		if (obj == nullptr)
 			return nullptr;
-		return Ty::_ms_RttiType == (obj->GetRtti()) ? (Ty*)(obj) : nullptr;
+		return Ty::_ms_RttiType.DerivedFrom(obj->GetRtti()) ||(obj->GetRtti().DerivedFrom(Ty::_ms_Rtti)) ? static_cast<Ty*>(obj) : nullptr;
 	}
 
 	template<typename Ty>
@@ -155,15 +193,13 @@ namespace ysl
 	template<typename Ty>
 	const Ty * Object_Static_Cast(const Object * obj)
 	{
-		return static_cast<Ty>(obj);
+		return static_cast<const Ty*>(obj);
 	}
 	
 	template<typename Ty>
 	std::shared_ptr<Ty> Shared_Object_Dynamic_Cast(const std::shared_ptr<Object> &obj)
 	{
-		if (obj == nullptr)
-			return nullptr;
-		return Ty::_ms_RttiType == obj->GetRtti() ? std::static_pointer_cast<Ty>(obj) : nullptr;
+		return Object_Dynamic_Cast<Ty>(obj.get()) ? std::static_pointer_cast<Ty>(obj) : nullptr;
 	}
 
 	template<typename Ty>
@@ -173,4 +209,13 @@ namespace ysl
 	}
 
 }
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+	COMMON_EXPORT_IMPORT ysl::IObjectFactory * GetObjectFactory();
+#ifdef __cplusplus
+}
+#endif
 

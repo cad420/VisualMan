@@ -1,9 +1,7 @@
 
 #ifndef _PAGEFILEPLUGININTERFACE_H_
 #define _PAGEFILEPLUGININTERFACE_H_
-#include "object.h"
 #include "geometry.h"
-
 #include "plugin.h"
 namespace ysl
 {
@@ -62,8 +60,6 @@ namespace ysl
 	};
 
 	DECLARE_PLUGIN_METADATA(I3DBlockFilePluginInterface,"visualman.blockdata.io")
-
-
 
 	class IPageFaultEventCallbackPluginInterface:public Object,public IPageFile
 	{

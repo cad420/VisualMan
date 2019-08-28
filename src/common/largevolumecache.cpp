@@ -2,7 +2,7 @@
 #include "largevolumecache.h"
 #include "error.h"
 #include "cachepolicy.h"
-#include "libraryloader.h"
+#include "pluginloader.h"
 
 #include <rapidjson/document.h>
 #include <iostream>
@@ -70,10 +70,7 @@ namespace ysl
 		cacheDim(16, 16, 16)
 	{
 		const auto cap = fileName.substr(fileName.find_last_of('.'));
-		//std::shared_ptr<I3DBlockFilePluginInterface> p = ysl::Object::CreateObject<I3DBlockFilePluginInterface>("common.pagefilereader"+cap);
-		PluginLoader::GetPluginLoader()->LoadPlugins("plugins");
 		auto p = PluginLoader::CreatePlugin<I3DBlockFilePluginInterface>(cap);
-		//std::unique_ptr<I3DBlockFilePluginInterface> p;
 
 		if(p == nullptr)
 		{
