@@ -1,13 +1,13 @@
 
 #include "ooctexture.h"
+#include "timer.h"
 #include <GL/gl3w.h>
 #include <cstring>
-#include "timer.h"
 #include <iostream>
 #include <rapidjson/document.h>
 #include <fstream>
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/pointer.h"
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/pointer.h>
 
 
 namespace ysl
@@ -145,12 +145,12 @@ namespace ysl
 			lodCount = fileInfo.fileNames.size();
 			cpuVolumeData.resize(lodCount);
 			lodInfo.resize(lodCount);
+
 			for(int i = 0 ;i<lodCount;i++)
 			{
 				cpuVolumeData[i] = MakeRef<MemoryPageAdapter>(fileInfo.fileNames[i]);
 				std::cout << i << std::endl;
 			}
-
 			memoryEvaluators = MakeRef<DefaultMemoryParamsEvaluator>(cpuVolumeData[0]->BlockDim(), cpuVolumeData[0]->BlockSize(),videoMemory);
 
 			InitVolumeTextures();

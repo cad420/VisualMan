@@ -2,6 +2,9 @@
 
 namespace ysl
 {
-	IMPLEMENT_RTTI_NoParent(IPageFilePluginInterface,Object)
+	IMPLEMENT_RTTI_NoConstructor(I3DBlockFilePluginInterface,Object)
+
+	IMPLEMENT_RTTI_NoConstructor(IPageFaultEventCallbackPluginInterface,Object)
+	
 }
 

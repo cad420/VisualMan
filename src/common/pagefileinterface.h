@@ -2,13 +2,15 @@
 #ifndef _PAGEFILEPLUGININTERFACE_H_
 #define _PAGEFILEPLUGININTERFACE_H_
 #include "object.h"
+#include "geometry.h"
 
+#include "plugin.h"
 namespace ysl
 {
 	class AbstrMemoryCache;
 
 
-	class COMMON_EXPORT_IMPORT IPageFile
+	class IPageFile
 	{
 	public:
 		virtual ~IPageFile() = default;
@@ -38,7 +40,7 @@ namespace ysl
 
 	};
 
-	class COMMON_EXPORT_IMPORT IPageFaultEventCallback
+	class IPageFaultEventCallback
 	{
 	public:
 		virtual void OnAfterPageSwapInEvent(IPageFile* cache, void* page, size_t pageID) = 0;
@@ -46,12 +48,29 @@ namespace ysl
 		virtual ~IPageFaultEventCallback() = default;
 	};
 
-	class COMMON_EXPORT_IMPORT IPageFilePluginInterface:public Object,public IPageFile
+	class COMMON_EXPORT_IMPORT I3DBlockFilePluginInterface:public Object,public IPageFile
 	{
 		DECLARE_RTTI
-		
+		//DECLARE_INITIAL(I3DBlockFilePluginInterface)
+	public:
+		virtual void Open(const std::string& fileName) = 0;
+		virtual int GetPadding()const=0;
+		virtual Size3 GetDataSizeWithoutPadding()const=0;
+		virtual Size3 Get3DPageSize()const=0;
+		virtual int Get3DPageSizeInLog()const=0;
+		virtual Size3 Get3DPageCount()const=0;
 	};
 
+	DECLARE_PLUGIN_METADATA(I3DBlockFilePluginInterface,"visualman.blockdata.io")
+
+
+
+	class IPageFaultEventCallbackPluginInterface:public Object,public IPageFile
+	{
+		DECLARE_RTTI
+	};
+
+	
 
 }
 

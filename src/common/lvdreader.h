@@ -12,7 +12,7 @@
 
 namespace ysl
 {
-	class LVDReader
+	class COMMON_EXPORT_IMPORT LVDReader
 	{
 		std::string fileName;
 		LVDHeader header;

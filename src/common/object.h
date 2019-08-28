@@ -28,10 +28,11 @@ namespace ysl
 		Rtti* GetBase() const;
 	private:
 		std::string rttiName;
-		Rtti * pBase;
+		Rtti * pBase = nullptr;
 		ObjectCtorFunc ctor;
 	};
 
+	
 
 #define DECLARE_RTTI																					\
 	public:																								\
@@ -58,6 +59,7 @@ namespace ysl
 	{																									\
 		return std::make_unique<classTypeName>();														\
 	}
+
 
 	/**
 		 * \brief The class is all classes that need to be managed.

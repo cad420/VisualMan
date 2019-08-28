@@ -16,10 +16,8 @@ namespace ysl
 	Library::Library(const std::string& name)
 	{
 		std::string errorMsg;
-		std::string fullName;
 #ifdef _WIN32
-		fullName = name + ".dll";
-		lib = LoadLibrary(fullName.c_str());
+		lib = LoadLibrary(name.c_str());
 		if (!lib)
 		{
 			DWORD err = GetLastError();
@@ -31,7 +29,7 @@ namespace ysl
 				NULL,
 				err,
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				(LPTSTR)&lpMsgBuf,
+				(LPTSTR)& lpMsgBuf,
 				0, NULL);
 
 			errorMsg = lpMsgBuf;
@@ -39,23 +37,22 @@ namespace ysl
 		}
 
 
-#else
-#if defined(__MACOSX__) || defined(__APPLE__)
-		fullName = "lib" + name + ".dylib";		// mac extension
-#else defined(__linux__)
-		fullName = "lib" + name + ".so";			// linux extension
-#endif	/*defined(__MACOSX__) || defined(__APPLE__)*/
-		lib = dlopen(fullName.c_str(), RTLD_NOW | RTLD_GLOBAL);
+#elif defined(__MACOSX__) || defined(__APPLE__)
+		lib = dlopen(name.c_str(), RTLD_NOW | RTLD_GLOBAL);
 		if (!lib)
 			errorMsg = dlerror();
-#endif /*_WIN32*/
+#elif defined(__linux__)
+		lib = dlopen(name.c_str(), RTLD_NOW | RTLD_GLOBAL);
+		if (!lib)
+			errorMsg = dlerror();
+#endif	/*defined(__MACOSX__) || defined(__APPLE__)*/
 		if (!lib)
 		{
-			Debug("%s can bot be found.", fullName.c_str());
+			Debug("%s can bot be found.", name.c_str());
 			throw std::runtime_error(errorMsg);
 		}
 	}
-
+	
 	void* Library::Symbol(const std::string& name) const
 	{
 		assert(lib);

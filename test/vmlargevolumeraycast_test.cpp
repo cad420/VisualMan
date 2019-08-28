@@ -2,16 +2,18 @@
 #include "vmglfwwindow.h"
 #include "vm_largevolumeraycast.h"
 #include "cmdline.h"
-
+#include <libraryloader.h>
 
 int main(int argc, char ** argv)
 {
 	using namespace ysl::vm;
 	using namespace ysl::app;
+	// Load plugins
+	ysl::LibraryReposity::GetLibraryRepo()->AddLibraries("plugins");
 
 	cmdline::parser a;
-	a.add<int>("width", 'w', "The width of window", false, 2560);
-	a.add<int>("height", 'h', "The height of window", false, 1440);
+	a.add<int>("width", 'w', "The width of window", false, 1024);
+	a.add<int>("height", 'h', "The height of window", false, 768);
 
 	a.add<int>("of", 'f', "output image file name", false);
 	a.add("offline", 'o', "offline rendering");

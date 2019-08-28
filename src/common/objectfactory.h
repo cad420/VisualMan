@@ -40,6 +40,9 @@ namespace ysl
 	private:
 		std::unordered_map<std::string, std::function<std::unique_ptr<Object>()>> constructors;
 	};
+
+	
+	
 }
 
 #ifdef __cplusplus

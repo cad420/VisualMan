@@ -42,14 +42,14 @@ namespace ysl
 
 		Size3 cacheDim;
 		std::unique_ptr<IBlock3DArrayAdapter> m_volumeCache;
-		std::shared_ptr<Disk3DPageAdapter> adapter;
+		std::shared_ptr<I3DBlockFilePluginInterface> adapter;
 
 		[[deprecated]] int blockCoordinateToBlockId(int xBlock, int yBlock, int zBlock) const;
 		void Create();
 	public:
 		explicit MemoryPageAdapter(const std::string& fileName);
 
-		void SetDiskFileCache(std::shared_ptr<Disk3DPageAdapter> diskCache);
+		void SetDiskFileCache(std::shared_ptr<I3DBlockFilePluginInterface> diskCache);
 
 		Size3 CPUCacheBlockSize() const;
 
