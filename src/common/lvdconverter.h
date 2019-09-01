@@ -211,6 +211,7 @@ bool RawToLVDConverterEx<nLogBlockSize, LVDTraits>::convert( std::size_t suggest
 		  strideSize.y * m_step + m_padding * 2,
 		  Clamp( g_zSize - regionStart.z, 0, blockSize ) );
 		auto rawRegionSize = regionSize;
+		auto rawRegionStart = regionStart;
 
 		/* overflow = bbbb -> -x,x,-y,y */
 		int overflow = 0;
@@ -256,7 +257,11 @@ bool RawToLVDConverterEx<nLogBlockSize, LVDTraits>::convert( std::size_t suggest
 			  lk, [&] { return not readBuffer.ready; } );
 
 			std::cout << "Read Stride: " << strideStart << " " << strideSize << std::endl;
+			std::cout << "Read Region(Raw): " << rawRegionStart << " " << rawRegionSize << std::endl;
 			std::cout << "Read Region: " << regionStart << " " << regionSize << std::endl;
+
+			std::cout << "overflow: " << std::hex << overflow << std::dec << std::endl;
+			std::cout << "dxy: " << Vec2i( dx, dy ) << std::endl;
 
 			/* always read region into buffer[0..] */
 			rawReader.readRegion(
@@ -269,30 +274,41 @@ bool RawToLVDConverterEx<nLogBlockSize, LVDTraits>::convert( std::size_t suggest
 
 			/* transfer overflowed into correct position */
 			if ( overflow ) {
-				memset( writeBuffer.buffer.get(), 0, sizeof( RawType ) * rawRegionSize.Prod() );
-				for ( int i = regionSize.y - 1; i >= 0; --i ) {
-					memcpy(
-					  writeBuffer.buffer.get() + rawRegionSize.x * ( i + dy ) + dx, /*x'_i*/
-					  readBuffer.buffer.get() + regionSize.x * i,					/*x_i*/
-					  regionSize.x * sizeof( RawType ) );
+				memset( writeBuffer.buffer.get(), 0,
+						sizeof( RawType ) * nVoxelsPerBlock * nBlocksPerStride );
+				auto dst = writeBuffer.buffer.get();
+				auto src = readBuffer.buffer.get();
+				for ( std::size_t dep = 0; dep < regionSize.z; ++dep ) {
+					auto slice_dst = dst + dep * rawRegionSize.x * rawRegionSize.y;
+					auto slice_src = src + dep * regionSize.x * regionSize.y;
+					for ( std::size_t i = 0; i < regionSize.y; ++i ) {
+						memcpy(
+						  slice_dst + ( i + dy ) * rawRegionSize.x + dx, /*x'_i*/
+						  slice_src + i * regionSize.x,					 /*x_i*/
+						  regionSize.x * sizeof( RawType ) );
+					}
 				}
 				writeBuffer.buffer.swap( readBuffer.buffer );
 			}
 
-#           pragma omp parallel for
+#pragma omp parallel for
 			for ( int yb = 0; yb < strideSize.y; yb++ ) {
 				for ( int xb = 0; xb < strideSize.x; xb++ ) {
 					const int blockIndex = xb + yb * strideSize.x;
-					const auto destPtr = writeBuffer.buffer.get() +
-										 blockIndex * nVoxelsPerBlock;
-					const auto srcPtr = readBuffer.buffer.get() +
-										xb * m_step + yb * m_step * rawRegionSize.x;
+					const auto dst = writeBuffer.buffer.get() +
+									 blockIndex * nVoxelsPerBlock;
+					const auto src = readBuffer.buffer.get() +
+									 xb * m_step + yb * m_step * rawRegionSize.x;
 
-					for ( int row = 0; row < blockSize; ++row ) {
-						memcpy(
-						  destPtr + row * blockSize,
-						  srcPtr + row * rawRegionSize.x,
-						  blockSize * sizeof( RawType ) );
+					for ( std::size_t dep = 0; dep < blockSize; ++dep ) {
+						auto slice_dst = dst + dep * blockSize * blockSize;
+						auto slice_src = src + dep * rawRegionSize.x * rawRegionSize.y;
+						for ( std::size_t row = 0; row < blockSize; ++row ) {
+							memcpy(
+							  slice_dst + row * blockSize,
+							  slice_src + row * rawRegionSize.x,
+							  blockSize * sizeof( RawType ) );
+						}
 					}
 					// z-offset
 
