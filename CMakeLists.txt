@@ -24,9 +24,6 @@ else()
 endif()
 
 
-
-
-
 option(VM_BUILD_OLD_LARGE_VOLUME_RENDERER "Set to On to build the old large volume renderer")
 
 

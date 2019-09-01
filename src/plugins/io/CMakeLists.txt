@@ -26,6 +26,23 @@ target_sources(lvdfilereader PRIVATE "lvdfilereader.cpp")
 target_link_libraries(lvdfilereader common)
 target_include_directories(lvdfilereader PRIVATE "${CMAKE_SOURCE_DIR}/src/common")
 
+if(VM_BUILD_LZ4ENCODER)
+find_path(lz4_INCLUDE_DIR
+		  NAMES lz4.h
+		  PATHS "${LZ4_SDK_DIR}/include")
 
+find_library(lz4_LIBRARY
+	         NAMES lz4
+			 PATHS "${LZ4_SDK_DIR}/lib")
+
+set(lz4_INCLUDE_DIRS ${lz4_INCLUDE_DIR})
+set(lz4_LIBRARIES ${lz4_LIBRARY})
+
+add_library(lz4filereader SHARED)
+target_sources(lz4filereader PRIVATE "lz4filereader.cpp")
+target_link_libraries(lz4filereader common ${lz4_LIBRARIES})
+target_include_directories(lz4filereader PRIVATE "${CMAKE_SOURCE_DIR}/src/common" ${lz4_INCLUDE_DIRS})
+
+endif()
 install(TARGETS ioplugin lvdfilereader LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin/plugins" ARCHIVE DESTINATION "lib")
 install(FILES ${INC_LIST} DESTINATION "include")

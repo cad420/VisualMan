@@ -13,7 +13,6 @@ namespace ysl
 	class LVDFileReader:public I3DBlockFilePluginInterface
 	{
 		DECLARE_RTTI
-		//DECLARE_INITIAL(LVDFileReader)
 		std::unique_ptr<LVDReader> lvdReader;
 	public:
 		void Open(const std::string& fileName)override

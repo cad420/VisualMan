@@ -43,6 +43,7 @@ namespace ysl
 		std::shared_ptr<Block3DArray<T, nLogBlockSize>> ReadAll(int lod = 0);
 		void ReadBlock(char * dest, int blockId,int lod = 0);
 		unsigned char* ReadBlock(int blockId, int lod = 0);
+		const LVDHeader& GetHeader()const { return header; }
 		~LVDReader();
 	private:
 		std::shared_ptr<IFileMappingPluginInterface> lvdIO;		// the declaration must be behind the declaration of ~LVDReader()

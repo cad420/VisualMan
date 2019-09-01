@@ -68,6 +68,7 @@ namespace ysl
 			validFlag = false;
 			return;
 		}
+		
 
 		const size_t aBlockSize = BlockSize();
 

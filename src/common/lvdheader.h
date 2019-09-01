@@ -65,7 +65,6 @@ namespace ysl
 		int HeaderSize()const;
 		void Decode(unsigned char * buf);
 		unsigned char * Encode();
-
 	};
 }
 

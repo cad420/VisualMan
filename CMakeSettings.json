@@ -45,6 +45,14 @@
         {
           "name": "VM_BUILD_OLD_LARGE_VOLUME_RENDERER",
           "value": "On"
+        },
+        {
+          "name": "VM_BUILD_LZ4ENCODER",
+          "value": "On"
+        },
+        {
+          "name": "LZ4_SDK_DIR",
+          "value": "C:\\lib\\lz4_win64_v1_9_2"
         }
       ]
     },
@@ -93,7 +101,16 @@
         {
           "name": "VM_BUILD_OLD_LARGE_VOLUME_RENDERER",
           "value": "On"
+        },
+        {
+          "name": "VM_BUILD_LZ4ENCODER",
+          "value": "On"
+        },
+        {
+          "name": "LZ4_SDK_DIR",
+          "value": "C:\\lib\\lz4_win64_v1_9_2"
         }
+
       ]
     },
 
@@ -142,6 +159,14 @@
         {
           "name": "VM_BUILD_OLD_LARGE_VOLUME_RENDERER",
           "value": "On"
+        },
+        {
+          "name": "VM_BUILD_LZ4ENCODER",
+          "value": "On"
+        },
+        {
+          "name": "LZ4_SDK_DIR",
+          "value": "C:\\lib\\lz4_win64_v1_9_2"
         }
       ]
     }
