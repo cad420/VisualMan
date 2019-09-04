@@ -1,36 +1,76 @@
 
 #include "lz4filereader.h"
+
 #include <lz4.h>
+#include <pluginloader.h>
 
 namespace ysl
 {
-	IMPLEMENT_RTTI_NoParent(LZ4FileReader)
+	
+	IMPLEMENT_RTTI_NoConstructor(LZ4FileReader,I3DBlockFilePluginInterface)
 }
 
 void ysl::LZ4FileReader::Open(const std::string& fileName)
 {
-	inFile.open(fileName, std::ios::binary);
-	if (inFile.is_open() == false)
+#ifdef _WIN32
+	fileMapping = PluginLoader::GetPluginLoader()->CreatePlugin<IFileMappingPluginInterface>("windows");
+#else
+	fileMapping = PluginLoader::GetPluginLoader()->CreatePlugin<IFileMappingPluginInterface>("linux");
+#endif
+
+	if(fileMapping == nullptr)
 	{
-		throw std::runtime_error("failed to load .lz4 file");
+		throw std::runtime_error("failed to load file mapping plugin");
 	}
 
+	std::ifstream fileSize(fileName);
+	if(fileSize.is_open() == false)
+	{
+		throw std::runtime_error("can not file file");
+	}
+
+	fileSize.seekg(0, std::ios::end);
+	const size_t fileBytes = fileSize.tellg();
+	fileSize.close();
+
+	fileMapping->Open(fileName,fileBytes,FileAccess::Read,MapAccess::ReadOnly );
+
+	dataPtr = (char *)fileMapping->FileMemPointer(0, fileBytes);
+
+	size_t curOffset = 0;
+
+	std::vector<int> ttt(10);
 
 	// Get block bytes and offsets
-
 	std::unique_ptr<char[]> buf(new char[header.HeaderSize()]);
-	inFile.read(buf.get(), header.HeaderSize());
-	int blockCount = 0;
-	inFile.read((char*)& blockCount, sizeof(int));
 
-	blockBytes.resize(blockCount);
-	blockOffset.resize(blockCount);
-	inFile.read((char*)blockOffset.data(), sizeof(uint64_t) * blockCount);
-	inFile.read((char*)blockBytes.data(), sizeof(uint32_t) * blockCount);
+	memcpy(buf.get(), dataPtr + curOffset, header.HeaderSize());
+	curOffset += header.HeaderSize();
+	header.Decode((unsigned char*)buf.get());
+	
+	int blockCount = 0;
+	memcpy(&blockCount, dataPtr+curOffset, sizeof(int));
+	curOffset += sizeof(int);
+	//inFile.read((char*)&blockCount, sizeof(int));
+
+	blockBytes = new std::vector<uint32_t>(blockCount);
+	blockOffset = new std::vector<uint64_t>(blockCount);
+	
+	
+	blockBytes->resize(blockCount);
+	blockOffset->resize(blockCount);
+	//inFile.read((char*)blockOffset.data(), sizeof(uint64_t) * blockCount);
+	//inFile.read((char*)blockBytes.data(), sizeof(uint32_t) * blockCount);
+
+	memcpy((char*)blockOffset->data(), dataPtr+ curOffset, sizeof(uint64_t) * blockCount);
+	curOffset += sizeof(uint64_t) * blockCount;
+	memcpy((char*)blockBytes->data(), dataPtr+ curOffset, sizeof(uint32_t) * blockCount);
+	curOffset += sizeof(uint32_t) * blockCount;
+	
 
 	const auto blockLength = 1 << header.blockLengthInLog;
-	blockBuf = std::unique_ptr<char[]>(new char[blockLength * blockLength * blockLength]);
-	compressedBuf = std::unique_ptr<char[]>(new char[blockLength * blockLength * blockLength]);
+	blockBuf = new char[blockLength * blockLength * blockLength];
+	compressedBuf = new char[blockLength * blockLength * blockLength];
 
 
 	const size_t aBlockSize = blockLength;
@@ -82,10 +122,8 @@ int ysl::LZ4FileReader::Get3DPageSizeInLog() const
 
 const void* ysl::LZ4FileReader::GetPage(size_t pageID)
 {
-	inFile.seekg(blockOffset[pageID], std::ios::beg);
-	inFile.read(compressedBuf.get(), blockBytes[pageID]);
-	LZ4_decompress_safe(compressedBuf.get(), blockBuf.get(), blockSizeBytes, blockSizeBytes);
-	return blockBuf.get();
+	LZ4_decompress_safe(dataPtr+(*blockOffset)[pageID], blockBuf, (*blockBytes)[pageID], blockSizeBytes);
+	return blockBuf;
 }
 
 size_t ysl::LZ4FileReader::GetPageSize() const
@@ -101,6 +139,14 @@ size_t ysl::LZ4FileReader::GetPhysicalPageCount() const
 size_t ysl::LZ4FileReader::GetVirtualPageCount() const
 {
 	return bSize.Prod();
+}
+
+ysl::LZ4FileReader::~LZ4FileReader()
+{
+	delete blockBytes;
+	delete blockOffset;
+	delete compressedBuf;
+	delete blockBuf;
 }
 
 std::unique_ptr<ysl::Object> ysl::LZ4FileReaderFactory::Create(const std::string& key)

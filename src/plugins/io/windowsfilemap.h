@@ -3,16 +3,15 @@
 #define _WINDOWSFILEMAP_H_
 #include <filemappingplugininterface.h>
 #include <unordered_set>
-#include "config.h"
+#include <plugin.h>
 
 #ifdef _WIN32
 #include <Windows.h>
 
 namespace ysl
 {
-	class IO_EXPORT_IMPORT WindowsFileMapping:public IFileMappingPluginInterface
+	class WindowsFileMapping:public IFileMappingPluginInterface
 	{
-
 		DECLARE_RTTI
 		DECLARE_INITIAL(WindowsFileMapping)
 		HANDLE f = nullptr;
@@ -32,7 +31,17 @@ namespace ysl
 		~WindowsFileMapping();
 	};
 
+	class WindowsFileMappingFactory:public IPluginFactory
+	{
+		DECLARE_PLUGIN_FACTORY("visualman.io")
+	public:
+		std::vector<std::string> Keys() const override;
+		std::unique_ptr<Object> Create(const std::string& key) override;
+	};
+
 }
+
+EXPORT_PLUGIN_FACTORY(WindowsFileMappingFactory)
 
 #endif /*_WIN32*/
 

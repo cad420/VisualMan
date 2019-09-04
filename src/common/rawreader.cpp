@@ -2,6 +2,7 @@
 #include "rawreader.h"
 #include "filemappingplugininterface.h"
 #include "libraryloader.h"
+#include "pluginloader.h"
 
 #include <cstring> // memcpy
 #include <cassert>
@@ -19,7 +20,12 @@ namespace ysl
 		auto repo = LibraryReposity::GetLibraryRepo();
 		assert(repo);
 		repo->AddLibrary("ioplugin");
-		io = Object::CreateObject<IFileMappingPluginInterface>("common.filemapio");
+
+#ifdef _WIN32
+		io = PluginLoader::GetPluginLoader()->CreatePlugin<IFileMappingPluginInterface>("windows");
+#elif defined(__linux__)
+		io = PluginLoader::GetPluginLoader()->CreatePlugin<IFileMappingPluginInterface>("linux");
+#endif
 		if (io == nullptr)
 			throw std::runtime_error("can not load ioplugin");
 		io->Open(fileName, rawBytes, FileAccess::Read, MapAccess::ReadOnly);

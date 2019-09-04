@@ -34,7 +34,7 @@ namespace ysl
 			}
 			return nullptr;
 		}
-
+		
 		static PluginLoader* GetPluginLoader();
 
 		static void LoadPlugins(const std::string& directory);

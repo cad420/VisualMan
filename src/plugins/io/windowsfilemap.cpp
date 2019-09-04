@@ -6,9 +6,6 @@ namespace ysl
 
 	IMPLEMENT_RTTI_NoConstructor(WindowsFileMapping, IFileMappingPluginInterface)
 	IMPLEMENT_INITIAL(WindowsFileMapping, common.filemapio)
-
-
-
 	void WindowsFileMapping::PrintLastErrorMsg()
 	{
 		DWORD dw = GetLastError();
@@ -165,6 +162,16 @@ namespace ysl
 		WindowsFileMapping::Close();
 	}
 
+	std::vector<std::string> WindowsFileMappingFactory::Keys() const
+	{
+		return {"windows"};
+	}
+	std::unique_ptr<Object> WindowsFileMappingFactory::Create(const std::string& key)
+	{
+		return std::make_unique<WindowsFileMapping>();
+	}
 }
+
+EXPORT_PLUGIN_FACTORY_IMPLEMENT(ysl::WindowsFileMappingFactory)
 
 #endif /*_WIN32*/

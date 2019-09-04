@@ -84,5 +84,15 @@ namespace ysl
         {
             Close();
         }
+
+	std::vector<std::string> LinuxFileMappingFactory::Keys(const std::string & key)const
+    {
+		return { "linux" };
+    }
+
+	std::unique_ptr<Object> Create(const std::string & key)const
+    {
+		return std::make_unique<LinuxFileMapping>();
+    }
 }
 #endif /*__linux__*/

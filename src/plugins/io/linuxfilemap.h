@@ -1,7 +1,6 @@
 #ifndef _LINUXFILEMAP_H_
 #define _LINUXFILEMAP_H_
 
-
 #ifdef __linux__
 #include "config.h"
 #include <filemappingplugininterface.h>
@@ -9,6 +8,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <set>
+#include <plugin.h>
 
 namespace ysl
 {
@@ -28,6 +28,16 @@ namespace ysl
         bool Close()override;
         ~LinuxFileMapping();
     };
+	
+
+	class LinuxFileMappingFactory :public IPluginFactory
+	{
+		DECLARE_PLUGIN_FACTORY("common.io")
+	public:
+		std::vector<std::string> Keys() const override;
+		std::unique_ptr<Object> Create(const std::string& key) override;
+	};
+	
 }
 
 

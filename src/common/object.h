@@ -1,21 +1,28 @@
 #pragma once
 #include <string>
 #include <functional>
+#include <unordered_map>
 #include "common.h"
 
+
+#define VM_RTTI
+
+namespace ysl
+{
+	class IObjectFactory;
+	class Object;
+	using ObjectCtorFunc = std::function<std::unique_ptr<Object>()>;
+	class Rtti;
+}
+
+extern "C"
+{
+	COMMON_EXPORT_IMPORT ysl::IObjectFactory* GetObjectFactory();
+}
 
 
 namespace ysl
 {
-
-	class Object;
-	using ObjectCtorFunc = std::function<std::unique_ptr<Object>()>;
-
-	/**
-	 * \brief Rtti
-	 */
-
-	class Rtti;
 	
 	struct pImplRtti
 	{
@@ -77,17 +84,29 @@ namespace ysl
 
 	
 
-#define DECLARE_RTTI																					\
+#ifdef VM_RTTI
+	
+#define DECLARE_RTTI																				\
 	public:																								\
 	static Rtti _ms_RttiType;																			\
-	virtual Rtti & GetRtti()const{return _ms_RttiType;}	
-
+	virtual Rtti & GetRtti()const{return _ms_RttiType;}
+	
 
 #define IMPLEMENT_RTTI_NoConstructor(classTypeName,baseClassTypeName)									\
 	Rtti classTypeName::_ms_RttiType(#classTypeName,&baseClassTypeName::_ms_RttiType,nullptr);
-
+	
 #define IMPLEMENT_RTTI_NoParent(classTypeName)															\
 	Rtti classTypeName::_ms_RttiType(#classTypeName,nullptr,nullptr);
+
+	
+#else
+#define DECLARE_RTTI
+#define IMPLEMENT_RTTI_NoConstructor(classTypeName,baseClassTypeName)
+#define IMPLEMENT_RTTI_NoParent(classTypeName)
+#endif
+
+	
+#define OBJECT_NAME(objectName) virtual std::string ToString()const{return objectName;}
 
 #define DECLARE_INITIAL(classTypeName)																	\
 	public:																								\
@@ -113,11 +132,10 @@ namespace ysl
 
 	class COMMON_EXPORT_IMPORT Object :public std::enable_shared_from_this<Object>
 	{
-
 	protected:
 		Object() = default;
 	public:
-		virtual std::string ToString()const { return GetRtti().ObjectName(); }
+		OBJECT_NAME("Object")
 		virtual ~Object() = default;
 		template<typename Ty>
 		std::shared_ptr<Ty> As() { return Shared_Object_Dynamic_Cast<Ty>(shared_from_this()); }
@@ -171,17 +189,25 @@ namespace ysl
 	template<typename Ty>
 	Ty* Object_Dynamic_Cast(Object * obj)
 	{
+#ifdef VM_RTTI
 		if (obj == nullptr)
 			return nullptr;
 		return Ty::_ms_RttiType.DerivedFrom(obj->GetRtti()) || obj->GetRtti().DerivedFrom(Ty::_ms_RttiType) ? static_cast<Ty*>(obj) : nullptr;
+#else
+		return dynamic_cast<Ty*>(obj);
+#endif
 	}
 
 	template<typename Ty>
 	const Ty* Object_Dynamic_Cast(const Object * obj)
 	{
+#ifdef VM_RTTI
 		if (obj == nullptr)
 			return nullptr;
 		return Ty::_ms_RttiType.DerivedFrom(obj->GetRtti()) ||(obj->GetRtti().DerivedFrom(Ty::_ms_Rtti)) ? static_cast<Ty*>(obj) : nullptr;
+#else
+		return dynamic_cast<Ty*>(obj);
+#endif
 	}
 
 	template<typename Ty>
@@ -210,12 +236,5 @@ namespace ysl
 
 }
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-	COMMON_EXPORT_IMPORT ysl::IObjectFactory * GetObjectFactory();
-#ifdef __cplusplus
-}
-#endif
+
 
