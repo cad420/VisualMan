@@ -100,14 +100,7 @@ int main()
 	std::cin >> input >> output;
 
 	ysl::LVDReader reader(input);
-
-
 	LZ4Encoder endcoder(reader);
-
 	endcoder.Save(output);
-	
-	
-	
-	
 	return 0;
 }

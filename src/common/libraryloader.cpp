@@ -61,7 +61,6 @@ namespace ysl
 			if (std::regex_match(fullName, reg) == false)continue;
 			libName = libName.substr(3, fullName.find_last_of('.') - 3);
 #endif	/*defined(__MACOSX__) || defined(__APPLE__)*/
-			
 			try
 			{
 				auto rp = std::make_shared<Library>(lib.path().string());

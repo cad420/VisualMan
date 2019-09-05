@@ -67,7 +67,7 @@ namespace ysl
 
 	MemoryPageAdapter::MemoryPageAdapter(const std::string& fileName) :
 		//lvdReader(fileName),
-		cacheDim(16, 16, 16)
+		cacheDim(20, 20, 20)
 	{
 		const auto cap = fileName.substr(fileName.find_last_of('.'));
 		auto p = PluginLoader::CreatePlugin<I3DBlockFilePluginInterface>(cap);

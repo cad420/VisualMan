@@ -18,7 +18,7 @@ namespace ysl
 				 * It could be invalid when next call because its data has been swapped out.
 				 */
 		virtual const void* GetPage(size_t pageID) = 0;
-
+		
 		/**
 		 * \brief Returns the page size by bytes
 		 */
@@ -58,7 +58,6 @@ namespace ysl
 		virtual int Get3DPageSizeInLog()const=0;
 		virtual Size3 Get3DPageCount()const=0;
 	};
-
 	DECLARE_PLUGIN_METADATA(I3DBlockFilePluginInterface,"visualman.blockdata.io")
 
 	class IPageFaultEventCallbackPluginInterface:public Object,public IPageFile

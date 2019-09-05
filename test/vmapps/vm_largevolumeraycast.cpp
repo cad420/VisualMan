@@ -111,7 +111,7 @@ namespace ysl
 			 */
 
 			//
-			//Context()->SetAutomaticallyUpdate(false);
+			Context()->SetAutomaticallyUpdate(false);
 
 			const auto w = Context()->GetFramebuffer()->Width();
 			const auto h = Context()->GetFramebuffer()->Height();
@@ -133,8 +133,6 @@ namespace ysl
 			intermediateResult = MakeRef<Texture>();
 			intermediateResult->SetSetupParams(texParam);
 			intermediateResult->CreateTexture();
-
-
 
 			/*[1]Multi Render Targets Aggregation*****************************************
 			 *
@@ -324,10 +322,10 @@ namespace ysl
 
 		void VM_LargeVolumeRayCast::UpdateScene()
 		{
-			const auto cam = mrtAgt->CreateGetCamera();
+			//const auto cam = mrtAgt->CreateGetCamera();
 			//cam->GetViewMatrixWrapper()->RotateCamera(cam->GetUp(), 10);
 			//cam->Movement(cam->GetFront().Normalized(),100);
-			cam->SetFov(int(cam->GetFov())-2);
+			//cam->SetFov(int(cam->GetFov())-2);
 		}
 
 		void VM_LargeVolumeRayCast::DestroyEvent()

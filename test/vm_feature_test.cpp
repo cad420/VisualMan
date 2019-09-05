@@ -3,6 +3,7 @@
 #include <libraryloader.h>
 #include <pluginloader.h>
 #include <pagefileinterface.h>
+#include <Windows.h>
 int main()
 {
 	ysl::PluginLoader::LoadPlugins("plugins");

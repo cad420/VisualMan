@@ -99,22 +99,6 @@ namespace ysl
 		 * It could be invalid when next call because its data has been swapped out.
 		 */
 		virtual const void* GetPage(size_t pageID);
-
-		/**
-		 * \brief Returns the page size by bytes
-		 */
-		virtual size_t GetPageSize()const = 0;
-		/**
-		 * \brief 
-		 * \return 
-		 */
-		virtual size_t GetPhysicalPageCount()const = 0;
-		/**
-		 * \brief 
-		 * \return 
-		 */
-		virtual size_t GetVirtualPageCount()const = 0;
-
 		virtual ~AbstrMemoryCache() = default;
 	private:
 		/**
@@ -165,6 +149,7 @@ namespace ysl
 
 		void SetOwnerCache(AbstrMemoryCache * cache) { ownerCache = cache; }
 	};
+	
 }
 
 
