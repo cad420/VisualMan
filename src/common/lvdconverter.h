@@ -204,49 +204,63 @@ bool RawToLVDConverterEx<nLogBlockSize, LVDTraits>::convert( std::size_t suggest
 		Vec3i regionStart(
 		  strideStart.x * m_step - m_padding,
 		  strideStart.y * m_step - m_padding,
-		  std::max( -m_padding + slice * m_step, 0 ) );
+		  slice * m_step - m_padding );
 		/* whole region size includes padding, might overflow */
 		Size3 regionSize(
 		  strideSize.x * m_step + m_padding * 2,
 		  strideSize.y * m_step + m_padding * 2,
-		  Clamp( g_zSize - regionStart.z, 0, blockSize ) );
+		  m_step + m_padding * 2 );
 		auto rawRegionSize = regionSize;
 		auto rawRegionStart = regionStart;
 
-		/* overflow = bbbb -> -x,x,-y,y */
+		/* overflow = bbbbbb -> -x,x,-y,y,-z,z */
 		int overflow = 0;
 		/* region overflows: x1 > X */
 		if ( regionSize.x + regionStart.x > g_xSize ) {
 			regionSize.x = g_xSize - regionStart.x;
-			overflow |= 0b0100;
+			overflow |= 0b010000;
 		}
 		/* region overflows: y1 > Y */
 		if ( regionSize.y + regionStart.y > g_ySize ) {
 			regionSize.y = g_ySize - regionStart.y;
-			overflow |= 0b0001;
+			overflow |= 0b000100;
+		}
+		/* region overflows: z1 > Z */
+		if ( regionSize.z + regionStart.z > g_zSize ) {
+			regionSize.z = g_zSize - regionStart.z;
+			overflow |= 0b000001;
 		}
 		/* region overflows: x0 < 0, must be a padding */
 		if ( regionStart.x < 0 ) {
 			regionSize.x -= m_padding;
 			regionStart.x = 0;
-			overflow |= 0b1000;
+			overflow |= 0b100000;
 		}
 		/* region overflows: y0 < 0, must be a padding */
 		if ( regionStart.y < 0 ) {
 			regionSize.y -= m_padding;
 			regionStart.y = 0;
-			overflow |= 0b0010;
+			overflow |= 0b001000;
+		}
+		/* region overflows: x0 < 0, must be a padding */
+		if ( regionStart.z < 0 ) {
+			regionSize.z -= m_padding;
+			regionStart.z = 0;
+			overflow |= 0b000010;
 		}
 
-		std::size_t dx = 0, dy = 0;
+		std::size_t dx = 0, dy = 0, dz = 0;
 		/* let x_i = first voxel of line i
 		   x_i = len * i
 		   -> x'_i = slen * i + dx? * 1 + slen * dy?*/
-		if ( overflow & 0b1000 ) {
+		if ( overflow & 0b100000 ) {
 			dx = m_padding;
 		}
-		if ( overflow & 0b0010 ) {
+		if ( overflow & 0b001000 ) {
 			dy = m_padding;
+		}
+		if ( overflow & 0b000010 ) {
+			dz = m_padding;
 		}
 
 		const int zoffset = ( slice == 0 ) ? -m_padding : 0;
@@ -283,7 +297,8 @@ bool RawToLVDConverterEx<nLogBlockSize, LVDTraits>::convert( std::size_t suggest
 					auto slice_src = src + dep * regionSize.x * regionSize.y;
 					for ( std::size_t i = 0; i < regionSize.y; ++i ) {
 						memcpy(
-						  slice_dst + ( i + dy ) * rawRegionSize.x + dx, /*x'_i*/
+						  slice_dst + dz * rawRegionSize.x * rawRegionSize.y +
+						  ( i + dy ) * rawRegionSize.x + dx, /*x'_i*/
 						  slice_src + i * regionSize.x,					 /*x_i*/
 						  regionSize.x * sizeof( RawType ) );
 					}
