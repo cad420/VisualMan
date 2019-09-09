@@ -189,25 +189,25 @@ namespace ysl
 	template<typename Ty>
 	Ty* Object_Dynamic_Cast(Object * obj)
 	{
-#ifdef VM_RTTI
-		if (obj == nullptr)
-			return nullptr;
-		return Ty::_ms_RttiType.DerivedFrom(obj->GetRtti()) || obj->GetRtti().DerivedFrom(Ty::_ms_RttiType) ? static_cast<Ty*>(obj) : nullptr;
-#else
+//#ifdef VM_RTTI
+//		if (obj == nullptr)
+//			return nullptr;
+//		return Ty::_ms_RttiType.DerivedFrom(obj->GetRtti()) || obj->GetRtti().DerivedFrom(Ty::_ms_RttiType) ? static_cast<Ty*>(obj) : nullptr;
+//#else
 		return dynamic_cast<Ty*>(obj);
-#endif
+//#endif
 	}
 
 	template<typename Ty>
 	const Ty* Object_Dynamic_Cast(const Object * obj)
 	{
-#ifdef VM_RTTI
-		if (obj == nullptr)
-			return nullptr;
-		return Ty::_ms_RttiType.DerivedFrom(obj->GetRtti()) ||(obj->GetRtti().DerivedFrom(Ty::_ms_Rtti)) ? static_cast<Ty*>(obj) : nullptr;
-#else
+//#ifdef VM_RTTI
+//		if (obj == nullptr)
+//			return nullptr;
+//		return Ty::_ms_RttiType.DerivedFrom(obj->GetRtti()) ||(obj->GetRtti().DerivedFrom(Ty::_ms_Rtti)) ? static_cast<Ty*>(obj) : nullptr;
+//#else
 		return dynamic_cast<Ty*>(obj);
-#endif
+//#endif
 	}
 
 	template<typename Ty>

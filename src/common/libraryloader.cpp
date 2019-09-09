@@ -34,11 +34,10 @@ namespace ysl
 			auto lib = std::make_shared<Library>(fullName);
 			repo[name] = lib;
 		}
-		catch (std::exception& e)
+		catch (std::exception& e)					
 		{
 			std::cerr << e.what() << std::endl;
 		}
-
 	}
 
 	void LibraryReposity::AddLibraries(const std::string& directory)

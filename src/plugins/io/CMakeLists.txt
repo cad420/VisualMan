@@ -42,7 +42,7 @@ add_library(lz4filereader SHARED)
 target_sources(lz4filereader PRIVATE "lz4filereader.cpp")
 target_link_libraries(lz4filereader common ${lz4_LIBRARIES})
 target_include_directories(lz4filereader PRIVATE "${CMAKE_SOURCE_DIR}/src/common" ${lz4_INCLUDE_DIRS})
-
 endif()
+
 install(TARGETS ioplugin lvdfilereader lz4filereader LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin/plugins" ARCHIVE DESTINATION "lib")
 install(FILES ${INC_LIST} DESTINATION "include")
