@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <libraryloader.h>
+#include <cmdline.h>
 
 //#include "../io/rawio.h"
 
@@ -48,6 +49,16 @@ namespace ysl
 		{
 			return data[z * size.y*size.x + y * size.x + x];
 		}
+
+		T * Get()
+		{
+			return data;
+		}
+
+		Size3 GetSize()const
+		{
+			return size;
+		}
 	};
 }
 
@@ -57,66 +68,6 @@ ysl::Size3 SampleSize(const ysl::Size3 & orignalSize, const ysl::Vector3f & fact
 	return ysl::Size3(1.0*orignalSize.x / factor.x, 1.0*orignalSize.y / factor.y, 1.0*orignalSize.z / factor.z);
 }
 
-//void OutOfCoreDownsample(const std::string & fileName,
-//	const ysl::Size3 & size,
-//	int voxelSize,
-//	const ysl::Vector3f & factor,
-//	const std::string & outFileName)
-//{
-//	std::shared_ptr<ysl::AbstrRawIO> rm(new ysl::WindowsMappingRawIO(fileName,size,voxelSize));
-//	//std::unique_ptr<unsigned char[]> buf(new unsigned char[*size.x*size.y*voxelSize]);
-//	std::ofstream outFile(outFileName, std::ios_base::binary);
-//
-//	const auto sampleSize = SampleSize(size,factor);
-//	ysl::Vector3f step(1.0*size.x / sampleSize.x, 1.0*size.y / sampleSize.y, 1.0*size.z / sampleSize.z);
-//
-//
-//	const auto sliceStep = 5;
-//
-//	const auto bufSize = sliceStep * sampleSize.x * sampleSize.y * voxelSize;
-//
-//	std::unique_ptr<unsigned char[]> buf(new unsigned char[bufSize]);
-//
-//	const auto ptr = rm->FileMemPointer(0, size.x*size.y*size.z*voxelSize);
-//
-//
-//
-//
-//	for (int zz = 0; zz < sampleSize.z; zz+= sliceStep)
-//	{
-//		std::size_t actualSlice;
-//		if (zz + sliceStep >= sampleSize.z)
-//			actualSlice = sampleSize.z - zz;
-//		else
-//			actualSlice = sliceStep;
-//
-//
-//		int sampleZmin = zz * step.z;
-//		int sampleZmax = std::ceil(zz * step.z) + sliceStep;
-//
-//		for(int z = 0 ;z<actualSlice;z++)
-//		{
-//			
-//
-//
-//			for (int y = 0; y < sampleSize.y; y++)
-//			{
-//				for (int x = 0; x < sampleSize.x; x++)
-//				{
-//					const auto index = sampleSize.x*(zz *sampleSize.y + y) + x;
-//					//downsampleData[index] = sampler.Sample(ysl::Point3f(xx * step.x, yy * step.y, zz * step.z));
-//				}
-//			}
-//
-//
-//		}
-//
-//	}
-//
-//	rm->DestroyFileMemPointer(ptr);
-//
-//
-//}
 
 
 
@@ -136,6 +87,7 @@ int main()
 	std::cout << "[filename(str), offset(std::size_t),  x(int), y(int), z(int),xfactor(int), yfactor(int),zfactor(int), ouputfilename(str)]\n";
 	std::cin >> inFileName >>offset>> x >> y >> z >> sx >> sy >> sz>>outFileName;
 
+
 	const auto sampleSize = ysl::Size3(1.0*x / sx + 0.5, 1.0*y / sy + 0.5, 1.0*z / sz + 0.5); 
 	ysl::Vector3f step( 1.0*x / sampleSize.x,1.0*y / sampleSize.y,1.0*z / sampleSize.z );
 
@@ -143,45 +95,48 @@ int main()
 	std::cout << "Downsample Size:" << sampleSize << std::endl;
 	std::cout << "Step:" << step << std::endl;
 
-	//std::unique_ptr<unsigned char> buf(new unsigned char[x*y*z]);
+	std::unique_ptr<unsigned char> buf(new unsigned char[x*y*z]);
 	//std::shared_ptr<ysl::IFileMappingPluginInterface> rm(new ysl::WindowsFileMapping(inFileName, offset+x*y*z, ysl::WindowsFileMapping::FileAccess::Read,ysl::WindowsFileMapping::MapAccess::ReadOnly));
 
 
 	auto repo = ysl::LibraryReposity::GetLibraryRepo();
 	repo->AddLibrary("ioplugin");
+	
 	std::shared_ptr<ysl::IFileMappingPluginInterface> rm = ysl::Object::CreateObject<ysl::IFileMappingPluginInterface>("common.filemapio");
 
+	ysl::Sampler3D<unsigned char> sampler(reinterpret_cast<unsigned char*>(offset), { x,y,z });
 
-	if (rm == nullptr)
-		throw std::runtime_error("IO plugin can not be loaded");
-	rm->Open(inFileName, x*y*z, ysl::FileAccess::Read, ysl::MapAccess::ReadOnly);
-	const auto ptr = rm->FileMemPointer(0, x*y*z + offset);
-	if(!ptr)
-	{
-		std::cout << "File mapping failed\n";
-		return 0;
-	}
+	//if (rm == nullptr)
+	//	throw std::runtime_error("IO plugin can not be loaded");
+	//rm->Open(inFileName, x*y*z, ysl::FileAccess::Read, ysl::MapAccess::ReadOnly);
+	//const auto ptr = rm->FileMemPointer(0, x*y*z + offset);
+	//if(!ptr)
+	//{
+	//	std::cout << "File mapping failed\n";
+	//	return 0;
+	//}
 
-	ysl::Sampler3D<unsigned char> sampler(reinterpret_cast<unsigned char*>(ptr+offset), { x,y,z });
 
-	//ysl::RawReader reader(inFileName, {x,y,z},1);
-	//std::cout << "Reading Raw Data\n";
-	//reader.readRegion({ 0,0,0 }, { x,y,z }, buf.get());
-	//std::cout << "Reading finished\n";
+	ysl::RawReader reader(inFileName, {x,y,z},1);
+
+	//reader.readRegion({ 0,0,0 }, { x,y,z },ptr);
 
 	const auto sliceStep = 5;
 	const auto bytes = sampleSize.x*sampleSize.y*sliceStep;
 	std::unique_ptr<unsigned char[]> downsampleData(new unsigned char[bytes]);
+	std::unique_ptr<unsigned char[]> originalData(new unsigned char[x*y*sliceStep]);
 	std::ofstream out(outFileName, std::ios::binary);
-#pragma omp parallel for
+
 	for(int zz = 0 ;zz < sampleSize.z;zz+=sliceStep)
 	{
 		std::size_t actualSlice;
-		if (zz + sliceStep >= sampleSize.z) actualSlice = sampleSize.z - zz;
-
-		else actualSlice = sliceStep;
-
+		if (zz + sliceStep >= sampleSize.z) 
+			actualSlice = sampleSize.z - zz;
+		else 
+			actualSlice = sliceStep;
+		
 		const auto actualBytes = actualSlice * sampleSize.x * sampleSize.y;
+		
 
 		for(int s = 0;s < actualSlice;s++)
 		{

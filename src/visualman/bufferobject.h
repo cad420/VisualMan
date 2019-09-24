@@ -11,7 +11,7 @@ namespace ysl
 	namespace vm
 	{
 		class VISUALMAN_EXPORT_IMPORT BufferObject:public LocalBuffer,
-											      public std::enable_shared_from_this<BufferObject>
+											       public std::enable_shared_from_this<BufferObject>
 		{
 		public:
 			BufferObject() = default;
