@@ -39,6 +39,7 @@ target_sources(vm_largevolumerenderer_test PRIVATE "vmlargevolumeraycast_test.cp
 target_link_libraries(vm_largevolumerenderer_test vmglfwwindow vm vmapps)
 target_include_directories(vm_largevolumerenderer_test PRIVATE ${PROJECT_SOURCE_DIR}/guibinding/glfwwindow ${PROJECT_SOURCE_DIR}/src/visualman ${PROJECT_SOURCE_DIR}/test/vmapps)
 
+SET_TARGET_PROPERTIES(vm_largevolumerenderer_test PROPERTIES LINK_FLAGS "/PROFILE")
 install(TARGETS vmglfwwindow_test vm_largevolumerenderer_test LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
 
 endif() ## if(VM_BUILD_GLFW_EXAMPLE)
@@ -49,7 +50,6 @@ add_executable(vm_feature_test)
 target_sources(vm_feature_test PRIVATE "vm_feature_test.cpp")
 target_link_libraries(vm_feature_test vmglfwwindow common vm vmapps)
 target_include_directories(vm_feature_test PRIVATE ${PROJECT_SOURCE_DIR}/guibinding/glfwwindow ${PROJECT_SOURCE_DIR}/src/visualman ${PROJECT_SOURCE_DIR}/test/vmapps ${PROJECT_SOURCE_DIR}/src/common)
-
 install(TARGETS vm_feature_test LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
 
 

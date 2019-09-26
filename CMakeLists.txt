@@ -42,6 +42,8 @@ if(VM_BUILD_GLFW_EXAMPLE)
 	set(VM_BUILD_GLFW_GUIBINDING "On")
 endif()
 
+
+
 # GuiBinding build
 
 

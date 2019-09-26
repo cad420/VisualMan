@@ -2,6 +2,7 @@
 #include "lz4filereader.h"
 
 #include <lz4.h>
+
 #include <pluginloader.h>
 
 namespace ysl
