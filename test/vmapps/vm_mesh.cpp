@@ -1,6 +1,6 @@
 #include "vm_mesh.h"
 
-#include "../common/error.h"
+#include <VMUtils/log.hpp>
 #include "abstraarray.h"
 #include "primitive.h"
 #include "renderstudio.h"

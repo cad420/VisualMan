@@ -7,7 +7,7 @@
 #include "abstrdraw.h"
 #include "vertexattribsetinterface.h"
 #include "renderable.h"
-#include <geometry.h>
+#include <VMat/geometry.h>
 
 namespace ysl
 {

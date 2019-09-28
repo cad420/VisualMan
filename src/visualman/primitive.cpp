@@ -3,7 +3,7 @@
 #include "rendercontext.h"
 #include "abstraarray.h"
 #include "graphictype.h"
-#include <objreader.h>
+#include <VMGraphics/objreader.h>
 #include <cassert>
 #include <iostream>
 

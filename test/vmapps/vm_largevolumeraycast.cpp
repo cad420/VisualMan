@@ -5,8 +5,8 @@
 #include <rendercontext.h>
 #include <screenactor.h>
 #include <trivialscenemanager.h>
-#include <transformation.h>
-#include <error.h>
+#include <VMat/transformation.h>
+#include <VMUtils/log.hpp>
 #include "blitframebuffer.h"
 #include "actoreventcallback.h"
 #include <framebuffer.h>
@@ -16,6 +16,7 @@ namespace ysl
 {
 	namespace vm
 	{
+		using namespace ::vm;
 		FrustumEventCallback::FrustumEventCallback(Ref<Camera> camera) :camera(camera)
 		{
 			frustum = MakeRef<Primitive>();

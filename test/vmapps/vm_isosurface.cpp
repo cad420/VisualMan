@@ -5,7 +5,7 @@
 #include <abstraarray.h>
 #include <drawelements.h>
 #include <trivialscenemanager.h>
-#include <rawreader.h>
+#include <VMFoundation/rawreader.h>
 
 namespace ysl
 {

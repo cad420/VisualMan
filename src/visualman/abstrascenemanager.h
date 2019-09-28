@@ -2,7 +2,7 @@
 #ifndef _SCENEMANAGER_H_
 #define _SCENEMANAGER_H_
 #include <vector>
-#include <geometry.h>
+#include <VMat/geometry.h>
 #include "actor.h"
 namespace ysl
 {

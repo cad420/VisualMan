@@ -22,7 +22,7 @@ namespace ysl
 			if (!sourceFile.is_open())
 			{
 
-				Warning("Can not open shader source file. Path: %s\n",fileName.c_str());
+				::vm::Warning("Can not open shader source file. Path: %s\n",fileName.c_str());
 				return;
 			}
 			const std::string text{std::istreambuf_iterator<char>{sourceFile},std::istreambuf_iterator<char>{} };
@@ -54,7 +54,7 @@ namespace ysl
 				if (!success)
 				{
 					GL(glGetShaderInfoLog(handle, 512, NULL, infoLog));
-					Log("ERROR::SHADER::COMPILATION_FAILED, %s\n", infoLog);
+					::vm::Log("ERROR::SHADER::COMPILATION_FAILED, %s\n", infoLog);
 					return compiled = false;
 				}
 				compiled = true;
@@ -118,7 +118,7 @@ namespace ysl
 					if (!success)
 					{
 						glGetProgramInfoLog(handle, 512, NULL, infoLog);
-						Log("ERROR::SHADER::PROGRAM::LINKING_FAILED\n:%s", infoLog);
+						::vm::Log("ERROR::SHADER::PROGRAM::LINKING_FAILED\n:%s", infoLog);
 						return false;
 					}
 					PostLink();

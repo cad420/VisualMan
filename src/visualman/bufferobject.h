@@ -2,7 +2,7 @@
 #ifndef _BUFFEROBJECT_H_
 #define _BUFFEROBJECT_H_
 #include <cstdint>
-#include <lineararray.h>
+#include <VMFoundation/lineararray.h>
 
 #include "graphictype.h"
 

@@ -5,7 +5,7 @@
 #include "config.h"
 #include "oocprimitive.h"
 #include <texture.h>
-#include <largevolumecache.h>
+#include <VMFoundation/largevolumecache.h>
 
 namespace ysl
 {

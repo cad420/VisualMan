@@ -6,7 +6,7 @@
 #include "actor.h"
 #include "shading.h"
 #include "graphictype.h"
-#include <dataarena.h>
+#include <VMFoundation/dataarena.h>
 
 namespace ysl
 {

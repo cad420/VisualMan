@@ -6,7 +6,7 @@
 #include <vector>
 #include <array>
 
-#include <geometry.h>
+#include <VMat/geometry.h>
 #include "graphictype.h"
 #include "framebuffer.h"
 #include "eventinterface.h"

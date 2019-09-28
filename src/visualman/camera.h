@@ -1,8 +1,8 @@
 
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
-#include <geometry.h>
-#include <transformation.h>
+#include <VMat/geometry.h>
+#include <VMat/transformation.h>
 
 #include "graphictype.h"
 #include "eventinterface.h"

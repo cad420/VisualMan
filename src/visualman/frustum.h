@@ -3,7 +3,7 @@
 #define _FRUSTUM_H_
 
 #include "graphictype.h"
-#include <plane.h>
+#include <VMGraphics/plane.h>
 #include <array>
 #include <vector>
 #include "camera.h"

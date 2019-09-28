@@ -1,7 +1,7 @@
 //#include "assembly.h"
 #include "visualman.h"
 #include "rendercontext.h"
-#include <error.h>
+#include <VMUtils/log.hpp>
 
 namespace ysl
 {
@@ -29,7 +29,7 @@ namespace ysl
 		void VisualMan::UpdateEvent()
 		{
 			timer.stop();
-			const auto dur = timer.duration()*1.0/1000000;
+			const auto dur = timer.duration().us()*1.0/1000000;
 			if(dur > 0.5)
 			{
 				FPS = frameCount / dur;

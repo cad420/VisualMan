@@ -2,8 +2,8 @@
 #include "renderstudio.h"
 #include "renderer.h"
 #include "rendercontext.h"
-#include "error.h"
 #include "graphictype.h"
+#include <VMUtils/log.hpp>
 
 namespace ysl
 {
@@ -27,18 +27,18 @@ namespace ysl
 					assert(context);
 					if(aggr->renderers.empty())
 					{
-						ysl::Log("No specified renderer\n");
+						::vm::Log("No specified renderer\n");
 						return;
 					}
 					if(!aggr->renderers[0]->GetFramebuffer())
 					{
-						ysl::Log("The Renderer has no specified framebuffer");
+						::vm::Log("The Renderer has no specified framebuffer");
 						return;
 					}
 					context = aggr->renderers[0]->GetFramebuffer()->Context();
 					if(!context)
 					{
-						ysl::Error("The framebuffer has no corresponding context");
+						::vm::Error("The framebuffer has no corresponding context");
 						return;
 					}
 					context->MakeCurrent(); // Redundant ??
@@ -58,13 +58,13 @@ namespace ysl
 
 			if (sceneManagers.empty())
 			{
-				Warning("There is no scene manager in this aggregation. %x",this);
+				::vm::Warning("There is no scene manager in this aggregation. %x",this);
 				return;
 			}
 
 			if (!camera)
 			{
-				Warning("There is no camera in this aggregation. %x",this);
+				::vm::Warning("There is no camera in this aggregation. %x",this);
 				return;
 			}
 

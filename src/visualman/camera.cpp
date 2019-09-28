@@ -303,7 +303,7 @@ namespace ysl
 
 			std::ofstream ofs(jsonFileName);
 			if (!ofs.is_open()) {
-				Log("Can not open file %s.", jsonFileName.c_str());
+				::vm::Log("Can not open file %s.", jsonFileName.c_str());
 				return false;
 			}
 			OStreamWrapper osw(ofs);

@@ -1,7 +1,7 @@
 
 #ifndef _VIEWPORT_H_
 #define _VIEWPORT_H_
-#include <geometry.h>
+#include <VMat/geometry.h>
 #include "graphictype.h"
 
 namespace ysl

@@ -4,7 +4,7 @@
 
 #include "graphictype.h"
 #include "bufferobject.h"
-#include <transformation.h>
+#include <VMat/transformation.h>
 
 namespace ysl
 {

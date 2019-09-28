@@ -2,7 +2,7 @@
 cmake_minimum_required (VERSION 3.8)
 
 project ("VisualMan")
-set(CMAKE_CXX_STANDARD 17)				# C++17 is requireddd
+set(CMAKE_CXX_STANDARD 17)				# C++17 is required
 
 if(WIN32)
 add_definitions(-DNOMINMAX)			# min and max are recoginized as macro on windows
@@ -66,14 +66,16 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}
 message(STATUS ${OpenMP_EXE_LINKER_FLAGS})
 endif()
 
+
+add_subdirectory("VMCore")
 add_subdirectory("src")
-
-add_subdirectory("guibinding")
-
 add_subdirectory("test")
 
+#add_subdirectory("guibinding")
+
+
 if(VM_BUILD_TOOLS)
-add_subdirectory("tools")
+#add_subdirectory("tools")
 endif()
 
 #message(STATUS "-------" ${CMAKE_RUNTIME_OUTPUT_DIR})

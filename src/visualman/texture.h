@@ -4,7 +4,8 @@
 
 #include "graphictype.h"
 #include "bufferobject.h"
-#include <spectrum.h>
+#include <VMGraphics/spectrum.h>
+#include <vector>
 
 namespace ysl
 {

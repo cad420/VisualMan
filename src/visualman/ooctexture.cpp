@@ -1,6 +1,6 @@
 
 #include "ooctexture.h"
-#include "timer.h"
+#include <VMUtils/timer.hpp>
 #include <GL/gl3w.h>
 #include <cstring>
 #include <iostream>
@@ -35,12 +35,12 @@ namespace ysl
 
 			}
 
-			Log("------------Summary Memory Usage ---------------");
-			Log("Volume Texture Memory Usage: %lld Bytes = %.2f MB", volumeTextureMemoryUsage, volumeTextureMemoryUsage*1.0 / 1024 / 1024);
-			Log("Page Table Memory Usage: %lld Bytes = %2.f MB", pageTableBufferBytes, pageTableBufferBytes*1.0 / 1024 / 1024);
-			Log("Total ID Buffer Block Memory Usage: %lld Bytes = %2.f MB", blockIdBuffer->BufferObjectSize(), blockIdBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
-			Log("Total Hash Buffer Block Memory Usage: %lld Bytes = %2.f MB", hashBuffer->BufferObjectSize(), hashBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
-			Log("--------------End-----------------------------");
+			::vm::Log("------------Summary Memory Usage ---------------");
+			::vm::Log("Volume Texture Memory Usage: %lld Bytes = %.2f MB", volumeTextureMemoryUsage, volumeTextureMemoryUsage*1.0 / 1024 / 1024);
+			::vm::Log("Page Table Memory Usage: %lld Bytes = %2.f MB", pageTableBufferBytes, pageTableBufferBytes*1.0 / 1024 / 1024);
+			::vm::Log("Total ID Buffer Block Memory Usage: %lld Bytes = %2.f MB", blockIdBuffer->BufferObjectSize(), blockIdBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
+			::vm::Log("Total Hash Buffer Block Memory Usage: %lld Bytes = %2.f MB", hashBuffer->BufferObjectSize(), hashBuffer->BufferObjectSize()*1.0 / 1024 / 1024);
+			::vm::Log("--------------End-----------------------------");
 		}
 
 		void OutOfCoreVolumeTexture::BindToOutOfCorePrimitive(Ref<OutOfCorePrimitive> oocPrimitive)
@@ -65,8 +65,8 @@ namespace ysl
 			//const auto textureId = volumeDataTexture[lod]->Handle();
 			//const auto blockBytes = this->bytes;
 
-			Timer t;
-			t.start();
+			//::vm::Timer t;
+			//t.start();
 
 			for (int i = 0; i < data.size(); i++)
 			{
@@ -74,9 +74,9 @@ namespace ysl
 				GL(glTextureSubImage3D(volumeDataTexture[data[i].Value().GetPhysicalStorageUnit()]->Handle(), 0, posInCache.x, posInCache.y, posInCache.z, blockSize.x, blockSize.y, blockSize.z, IF_RED, IT_UNSIGNED_BYTE, cpuVolumeData[lod]->GetPage(data[i].Key())));
 			}
 
-			t.stop();
+			//t.stop();
 			totalBlocks += data.size();
-			time += t.duration_to_seconds();
+			//time += t.duration_to_seconds();
 		}
 
 		void OutOfCoreVolumeTexture::InitVolumeTextures()

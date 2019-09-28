@@ -2,7 +2,6 @@
 cmake_minimum_required (VERSION 3.3)
 project (vm)
 
-
 set(GL3W_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/gl3w")											 #gl3w headers
 set(GL3W_SRC "${CMAKE_SOURCE_DIR}/lib/gl3w/GL/gl3w.c")
 
@@ -15,8 +14,8 @@ if(OPENGL_FOUND)
 endif(OPENGL_FOUND)
 
 
-set(GRAPHIC_SRC)
-aux_source_directory(. GRAPHIC_SRC)
+set(SRC)
+aux_source_directory(. SRC)
 
 file(GLOB VM_INC "*.h")
 
@@ -26,12 +25,15 @@ set(GRAPHIC_INCLUDE)
 
 #message(STATUS  ${GRAPHIC_SRC})
 
-add_library(vm ${VM_SHARED_OR_STATIC}
-${GRAPHIC_SRC} 
-${GL3W_SRC})
-target_link_libraries(vm ${OPENGL_LIBRARIES} common graphicfoundation)
-target_include_directories(vm PUBLIC ${GL3W_INCLUDE_DIR} "../common" "../graphicfoundation")
+add_library(vm ${VM_SHARED_OR_STATIC} ${SRC} ${GL3W_SRC})
+#add_dependencies(vm vmfoundation)
+#add_dependencies(vm vmgraphics)
+
+target_link_libraries(vm ${OPENGL_LIBRARIES} vmcore)
+target_include_directories(vm PUBLIC ${GL3W_INCLUDE_DIR} "../graphicfoundation")
 target_include_directories(vm PRIVATE "${CMAKE_SOURCE_DIR}/lib/3rdparty")
+target_include_directories(vm PUBLIC "../../VMCore/include")
+
 
 install(TARGETS vm LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
 install(FILES ${VM_INC} DESTINATION "include")

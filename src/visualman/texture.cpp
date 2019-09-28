@@ -1,15 +1,17 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "graphictype.h"
 #include "texture.h"
-#include <interpulator.h>
+#include <VMGraphics/interpulator.h>
 #include <cassert>
-#include <rawreader.h>
+#include <VMFoundation/rawreader.h>
 #include <stb_image_write.h>
+#include <VMUtils/log.hpp>
 
 namespace ysl
 {
 	namespace vm
 	{
+		using namespace ::vm;
 		int GetBaseFormatBySizedFormat(TextureFormat sizedFormat)
 		{
 			switch (sizedFormat)
@@ -218,7 +220,7 @@ namespace ysl
 		{
 			if (!createParams)
 			{
-				Debug("Setup Parameters have not been set.\n");
+				::vm::Debug("Setup Parameters have not been set.\n");
 				return false;
 			}
 

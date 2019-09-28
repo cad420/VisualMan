@@ -7,8 +7,8 @@
 #include <GL/glcorearb.h>
 //#include "../core/spectrum.h"
 #include "graphictype.h"
-#include <geometry.h>
-#include <transformation.h>
+#include <VMat/geometry.h>
+#include <VMat/transformation.h>
 
 namespace ysl {
 	struct Matrix3x3;

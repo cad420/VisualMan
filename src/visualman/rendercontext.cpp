@@ -12,7 +12,8 @@
 #include <cassert>
 #include <vector>
 
-namespace ysl {
+namespace ysl
+{
 	namespace vm
 	{
 		RenderContext::RenderContext() :
@@ -21,7 +22,7 @@ namespace ysl {
 			int width = 800, height = 600;
 		}
 
-		RenderContext::RenderContext(int w, int h):framebuffer(MakeRef<Framebuffer>(this,w,h,RDB_BACK_LEFT,RDB_BACK_LEFT))
+		RenderContext::RenderContext(int w, int h) :framebuffer(MakeRef<Framebuffer>(this, w, h, RDB_BACK_LEFT, RDB_BACK_LEFT))
 		{
 
 		}
@@ -136,7 +137,7 @@ namespace ysl {
 			MakeCurrent();
 			if (IsInitialized())
 			{
-				for (const auto & each : listeners)
+				for (const auto& each : listeners)
 				{
 					if (each->Enabled())
 						each->InitEvent();
@@ -148,7 +149,7 @@ namespace ysl {
 		{
 			//std::cout << "RenderContext::DispatchUpdateEvent\n";
 			MakeCurrent();
-			for (const auto & each : listeners)
+			for (const auto& each : listeners)
 			{
 				if (each->Enabled())
 					each->UpdateEvent();
@@ -159,7 +160,7 @@ namespace ysl {
 		{
 			//std::cout << "RenderContext::DispatchDestroyEvent\n";
 			MakeCurrent();
-			for (const auto & each : listeners)
+			for (const auto& each : listeners)
 			{
 				if (each->Enabled())
 					each->DestroyEvent();
@@ -174,7 +175,7 @@ namespace ysl {
 			// Update Frambuffer Size
 			framebuffer->SetWidth(w);
 			framebuffer->SetHeight(h);
-			for (const auto & each : listeners)
+			for (const auto& each : listeners)
 			{
 				if (each->Enabled())
 					each->ResizeEvent(w, h);
@@ -185,7 +186,7 @@ namespace ysl {
 		{
 			//std::cout << "DispatchMousePressedEvent:" << button<<" "<<xpos << " " << ypos << std::endl;
 			MakeCurrent();
-			for (const auto & each : listeners)
+			for (const auto& each : listeners)
 			{
 				if (each->Enabled())
 					each->MousePressEvent(button, xpos, ypos);
@@ -196,7 +197,7 @@ namespace ysl {
 		{
 			//std::cout << "RenderContext::DispatchMouseMoveEvent:" << button << " " << xpos << " " << ypos << std::endl;
 			MakeCurrent();
-			for (const auto & each : listeners)
+			for (const auto& each : listeners)
 			{
 				if (each->Enabled())
 					each->MouseMoveEvent(button, xpos, ypos);
@@ -207,7 +208,7 @@ namespace ysl {
 		{
 			//std::cout << "RenderContext::DispatchMouseReleasedEvent:" << button << " " << xpos << " " << ypos << std::endl;
 			MakeCurrent();
-			for (const auto & each : listeners)
+			for (const auto& each : listeners)
 			{
 				if (each->Enabled())
 					each->MouseReleaseEvent(button, xpos, ypos);
@@ -218,7 +219,7 @@ namespace ysl {
 		{
 			//std::cout << "RenderContext::DispatchMouseWheelEvent:" <<ydegree << std::endl;
 			MakeCurrent();
-			for (const auto & each : listeners)
+			for (const auto& each : listeners)
 			{
 				if (each->Enabled())
 					each->MouseWheelEvent(ydegree, xdegree);
@@ -231,7 +232,7 @@ namespace ysl {
 
 			//std::cout << "RenderContext::DispatchKeyReleasedEvent:" << key << std::endl;
 			MakeCurrent();
-			for (const auto & each : listeners)
+			for (const auto& each : listeners)
 			{
 				if (each->Enabled())
 					each->KeyReleaseEvent(key);
@@ -242,7 +243,7 @@ namespace ysl {
 		{
 			//std::cout << "RenderContext::DispatchKeyPressedEvent:" << key << std::endl;
 			MakeCurrent();
-			for (const auto & each : listeners)
+			for (const auto& each : listeners)
 			{
 				if (each->Enabled())
 					each->KeyPressEvent(key);
@@ -252,9 +253,9 @@ namespace ysl {
 		void RenderContext::DispatchFileDropEvent(const std::vector<std::string>& fileNames)
 		{
 			MakeCurrent();
-			for(const auto &each:listeners)
+			for (const auto& each : listeners)
 			{
-				if(each->Enabled())
+				if (each->Enabled())
 				{
 					each->FileDropEvent(fileNames);
 				}
@@ -332,7 +333,7 @@ namespace ysl {
 
 			if (!rss)
 			{
-				for (const auto & each : defaultRenderStates)
+				for (const auto& each : defaultRenderStates)
 				{
 					each.Apply(nullptr, this);
 				}
@@ -349,7 +350,7 @@ namespace ysl {
 
 			std::unordered_map<RenderStateType, RenderStateBox> newStates;
 
-			for (const auto & each : rss->renderStates)
+			for (const auto& each : rss->renderStates)
 			{
 				const auto type = each.StateType();			// Indexed or non-indexed
 				auto it = currentRenderStates.find(type);
@@ -362,7 +363,7 @@ namespace ysl {
 				}
 			}
 
-			for (const auto & each : currentRenderStates)
+			for (const auto& each : currentRenderStates)
 			{
 				const auto curStateType = each.first;
 
@@ -395,7 +396,7 @@ namespace ysl {
 			assert(ess);
 			std::unordered_set<EnableState> newEnableStates;
 
-			for (const auto & each : ess->enableSet)
+			for (const auto& each : ess->enableSet)
 			{
 				auto it = currentEnableStates.find(each);
 				newEnableStates.insert(each);
@@ -406,7 +407,7 @@ namespace ysl {
 				}
 			}
 
-			for (const auto & each : currentEnableStates)
+			for (const auto& each : currentEnableStates)
 			{
 				auto it = newEnableStates.find(each);
 				if (it == newEnableStates.end())
@@ -476,38 +477,39 @@ namespace ysl {
 			maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS = std::min(int(RS_AtomicCounterBuffer7 - RS_AtomicCounterBuffer0 + 1), maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
 			GL(glGetIntegerv(GL_MAX_IMAGE_UNITS, &maxInteger.MAX_IMAGE_UNITS));
 			maxInteger.MAX_IMAGE_UNITS = std::min(int(RS_TextureImageUnit15 - RS_TextureSampler + 1), maxInteger.MAX_IMAGE_UNITS);
-			GL(glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE,&maxInteger.MAX_3DTEXUTRE_SIZE));
+			GL(glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &maxInteger.MAX_3DTEXUTRE_SIZE));
 
 			GL(glGetIntegerv(GL_MAX_COMBINED_UNIFORM_BLOCKS, &maxInteger.MAX_UNIFORM_BLOCKS_COUNT));
 			maxInteger.MAX_UNIFORM_BLOCKS_COUNT = std::min(int(RS_UniformBuffer7 - RS_UniformBuffer0 + 1), maxInteger.MAX_UNIFORM_BLOCKS_COUNT);
 
-			if(CheckSupportForExtension("GL_NVX_gpu_memory_info"))
+			if (CheckSupportForExtension("GL_NVX_gpu_memory_info"))
 			{
 				constexpr int GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX = 0x9047;		// dedicated video memory, total size (in kb) of the GPU memory
 				constexpr int GPU_MEMORY_INFO_TOTAL_AVAILABEL_MEMORY_NVX = 0x9048;	// total available memory, total size (in Kb) of the memory available for allocations
 				constexpr int GPU_MEMORY_INFO_CURRENT_AVAILABEL_VIDEMEM_NVX = 0x9049; //current available dedicated video memory (in kb), currently unused GPU memory
 				GL(glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABEL_MEMORY_NVX, &maxInteger.MAX_GPU_MEMORY_SIZE));
 
-			}else if(CheckSupportForExtension("GL_ATI_meminfo"))
+			}
+			else if (CheckSupportForExtension("GL_ATI_meminfo"))
 			{
 				constexpr int GPU_VBO_FREE_MEMORY_ATI = 0x87FB;
 				constexpr int GPU_TEXTURE_FREE_MEMORY_ATI = 0x87FC;
 				constexpr int GPU_RENDERBUFFER_FREE_MEMORY_ATI = 0x87FD;
 				int texFreeMem = 0, vboFreeMem = 0, renderBufferFreeMem = 0;
 				GL(glGetIntegerv(GPU_TEXTURE_FREE_MEMORY_ATI, &texFreeMem));
-				GL(glGetIntegerv(GPU_VBO_FREE_MEMORY_ATI,&vboFreeMem));
+				GL(glGetIntegerv(GPU_VBO_FREE_MEMORY_ATI, &vboFreeMem));
 				GL(glGetIntegerv(GPU_RENDERBUFFER_FREE_MEMORY_ATI, &renderBufferFreeMem));
 				maxInteger.MAX_GPU_MEMORY_SIZE = texFreeMem + vboFreeMem + renderBufferFreeMem;
 			}
 
-			Log("MAX_VERTEX_ATTRIBS:%d\n", maxInteger.MAX_VERTEX_ATTRIBS);
-			Log("MAX_TEXTURE_IMAGE_UNITE:%d\n", maxInteger.MAX_TEXTURE_IMAGE_UNITE);
-			Log("MAX_SHADER_STORAGE_BINDINGS:%d\n", maxInteger.MAX_SHADER_STORAGE_BINDINGS);
-			Log("MAX_ATOMIC_COUNTER_BUFFER_BINDINGS:%d\n", maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
-			Log("MAX_IMAGE_UNITS:%d\n", maxInteger.MAX_IMAGE_UNITS);
-			Log("MAX_3DTEXTURE_SIZE:%d\n", maxInteger.MAX_3DTEXUTRE_SIZE);
-			Log("MAX_UNIFORM_BLOCKS_COUNT:%d\n", maxInteger.MAX_UNIFORM_BLOCKS_COUNT);
-			Log("MAX_GPU_MEMORY_SIZE:%d", maxInteger.MAX_GPU_MEMORY_SIZE);
+			::vm::Log("MAX_VERTEX_ATTRIBS:%d\n", maxInteger.MAX_VERTEX_ATTRIBS);
+			::vm::Log("MAX_TEXTURE_IMAGE_UNITE:%d\n", maxInteger.MAX_TEXTURE_IMAGE_UNITE);
+			::vm::Log("MAX_SHADER_STORAGE_BINDINGS:%d\n", maxInteger.MAX_SHADER_STORAGE_BINDINGS);
+			::vm::Log("MAX_ATOMIC_COUNTER_BUFFER_BINDINGS:%d\n", maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS);
+			::vm::Log("MAX_IMAGE_UNITS:%d\n", maxInteger.MAX_IMAGE_UNITS);
+			::vm::Log("MAX_3DTEXTURE_SIZE:%d\n", maxInteger.MAX_3DTEXUTRE_SIZE);
+			::vm::Log("MAX_UNIFORM_BLOCKS_COUNT:%d\n", maxInteger.MAX_UNIFORM_BLOCKS_COUNT);
+			::vm::Log("MAX_GPU_MEMORY_SIZE:%d", maxInteger.MAX_GPU_MEMORY_SIZE);
 
 		}
 
@@ -560,7 +562,7 @@ namespace ysl {
 			}
 
 
-			for(int i = 0 ; i < maxInteger.MAX_UNIFORM_BLOCKS_COUNT;i++)
+			for (int i = 0; i < maxInteger.MAX_UNIFORM_BLOCKS_COUNT; i++)
 			{
 				defaultRenderStates[RS_UniformBuffer + i] = RenderStateBox(MakeRef<UniformBufferObject>(), i);
 			}
@@ -574,17 +576,18 @@ namespace ysl {
 		{
 			auto count = 0;
 			GL(glGetIntegerv(GL_NUM_EXTENSIONS, &count));
-			for(int i = 0 ; i < count;++i)
-				extensions.emplace_back((char*)(glGetStringi(GL_EXTENSIONS,i)));
+			for (int i = 0; i < count; ++i)
+				extensions.emplace_back((char*)(glGetStringi(GL_EXTENSIONS, i)));
 			GL_ERROR_REPORT;
 		}
 
 		bool RenderContext::CheckSupportForExtension(const std::string& ext)
 		{
-			for(const auto & e:extensions)
+			for (const auto& e : extensions)
 				if (ext == e)
 					return true;
 			return false;
 		}
+
 	}
 }

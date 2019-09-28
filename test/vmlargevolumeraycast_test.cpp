@@ -1,9 +1,8 @@
 
 #include "vmglfwwindow.h"
 #include "vm_largevolumeraycast.h"
-#include "cmdline.h"
-
-#include <pluginloader.h>
+#include <VMUtils/cmdline.hpp>
+#include <VMFoundation/pluginloader.h>
 
 int main(int argc, char ** argv)
 {

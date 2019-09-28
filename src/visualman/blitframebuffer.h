@@ -5,7 +5,7 @@
 #include "graphictype.h"
 #include "renderevent.h"
 #include "framebuffer.h"
-#include <geometry.h>
+#include <VMat/geometry.h>
 
 
 namespace ysl

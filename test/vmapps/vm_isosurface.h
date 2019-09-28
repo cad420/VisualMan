@@ -4,7 +4,7 @@
 #include "visualman.h"
 #include "primitive.h"
 
-#include <marchingcubes.h>
+#include <VMGraphics/marchingcubes.h>
 #include "config.h"
 
 namespace ysl

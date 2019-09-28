@@ -85,7 +85,7 @@ namespace ysl
 			{
 				// We only support that vertex indices are stored in GPU/
 				// If they are not in gpu, just return.
-				ysl::Warning("There is no bufferobject in DrawElements call");
+				::vm::Warning("There is no bufferobject in DrawElements call");
 				return;
 			}
 

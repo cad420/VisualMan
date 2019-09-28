@@ -3,7 +3,7 @@
 #define _CACHETEXTURE_H_
 #include "texture.h"
 #include <vector>
-#include "largevolumecache.h"
+#include <VMFoundation/largevolumecache.h>
 #include "oocprimitive.h"
 //#include "rapidjson/reader.h"
 

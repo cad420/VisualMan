@@ -1,9 +1,9 @@
 #ifndef _VOLUME_H_
 #define _VOLUME_H_
-#include <geometry.h>
+#include <VMat/geometry.h>
 #include <GL/glcorearb.h>
 #include <typeindex>
-#include <dataarena.h>
+#include <VMFoundation/dataarena.h>
 
 namespace ysl
 {

@@ -4,7 +4,7 @@
 
 #include "eventinterface.h"
 #include "renderstudio.h"
-#include "timer.h"
+#include <VMUtils/timer.hpp>
 
 namespace ysl
 {
@@ -60,8 +60,7 @@ namespace ysl
 			Ref<CameraManipulator> manipulator;
 			double FPS = 0;
 			int frameCount = 0;
-			Timer timer;
-
+			::vm::Timer timer;
 		};
 	}
 }

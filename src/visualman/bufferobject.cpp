@@ -2,6 +2,7 @@
 #include "bufferobject.h"
 #include "graphictype.h"
 #include <cassert>
+#include <VMUtils/log.hpp>
 
 //#include <GLFW/glfw3.h>
 
@@ -23,7 +24,7 @@ namespace ysl
 				bufferSize = 0;
 			}else
 			{
-				Debug("Buffer Object has already been created");
+				::vm::Debug("Buffer Object has already been created");
 			}
 		}
 
@@ -38,7 +39,7 @@ namespace ysl
 			}
 			else
 			{
-				Debug("Buffer Object has already been created");
+				::vm::Debug("Buffer Object has already been created");
 			}
 		}
 
@@ -69,7 +70,7 @@ namespace ysl
 		{
 			if(IsImmutable())
 			{
-				Warning("This is am imutable buffer. It is not able to be resized.");
+				::vm::Warning("This is am imutable buffer. It is not able to be resized.");
 				return;
 			}
 			CreateBufferObject();
@@ -85,7 +86,7 @@ namespace ysl
 		{
 			if (IsImmutable())
 			{
-				Warning("This is am imutable buffer. It is not able to be resized.");
+				::vm::Warning("This is am imutable buffer. It is not able to be resized.");
 				return;
 			}
 			ReallocBufferData(Bytes(), LocalData(), usage);
@@ -105,7 +106,7 @@ namespace ysl
 			}
 			else
 			{
-				Warning("No buffer object. %s:%d", __FILE__, __LINE__);
+				::vm::Warning("No buffer object. %s:%d", __FILE__, __LINE__);
 			}
 		}
 
@@ -121,7 +122,7 @@ namespace ysl
 			}
 			else
 			{
-				Warning("No buffer object. %s:%d", __FILE__, __LINE__);
+				::vm::Warning("No buffer object. %s:%d", __FILE__, __LINE__);
 			}
 		}
 
@@ -136,7 +137,7 @@ namespace ysl
 			}
 			else
 			{
-				Warning("No buffer object. %s:%d", __FILE__, __LINE__);
+				::vm::Warning("No buffer object. %s:%d", __FILE__, __LINE__);
 			}
 		}
 
@@ -145,7 +146,7 @@ namespace ysl
 			//CreateBufferObject();
 			if(IsMapped())
 			{
-				Warning("Buffer Object has been mapped\n");
+				::vm::Warning("Buffer Object has been mapped\n");
 				return nullptr;
 			}
 			if (handle)
@@ -156,7 +157,7 @@ namespace ysl
 				//mapped = true;
 				return mappedPointer;
 			}
-			Warning("No buffer object. %s:%d", __FILE__, __LINE__);
+			::vm::Warning("No buffer object. %s:%d", __FILE__, __LINE__);
 			return nullptr;
 		}
 
@@ -164,7 +165,7 @@ namespace ysl
 		{
 			if(IsMapped())
 			{
-				Warning("Buffer Object has been mapped\n");
+				::vm::Warning("Buffer Object has been mapped\n");
 				return nullptr;
 			}
 			if(handle)
@@ -175,7 +176,7 @@ namespace ysl
 				//mapped = true;
 				return mappedPointer;
 			}
-			Warning("No buffer object. %s:%d", __FILE__, __LINE__);
+			::vm::Warning("No buffer object. %s:%d", __FILE__, __LINE__);
 			return nullptr;
 		}
 
@@ -198,7 +199,7 @@ namespace ysl
 			}
 			else if (!handle)
 			{
-				Warning("No buffer object. %s:%d", __FILE__, __LINE__);
+				::vm::Warning("No buffer object. %s:%d", __FILE__, __LINE__);
 			}
 		}
 
