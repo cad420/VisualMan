@@ -11,7 +11,6 @@ namespace ysl
 {
 	namespace vm
 	{
-		using namespace ::vm;
 		int GetBaseFormatBySizedFormat(TextureFormat sizedFormat)
 		{
 			switch (sizedFormat)
@@ -254,7 +253,7 @@ namespace ysl
 			GL(glCreateTextures(target, 1, &handle));
 			if(handle == 0)
 			{
-				Warning("Texture can not be created. %s %d",__FILE__,__LINE__);
+				::vm::Warning("Texture can not be created. %s %d",__FILE__,__LINE__);
 				return false;
 			}
 
@@ -299,7 +298,7 @@ namespace ysl
 			else
 			{
 				assert(false);
-				Debug("Unsupported format");
+				::vm::Debug("Unsupported format");
 			}
 			// Set up the texture properties and delete the setup params 
 
@@ -352,10 +351,10 @@ namespace ysl
 		{
 			if (handle == 0)
 			{
-				Warning("No Texture has been created. %s: %d", __FILE__, __LINE__);
+				::vm::Warning("No Texture has been created. %s: %d", __FILE__, __LINE__);
 				if (!CreateTexture())
 				{
-					Debug("Texture has not beed created. But it created failed\n. %s: %d", __FILE__, __LINE__);
+					::vm::Debug("Texture has not beed created. But it created failed\n. %s: %d", __FILE__, __LINE__);
 					return;
 				}
 			}
@@ -374,7 +373,7 @@ namespace ysl
 			}
 			else
 			{
-				Debug("Unsuported format. %s %d", __FILE__, __LINE__);
+				::vm::Debug("Unsuported format. %s %d", __FILE__, __LINE__);
 			}
 		}
 
@@ -395,7 +394,7 @@ namespace ysl
 				SetSubTextureData(bufferObject->LocalData(), imageFormat, imageType, xOffset, yOffset, zOffset, w, h, d);
 			}else
 			{
-				Debug("No Buffer Object. %s:%d", __FILE__, __LINE__);
+				::vm::Debug("No Buffer Object. %s:%d", __FILE__, __LINE__);
 			}
 		}
 

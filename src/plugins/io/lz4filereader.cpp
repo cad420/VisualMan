@@ -3,20 +3,19 @@
 
 #include <lz4.h>
 
-#include <pluginloader.h>
+#include <VMFoundation/pluginloader.h>
 
 namespace ysl
 {
 	
-	IMPLEMENT_RTTI_NoConstructor(LZ4FileReader,I3DBlockFilePluginInterface)
 }
 
 void ysl::LZ4FileReader::Open(const std::string& fileName)
 {
 #ifdef _WIN32
-	fileMapping = PluginLoader::GetPluginLoader()->CreatePlugin<IFileMappingPluginInterface>("windows");
+	fileMapping = PluginLoader::GetPluginLoader()->CreatePluginEx<IFileMapping>("windows");
 #else
-	fileMapping = PluginLoader::GetPluginLoader()->CreatePlugin<IFileMappingPluginInterface>("linux");
+	fileMapping = PluginLoader::GetPluginLoader()->CreatePluginEx<IFileMapping>("linux");
 #endif
 
 	if(fileMapping == nullptr)
@@ -152,7 +151,12 @@ ysl::LZ4FileReader::~LZ4FileReader()
 
 std::unique_ptr<ysl::Object> ysl::LZ4FileReaderFactory::Create(const std::string& key)
 {
-	return std::make_unique<LZ4FileReader>();
+	return nullptr;
+}
+
+::vm::IEverything* ysl::LZ4FileReaderFactory::CreateEx(const std::string& key)
+{
+	return VM_NEW<LZ4FileReader>();
 }
 
 std::vector<std::string> ysl::LZ4FileReaderFactory::Keys() const

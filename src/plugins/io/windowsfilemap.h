@@ -1,19 +1,17 @@
 
 #ifndef _WINDOWSFILEMAP_H_
 #define _WINDOWSFILEMAP_H_
-#include <filemappingplugininterface.h>
 #include <unordered_set>
-#include <plugin.h>
+#include <VMFoundation/plugin.h>
+#include <VMCoreIO/filemappingplugininterface.h>
 
 #ifdef _WIN32
 #include <Windows.h>
 
 namespace ysl
 {
-	class WindowsFileMapping:public IFileMappingPluginInterface
+	class WindowsFileMapping:public ::vm::EverythingBase<IFileMapping>
 	{
-		DECLARE_RTTI
-		DECLARE_INITIAL(WindowsFileMapping)
 		HANDLE f = nullptr;
 		HANDLE mapping = nullptr;
 		FileAccess fileFlag;
@@ -22,7 +20,7 @@ namespace ysl
 		std::unordered_set<unsigned char*> mappedPointers;
 		void PrintLastErrorMsg();
 	public:
-		WindowsFileMapping() = default;
+		WindowsFileMapping(::vm::IRefCnt * cnt): ::vm::EverythingBase<ysl::IFileMapping>(cnt){}
 		bool Open(const std::string& fileName, size_t fileSize, FileAccess fileFlags, MapAccess mapFlags) override;
 		unsigned char* FileMemPointer(unsigned long long offset, std::size_t size) override;
 		void DestroyFileMemPointer(unsigned char* addr) override;
@@ -37,6 +35,7 @@ namespace ysl
 	public:
 		std::vector<std::string> Keys() const override;
 		std::unique_ptr<Object> Create(const std::string& key) override;
+		::vm::IEverything* CreateEx(const std::string& key) override;
 	};
 
 }

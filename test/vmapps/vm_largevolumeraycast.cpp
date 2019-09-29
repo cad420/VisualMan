@@ -16,7 +16,7 @@ namespace ysl
 {
 	namespace vm
 	{
-		using namespace ::vm;
+		//using namespace ::vm;
 		FrustumEventCallback::FrustumEventCallback(Ref<Camera> camera) :camera(camera)
 		{
 			frustum = MakeRef<Primitive>();
@@ -434,7 +434,7 @@ namespace ysl
 			}
 			catch (std::runtime_error& e)
 			{
-				Warning("Can not load lvd file");
+				::vm::Warning("Can not load lvd file");
 				return;
 			}
 
@@ -478,7 +478,7 @@ namespace ysl
 			}
 			catch (std::runtime_error& e)
 			{
-				Warning("Can not load .tf file");
+				::vm::Warning("Can not load .tf file");
 				return;
 			}
 			Context()->Update();

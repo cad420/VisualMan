@@ -1,11 +1,10 @@
+#include <VMUtils/vmnew.hpp>
 #ifdef _WIN32
 #include "windowsfilemap.h"
 
 namespace ysl
 {
 
-	IMPLEMENT_RTTI_NoConstructor(WindowsFileMapping, IFileMappingPluginInterface)
-	IMPLEMENT_INITIAL(WindowsFileMapping, common.filemapio)
 	void WindowsFileMapping::PrintLastErrorMsg()
 	{
 		DWORD dw = GetLastError();
@@ -168,7 +167,12 @@ namespace ysl
 	}
 	std::unique_ptr<Object> WindowsFileMappingFactory::Create(const std::string& key)
 	{
-		return std::make_unique<WindowsFileMapping>();
+		return nullptr;
+	}
+
+	::vm::IEverything* WindowsFileMappingFactory::CreateEx(const std::string& key)
+	{
+		return VM_NEW<WindowsFileMapping>();
 	}
 }
 

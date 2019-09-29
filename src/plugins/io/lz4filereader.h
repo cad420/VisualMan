@@ -1,18 +1,19 @@
 #ifndef _LZ4FILEREADER_H_
 #define _LZ4FILEREADER_H_
 
-#include <pagefileinterface.h>
+#include <VMCoreIO/filemappingplugininterface.h>
+#include <VMFoundation/pagefileinterface.h>
 #include <fstream>
-#include <lvdheader.h>
-#include <filemappingplugininterface.h>
+#include <VMFoundation/lvdheader.h>
+#include <VMUtils/ref.hpp>
+#include <VMUtils/vmnew.hpp>
 
 namespace ysl
 {
-	class LZ4FileReader :public I3DBlockFilePluginInterface
+	class LZ4FileReader :public ::vm::EverythingBase<I3DBlockFilePluginInterface>
 	{
-		DECLARE_RTTI
 	public:
-		LZ4FileReader() = default;
+		LZ4FileReader(::vm::IRefCnt * cnt): ::vm::EverythingBase<ysl::I3DBlockFilePluginInterface>(cnt){}
 		void Open(const std::string& fileName) override;
 		int GetPadding() const override;
 		Size3 GetDataSizeWithoutPadding() const override;
@@ -26,7 +27,9 @@ namespace ysl
 		~LZ4FileReader();
 	private:
 		//std::ifstream inFile;
-		std::shared_ptr<IFileMappingPluginInterface> fileMapping;
+		//std::shared_ptr<IFileMapping> fileMapping;
+		::vm::Ref<IFileMapping> fileMapping;
+
 		char* dataPtr = nullptr;
 		ysl::LVDHeader header;
 		std::vector<uint32_t>* blockBytes = nullptr;
@@ -43,6 +46,7 @@ namespace ysl
 	public:
 		DECLARE_PLUGIN_FACTORY("visualman.blockdata.io")
 		std::unique_ptr<Object> Create(const std::string& key) override;
+		::vm::IEverything * CreateEx(const std::string& key) override;
 		std::vector<std::string> Keys() const override;
 	};
 

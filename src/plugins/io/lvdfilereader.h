@@ -3,18 +3,21 @@
 #define _LVDFILEREADER_H_
 
 #include "config.h"
-#include <pagefileinterface.h>
-#include <lvdreader.h>
-#include <plugin.h>
+#include <VMFoundation/pagefileinterface.h>
+#include <VMFoundation/lvdreader.h>
+#include <VMUtils/vmnew.hpp>
+#include <VMUtils/ieverything.hpp>
+#include <VMFoundation/plugin.h>
 
 
 namespace ysl
 {
-	class LVDFileReader:public I3DBlockFilePluginInterface
+	class LVDFileReader:public vm::EverythingBase<I3DBlockFilePluginInterface>
 	{
-		DECLARE_RTTI
 		std::unique_ptr<LVDReader> lvdReader;
 	public:
+		LVDFileReader(::vm::IRefCnt* cnt):vm::EverythingBase<ysl::I3DBlockFilePluginInterface>(cnt)
+		{}
 		void Open(const std::string& fileName)override
 		{
 			lvdReader = std::make_unique<LVDReader>(fileName);
@@ -48,9 +51,14 @@ namespace ysl
 		std::vector<std::string> Keys() const override { return {".lvd"}; }
 		std::unique_ptr<Object> Create(const std::string& key) override
 		{
-			if(key ==".lvd")
+			return nullptr;
+		}
+		::vm::IEverything * CreateEx(const std::string& key) override
+		{
+			if (key == ".lvd")
 			{
-				return std::make_unique<LVDFileReader>();
+				//return std::make_unique<LVDFileReader>();
+				return VM_NEW<LVDFileReader>();
 			}
 			return nullptr;
 		}
