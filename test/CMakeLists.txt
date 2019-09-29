@@ -48,8 +48,8 @@ endif()##if(VM_BUILD_QT5_EXAMPLE OR VM_BUILD_GLFW_EXAMPLE)
 
 add_executable(vm_feature_test)
 target_sources(vm_feature_test PRIVATE "vm_feature_test.cpp")
-target_link_libraries(vm_feature_test vmglfwwindow common vm vmapps)
-target_include_directories(vm_feature_test PRIVATE ${PROJECT_SOURCE_DIR}/guibinding/glfwwindow ${PROJECT_SOURCE_DIR}/src/visualman ${PROJECT_SOURCE_DIR}/test/vmapps ${PROJECT_SOURCE_DIR}/src/common)
+target_link_libraries(vm_feature_test vmcore)
+target_include_directories(vm_feature_test PRIVATE "../VMCore/interface" "../VMCore/include/VMUtils/include")
 install(TARGETS vm_feature_test LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
 
 

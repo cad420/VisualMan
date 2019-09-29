@@ -1,6 +1,5 @@
 
 #include "vmglfwwindow.h"
-#include <error.h>
 #include <abstraarray.h>
 #include <primitive.h>
 #include <renderstudio.h>
@@ -24,7 +23,7 @@ namespace ysl {
 
 			if (!glfwInit())
 			{
-				Error("GLFW cannot be initialized");
+				std::cout << "GLFW cannot be initialized" << std::endl;
 				return false;
 			}
 
@@ -225,7 +224,7 @@ namespace ysl {
 			{
 			case GLFW_PRESS:app->DispatchKeyPressedEvent(TranslateKey(key, scancode, mods)); break;
 			case GLFW_RELEASE:app->DispatchKeyReleasedEvent(TranslateKey(key, scancode, mods)); break;
-			default:Debug("Unsupported callback"); break;
+			default:std::cout << "Unsupported callback\n";
 			}
 		}
 
@@ -304,7 +303,7 @@ namespace ysl {
 		case GLFW_KEY_KP_7: return vm::Key_7;
 		case GLFW_KEY_KP_8: return vm::Key_8;
 		case GLFW_KEY_KP_9: return vm::Key_9;
-		default:Debug("Unsupported key\n");
+		default:std::cout << "Unsupported key\n";
 		}
 
 		//case GLFW_KEY_RIGHT_SUPER:

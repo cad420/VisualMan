@@ -69,9 +69,8 @@ endif()
 
 add_subdirectory("VMCore")
 add_subdirectory("src")
+add_subdirectory("guibinding")
 add_subdirectory("test")
-
-#add_subdirectory("guibinding")
 
 
 if(VM_BUILD_TOOLS)
