@@ -7,8 +7,6 @@
       "inheritEnvironments": [
         "msvc_x64_x64"
       ],
-      "buildRoot": "D:\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
-      "installRoot": "D:\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
@@ -63,8 +61,6 @@
       "inheritEnvironments": [
         "msvc_x64_x64"
       ],
-      "buildRoot": "D:\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
-      "installRoot": "D:\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
@@ -121,8 +117,6 @@
       "inheritEnvironments": [
         "msvc_x64_x64"
       ],
-      "buildRoot": "D:\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
-      "installRoot": "D:\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",

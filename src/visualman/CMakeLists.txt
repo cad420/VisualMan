@@ -30,9 +30,7 @@ add_library(vm ${VM_SHARED_OR_STATIC} ${SRC} ${GL3W_SRC})
 #add_dependencies(vm vmgraphics)
 
 target_link_libraries(vm ${OPENGL_LIBRARIES} vmcore)
-target_include_directories(vm PUBLIC ${GL3W_INCLUDE_DIR} "../graphicfoundation")
 target_include_directories(vm PRIVATE "${CMAKE_SOURCE_DIR}/lib/3rdparty")
-target_include_directories(vm PUBLIC "../../VMCore/include")
 
 
 install(TARGETS vm LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")
