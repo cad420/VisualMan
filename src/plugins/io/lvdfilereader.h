@@ -3,7 +3,7 @@
 #define _LVDFILEREADER_H_
 
 #include "config.h"
-#include <VMFoundation/pagefileinterface.h>
+#include <VMCore/i3dblockfileplugininterface.h>
 #include <VMFoundation/lvdreader.h>
 #include <VMUtils/vmnew.hpp>
 #include <VMUtils/ieverything.hpp>
@@ -49,11 +49,7 @@ namespace ysl
 	public:
 		DECLARE_PLUGIN_FACTORY("visualman.blockdata.io")
 		std::vector<std::string> Keys() const override { return {".lvd"}; }
-		std::unique_ptr<Object> Create(const std::string& key) override
-		{
-			return nullptr;
-		}
-		::vm::IEverything * CreateEx(const std::string& key) override
+		::vm::IEverything * Create(const std::string& key) override
 		{
 			if (key == ".lvd")
 			{

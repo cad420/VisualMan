@@ -27,15 +27,7 @@ target_link_libraries(lvdfilereader vmcore)
 target_include_directories(lvdfilereader PRIVATE)
 
 
-find_package(lz4 CONFIG)
-if(lz4_FOUND)
-add_library(lz4filereader SHARED)
-target_sources(lz4filereader PRIVATE "lz4filereader.cpp")
-target_link_libraries(lz4filereader vmcore lz4::lz4)
-target_include_directories(lz4filereader PRIVATE  ${LZ4_INCLUDE_DIRS})
-endif()
-
 #endif()
 
-install(TARGETS lvdfilereader ioplugin lz4filereader LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin/plugins" ARCHIVE DESTINATION "lib")
+install(TARGETS lvdfilereader ioplugin LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin/plugins" ARCHIVE DESTINATION "lib")
 install(FILES ${INC_LIST} DESTINATION "include")

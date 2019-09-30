@@ -165,12 +165,8 @@ namespace ysl
 	{
 		return {"windows"};
 	}
-	std::unique_ptr<Object> WindowsFileMappingFactory::Create(const std::string& key)
-	{
-		return nullptr;
-	}
 
-	::vm::IEverything* WindowsFileMappingFactory::CreateEx(const std::string& key)
+	::vm::IEverything* WindowsFileMappingFactory::Create(const std::string& key)
 	{
 		return VM_NEW<WindowsFileMapping>();
 	}
