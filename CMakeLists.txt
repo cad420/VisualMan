@@ -73,23 +73,10 @@ add_subdirectory("test")
 
 include(scripts/external.cmake)
 
-#vm_external_module(
-#	GIT_REPOSITORY https://github.com/cad420/VMat.git
-#	GIT_TAG master
-#)
-
 vm_external_module(
 	GIT_REPOSITORY https://github.com/cad420/VMCore.git
 	GIT_TAG master
 )
-
-#vm_external_module(
-#	GIT_REPOSITORY https://github.com/cad420/VMUtils.git
-#	GIT_TAG master
-#)
-
-
-
 
 
 if(VM_BUILD_TOOLS)

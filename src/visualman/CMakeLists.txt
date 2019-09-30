@@ -19,7 +19,6 @@ aux_source_directory(. SRC)
 
 file(GLOB VM_INC "*.h")
 
-
 set(GRAPHIC_INCLUDE)
 
 
@@ -31,6 +30,7 @@ add_library(vm ${VM_SHARED_OR_STATIC} ${SRC} ${GL3W_SRC})
 
 target_link_libraries(vm ${OPENGL_LIBRARIES} vmcore)
 target_include_directories(vm PRIVATE "${CMAKE_SOURCE_DIR}/lib/3rdparty")
+target_include_directories(vm PUBLIC "${GL3W_INCLUDE_DIR}")
 
 
 install(TARGETS vm LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")

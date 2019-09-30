@@ -2,7 +2,7 @@
 #ifndef _WINDOWSFILEMAP_H_
 #define _WINDOWSFILEMAP_H_
 #include <unordered_set>
-#include <VMFoundation/plugin.h>
+#include <VMCoreExtension/plugin.h>
 #include <VMCoreExtension/ifilemappingplugininterface.h>
 #include <VMCoreExtension/plugindef.h>
 

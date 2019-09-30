@@ -3,11 +3,12 @@
 #define _LVDFILEREADER_H_
 
 #include "config.h"
-#include <VMCore/i3dblockfileplugininterface.h>
+#include <VMCoreExtension/i3dblockfileplugininterface.h>
 #include <VMFoundation/lvdreader.h>
 #include <VMUtils/vmnew.hpp>
 #include <VMUtils/ieverything.hpp>
-#include <VMFoundation/plugin.h>
+
+#include <VMCoreExtension/plugin.h>
 
 
 namespace ysl
