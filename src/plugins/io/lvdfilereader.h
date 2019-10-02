@@ -17,7 +17,7 @@ namespace ysl
 	{
 		std::unique_ptr<LVDReader> lvdReader;
 	public:
-		LVDFileReader(::vm::IRefCnt* cnt):vm::EverythingBase<ysl::I3DBlockFilePluginInterface>(cnt)
+		LVDFileReader(::vm::IRefCnt* cnt):vm::EverythingBase<I3DBlockFilePluginInterface>(cnt)
 		{}
 		void Open(const std::string& fileName)override
 		{
