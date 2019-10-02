@@ -2,30 +2,30 @@
 #ifndef _TRANSFORMCHANGECALLBACK_H_
 #define _TRANSFORMCHANGECALLBACK_H_
 
-
-namespace ysl 
+namespace ysl
 {
-	class Transform;
+class Transform;
 }
 
 namespace ysl
 {
-	namespace vm
-	{
-		class GLSLProgram;
-		class Camera;
+namespace vm
+{
+class GLSLProgram;
+class Camera;
 
-		class  TransformChangeCallback
-		{
-		public:
-			virtual void UpdateTransform(
-				const GLSLProgram * program,
-				const Camera* camera,
-				const Transform* transform);
-			virtual ~TransformChangeCallback() = default;
-		private:
-		};
-	}
-}
+class TransformChangeCallback
+{
+public:
+	virtual void UpdateTransform(
+	  const GLSLProgram *program,
+	  const Camera *camera,
+	  const Transform *transform );
+	virtual ~TransformChangeCallback() = default;
+
+private:
+};
+}  // namespace vm
+}  // namespace ysl
 
 #endif

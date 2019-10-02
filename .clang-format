@@ -1,0 +1,83 @@
+---
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
+NamespaceIndentation: None
+PointerAlignment: Right
+SpaceBeforeParens: ControlStatements
+SpacesBeforeTrailingComments: 2
+SpacesInAngles: false
+SpacesInParentheses: true
+SpacesInSquareBrackets: true
+SpacesInContainerLiterals: true
+SpacesInCStyleCastParentheses: false
+SpaceInEmptyParentheses: false
+SpaceBeforeAssignmentOperators: true
+SpaceAfterTemplateKeyword: true
+SpaceAfterCStyleCast: false
+SortIncludes: false
+ReflowComments: true
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: false
+IndentWrappedFunctionNames: true
+IndentCaseLabels: false
+ExperimentalAutoDetectBinPacking: false
+AccessModifierOffset: -4
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: true
+BinPackArguments: true
+BinPackParameters: true
+BraceWrapping:
+    AfterClass: false
+    AfterControlStatement: false
+    AfterEnum : false
+    AfterFunction : false
+    AfterNamespace : false
+    AfterStruct : false
+    AfterUnion : false
+    BeforeCatch : false
+    BeforeElse : false
+    IndentBraces : false
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Custom
+BreakBeforeTernaryOperators: true
+BreakStringLiterals: false
+BreakConstructorInitializers: AfterColon
+ColumnLimit: 0
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 2
+ContinuationIndentWidth: 2
+Cpp11BracedListStyle: false
+DerivePointerAlignment: false
+DisableFormat: false
+---
+Language: JavaScript
+JavaScriptQuotes: Double
+JavaScriptWrapImports: false
+DisableFormat: true
+---
+Language: Cpp
+Standard: Cpp11
+BraceWrapping:
+    AfterClass: true
+    AfterControlStatement: false
+    AfterEnum : true
+    AfterFunction : true
+    AfterNamespace : true
+    AfterStruct : true
+    AfterUnion : true
+    BeforeCatch : false
+    BeforeElse : false

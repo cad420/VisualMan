@@ -9,168 +9,164 @@
 
 namespace ysl
 {
-	namespace vm
-	{
-		class TexParams
-		{
-		public:
-			TexParams() = default;
-			void Apply();
-			TexFilter MinFilter()const { return minFilter; }
-			TexFilter MaxFilter()const { return maxFilter; }
-			TexWrap WrapS()const { return wrapS; }
-			TexWrap WrapT()const { return wrapT; }
-			TexWrap WrapR()const { return wrapR; }
+namespace vm
+{
+class TexParams
+{
+public:
+	TexParams() = default;
+	void Apply();
+	TexFilter MinFilter() const { return minFilter; }
+	TexFilter MaxFilter() const { return maxFilter; }
+	TexWrap WrapS() const { return wrapS; }
+	TexWrap WrapT() const { return wrapT; }
+	TexWrap WrapR() const { return wrapR; }
 
-			void SetMinFilter(TexFilter minFilter) { this->minFilter = minFilter; }
-			void SetMaxFilter(TexFilter maxFilter) { this->maxFilter = maxFilter; }
-			void SetWarpR(TexWrap wrapR) { this->wrapR = wrapR; }
-			void SetWarpS(TexWrap wrapS) { this->wrapS = wrapS; }
-			void SetWarpT(TexWrap wrapT) { this->wrapT = wrapT; }
-		private:
-			TexFilter minFilter = TPF_LINEAR;
-			TexFilter maxFilter = TPF_LINEAR;
-			TexWrap wrapS = TPW_CLAMP_TO_EDGE;
-			TexWrap wrapT = TPW_CLAMP_TO_EDGE;
-			TexWrap wrapR = TPW_CLAMP_TO_EDGE;
-		};
+	void SetMinFilter( TexFilter minFilter ) { this->minFilter = minFilter; }
+	void SetMaxFilter( TexFilter maxFilter ) { this->maxFilter = maxFilter; }
+	void SetWarpR( TexWrap wrapR ) { this->wrapR = wrapR; }
+	void SetWarpS( TexWrap wrapS ) { this->wrapS = wrapS; }
+	void SetWarpT( TexWrap wrapT ) { this->wrapT = wrapT; }
 
-		/**
+private:
+	TexFilter minFilter = TPF_LINEAR;
+	TexFilter maxFilter = TPF_LINEAR;
+	TexWrap wrapS = TPW_CLAMP_TO_EDGE;
+	TexWrap wrapT = TPW_CLAMP_TO_EDGE;
+	TexWrap wrapR = TPW_CLAMP_TO_EDGE;
+};
+
+/**
 		 * \brief A Texture is created according to the parameters in this class.
 		 *
 		 * A data member should be added for the data source of the texture to created
 		 *
 		 */
-		class TexCreateParams
-		{
-		public:
+class TexCreateParams
+{
+public:
+	void SetTextureTarget( TextureTarget target ) { this->target = target; }
+	TextureTarget GetTextureTarget() const { return target; }
 
-			void SetTextureTarget(TextureTarget target) { this->target = target; }
-			TextureTarget GetTextureTarget()const { return target; }
+	void SetTextureFormat( TextureFormat format ) { this->format = format; }
+	TextureFormat GetTextureFormat() const { return this->format; }
 
-			void SetTextureFormat(TextureFormat format) { this->format = format; }
-			TextureFormat GetTextureFormat()const { return this->format; }
+	Ref<BufferObject> GetBufferObject() { return bufferObject; }
+	void SetBufferObject( Ref<BufferObject> bo ) { bufferObject = std::move( bo ); }
 
-			Ref<BufferObject> GetBufferObject() { return bufferObject; }
-			void SetBufferObject(Ref<BufferObject> bo) { bufferObject = std::move(bo); }
+	void EnableBorder( bool enable ) { border = enable; }
+	bool IsBorder() const { return border; }
+	void EnableMipMap( bool enable ) { this->mipMap = enable; }
+	bool IsMipMap() const { return mipMap; }
 
+	void SetSize( int w, int h, int d )
+	{
+		this->w = w;
+		this->h = h;
+		this->d = d;
+	}
+	int Width() const { return w; }
+	int Height() const { return h; }
+	int Depth() const { return d; }
 
-			void EnableBorder(bool enable) { border = enable; }
-			bool IsBorder()const { return border; }
-			void EnableMipMap(bool enable) { this->mipMap = enable; }
-			bool IsMipMap()const { return mipMap; }
+private:
+	// Default parameters
+	TextureTarget target = TD_TEXTURE_2D;
+	TextureFormat format = TF_RGBA;
+	Ref<BufferObject> bufferObject;
 
-			void SetSize(int w, int h, int d) { this->w = w; this->h = h; this->d = d; }
-			int Width()const { return w; }
-			int Height()const { return h; }
-			int Depth()const { return d; }
+	bool border = false;
+	bool mipMap = false;
+	int nSamples = 0;
+	int w = 0, h = 0, d = 0;
+};
 
+int GetBaseFormatBySizedFormat( TextureFormat sizedFormat );
+int GetTypeBySizedFormat( TextureFormat sizedFormat );
 
-		private:
-			// Default parameters
-			TextureTarget target = TD_TEXTURE_2D;
-			TextureFormat format = TF_RGBA;
-			Ref<BufferObject> bufferObject;
+class VISUALMAN_EXPORT_IMPORT Texture
+{
+public:
+	Texture()
+	{
+		texParams = MakeRef<TexParams>();
+	}
 
-			bool border = false;
-			bool mipMap = false;
-			int nSamples = 0;
-			int w = 0, h = 0, d = 0;
+	~Texture();
 
-		};
+	bool CreateTexture();
 
-		int GetBaseFormatBySizedFormat(TextureFormat sizedFormat);
-		int GetTypeBySizedFormat(TextureFormat sizedFormat);
+	bool CreateTexture( TextureTarget texDimension,
+						TextureFormat texFormat,
+						int w, int h, int d,
+						bool border,
+						Ref<BufferObject> bufferObject,
+						int sampels );
 
+	void DestroyTexture();
 
-		class VISUALMAN_EXPORT_IMPORT  Texture
-		{
-		public:
-			Texture()
-			{
-				texParams = MakeRef<TexParams>();
-			}
+	Ref<TexParams> GetTextureParams() { return texParams; }
+	Ref<const TexParams> GetTextureParams() const { return texParams; }
+	void SetTextureParams( Ref<TexParams> params ) { texParams = std::move( params ); }
 
-			~Texture();
+	Ref<TexCreateParams> GetSetupParams() { return createParams; }
+	Ref<const TexCreateParams> GetSetupParams() const { return createParams; }
 
-			bool CreateTexture();
+	void SetSetupParams( Ref<TexCreateParams> params );
 
-			bool CreateTexture(TextureTarget texDimension,
-			                   TextureFormat texFormat,
-			                   int w, int h, int d,
-			                   bool border,
-			                   Ref<BufferObject> bufferObject,
-			                   int sampels);
+	Ref<BufferObject> GetBufferObject() { return bufferObject; }
+	Ref<const BufferObject> GetBufferObject() const { return bufferObject; }
 
-			void DestroyTexture();
+	void SaveTextureAs( const std::string &fileName );
 
-			Ref<TexParams> GetTextureParams() { return texParams; }
-			Ref<const TexParams> GetTextureParams()const { return texParams; }
-			void SetTextureParams(Ref<TexParams> params) { texParams = std::move(params); }
+	int Width() const { return w; }
+	int Height() const { return h; }
+	int Depth() const { return d; }
 
-			Ref<TexCreateParams> GetSetupParams() { return createParams; }
-			Ref<const TexCreateParams> GetSetupParams()const { return createParams; }
+	TextureTarget GetTextureTarget() const { return target; }
+	TextureFormat GetTextureFormat() const { return format; }
 
-			void SetSetupParams(Ref<TexCreateParams> params);
+	unsigned int Handle() const { return handle; }
 
-			Ref<BufferObject> GetBufferObject() { return bufferObject; }
-			Ref<const BufferObject> GetBufferObject() const { return bufferObject; }
+	bool GetTextureDataDirty() const { return this->dirty; };
+	void SetTextureDataDirty( bool dirty ) { this->dirty = dirty; }
 
-			void SaveTextureAs(const std::string & fileName);
-
-
-			int Width()const { return w; }
-			int Height()const { return h; }
-			int Depth()const { return d; }
-
-			TextureTarget GetTextureTarget()const { return target; }
-			TextureFormat GetTextureFormat()const { return format; }
-
-			unsigned int Handle()const { return handle; }
-
-			bool GetTextureDataDirty()const { return this->dirty; };
-			void SetTextureDataDirty(bool dirty) { this->dirty = dirty; }
-
-			/**
+	/**
 			 * \brief Set texture sub data given by \a data
 			 */
-			void SetSubTextureData(const void * data,ImageFormat imageFormat,ImageType imageType,int xOffset, int yOffset, int zOffset, int w, int h, int d);
-			void SetSubTextureData(const void * data, int xOffset, int yOffset, int zOffset, int w, int h, int d);
+	void SetSubTextureData( const void *data, ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d );
+	void SetSubTextureData( const void *data, int xOffset, int yOffset, int zOffset, int w, int h, int d );
 
-			void SetSubTextureData(ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d);
-			void SetSubTextureData(int xOffset, int yOffset, int zOffset, int w, int h, int d);
+	void SetSubTextureData( ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d );
+	void SetSubTextureData( int xOffset, int yOffset, int zOffset, int w, int h, int d );
 
-			void SetSubTextureDataUsePBO(ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d);
-			void SetSubTextureDataUsePBO(int xOffset, int yOffset, int zOffset, int w, int h, int d);
-		
+	void SetSubTextureDataUsePBO( ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d );
+	void SetSubTextureDataUsePBO( int xOffset, int yOffset, int zOffset, int w, int h, int d );
 
-		private:
+private:
+	// std::unique_ptr<BufferObject> pixelBufferObject; this is used to swap data between texture and memory
 
-			// std::unique_ptr<BufferObject> pixelBufferObject; this is used to swap data between texture and memory
-			
+	Ref<BufferObject> bufferObject;
+	Ref<TexCreateParams> createParams = nullptr;
+	Ref<TexParams> texParams = nullptr;
+	bool dirty = true;
 
-			Ref<BufferObject> bufferObject;
-			Ref<TexCreateParams> createParams = nullptr;
-			Ref<TexParams> texParams = nullptr;
-			bool dirty = true;
+	TextureTarget target = TD_TEXTURE_2D;
+	TextureFormat format = TF_RGBA;
+	int w = 0;
+	int h = 0;
+	int d = 0;
+	int samples = 0;
+	bool border = false;
+	bool mipMap = false;
+	unsigned int handle = 0;
+};
 
-			TextureTarget target = TD_TEXTURE_2D;
-			TextureFormat format = TF_RGBA;
-			int w = 0;
-			int h = 0;
-			int d = 0;
-			int samples = 0;
-			bool border = false;
-			bool mipMap = false;
-			unsigned int handle = 0;
-		};
-
-		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeVolumeTexture(const std::string & fileName, size_t x, size_t y, size_t z);
-		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeImageTexuture(const std::string & fileName);
-		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeTransferFunction1DTexture(const std::string & fileName);
-		Ref<Texture> VISUALMAN_EXPORT_IMPORT  MakeTransferFunction1DTexture(const std::vector<Color> & colors);
-	}
-}
-
+Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeVolumeTexture( const std::string &fileName, size_t x, size_t y, size_t z );
+Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeImageTexuture( const std::string &fileName );
+Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeTransferFunction1DTexture( const std::string &fileName );
+Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeTransferFunction1DTexture( const std::vector<Color> &colors );
+}  // namespace vm
+}  // namespace ysl
 
 #endif

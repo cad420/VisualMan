@@ -5,5 +5,5 @@ in vec2 textureRectCoord;
 out vec4 fragColor;
 void main()
 {
-	fragColor = texture2DRect(resTex,textureRectCoord);
+	fragColor = texture2DRect( resTex, textureRectCoord );
 }

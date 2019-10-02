@@ -2,8 +2,7 @@
 #include "abstrdraw.h"
 namespace ysl
 {
-	namespace vm
-	{
-
-		}
+namespace vm
+{
 }
+}  // namespace ysl

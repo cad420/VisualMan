@@ -10,28 +10,28 @@
 
 namespace ysl
 {
-	namespace vm
-	{
+namespace vm
+{
+class IRenderEvent;
 
-		class IRenderEvent;
+class VISUALMAN_EXPORT_IMPORT AbstraRenderer
+{
+public:
+	AbstraRenderer() = default;
+	virtual ~AbstraRenderer() = default;
+	virtual void Render( const RenderQueue &rederQueue, const Ref<Camera> &camera ) = 0;
+	virtual Ref<Framebuffer> GetFramebuffer() = 0;
+	void DispatchOnRenderStartedEvent();
+	void DispatchOnRenderFinishedEvent();
+	void AddRenderStartedEventCallback( Ref<IRenderEvent> callback );
+	void AddRenderFinishedEventCallback( Ref<IRenderEvent> callback );
 
-		class VISUALMAN_EXPORT_IMPORT AbstraRenderer
-		{
-		public:
-			AbstraRenderer() = default;
-			virtual ~AbstraRenderer() = default;
-			virtual void Render(const RenderQueue & rederQueue, const Ref<Camera> & camera) = 0;
-			virtual Ref<Framebuffer> GetFramebuffer() = 0;
-			void DispatchOnRenderStartedEvent();
-			void DispatchOnRenderFinishedEvent();
-			void AddRenderStartedEventCallback(Ref<IRenderEvent> callback);
-			void AddRenderFinishedEventCallback(Ref<IRenderEvent> callback);
-		private:
-			std::vector<Ref<IRenderEvent>> startedCallbacks;
-			std::vector<Ref<IRenderEvent>> finishedCallbacks;
-		};
+private:
+	std::vector<Ref<IRenderEvent>> startedCallbacks;
+	std::vector<Ref<IRenderEvent>> finishedCallbacks;
+};
 
-	}
-}
+}  // namespace vm
+}  // namespace ysl
 
 #endif

@@ -8,87 +8,85 @@
 
 namespace ysl
 {
-	namespace vm 
-	{
-		class Renderable;
+namespace vm
+{
+class Renderable;
 
-		class VISUALMAN_EXPORT_IMPORT IActorEvent:public std::enable_shared_from_this<IActorEvent>
-		{
-		public:
-			virtual void OnActorRenderStartedEvent(Actor * actor,
-				const Camera * camera,
-				Renderable * renderable,
-				const Shading * shading,
-				int pass);
-			virtual void OnActorDeletingEvent(Actor * actor,
-				const Camera * camera,
-				Renderable * renderable,
-				const Shading * shading,
-				int pass);
-			//virtual void OnActorContinueRender(Actor * actor,const Camera * camera,Renderable * renderable,const Shading * shading,int pass,bool & continued);
+class VISUALMAN_EXPORT_IMPORT IActorEvent : public std::enable_shared_from_this<IActorEvent>
+{
+public:
+	virtual void OnActorRenderStartedEvent( Actor *actor,
+											const Camera *camera,
+											Renderable *renderable,
+											const Shading *shading,
+											int pass );
+	virtual void OnActorDeletingEvent( Actor *actor,
+									   const Camera *camera,
+									   Renderable *renderable,
+									   const Shading *shading,
+									   int pass );
+	//virtual void OnActorContinueRender(Actor * actor,const Camera * camera,Renderable * renderable,const Shading * shading,int pass,bool & continued);
 
-			void SetEventEnable(bool enable) { eventEnable = enable; }
-			bool IsEventEnable()const { return eventEnable; }
-			virtual ~IActorEvent() = default;
-		private:
-			bool eventEnable = true;
-		};
+	void SetEventEnable( bool enable ) { eventEnable = enable; }
+	bool IsEventEnable() const { return eventEnable; }
+	virtual ~IActorEvent() = default;
 
-		class VISUALMAN_EXPORT_IMPORT MarchingCubeActorCallback :public IActorEvent
-		{
-		public:
-			void OnActorRenderStartedEvent(Actor* actor, const Camera* camera, Renderable* renderable, const Shading* shading, int pass) override;
-		};
+private:
+	bool eventEnable = true;
+};
 
+class VISUALMAN_EXPORT_IMPORT MarchingCubeActorCallback : public IActorEvent
+{
+public:
+	void OnActorRenderStartedEvent( Actor *actor, const Camera *camera, Renderable *renderable, const Shading *shading, int pass ) override;
+};
 
+class VISUALMAN_EXPORT_IMPORT Actor
+{
+public:
+	Actor( Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform );
+	void SetTransform( Ref<Transform> transform ) { this->transform = std::move( transform ); }
+	Ref<Transform> GetTransform() { return transform; }
+	Ref<const Transform> GetTransform() const { return transform; }
+	void DispatchOnActorRenderStartedEvent( const Camera *camera, Renderable *renderable, const Shading *shading, int pass );
+	void DispatchOnActorDeletingEvent( const Camera *camera, Renderable *renderable, const Shading *shading, int pass );
+	//void DispatchOnActorContinueRenderEvent(const Camera * camera, Renderable * renderable, const Shading * shading, int pass);
+	void AddActorRenderEventCallback( Ref<IActorEvent> callback );
+	void RemoveActorRenderEventCallback( Ref<IActorEvent> callback );
+	void SetLODEvaluator( Ref<LODEvaluator> evaluator ) { lodEvaluator = std::move( evaluator ); }
 
-		class VISUALMAN_EXPORT_IMPORT Actor
-		{
-		public:
-			Actor(Ref<Renderable> renderable, Ref<Artist> art, Ref<Transform> transform);
-			void SetTransform(Ref<Transform> transform){this->transform = std::move(transform);}
-			Ref<Transform> GetTransform() { return transform; }
-			Ref<const Transform> GetTransform()const { return transform; }
-			void DispatchOnActorRenderStartedEvent(const Camera * camera,Renderable * renderable,const Shading * shading,int pass);
-			void DispatchOnActorDeletingEvent(const Camera * camera, Renderable * renderable, const Shading * shading, int pass);
-			//void DispatchOnActorContinueRenderEvent(const Camera * camera, Renderable * renderable, const Shading * shading, int pass);
-			void AddActorRenderEventCallback(Ref<IActorEvent> callback);
-			void RemoveActorRenderEventCallback(Ref<IActorEvent> callback);
-			void SetLODEvaluator(Ref<LODEvaluator> evaluator) { lodEvaluator = std::move(evaluator); }
+	Ref<LODEvaluator> GetLODEvaluator() { return lodEvaluator; }
+	Ref<const LODEvaluator> GetLODEvaluator() const { return lodEvaluator; }
 
-			Ref<LODEvaluator> GetLODEvaluator() { return lodEvaluator; }
-			Ref<const LODEvaluator> GetLODEvaluator()const { return lodEvaluator; }
+	Ref<UniformSet> GetUniformSet() { return uniformSet; }
+	Ref<const UniformSet> GetUniformSet() const { return uniformSet; }
+	Ref<UniformSet> CreateGetUniformSet() { return uniformSet ? uniformSet : uniformSet = MakeRef<UniformSet>(); }
+	void SetUniform( Ref<Uniform> uniform ) { uniformSet->SetUniform( std::move( uniform ) ); }
+	Ref<Uniform> GetUniform( const char *name ) { return uniformSet->GetUniform( name ); }
 
-			Ref<UniformSet> GetUniformSet() { return uniformSet; }
-			Ref<const UniformSet> GetUniformSet()const { return uniformSet; }
-			Ref<UniformSet> CreateGetUniformSet() { return uniformSet ? uniformSet : uniformSet = MakeRef<UniformSet>(); }
-			void SetUniform(Ref<Uniform> uniform) { uniformSet->SetUniform(std::move(uniform)); }
-			Ref<Uniform> GetUniform(const char * name) { return uniformSet->GetUniform(name); }
+	Ref<Artist> GetArtist() { return artist; }
+	Ref<const Artist> GetArtist() const { return artist; }
 
+	Ref<Renderable> GetRenderable( int lod );
+	void SetRenderable( Ref<Renderable> renderable, int lod );
 
-			Ref<Artist> GetArtist() { return artist; }
-			Ref<const Artist> GetArtist()const { return artist; }
+	void SetPriority( int p ) { priority = p; }
+	int GetPriority() const { return priority; }
+	int EvalLod( const Camera *camera );
+	void RemoveUniform( const char *name ) { return uniformSet->RemoveUniform( name ); }
+	void RemoveUniform( Ref<Uniform> uniform ) { return uniformSet->RemoveUniform( uniform ); }
 
-
-			Ref<Renderable> GetRenderable(int lod);
-			void SetRenderable(Ref<Renderable> renderable, int lod);
-
-			void SetPriority(int p) { priority = p; }
-			int GetPriority()const { return priority; }
-			int EvalLod(const Camera * camera);
-			void RemoveUniform(const char * name) { return uniformSet->RemoveUniform(name); }
-			void RemoveUniform(Ref<Uniform> uniform) { return uniformSet->RemoveUniform(uniform); }
-		protected:
-			Bound3f bound;
-			Ref<UniformSet> uniformSet;
-			Ref<Transform> transform;
-			Ref<LODEvaluator> lodEvaluator;
-			Ref<Artist> artist;
-			int priority = 0;
-			std::vector<Ref<IActorEvent>> actorEvents;
-			std::array<Ref<Renderable>, 8> renderables;
-		};
-	}
-}
+protected:
+	Bound3f bound;
+	Ref<UniformSet> uniformSet;
+	Ref<Transform> transform;
+	Ref<LODEvaluator> lodEvaluator;
+	Ref<Artist> artist;
+	int priority = 0;
+	std::vector<Ref<IActorEvent>> actorEvents;
+	std::array<Ref<Renderable>, 8> renderables;
+};
+}  // namespace vm
+}  // namespace ysl
 
 #endif
