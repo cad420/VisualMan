@@ -4,14 +4,13 @@
 
 #include "../graphicfoundation/spectrum.h"
 
-namespace ysl 
+namespace ysl
 {
-	class Scene;
-	class Ray;
+class Scene;
+class Ray;
 
-	RGBASpectrum trace(const Scene & scene,
-		const Ray & ray,
-		int depth, bool di, bool gi, int intensity);
+RGBASpectrum trace( const Scene &scene,
+					const Ray &ray,
+					int depth, bool di, bool gi, int intensity );
 
-
-}
+}  // namespace ysl

@@ -3,9 +3,7 @@
 
 namespace ysl
 {
-	namespace vm
-	{
-
-
-	}
+namespace vm
+{
 }
+}  // namespace ysl

@@ -9,22 +9,23 @@
 
 namespace ysl
 {
-	namespace vm
-	{
-		class VISUALMAN_EXPORT_IMPORT AbstraAggregate
-		{
-		public:
-			virtual ~AbstraAggregate()=default;
-			virtual void Render() = 0;
-			void DispatchRenderStartedEvent();
-			void DispatchRenderFinishedEvent();
-			void AddRenderStartedEventCallback(Ref<IRenderEvent> callback);
-			void AddRenderFinishedEventCallback(Ref<IRenderEvent> callback);
-		protected:
-			std::vector<Ref<IRenderEvent>> renderStartedcallbacks;
-			std::vector<Ref<IRenderEvent>> renderFinishedCallbacks;
-		};
-	}
-}
+namespace vm
+{
+class VISUALMAN_EXPORT_IMPORT AbstraAggregate
+{
+public:
+	virtual ~AbstraAggregate() = default;
+	virtual void Render() = 0;
+	void DispatchRenderStartedEvent();
+	void DispatchRenderFinishedEvent();
+	void AddRenderStartedEventCallback( Ref<IRenderEvent> callback );
+	void AddRenderFinishedEventCallback( Ref<IRenderEvent> callback );
+
+protected:
+	std::vector<Ref<IRenderEvent>> renderStartedcallbacks;
+	std::vector<Ref<IRenderEvent>> renderFinishedCallbacks;
+};
+}  // namespace vm
+}  // namespace ysl
 
 #endif

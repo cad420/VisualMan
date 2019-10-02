@@ -4,57 +4,51 @@
 
 #include <VMUtils/log.hpp>
 
-
 #include <GL/gl3w.h>
 //#include "../../lib/gl3w/GL/glcorearb.h"
 
-inline
-void PrintGLErrorType(GLenum glerr)
+inline void PrintGLErrorType( GLenum glerr )
 {
 	std::string error;
-	switch (glerr)
-	{
-	case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
-	case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
-	case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
-	case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
-	case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
-	case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+	switch ( glerr ) {
+	case GL_INVALID_ENUM: error = "INVALID_ENUM"; break;
+	case GL_INVALID_VALUE: error = "INVALID_VALUE"; break;
+	case GL_INVALID_OPERATION: error = "INVALID_OPERATION"; break;
+	case GL_STACK_OVERFLOW: error = "STACK_OVERFLOW"; break;
+	case GL_STACK_UNDERFLOW: error = "STACK_UNDERFLOW"; break;
+	case GL_OUT_OF_MEMORY: error = "OUT_OF_MEMORY"; break;
 	case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
-	default:							   error = "UNKNOWN_ERROR"; break;
+	default: error = "UNKNOWN_ERROR"; break;
 	}
-	vm::Warning("%s", error.c_str());
+	vm::Warning( "%s", error.c_str() );
 }
 
-inline
-GLenum PrintGLErrorMsg(const char * file, int line)
+inline GLenum PrintGLErrorMsg( const char *file, int line )
 {
 	GLenum errorCode;
-	while ((errorCode = glGetError()) != GL_NO_ERROR)
-	{
+	while ( ( errorCode = glGetError() ) != GL_NO_ERROR ) {
 		std::string error;
-		switch (errorCode)
-		{
-		case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
-		case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
-		case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
-		case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
-		case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
-		case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+		switch ( errorCode ) {
+		case GL_INVALID_ENUM: error = "INVALID_ENUM"; break;
+		case GL_INVALID_VALUE: error = "INVALID_VALUE"; break;
+		case GL_INVALID_OPERATION: error = "INVALID_OPERATION"; break;
+		case GL_STACK_OVERFLOW: error = "STACK_OVERFLOW"; break;
+		case GL_STACK_UNDERFLOW: error = "STACK_UNDERFLOW"; break;
+		case GL_OUT_OF_MEMORY: error = "OUT_OF_MEMORY"; break;
 		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
 		}
-		vm::Warning("%s | %s (%d)", error.c_str(), file, line);
+		vm::Warning( "%s | %s (%d)", error.c_str(), file, line );
 	}
 	return errorCode;
 }
 
 #ifdef NDEBUG
-#define GL_ERROR_REPORT void(0);
-#define GL_ERROR_ASSERT	void(0);
-#define GL(stmt) stmt;
-#define GL_CHECK void(0);
+#define GL_ERROR_REPORT void( 0 );
+#define GL_ERROR_ASSERT void( 0 );
+#define GL( stmt ) stmt;
+#define GL_CHECK void( 0 );
 #else
-#define GL_ERROR_REPORT								PrintGLErrorMsg(__FILE__, __LINE__);
+#define GL_ERROR_REPORT PrintGLErrorMsg( __FILE__, __LINE__ );
 //{												\
 	//	GLenum err;									\
 	//	while((err = glGetError()) != GL_NO_ERROR)	\
@@ -63,60 +57,57 @@ GLenum PrintGLErrorMsg(const char * file, int line)
 	//	}											\
 	//}
 
+#define GL_ERROR_ASSERT \
+	assert( glGetError() == GL_NO_ERROR );
 
-#define GL_ERROR_ASSERT														\
-		assert(glGetError() == GL_NO_ERROR);								\
+#define GL( stmt )                                                              \
+	do {                                                                        \
+		GLenum glerr;                                                           \
+		unsigned int iCounter = 0;                                              \
+		while ( ( glerr = glGetError() ) != GL_NO_ERROR ) {                     \
+			::vm::Warning( "GL error calling %s before line %u (%s): (%x)",     \
+						   #stmt, __LINE__, __FILE__,                           \
+						   static_cast<unsigned>( glerr ) );                    \
+			PrintGLErrorType( glerr );                                          \
+			iCounter++;                                                         \
+			if ( iCounter > 100 ) break;                                        \
+		}                                                                       \
+		stmt;                                                                   \
+		iCounter = 0;                                                           \
+		while ( ( glerr = glGetError() ) != GL_NO_ERROR ) {                     \
+			::vm::Warning( "'%s' on line %u (%s) caused GL error: (%d)", #stmt, \
+						   __LINE__, __FILE__,                                  \
+						   static_cast<unsigned>( glerr ) );                    \
+			PrintGLErrorType( glerr );                                          \
+			iCounter++;                                                         \
+			if ( iCounter > 100 ) break;                                        \
+		}                                                                       \
+	} while ( 0 );
 
-#define GL(stmt)															\
- do {																		\
-    GLenum glerr;															\
-    unsigned int iCounter = 0;												\
-    while((glerr = glGetError()) != GL_NO_ERROR) {							\
-      ::vm::Warning("GL error calling %s before line %u (%s): (%x)",     \
-              #stmt, __LINE__, __FILE__,									\
-              static_cast<unsigned>(glerr));								\
-	  PrintGLErrorType(glerr);												\
-      iCounter++;															\
-      if (iCounter > 100) break;											\
-    }																		\
-    stmt;																	\
-    iCounter = 0;															\
-    while((glerr = glGetError()) != GL_NO_ERROR) {							\
-      ::vm::Warning("'%s' on line %u (%s) caused GL error: (%d)", #stmt, \
-              __LINE__, __FILE__,											\
-              static_cast<unsigned>(glerr));								\
-	  PrintGLErrorType(glerr);												\
-      iCounter++;															\
-      if (iCounter > 100) break;											\
-    }																		\
-  } while(0);
-
-#define GL_CHECK	\
- do {																		\
-    GLenum glerr;															\
-    unsigned int iCounter = 0;												\
-    while((glerr = glGetError()) != GL_NO_ERROR) {							\
-      ::vm::Warning("before line %u (%s):(%#x)",							\
-              __LINE__, __FILE__,											\
-              static_cast<unsigned>(glerr));								\
-	  PrintGLErrorType(glerr);												\
-      iCounter++;															\
-      if (iCounter > 100) break;											\
-    }																		\
-    iCounter = 0;															\
-    while((glerr = glGetError()) != GL_NO_ERROR) {							\
-      ::vm::Warning(" on line %u (%s) caused GL error:(%#x)",			\
-              __LINE__, __FILE__,											\
-              static_cast<unsigned>(glerr));								\
-	  PrintGLErrorType(glerr);												\
-      iCounter++;															\
-      if (iCounter > 100) break;											\
-    }																		\
-  } while(0);
-
+#define GL_CHECK                                                     \
+	do {                                                             \
+		GLenum glerr;                                                \
+		unsigned int iCounter = 0;                                   \
+		while ( ( glerr = glGetError() ) != GL_NO_ERROR ) {          \
+			::vm::Warning( "before line %u (%s):(%#x)",              \
+						   __LINE__, __FILE__,                       \
+						   static_cast<unsigned>( glerr ) );         \
+			PrintGLErrorType( glerr );                               \
+			iCounter++;                                              \
+			if ( iCounter > 100 ) break;                             \
+		}                                                            \
+		iCounter = 0;                                                \
+		while ( ( glerr = glGetError() ) != GL_NO_ERROR ) {          \
+			::vm::Warning( " on line %u (%s) caused GL error:(%#x)", \
+						   __LINE__, __FILE__,                       \
+						   static_cast<unsigned>( glerr ) );         \
+			PrintGLErrorType( glerr );                               \
+			iCounter++;                                              \
+			if ( iCounter > 100 ) break;                             \
+		}                                                            \
+	} while ( 0 );
 
 #endif /*NDBUG*/
-
 
 //
 //#define USE_SMART_POINTER
@@ -170,67 +161,63 @@ GLenum PrintGLErrorMsg(const char * file, int line)
 #include <map>
 #include <set>
 
-#if defined(_WIN32) && defined(VM_SHARED_LIBRARY)
-	#ifdef vm_EXPORTS
-		#define VISUALMAN_EXPORT_IMPORT __declspec(dllexport)
-	#else
-		#define VISUALMAN_EXPORT_IMPORT __declspec(dllimport)
-	#endif
+#if defined( _WIN32 ) && defined( VM_SHARED_LIBRARY )
+#ifdef vm_EXPORTS
+#define VISUALMAN_EXPORT_IMPORT __declspec( dllexport )
 #else
-	#define VISUALMAN_EXPORT_IMPORT
+#define VISUALMAN_EXPORT_IMPORT __declspec( dllimport )
+#endif
+#else
+#define VISUALMAN_EXPORT_IMPORT
 #endif
 
-//#define GRAPHICS_EXPORT_IMPORT 
+//#define GRAPHICS_EXPORT_IMPORT
 
-
-template<typename Ty>
+template <typename Ty>
 using Ref = std::shared_ptr<Ty>;
 
-template<typename Ty>
+template <typename Ty>
 using WeakRef = std::weak_ptr<Ty>;
 
-template<typename Ty>
+template <typename Ty>
 using ExclRef = std::unique_ptr<Ty>;
 
-template<typename Ty1, typename Ty2>
+template <typename Ty1, typename Ty2>
 using Map = std::map<Ty1, Ty2>;
 
-template<typename Ty>
+template <typename Ty>
 using Set = std::set<Ty>;
 
-template<typename Ty, typename ...Args>
-inline
-Ref<Ty> MakeRef(Args && ... args)
+template <typename Ty, typename... Args>
+inline Ref<Ty> MakeRef( Args &&... args )
 {
-	return std::make_shared<Ty>(std::forward<Args>(args)...);
+	return std::make_shared<Ty>( std::forward<Args>( args )... );
 }
-
 
 namespace ysl
 {
-	namespace vm
-	{
-		struct Descriptor3D
-		{
-			int w = 0, h = 0, d = 0;
-			int xOffset =0, yOffset=0, zOffset =0;
-		};
+namespace vm
+{
+struct Descriptor3D
+{
+	int w = 0, h = 0, d = 0;
+	int xOffset = 0, yOffset = 0, zOffset = 0;
+};
 
-		struct Descriptor2D
-		{
-			int w = 0, h = 0;
-			int xOffset = 0, yOffset = 0; 
-		};
+struct Descriptor2D
+{
+	int w = 0, h = 0;
+	int xOffset = 0, yOffset = 0;
+};
 
-		struct Descriptor1D
-		{
-			size_t offset = 0;
-			size_t bytes = 0;
-		};
-	}
+struct Descriptor1D
+{
+	size_t offset = 0;
+	size_t bytes = 0;
+};
+}  // namespace vm
 
-
-}
+}  // namespace ysl
 
 // Enum for OpenGL
 
@@ -482,7 +469,6 @@ enum TextureFormat
 	TF_RGBA16F = GL_RGBA16F,
 	TF_RGB16F = GL_RGB16F,
 
-
 	// EXT_packed_depth_stencil / GL_ARB_framebuffer_object
 	TF_DEPTH_STENCIL = GL_DEPTH_STENCIL,
 	TF_DEPTH24_STENCIL8 = GL_DEPTH24_STENCIL8,
@@ -496,7 +482,6 @@ enum TextureFormat
 	TF_DEPTH_COMPONENT16 = GL_DEPTH_COMPONENT16,
 	TF_DEPTH_COMPONENT24 = GL_DEPTH_COMPONENT24,
 	TF_DEPTH_COMPONENT32 = GL_DEPTH_COMPONENT32,
-
 
 	// GL_ARB_texture_rg
 	TF_RED = GL_RED,
@@ -539,7 +524,6 @@ enum TextureFormat
 	TF_SRGB8_ALPHA8 = GL_SRGB8_ALPHA8,
 	TF_COMPRESSED_SRGB = GL_COMPRESSED_SRGB,
 	TF_COMPRESSED_SRGB_ALPHA = GL_COMPRESSED_SRGB_ALPHA,
-
 
 	// from table 3.12 opengl api specs 4.1
 	TF_R8_SNORM = GL_R8_SNORM,
@@ -585,8 +569,6 @@ enum TexWrap
 	TPW_REPEAT = GL_REPEAT
 };
 
-
-
 enum ImageFormat
 {
 	IF_RGB = GL_RGB,
@@ -625,7 +607,7 @@ enum ImageFormat
 
 enum ImageType
 {
-	IT_IMPLICIT_TYPE = 0, //!< The type is implicitly defined by the EImageFormat value, for ex. IF_COMPRESSED_RGB_S3TC_DXT1.
+	IT_IMPLICIT_TYPE = 0,  //!< The type is implicitly defined by the EImageFormat value, for ex. IF_COMPRESSED_RGB_S3TC_DXT1.
 
 	IT_UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
 	IT_BYTE = GL_BYTE,
@@ -647,8 +629,8 @@ enum ImageType
 	IT_UNSIGNED_INT_10_10_10_2 = GL_UNSIGNED_INT_10_10_10_2,
 	IT_UNSIGNED_INT_2_10_10_10_REV = GL_UNSIGNED_INT_2_10_10_10_REV,
 
-	IT_UNSIGNED_INT_24_8 = GL_UNSIGNED_INT_24_8,                /* EXT_packed_depth_stencil/GL_ARB_framebuffer_object */
-	IT_FLOAT_32_UNSIGNED_INT_24_8_REV = GL_FLOAT_32_UNSIGNED_INT_24_8_REV    /* ARB_depth_buffer_float */
+	IT_UNSIGNED_INT_24_8 = GL_UNSIGNED_INT_24_8,						  /* EXT_packed_depth_stencil/GL_ARB_framebuffer_object */
+	IT_FLOAT_32_UNSIGNED_INT_24_8_REV = GL_FLOAT_32_UNSIGNED_INT_24_8_REV /* ARB_depth_buffer_float */
 
 };
 
@@ -765,7 +747,6 @@ enum RenderStateType
 	RS_VertexAttrib6,
 	RS_VertexAttrib7,
 
-
 	// Non-indexed state
 	RS_AlphaFunc,
 	RS_BlendEquation,
@@ -780,8 +761,6 @@ enum RenderStateType
 	//RS_StencilFunc,
 	//RS_StencilMask,
 	//RS_StencilOp,
-
-
 
 	// Indexed state
 	RS_TextureSampler,
@@ -850,11 +829,9 @@ enum RenderStateType
 	RS_UniformBuffer6 = RS_UniformBuffer + 6,
 	RS_UniformBuffer7 = RS_UniformBuffer + 7,
 
-
 	RS_RenderState_Count,
 	RS_NONE,
 };
-
 
 enum GLSLShaderType
 {
@@ -888,8 +865,6 @@ enum VertexAttribArrayIndexType
 	VA_VertexAttribArray_Count
 };
 
-
-
 enum BufferObjectUpdateFlag
 {
 	VM_BUF_Force = 1,
@@ -903,7 +878,5 @@ enum BufferObjectUpdateMode
 	VM_UM_DiscardRAM = VM_BUF_DiscardRAM,
 	VM_UM_ForceDiscardRAM = VM_BUF_Force | VM_BUF_DiscardRAM,
 };
-
-
 
 #endif

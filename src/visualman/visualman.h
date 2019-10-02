@@ -8,61 +8,61 @@
 
 namespace ysl
 {
-	namespace vm
-	{
-		class AbstraSceneManager;
+namespace vm
+{
+class AbstraSceneManager;
 
-		class VISUALMAN_EXPORT_IMPORT VisualMan :public IEventListener
-		{
-		public:
-			void InitDefault();
-			// IEventListener interfaces
-			VisualMan();
+class VISUALMAN_EXPORT_IMPORT VisualMan : public IEventListener
+{
+public:
+	void InitDefault();
+	// IEventListener interfaces
+	VisualMan();
 
-			void InitEvent() override{}
+	void InitEvent() override {}
 
-			void DestroyEvent() override;
+	void DestroyEvent() override;
 
-			void UpdateEvent() override;
+	void UpdateEvent() override;
 
-			void AddedEvent(RenderContext* context) override;
+	void AddedEvent( RenderContext *context ) override;
 
-			void DeletedEvent(RenderContext* context) override;
+	void DeletedEvent( RenderContext *context ) override;
 
-			void MousePressEvent(MouseButton button, int xpos, int ypos) override;
+	void MousePressEvent( MouseButton button, int xpos, int ypos ) override;
 
-			void MouseReleaseEvent(MouseButton button, int xpos, int ypos) override;
+	void MouseReleaseEvent( MouseButton button, int xpos, int ypos ) override;
 
-			void MouseMoveEvent(MouseButton button, int xpos, int ypos) override;
+	void MouseMoveEvent( MouseButton button, int xpos, int ypos ) override;
 
-			void MouseWheelEvent(int ydegree, int xdegree) override;
+	void MouseWheelEvent( int ydegree, int xdegree ) override;
 
-			void KeyPressEvent(KeyButton key) override;
+	void KeyPressEvent( KeyButton key ) override;
 
-			void KeyReleaseEvent(KeyButton key) override;
+	void KeyReleaseEvent( KeyButton key ) override;
 
-			void ResizeEvent(int w, int h) override;
+	void ResizeEvent( int w, int h ) override;
 
-			void FileDropEvent(const std::vector<std::string>& fileNames) override;
+	void FileDropEvent( const std::vector<std::string> &fileNames ) override;
 
-			virtual void UpdateScene(){}
+	virtual void UpdateScene() {}
 
-			Ref<AbstraAggregate> GetAggregate()const { return abstraAggregate; }
+	Ref<AbstraAggregate> GetAggregate() const { return abstraAggregate; }
 
-			void SetAggregation(Ref<AbstraAggregate> aggregate) { this->abstraAggregate = std::move(aggregate); }
+	void SetAggregation( Ref<AbstraAggregate> aggregate ) { this->abstraAggregate = std::move( aggregate ); }
 
-			void BindCameraEvent(Ref<Camera> camera);
+	void BindCameraEvent( Ref<Camera> camera );
 
-			double GetFPS()const { return FPS; }
+	double GetFPS() const { return FPS; }
 
-		protected:
-			Ref<AbstraAggregate> abstraAggregate;
-			Ref<CameraManipulator> manipulator;
-			double FPS = 0;
-			int frameCount = 0;
-			::vm::Timer timer;
-		};
-	}
-}
+protected:
+	Ref<AbstraAggregate> abstraAggregate;
+	Ref<CameraManipulator> manipulator;
+	double FPS = 0;
+	int frameCount = 0;
+	::vm::Timer timer;
+};
+}  // namespace vm
+}  // namespace ysl
 
 #endif

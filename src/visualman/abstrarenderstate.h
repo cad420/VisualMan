@@ -7,67 +7,68 @@
 
 namespace ysl
 {
-	namespace vm
+namespace vm
+{
+class RenderContext;
+class GLSLProgram;
+
+class VISUALMAN_EXPORT_IMPORT RenderState : public std::enable_shared_from_this<RenderState>
+{
+public:
+	RenderState() = delete;
+	RenderState( RenderStateType type ) :
+	  type( type ) {}
+	virtual void Apply( int index, const Camera *camera, RenderContext *context ) const = 0;
+	RenderStateType Type() const { return type; }
+	virtual ~RenderState() = default;
+
+private:
+	RenderStateType type;
+};
+
+class VISUALMAN_EXPORT_IMPORT RenderStateNonIndexed : public RenderState
+{
+public:
+	RenderStateNonIndexed( RenderStateType type ) :
+	  RenderState( type ) {}
+};
+
+class VISUALMAN_EXPORT_IMPORT RenderStateIndexed : public RenderState
+{
+public:
+	RenderStateIndexed( RenderStateType type ) :
+	  RenderState( type ) {}
+	//int Index()const { return index; }
+	//void SetIndex(int index) { this->index = index; }
+private:
+	//int index = -1;
+};
+
+class RenderStateBox
+{
+public:
+	RenderStateBox() = default;
+	RenderStateBox( Ref<RenderState> state, int i ) :
+	  rawRenderState( std::move( state ) ), index( i ) {}
+	RenderStateType StateType() const
 	{
-		class RenderContext;
-		class GLSLProgram;
-	
+		if ( index < 0 )
+			return rawRenderState->Type();
+		return RenderStateType( rawRenderState->Type() + index );
+	}
 
-		class VISUALMAN_EXPORT_IMPORT RenderState:public std::enable_shared_from_this<RenderState>
-		{
-		public:
-			RenderState() = delete;
-			RenderState(RenderStateType type) :type(type) {}
-			virtual void Apply(int index, const Camera * camera, RenderContext * context)const = 0;
-			RenderStateType Type()const { return type; }
-			virtual ~RenderState() = default;
-		private:
-			RenderStateType type;
-		};
-
-
-		class VISUALMAN_EXPORT_IMPORT RenderStateNonIndexed :public RenderState
-		{
-		public:
-			RenderStateNonIndexed(RenderStateType type) :RenderState(type) {}
-		};
-
-		class VISUALMAN_EXPORT_IMPORT RenderStateIndexed:public RenderState
-		{
-		public:
-			RenderStateIndexed(RenderStateType type):RenderState(type){}
-			//int Index()const { return index; }
-			//void SetIndex(int index) { this->index = index; }
-		private:
-			//int index = -1;
-		};
-
-		class RenderStateBox
-		{
-		public:
-			RenderStateBox() = default;
-			RenderStateBox(Ref<RenderState> state,int i):rawRenderState(std::move(state)),index(i){}
-			RenderStateType StateType()const
-			{
-				if (index < 0)
-					return rawRenderState->Type();
-				return RenderStateType(rawRenderState->Type() + index);
-			}
-
-			/**
+	/**
 			 * \brief  index<0 indicates it is not a indexed render state
 			 */
-			virtual void Apply(const Camera * camera,RenderContext * context)const
-			{
-				rawRenderState->Apply(index, camera, context);
-			}
-			Ref<RenderState> rawRenderState;
-			int index = -1;
-		};
-
-
-
+	virtual void Apply( const Camera *camera, RenderContext *context ) const
+	{
+		rawRenderState->Apply( index, camera, context );
 	}
-}
+	Ref<RenderState> rawRenderState;
+	int index = -1;
+};
+
+}  // namespace vm
+}  // namespace ysl
 
 #endif
