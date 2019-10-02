@@ -1,5 +1,0 @@
-add_executable(subregion)
-target_sources(subregion PRIVATE "subregion.cpp")
-target_link_libraries(subregion common)
-target_include_directories(subregion PRIVATE "${CMAKE_SOURCE_DIR}/src/common")
-install(TARGETS subregion LIBRARY DESTINATION "lib" RUNTIME DESTINATION "bin" ARCHIVE DESTINATION "lib")

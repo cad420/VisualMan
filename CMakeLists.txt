@@ -79,8 +79,3 @@ add_subdirectory("src")
 add_subdirectory("guibinding")
 add_subdirectory("test")
 
-if(VM_BUILD_TOOLS)
-#add_subdirectory("tools")
-endif()
-
-#message(STATUS "-------" ${CMAKE_RUNTIME_OUTPUT_DIR})
