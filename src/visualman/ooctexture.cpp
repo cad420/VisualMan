@@ -8,6 +8,7 @@
 #include <fstream>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/pointer.h>
+#include <VMUtils/vmnew.hpp>
 
 namespace ysl
 {
@@ -136,7 +137,9 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 	lodInfo.resize( lodCount );
 
 	for ( int i = 0; i < lodCount; i++ ) {
-		cpuVolumeData[ i ] = MakeRef<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
+
+		//cpuVolumeData[ i ] = MakeRef<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
+		cpuVolumeData[ i ] = VM_NEW<MemoryPageAdapter>(fileInfo.fileNames[i]);
 		std::cout << i << std::endl;
 	}
 	memoryEvaluators = MakeRef<DefaultMemoryParamsEvaluator>( cpuVolumeData[ 0 ]->BlockDim(), cpuVolumeData[ 0 ]->BlockSize(), videoMemory );

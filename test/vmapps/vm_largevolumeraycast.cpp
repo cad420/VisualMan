@@ -274,7 +274,7 @@ namespace ysl
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume0")->SetUniformValue(1);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume1")->SetUniformValue(2);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("cacheVolume2")->SetUniformValue(3);
-			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.0001f);
+			rayCastShading->CreateGetUniformSet()->CreateGetUniform("step")->SetUniformValue(0.01f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ka")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("kd")->SetUniformValue(1.0f);
 			rayCastShading->CreateGetUniformSet()->CreateGetUniform("ks")->SetUniformValue(50.f);
@@ -462,7 +462,7 @@ namespace ysl
 			const auto resolution = oocResources->DataResolutionWithPadding(0);
 			auto t = Translate(-0.5, -0.5, -0.5);
 			auto s = Scale(Vec3f(resolution));
-			auto spacing = Scale(Vec3f(1, 1, 6));
+			auto spacing = Scale(Vec3f(1, 1, 1));
 			*proxyGemoryScaleTrans = Transform(spacing*s * t);
 			*navigationCameraViewMatrix = ViewMatrixWrapper(Point3f(MinComponent(resolution), MinComponent(resolution), MaxComponent(resolution*2) ), Vec3f{ 0,1,0 }, Point3f{ 0,0,0 });
 			Context()->Update();

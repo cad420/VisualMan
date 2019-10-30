@@ -5,6 +5,7 @@
 #include <vector>
 #include <VMFoundation/largevolumecache.h>
 #include "oocprimitive.h"
+#include <VMUtils/ref.hpp>
 //#include "rapidjson/reader.h"
 
 namespace ysl
@@ -215,7 +216,7 @@ private:
 
 	std::vector<Ref<Texture>> volumeDataTexture;
 
-	std::vector<Ref<MemoryPageAdapter>> cpuVolumeData;
+	std::vector<::vm::Ref<MemoryPageAdapter>> cpuVolumeData;
 
 	/**
 			 * \brief Stores the atomic counters for every lod data

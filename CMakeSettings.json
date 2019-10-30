@@ -162,6 +162,7 @@
           "name": "LZ4_SDK_DIR",
           "value": "C:\\lib\\lz4_win64_v1_9_2"
         }
+
       ]
     }
   ]
