@@ -23,14 +23,14 @@ void TransformChangeCallback::UpdateTransform( const GLSLProgram *program,
 #ifndef NDEBUG
 		GLint prog;
 		GL( glGetIntegerv( GL_CURRENT_PROGRAM, &prog ) );
-		//Debug("%d %d\n", program->Handle(), prog);
+		//Debug("{} {}\n", program->Handle(), prog);
 		assert( prog == program->Handle() );
 #endif
 		const int modelLoc = program->GetWorldMatrixUniformLocation();
 
 		if ( modelLoc != -1 ) {
 			if ( transform ) {
-				//Debug("%s %d\n", __FILE__, __LINE__);
+				//Debug("{} {}\n", __FILE__, __LINE__);
 				GL( glUniformMatrix4fv( modelLoc, 1, GL_TRUE, transform->Matrix().m[ 0 ] ) );
 			}
 		}
@@ -38,7 +38,7 @@ void TransformChangeCallback::UpdateTransform( const GLSLProgram *program,
 		const int viewLoc = program->GetViewMatrixUniformLocation();
 		if ( viewLoc != -1 ) {
 			if ( camera ) {
-				//Debug("%s %d\n", __FILE__, __LINE__);
+				//Debug("{} {}\n", __FILE__, __LINE__);
 				GL( glUniformMatrix4fv( viewLoc, 1, GL_TRUE, camera->ViewMatrix().Matrix().m[ 0 ] ) );
 			}
 		}
@@ -46,7 +46,7 @@ void TransformChangeCallback::UpdateTransform( const GLSLProgram *program,
 		const int projLoc = program->GetProjectionMatrixUniformLocation();
 		if ( projLoc != -1 ) {
 			if ( camera ) {
-				//Debug("%s %d\n", __FILE__, __LINE__);
+				//Debug("{} {}\n", __FILE__, __LINE__);
 				GL( glUniformMatrix4fv( projLoc, 1, GL_TRUE, camera->ProjectionMatrix().Matrix().m[ 0 ] ) );
 			}
 		}
@@ -54,7 +54,7 @@ void TransformChangeCallback::UpdateTransform( const GLSLProgram *program,
 		const int normalLoc = program->GetNormalMatrixUniformLocation();
 		if ( normalLoc != -1 ) {
 			if ( camera ) {
-				//Debug("%s %d\n", __FILE__, __LINE__);
+				//Debug("{} {}\n", __FILE__, __LINE__);
 				GL( glUniformMatrix3fv( normalLoc, 1, GL_TRUE, camera->ViewMatrix().Matrix().NormalMatrix().FlatData() ) );
 			}
 		}
@@ -68,7 +68,7 @@ void TransformChangeCallback::UpdateTransform( const GLSLProgram *program,
 			}
 			if ( transform )
 				mvp = mvp * transform->Matrix();
-			//Debug("%s %d\n", __FILE__, __LINE__);
+			//Debug("{} {}\n", __FILE__, __LINE__);
 			GL( glUniformMatrix4fv( mvpLoc, 1, GL_TRUE, mvp.FlatData() ) );
 		}
 	}

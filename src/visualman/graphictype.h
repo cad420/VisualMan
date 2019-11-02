@@ -20,7 +20,7 @@ inline void PrintGLErrorType( GLenum glerr )
 	case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
 	default: error = "UNKNOWN_ERROR"; break;
 	}
-	vm::Warning( "%s", error.c_str() );
+	vm::Warning( "{}", error.c_str() );
 }
 
 inline GLenum PrintGLErrorMsg( const char *file, int line )
@@ -37,7 +37,7 @@ inline GLenum PrintGLErrorMsg( const char *file, int line )
 		case GL_OUT_OF_MEMORY: error = "OUT_OF_MEMORY"; break;
 		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
 		}
-		vm::Warning( "%s | %s (%d)", error.c_str(), file, line );
+		vm::Warning( "{} | {} ({})", error.c_str(), file, line );
 	}
 	return errorCode;
 }
@@ -53,7 +53,7 @@ inline GLenum PrintGLErrorMsg( const char *file, int line )
 	//	GLenum err;									\
 	//	while((err = glGetError()) != GL_NO_ERROR)	\
 	//	{											\
-	//		ysl::Warning("OpenGL Error Code:%d. File:%s, Line:%d. \n",err,__FILE__,__LINE__);\
+	//		ysl::Warning("OpenGL Error Code:{}. File:{}, Line:{}. \n",err,__FILE__,__LINE__);\
 	//	}											\
 	//}
 
@@ -65,7 +65,7 @@ inline GLenum PrintGLErrorMsg( const char *file, int line )
 		GLenum glerr;                                                           \
 		unsigned int iCounter = 0;                                              \
 		while ( ( glerr = glGetError() ) != GL_NO_ERROR ) {                     \
-			::vm::Warning( "GL error calling %s before line %u (%s): (%x)",     \
+			::vm::Warning( "GL error calling {} before line %u ({}): (%x)",     \
 						   #stmt, __LINE__, __FILE__,                           \
 						   static_cast<unsigned>( glerr ) );                    \
 			PrintGLErrorType( glerr );                                          \
@@ -75,7 +75,7 @@ inline GLenum PrintGLErrorMsg( const char *file, int line )
 		stmt;                                                                   \
 		iCounter = 0;                                                           \
 		while ( ( glerr = glGetError() ) != GL_NO_ERROR ) {                     \
-			::vm::Warning( "'%s' on line %u (%s) caused GL error: (%d)", #stmt, \
+			::vm::Warning( "'{}' on line %u ({}) caused GL error: ({})", #stmt, \
 						   __LINE__, __FILE__,                                  \
 						   static_cast<unsigned>( glerr ) );                    \
 			PrintGLErrorType( glerr );                                          \
@@ -89,7 +89,7 @@ inline GLenum PrintGLErrorMsg( const char *file, int line )
 		GLenum glerr;                                                \
 		unsigned int iCounter = 0;                                   \
 		while ( ( glerr = glGetError() ) != GL_NO_ERROR ) {          \
-			::vm::Warning( "before line %u (%s):(%#x)",              \
+			::vm::Warning( "before line %u ({}):(%#x)",              \
 						   __LINE__, __FILE__,                       \
 						   static_cast<unsigned>( glerr ) );         \
 			PrintGLErrorType( glerr );                               \
@@ -98,7 +98,7 @@ inline GLenum PrintGLErrorMsg( const char *file, int line )
 		}                                                            \
 		iCounter = 0;                                                \
 		while ( ( glerr = glGetError() ) != GL_NO_ERROR ) {          \
-			::vm::Warning( " on line %u (%s) caused GL error:(%#x)", \
+			::vm::Warning( " on line %u ({}) caused GL error:(%#x)", \
 						   __LINE__, __FILE__,                       \
 						   static_cast<unsigned>( glerr ) );         \
 			PrintGLErrorType( glerr );                               \

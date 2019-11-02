@@ -34,10 +34,10 @@ void OutOfCoreVolumeTexture::PrintVideoMemoryUsageInfo()
 	}
 
 	::vm::Log( "------------Summary Memory Usage ---------------" );
-	::vm::Log( "Volume Texture Memory Usage: %lld Bytes = %.2f MB", volumeTextureMemoryUsage, volumeTextureMemoryUsage * 1.0 / 1024 / 1024 );
-	::vm::Log( "Page Table Memory Usage: %lld Bytes = %2.f MB", pageTableBufferBytes, pageTableBufferBytes * 1.0 / 1024 / 1024 );
-	::vm::Log( "Total ID Buffer Block Memory Usage: %lld Bytes = %2.f MB", blockIdBuffer->BufferObjectSize(), blockIdBuffer->BufferObjectSize() * 1.0 / 1024 / 1024 );
-	::vm::Log( "Total Hash Buffer Block Memory Usage: %lld Bytes = %2.f MB", hashBuffer->BufferObjectSize(), hashBuffer->BufferObjectSize() * 1.0 / 1024 / 1024 );
+	::vm::Log( "Volume Texture Memory Usage: {} Bytes = {.2} MB", volumeTextureMemoryUsage, volumeTextureMemoryUsage * 1.0 / 1024 / 1024 );
+	::vm::Log( "Page Table Memory Usage: {} Bytes = {.2} MB", pageTableBufferBytes, pageTableBufferBytes * 1.0 / 1024 / 1024 );
+	::vm::Log( "Total ID Buffer Block Memory Usage: {} Bytes = {.2} MB", blockIdBuffer->BufferObjectSize(), blockIdBuffer->BufferObjectSize() * 1.0 / 1024 / 1024 );
+	::vm::Log( "Total Hash Buffer Block Memory Usage: {} Bytes = {.2} MB", hashBuffer->BufferObjectSize(), hashBuffer->BufferObjectSize() * 1.0 / 1024 / 1024 );
 	::vm::Log( "--------------End-----------------------------" );
 }
 
@@ -85,7 +85,7 @@ void OutOfCoreVolumeTexture::InitVolumeTextures()
 	texSetupParams->SetTextureTarget( TD_TEXTURE_3D );
 
 	for ( int i = 0; i < memoryEvaluators->EvalPhysicalTextureCount(); i++ ) {
-		auto vTex = MakeRef<Texture>();	 // gpu volume data cache size
+		auto vTex = MakeRef<Texture>();  // gpu volume data cache size
 		vTex->SetSetupParams( texSetupParams );
 		vTex->CreateTexture();
 		volumeDataTexture.push_back( vTex );
@@ -137,9 +137,8 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 	lodInfo.resize( lodCount );
 
 	for ( int i = 0; i < lodCount; i++ ) {
-
 		//cpuVolumeData[ i ] = MakeRef<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
-		cpuVolumeData[ i ] = VM_NEW<MemoryPageAdapter>(fileInfo.fileNames[i]);
+		cpuVolumeData[ i ] = VM_NEW<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
 		std::cout << i << std::endl;
 	}
 	memoryEvaluators = MakeRef<DefaultMemoryParamsEvaluator>( cpuVolumeData[ 0 ]->BlockDim(), cpuVolumeData[ 0 ]->BlockSize(), videoMemory );
@@ -160,7 +159,7 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 		lodInfo[ i ].volumeDataSizeNoRepeat = Vec3i( cpuVolumeData[ i ]->DataSizeWithoutPadding() );
 		const int padding = cpuVolumeData[ i ]->Padding();
 		lodInfo[ i ].blockDataSizeNoRepeat = Vec3i( cpuVolumeData[ i ]->BlockSize() - Size3( 2 * padding, 2 * padding, 2 * padding ) );
-		lodInfo[ i ].pageTableSize = ( info.virtualSpaceSize );	 // GLSL std140 layout
+		lodInfo[ i ].pageTableSize = ( info.virtualSpaceSize );  // GLSL std140 layout
 		lodInfo[ i ].pageTableOffset = pageTableTotalEntries;
 		lodInfo[ i ].idBufferOffset = idBufferTotalBlocks;
 		lodInfo[ i ].hashBufferOffset = hashBufferTotalBlocks;
@@ -168,7 +167,7 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 		const auto blocks = cpuVolumeData[ i ]->BlockDim().Prod();
 		pageTableTotalEntries += blocks;  // *sizeof(MappingTableManager::PageTableEntry);
 		hashBufferTotalBlocks += blocks;  // *sizeof(uint32_t);
-		idBufferTotalBlocks += blocks;	  // *sizeof(uint32_t);
+		idBufferTotalBlocks += blocks;	// *sizeof(uint32_t);
 	}
 	/// [1] Create Page Table Buffer and mapping table mananger
 	pageTableBuffer = MakeRef<BufferObject>();
@@ -180,7 +179,7 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 		pageTableInfos[ i ].external = (MappingTableManager::PageTableEntry *)pageTablePtr + pageTableInfos[ i ].offset;
 	}
 
-	mappingTableManager = MakeRef<MappingTableManager>( pageTableInfos,	 // Create Mapping table for lods
+	mappingTableManager = MakeRef<MappingTableManager>( pageTableInfos,  // Create Mapping table for lods
 														memoryEvaluators->EvalPhysicalBlockDim(),
 														memoryEvaluators->EvalPhysicalTextureCount() );
 
@@ -223,14 +222,14 @@ void OutOfCoreVolumeTexture::OnDrawCallStart( OutOfCorePrimitive *p )
 
 void OutOfCoreVolumeTexture::OnDrawCallFinished( OutOfCorePrimitive *p )
 {
-	glFinish();	 // wait the memory to be done
+	glFinish();  // wait the memory to be done
 	bool render_finished = true;
 	for ( int curLod = 0; curLod < lodCount; curLod++ ) {
 		blockIdLocalBuffer.clear();
 		const auto counter = ( atomicCounterBuffer->MappedPointer<int *>() );
 		size_t blocks = *( counter + curLod );
 		*( counter + curLod ) = 0;
-		if ( blocks == 0 )	// render finished
+		if ( blocks == 0 )  // render finished
 			continue;
 		blocks = ( std::min )( memoryEvaluators->EvalPhysicalBlockDim().Prod() * memoryEvaluators->EvalPhysicalTextureCount(), blocks );
 		//std::cout << "Lod:" << curLod << " Blocks:" << blocks << std::endl;
@@ -266,7 +265,7 @@ void OutOfCoreVolumeTexture::OnDrawCallFinished( OutOfCorePrimitive *p )
 		printf( "\r" );
 		for ( int i = 0; i < lodCount; i++ )
 			printf( "LOD%d:%d|", i, mappingTableManager->GetResidentBlocks( i ) );
-		//Log("Time:%f, BandWidth:%.2fGb/s, blocks:%d", time, totalBlocks*2.0 / 1024.0 / time, totalBlocks);
+		//Log("Time:{}, BandWidth:{.2}Gb/s, blocks:{}", time, totalBlocks*2.0 / 1024.0 / time, totalBlocks);
 		time = 0;
 		totalBlocks = 0;
 	}
