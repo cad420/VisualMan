@@ -243,7 +243,7 @@ bool Texture::CreateTexture( TextureTarget target,
 
 	GL( glCreateTextures( target, 1, &handle ) );
 	if ( handle == 0 ) {
-		::vm::Warning( "Texture can not be created. %s %d", __FILE__, __LINE__ );
+		::vm::Warning( "Texture can not be created. {} {}", __FILE__, __LINE__ );
 		return false;
 	}
 
@@ -321,9 +321,9 @@ void Texture::SetSetupParams( Ref<TexCreateParams> params )
 void Texture::SetSubTextureData( const void *data, ImageFormat imageFormat, ImageType imageType, int xOffset, int yOffset, int zOffset, int w, int h, int d )
 {
 	if ( handle == 0 ) {
-		::vm::Warning( "No Texture has been created. %s: %d", __FILE__, __LINE__ );
+		::vm::Warning( "No Texture has been created. {}: {}", __FILE__, __LINE__ );
 		if ( !CreateTexture() ) {
-			::vm::Debug( "Texture has not beed created. But it created failed\n. %s: %d", __FILE__, __LINE__ );
+			::vm::Debug( "Texture has not beed created. But it created failed\n. {}: {}", __FILE__, __LINE__ );
 			return;
 		}
 	}
@@ -335,7 +335,7 @@ void Texture::SetSubTextureData( const void *data, ImageFormat imageFormat, Imag
 	} else if ( target == GL_TEXTURE_3D ) {
 		GL( glTextureSubImage3D( handle, 0, xOffset, yOffset, zOffset, w, h, d, imageFormat, imageType, data ) );
 	} else {
-		::vm::Debug( "Unsuported format. %s %d", __FILE__, __LINE__ );
+		::vm::Debug( "Unsuported format. {} {}", __FILE__, __LINE__ );
 	}
 }
 
@@ -354,7 +354,7 @@ void Texture::SetSubTextureData( ImageFormat imageFormat, ImageType imageType, i
 	if ( bufferObject ) {
 		SetSubTextureData( bufferObject->LocalData(), imageFormat, imageType, xOffset, yOffset, zOffset, w, h, d );
 	} else {
-		::vm::Debug( "No Buffer Object. %s:%d", __FILE__, __LINE__ );
+		::vm::Debug( "No Buffer Object. {}:{}", __FILE__, __LINE__ );
 	}
 }
 

@@ -291,7 +291,7 @@ void RenderContext::BindVertexArray( const IVertexAttribSet *vas )
 	//					0,		// stride
 	//					reinterpret_cast<void*>(0)));		// offset
 
-	//				Debug("%d %d",ptr->ComponentNum(),ptr->Type());
+	//				Debug("{} {}",ptr->ComponentNum(),ptr->Type());
 
 	//			}
 	//		}
@@ -323,7 +323,7 @@ void RenderContext::ApplyRenderState( const RenderStateSet *rss )
 	std::unordered_map<RenderStateType, RenderStateBox> newStates;
 
 	for ( const auto &each : rss->renderStates ) {
-		const auto type = each.StateType();	 // Indexed or non-indexed
+		const auto type = each.StateType();  // Indexed or non-indexed
 		auto it = currentRenderStates.find( type );
 		newStates[ type ] = each;
 
@@ -444,7 +444,7 @@ void RenderContext::GetMaxInteger()
 
 	if ( CheckSupportForExtension( "GL_NVX_gpu_memory_info" ) ) {
 		constexpr int GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX = 0x9047;		   // dedicated video memory, total size (in kb) of the GPU memory
-		constexpr int GPU_MEMORY_INFO_TOTAL_AVAILABEL_MEMORY_NVX = 0x9048;	   // total available memory, total size (in Kb) of the memory available for allocations
+		constexpr int GPU_MEMORY_INFO_TOTAL_AVAILABEL_MEMORY_NVX = 0x9048;	 // total available memory, total size (in Kb) of the memory available for allocations
 		constexpr int GPU_MEMORY_INFO_CURRENT_AVAILABEL_VIDEMEM_NVX = 0x9049;  //current available dedicated video memory (in kb), currently unused GPU memory
 		GL( glGetIntegerv( GPU_MEMORY_INFO_TOTAL_AVAILABEL_MEMORY_NVX, &maxInteger.MAX_GPU_MEMORY_SIZE ) );
 
@@ -459,14 +459,14 @@ void RenderContext::GetMaxInteger()
 		maxInteger.MAX_GPU_MEMORY_SIZE = texFreeMem + vboFreeMem + renderBufferFreeMem;
 	}
 
-	::vm::Log( "MAX_VERTEX_ATTRIBS:%d\n", maxInteger.MAX_VERTEX_ATTRIBS );
-	::vm::Log( "MAX_TEXTURE_IMAGE_UNITE:%d\n", maxInteger.MAX_TEXTURE_IMAGE_UNITE );
-	::vm::Log( "MAX_SHADER_STORAGE_BINDINGS:%d\n", maxInteger.MAX_SHADER_STORAGE_BINDINGS );
-	::vm::Log( "MAX_ATOMIC_COUNTER_BUFFER_BINDINGS:%d\n", maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS );
-	::vm::Log( "MAX_IMAGE_UNITS:%d\n", maxInteger.MAX_IMAGE_UNITS );
-	::vm::Log( "MAX_3DTEXTURE_SIZE:%d\n", maxInteger.MAX_3DTEXUTRE_SIZE );
-	::vm::Log( "MAX_UNIFORM_BLOCKS_COUNT:%d\n", maxInteger.MAX_UNIFORM_BLOCKS_COUNT );
-	::vm::Log( "MAX_GPU_MEMORY_SIZE:%d", maxInteger.MAX_GPU_MEMORY_SIZE );
+	::vm::Log( "MAX_VERTEX_ATTRIBS:{}\n", maxInteger.MAX_VERTEX_ATTRIBS );
+	::vm::Log( "MAX_TEXTURE_IMAGE_UNITE:{}\n", maxInteger.MAX_TEXTURE_IMAGE_UNITE );
+	::vm::Log( "MAX_SHADER_STORAGE_BINDINGS:{}\n", maxInteger.MAX_SHADER_STORAGE_BINDINGS );
+	::vm::Log( "MAX_ATOMIC_COUNTER_BUFFER_BINDINGS:{}\n", maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS );
+	::vm::Log( "MAX_IMAGE_UNITS:{}\n", maxInteger.MAX_IMAGE_UNITS );
+	::vm::Log( "MAX_3DTEXTURE_SIZE:{}\n", maxInteger.MAX_3DTEXUTRE_SIZE );
+	::vm::Log( "MAX_UNIFORM_BLOCKS_COUNT:{}\n", maxInteger.MAX_UNIFORM_BLOCKS_COUNT );
+	::vm::Log( "MAX_GPU_MEMORY_SIZE:{}", maxInteger.MAX_GPU_MEMORY_SIZE );
 }
 
 void RenderContext::InitDefaultRenderState()

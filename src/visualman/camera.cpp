@@ -300,7 +300,7 @@ bool SaveCameraAsJson( Ref<Camera> camera, const std::string &jsonFileName )
 
 	std::ofstream ofs( jsonFileName );
 	if ( !ofs.is_open() ) {
-		::vm::Log( "Can not open file %s.", jsonFileName.c_str() );
+		::vm::Log( "Can not open file {}.", jsonFileName.c_str() );
 		return false;
 	}
 	OStreamWrapper osw( ofs );

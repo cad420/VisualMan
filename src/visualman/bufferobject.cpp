@@ -93,7 +93,7 @@ void BufferObject::SetBufferSubData( size_t offset, size_t bytes, const void *da
 		GL( glBufferSubData( GetBufferTarget(), offset, bytes, data ) );
 		GL( glBindBuffer( GetBufferTarget(), 0 ) );
 	} else {
-		::vm::Warning( "No buffer object. %s:%d", __FILE__, __LINE__ );
+		::vm::Warning( "No buffer object. {}:{}", __FILE__, __LINE__ );
 	}
 }
 
@@ -106,7 +106,7 @@ void BufferObject::SetBufferSubData( size_t offset, size_t bytes, bool discard )
 		GL( glBindBuffer( GetBufferTarget(), 0 ) );
 		if ( discard ) Resize( 0 );
 	} else {
-		::vm::Warning( "No buffer object. %s:%d", __FILE__, __LINE__ );
+		::vm::Warning( "No buffer object. {}:{}", __FILE__, __LINE__ );
 	}
 }
 
@@ -118,7 +118,7 @@ void BufferObject::SetBufferSubDataFromLocalSubData( size_t bOffset, size_t loca
 		GL( glBufferSubData( GetBufferTarget(), bOffset, bytes, LocalData() + localBufferOffset ) );
 		GL( glBindBuffer( GetBufferTarget(), 0 ) );
 	} else {
-		::vm::Warning( "No buffer object. %s:%d", __FILE__, __LINE__ );
+		::vm::Warning( "No buffer object. {}:{}", __FILE__, __LINE__ );
 	}
 }
 
@@ -136,7 +136,7 @@ void *BufferObject::MapBuffer( BufferMapAccess access )
 		//mapped = true;
 		return mappedPointer;
 	}
-	::vm::Warning( "No buffer object. %s:%d", __FILE__, __LINE__ );
+	::vm::Warning( "No buffer object. {}:{}", __FILE__, __LINE__ );
 	return nullptr;
 }
 
@@ -153,7 +153,7 @@ void *BufferObject::MapBufferRange( size_t offset, size_t length, int rangeMapFl
 		//mapped = true;
 		return mappedPointer;
 	}
-	::vm::Warning( "No buffer object. %s:%d", __FILE__, __LINE__ );
+	::vm::Warning( "No buffer object. {}:{}", __FILE__, __LINE__ );
 	return nullptr;
 }
 
@@ -173,7 +173,7 @@ void BufferObject::UnmapBuffer()
 		//mapped = false;
 		mappedPointer = nullptr;
 	} else if ( !handle ) {
-		::vm::Warning( "No buffer object. %s:%d", __FILE__, __LINE__ );
+		::vm::Warning( "No buffer object. {}:{}", __FILE__, __LINE__ );
 	}
 }
 

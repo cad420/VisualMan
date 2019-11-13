@@ -261,9 +261,9 @@ namespace ysl
 			rayCastShading = MakeRef<Shading>();
 			auto raycastGLSL = rayCastShading->CreateGetProgram();
 			auto fs = MakeRef<GLSLFragmentShader>();
-			fs->SetFromFile(R"(glsl\blockraycasting_f.glsl)");
+			fs->SetFromFile(R"(glsl/blockraycasting_f.glsl)");
 			auto vs = MakeRef<GLSLVertexShader>();
-			vs->SetFromFile(R"(glsl\raycast_vs.glsl)");
+			vs->SetFromFile(R"(glsl/raycast_vs.glsl)");
 			raycastGLSL->AttachShader(fs);
 			raycastGLSL->AttachShader(vs);
 			rayCastShading->CreateGetTextureImageUnit(4)->SetTexture(intermediateResult);

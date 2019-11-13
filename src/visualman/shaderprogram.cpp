@@ -20,7 +20,7 @@ void GLSLShader::SetFromFile( const std::string &fileName )
 {
 	std::ifstream sourceFile( fileName, std::ios::in );
 	if ( !sourceFile.is_open() ) {
-		::vm::Warning( "Can not open shader source file. Path: %s\n", fileName.c_str() );
+		::vm::Warning( "Can not open shader source file. Path: {}\n", fileName.c_str() );
 		return;
 	}
 	const std::string text{ std::istreambuf_iterator<char>{ sourceFile }, std::istreambuf_iterator<char>{} };
@@ -49,7 +49,7 @@ bool GLSLShader::Compile()
 		GL( glGetShaderiv( handle, GL_COMPILE_STATUS, &success ) );
 		if ( !success ) {
 			GL( glGetShaderInfoLog( handle, 512, NULL, infoLog ) );
-			::vm::Log( "ERROR::SHADER::COMPILATION_FAILED, %s\n", infoLog );
+			::vm::Log( "ERROR::SHADER::COMPILATION_FAILED, {}\n", infoLog );
 			return compiled = false;
 		}
 		compiled = true;
@@ -107,7 +107,7 @@ bool GLSLProgram::Link()
 			GL( glGetProgramiv( handle, GL_LINK_STATUS, &success ) );
 			if ( !success ) {
 				glGetProgramInfoLog( handle, 512, NULL, infoLog );
-				::vm::Log( "ERROR::SHADER::PROGRAM::LINKING_FAILED\n:%s", infoLog );
+				::vm::Log( "ERROR::SHADER::PROGRAM::LINKING_FAILED\n:{}", infoLog );
 				return false;
 			}
 			PostLink();
