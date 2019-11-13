@@ -4,6 +4,7 @@
 #include "texture.h"
 #include <vector>
 #include <VMFoundation/largevolumecache.h>
+#include <VMFoundation/mapingtablemanager.hpp>
 #include "oocprimitive.h"
 #include <VMUtils/ref.hpp>
 //#include "rapidjson/reader.h"
@@ -12,145 +13,145 @@ namespace ysl
 {
 namespace vm
 {
-struct BlockDescriptor
-{
-private:
-	PhysicalMemoryBlockIndex value;
-	VirtualMemoryBlockIndex key;
-
-public:
-	BlockDescriptor() = default;
-	BlockDescriptor( const PhysicalMemoryBlockIndex &value, VirtualMemoryBlockIndex key ) :
-	  value( value ), key( key ) {}
-	const PhysicalMemoryBlockIndex &Value() const { return value; }
-	const VirtualMemoryBlockIndex &Key() const { return key; }
-};
-
-enum EntryMapFlag
-{
-	EM_UNKNOWN = 0,
-	EM_UNMAPPED = 2,
-	EM_MAPPED = 1
-};
-
-struct IVideoMemoryParamsEvaluator
-{
-	virtual Size3 EvalPhysicalTextureSize() const = 0;
-	virtual int EvalPhysicalTextureCount() const = 0;
-	virtual Size3 EvalPhysicalBlockDim() const = 0;
-	//	virtual int EvalHashBufferSize()const = 0;
-	//	virtual int EvalIDBufferCount()const = 0;
-	virtual ~IVideoMemoryParamsEvaluator() = default;
-};
-
-struct DefaultMemoryParamsEvaluator : IVideoMemoryParamsEvaluator
-{
-private:
-	const Size3 virtualDim;
-	const Size3 blockSize;
-	const std::size_t videoMem;
-	int textureUnitCount = 0;
-	Size3 finalBlockDim = { 0, 0, 0 };
-
-public:
-	DefaultMemoryParamsEvaluator( const Size3 &virtualDim, const Size3 &blockSize, std::size_t videoMemory );
-
-	Size3 EvalPhysicalTextureSize() const override;
-	Size3 EvalPhysicalBlockDim() const override;
-
-	int EvalPhysicalTextureCount() const override;
-	~DefaultMemoryParamsEvaluator() = default;
-};
-
-struct LODPageTableInfo
-{
-	Vec3i virtualSpaceSize;
-	void *external = nullptr;
-	size_t offset = 0;
-};
-
-class MappingTableManager
-{
-public:
-	struct PageDirEntry
-	{
-		int x, y, z, w;
-	};
-	struct PageTableEntry
-	{
-		int x, y, z;
-
-	private:
-		int w = 0;
-
-	public:
-		void SetMapFlag( EntryMapFlag f ) { w = ( w & ( 0xFFF0 ) ) | ( ( 0xF ) & f ); }	   // [0,4) bits
-		void SetTextureUnit( int unit ) { w = ( w & 0xFF0F ) | ( ( 0xF & unit ) << 4 ); }  // [4,8) bits
-		EntryMapFlag GetMapFlag() const { return EntryMapFlag( ( 0xF ) & w ); }
-		int GetTextureUnit() const { return ( w >> 4 ) & 0xF; }
-	};
-
-private:
-	using LRUList = std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>>;
-	using LRUMap = std::unordered_map<size_t, LRUList::iterator>;
-
-	Linear3DArray<PageTableEntry> pageTable;
-
-	std::vector<Linear3DArray<PageTableEntry>> lodPageTables;
-
-	LRUMap lruMap;
-	LRUList lruList;
-
-	std::vector<size_t> blocks;
-
-	void InitCPUPageTable( const Size3 &blockDim, void *external );
-	void InitLRUList( const Size3 &physicalMemoryBlock, int unitCount );
-
-	//void InitCPUPageTable();
-
-public:
-	using size_type = std::size_t;
-	/**
-			 * \brief
-			 * \param virtualSpaceSize virtual space size
-			 */
-	MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &physicalSpaceSize );
-
-	MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &physicalSpaceSize, int physicalSpaceCount );
-
-	MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &phsicalSpaceSize, int physicalSpaceCount, void *external );
-
-	MappingTableManager( const std::vector<LODPageTableInfo> &infos, const Size3 &physicalSpaceSize, int physicalSpaceCount );
-
-	const void *GetData() const { return pageTable.Data(); }
-
-	size_t GetBytes( int lod ) { return lodPageTables[ lod ].Size().Prod() * sizeof( PageTableEntry ); }
-
-	int GetResidentBlocks( int lod ) { return blocks[ lod ]; }
-
-	/**
-			 * \brief Translates the virtual space address to the physical address and update the mapping table by LRU policy
-			 */
-	std::vector<PhysicalMemoryBlockIndex> UpdatePageTable( int lod, const std::vector<VirtualMemoryBlockIndex> &missedBlockIndices );
-};
-
-struct LVDFileInfo
-{
-	std::vector<std::string> fileNames;
-	float samplingRate = 0.001;
-	Vec3f spacing = Vec3f{ 1.f, 1.f, 1.f };
-};
-
-struct _std140_layout_LODInfo
-{
-	Vec4i pageTableSize;
-	Vec4i volumeDataSizeNoRepeat;
-	Vec4i blockDataSizeNoRepeat;
-	uint32_t pageTableOffset;
-	uint32_t hashBufferOffset;
-	uint32_t idBufferOffset;
-	uint32_t pad[ 1 ];
-};
+//struct BlockDescriptor
+//{
+//private:
+//	PhysicalMemoryBlockIndex value;
+//	VirtualMemoryBlockIndex key;
+//
+//public:
+//	BlockDescriptor() = default;
+//	BlockDescriptor( const PhysicalMemoryBlockIndex &value, VirtualMemoryBlockIndex key ) :
+//	  value( value ), key( key ) {}
+//	const PhysicalMemoryBlockIndex &Value() const { return value; }
+//	const VirtualMemoryBlockIndex &Key() const { return key; }
+//};
+//
+//enum EntryMapFlag
+//{
+//	EM_UNKNOWN = 0,
+//	EM_UNMAPPED = 2,
+//	EM_MAPPED = 1
+//};
+//
+//struct IVideoMemoryParamsEvaluator
+//{
+//	virtual Size3 EvalPhysicalTextureSize() const = 0;
+//	virtual int EvalPhysicalTextureCount() const = 0;
+//	virtual Size3 EvalPhysicalBlockDim() const = 0;
+//	//	virtual int EvalHashBufferSize()const = 0;
+//	//	virtual int EvalIDBufferCount()const = 0;
+//	virtual ~IVideoMemoryParamsEvaluator() = default;
+//};
+//
+//struct DefaultMemoryParamsEvaluator : IVideoMemoryParamsEvaluator
+//{
+//private:
+//	const Size3 virtualDim;
+//	const Size3 blockSize;
+//	const std::size_t videoMem;
+//	int textureUnitCount = 0;
+//	Size3 finalBlockDim = { 0, 0, 0 };
+//
+//public:
+//	DefaultMemoryParamsEvaluator( const Size3 &virtualDim, const Size3 &blockSize, std::size_t videoMemory );
+//
+//	Size3 EvalPhysicalTextureSize() const override;
+//	Size3 EvalPhysicalBlockDim() const override;
+//
+//	int EvalPhysicalTextureCount() const override;
+//	~DefaultMemoryParamsEvaluator() = default;
+//};
+//
+//struct LODPageTableInfo
+//{
+//	Vec3i virtualSpaceSize;
+//	void *external = nullptr;
+//	size_t offset = 0;
+//};
+//
+//class MappingTableManager
+//{
+//public:
+//	struct PageDirEntry
+//	{
+//		int x, y, z, w;
+//	};
+//	struct PageTableEntry
+//	{
+//		int x, y, z;
+//
+//	private:
+//		int w = 0;
+//
+//	public:
+//		void SetMapFlag( EntryMapFlag f ) { w = ( w & ( 0xFFF0 ) ) | ( ( 0xF ) & f ); }	   // [0,4) bits
+//		void SetTextureUnit( int unit ) { w = ( w & 0xFF0F ) | ( ( 0xF & unit ) << 4 ); }  // [4,8) bits
+//		EntryMapFlag GetMapFlag() const { return EntryMapFlag( ( 0xF ) & w ); }
+//		int GetTextureUnit() const { return ( w >> 4 ) & 0xF; }
+//	};
+//
+//private:
+//	using LRUList = std::list<std::pair<PageTableEntryAbstractIndex, PhysicalMemoryBlockIndex>>;
+//	using LRUMap = std::unordered_map<size_t, LRUList::iterator>;
+//
+//	Linear3DArray<PageTableEntry> pageTable;
+//
+//	std::vector<Linear3DArray<PageTableEntry>> lodPageTables;
+//
+//	LRUMap lruMap;
+//	LRUList lruList;
+//
+//	std::vector<size_t> blocks;
+//
+//	void InitCPUPageTable( const Size3 &blockDim, void *external );
+//	void InitLRUList( const Size3 &physicalMemoryBlock, int unitCount );
+//
+//	//void InitCPUPageTable();
+//
+//public:
+//	using size_type = std::size_t;
+//	/**
+//			 * \brief
+//			 * \param virtualSpaceSize virtual space size
+//			 */
+//	MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &physicalSpaceSize );
+//
+//	MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &physicalSpaceSize, int physicalSpaceCount );
+//
+//	MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &phsicalSpaceSize, int physicalSpaceCount, void *external );
+//
+//	MappingTableManager( const std::vector<LODPageTableInfo> &infos, const Size3 &physicalSpaceSize, int physicalSpaceCount );
+//
+//	const void *GetData() const { return pageTable.Data(); }
+//
+//	size_t GetBytes( int lod ) { return lodPageTables[ lod ].Size().Prod() * sizeof( PageTableEntry ); }
+//
+//	int GetResidentBlocks( int lod ) { return blocks[ lod ]; }
+//
+//	/**
+//			 * \brief Translates the virtual space address to the physical address and update the mapping table by LRU policy
+//			 */
+//	std::vector<PhysicalMemoryBlockIndex> UpdatePageTable( int lod, const std::vector<VirtualMemoryBlockIndex> &missedBlockIndices );
+//};
+//
+//struct LVDFileInfo
+//{
+//	std::vector<std::string> fileNames;
+//	float samplingRate = 0.001;
+//	Vec3f spacing = Vec3f{ 1.f, 1.f, 1.f };
+//};
+//
+//struct _std140_layout_LODInfo
+//{
+//	Vec4i pageTableSize;
+//	Vec4i volumeDataSizeNoRepeat;
+//	Vec4i blockDataSizeNoRepeat;
+//	uint32_t pageTableOffset;
+//	uint32_t hashBufferOffset;
+//	uint32_t idBufferOffset;
+//	uint32_t pad[ 1 ];
+//};
 
 VISUALMAN_EXPORT_IMPORT LVDFileInfo GetLVDFileInfoFromJson( const std::string &fileName );
 

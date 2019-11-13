@@ -4,7 +4,7 @@ if(VM_BUILD_GLFW_GUIBINDING)
 
 aux_source_directory(. SRC)
 
-find_package(glfw3 REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 
 
 add_library(vmglfwwindow ${VM_SHARED_OR_STATIC})

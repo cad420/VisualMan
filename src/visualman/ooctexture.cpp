@@ -170,6 +170,8 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 		hashBufferTotalBlocks += blocks;  // *sizeof(uint32_t);
 		idBufferTotalBlocks += blocks;	  // *sizeof(uint32_t);
 	}
+
+	
 	/// [1] Create Page Table Buffer and mapping table mananger
 	pageTableBuffer = MakeRef<BufferObject>();
 	pageTableBuffer->CreateImmutableBufferObject( pageTableTotalEntries * sizeof( MappingTableManager::PageTableEntry ), nullptr, storage_flags );
@@ -272,186 +274,186 @@ void OutOfCoreVolumeTexture::OnDrawCallFinished( OutOfCorePrimitive *p )
 	}
 }
 
-DefaultMemoryParamsEvaluator::DefaultMemoryParamsEvaluator( const Size3 &virtualDim, const Size3 &blockSize,
-															std::size_t videoMemory ) :
-  virtualDim( virtualDim ),
-  blockSize( blockSize ),
-  videoMem( videoMemory )
-{
-	//if(videoMem ==0 )
-	//{
-	//	ysl::Error("No enough video memory");
-	//}
-	std::size_t d = 0;
-	textureUnitCount = 1;
-	while ( ++d ) {
-		const auto memory = d * d * d * blockSize.Prod();
-		if ( memory >= videoMem * 1024 )
-			break;
-	}
-	while ( d > 10 ) {
-		d /= 2;
-		textureUnitCount++;
-	}
-	finalBlockDim = Size3{ d, d, d };
-}
-
-Size3 DefaultMemoryParamsEvaluator::EvalPhysicalTextureSize() const
-{
-	return blockSize * EvalPhysicalBlockDim();
-}
-
-Size3 DefaultMemoryParamsEvaluator::EvalPhysicalBlockDim() const
-{
-	return { 10, 10, 10 };
-}
-
-int DefaultMemoryParamsEvaluator::EvalPhysicalTextureCount() const
-{
-	return 3;
-}
-
-void MappingTableManager::InitCPUPageTable( const Size3 &blockDim, void *external )
-{
-	// Only initialization flag filed, the table entry is determined by cache miss at run time using lazy evaluation policy.
-	if ( external == nullptr )
-		pageTable = Linear3DArray<PageTableEntry>( blockDim, nullptr );
-	else
-		pageTable = Linear3DArray<PageTableEntry>( blockDim.x, blockDim.y, blockDim.z, (PageTableEntry *)external, false );
-	size_t blockId = 0;
-	for ( auto z = 0; z < pageTable.Size().z; z++ )
-		for ( auto y = 0; y < pageTable.Size().y; y++ )
-			for ( auto x = 0; x < pageTable.Size().x; x++ ) {
-				PageTableEntry entry;
-				entry.x = -1;
-				entry.y = -1;
-				entry.z = -1;
-				entry.SetMapFlag( EM_UNMAPPED );
-				//entry.w = EM_UNMAPPED;
-				( pageTable )( x, y, z ) = entry;
-				lruMap[ blockId++ ] = lruList.end();
-			}
-}
-
-void MappingTableManager::InitLRUList( const Size3 &physicalMemoryBlock, int unitCount )
-{
-	for ( int i = 0; i < unitCount; i++ )
-		for ( auto z = 0; z < physicalMemoryBlock.z; z++ )
-			for ( auto y = 0; y < physicalMemoryBlock.y; y++ )
-				for ( auto x = 0; x < physicalMemoryBlock.x; x++ ) {
-					lruList.emplace_back(
-					  PageTableEntryAbstractIndex( -1, -1, -1 ),
-					  PhysicalMemoryBlockIndex( x, y, z, i ) );
-				}
-}
-
-MappingTableManager::MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &physicalSpaceSize )
-{
-	InitCPUPageTable( virtualSpaceSize, nullptr );
-	InitLRUList( physicalSpaceSize, 1 );
-}
-
-MappingTableManager::MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &physicalSpaceSize,
-										  int physicalSpaceCount )
-{
-	InitCPUPageTable( virtualSpaceSize, nullptr );
-	InitLRUList( physicalSpaceSize, physicalSpaceCount );
-}
-
-MappingTableManager::MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &physicalSpaceSize,
-										  int physicalSpaceCount, void *external )
-{
-	assert( external );
-	InitCPUPageTable( virtualSpaceSize, external );
-	InitLRUList( physicalSpaceSize, physicalSpaceCount );
-}
-
-MappingTableManager::MappingTableManager( const std::vector<LODPageTableInfo> &infos, const Size3 &physicalSpaceSize, int physicalSpaceCount )
-{
-	const int lod = infos.size();
-	lodPageTables.resize( lod );
-	blocks.resize( lod );
-
-	// lod page table
-	for ( int i = 0; i < lod; i++ ) {
-		if ( infos[ i ].external == nullptr )
-			lodPageTables[ i ] = Linear3DArray<PageTableEntry>( Size3( infos[ i ].virtualSpaceSize ), nullptr );
-		else
-			lodPageTables[ i ] = Linear3DArray<PageTableEntry>( infos[ i ].virtualSpaceSize.x, infos[ i ].virtualSpaceSize.y, infos[ i ].virtualSpaceSize.z, (PageTableEntry *)infos[ i ].external, false );
-		size_t blockId = 0;
-
-		for ( auto z = 0; z < lodPageTables[ i ].Size().z; z++ )
-			for ( auto y = 0; y < lodPageTables[ i ].Size().y; y++ )
-				for ( auto x = 0; x < lodPageTables[ i ].Size().x; x++ ) {
-					PageTableEntry entry;
-					entry.x = -1;
-					entry.y = -1;
-					entry.z = -1;
-					entry.SetMapFlag( EM_UNMAPPED );
-					//entry.w = EM_UNMAPPED;
-					( lodPageTables[ i ] )( x, y, z ) = entry;
-
-					lruMap[ blockId++ ] = lruList.end();
-				}
-	}
-
-	// lod lru list
-
-	for ( int i = 0; i < physicalSpaceCount; i++ )
-		for ( auto z = 0; z < physicalSpaceSize.z; z++ )
-			for ( auto y = 0; y < physicalSpaceSize.y; y++ )
-				for ( auto x = 0; x < physicalSpaceSize.x; x++ ) {
-					lruList.emplace_back(
-					  PageTableEntryAbstractIndex( -1, -1, -1 ),
-					  PhysicalMemoryBlockIndex( x, y, z, i ) );
-				}
-}
-
-std::vector<PhysicalMemoryBlockIndex> MappingTableManager::UpdatePageTable( int lod,
-																			const std::vector<VirtualMemoryBlockIndex> &missedBlockIndices )
-{
-	const auto missedBlocks = missedBlockIndices.size();
-	std::vector<PhysicalMemoryBlockIndex> physicalIndices;
-	physicalIndices.reserve( missedBlocks );
-	// Update LRU List
-	for ( int i = 0; i < missedBlocks; i++ ) {
-		const auto &index = missedBlockIndices[ i ];
-		auto &pageTableEntry = lodPageTables[ lod ]( index.x, index.y, index.z );
-		const size_t flatBlockID = index.z * lodPageTables[ lod ].Size().x * lodPageTables[ lod ].Size().y + index.y * lodPageTables[ lod ].Size().x + index.x;
-		if ( pageTableEntry.GetMapFlag() == EM_MAPPED ) {
-			// move the already mapped node to the head
-			lruList.splice( lruList.begin(), lruList, lruMap[ flatBlockID ] );
-
-		} else {
-			auto &last = lruList.back();
-			//pageTableEntry.w = EntryMapFlag::EM_MAPPED; // Map the flag of page table entry
-			pageTableEntry.SetMapFlag( EM_MAPPED );
-			// last.second is the cache block index
-			physicalIndices.push_back( last.second );
-			pageTableEntry.x = last.second.x;  // fill the page table entry
-			pageTableEntry.y = last.second.y;
-			pageTableEntry.z = last.second.z;
-			pageTableEntry.SetTextureUnit( last.second.GetPhysicalStorageUnit() );
-			if ( last.first.x != -1 )  // detach previous mapped storage
-			{
-				lodPageTables[ last.first.lod ]( last.first.x, last.first.y, last.first.z ).SetMapFlag( EM_UNMAPPED );
-				lruMap[ flatBlockID ] = lruList.end();
-				blocks[ last.first.lod ]--;
-			}
-			// critical section : last
-			last.first.x = index.x;
-			last.first.y = index.y;
-			last.first.z = index.z;
-
-			last.first.lod = lod;  //
-
-			lruList.splice( lruList.begin(), lruList, --lruList.end() );  // move from tail to head, LRU policy
-			lruMap[ flatBlockID ] = lruList.begin();
-			blocks[ lod ]++;
-		}
-	}
-	return physicalIndices;
-}
+//DefaultMemoryParamsEvaluator::DefaultMemoryParamsEvaluator( const Size3 &virtualDim, const Size3 &blockSize,
+//															std::size_t videoMemory ) :
+//  virtualDim( virtualDim ),
+//  blockSize( blockSize ),
+//  videoMem( videoMemory )
+//{
+//	//if(videoMem ==0 )
+//	//{
+//	//	ysl::Error("No enough video memory");
+//	//}
+//	std::size_t d = 0;
+//	textureUnitCount = 1;
+//	while ( ++d ) {
+//		const auto memory = d * d * d * blockSize.Prod();
+//		if ( memory >= videoMem * 1024 )
+//			break;
+//	}
+//	while ( d > 10 ) {
+//		d /= 2;
+//		textureUnitCount++;
+//	}
+//	finalBlockDim = Size3{ d, d, d };
+//}
+//
+//Size3 DefaultMemoryParamsEvaluator::EvalPhysicalTextureSize() const
+//{
+//	return blockSize * EvalPhysicalBlockDim();
+//}
+//
+//Size3 DefaultMemoryParamsEvaluator::EvalPhysicalBlockDim() const
+//{
+//	return { 10, 10, 10 };
+//}
+//
+//int DefaultMemoryParamsEvaluator::EvalPhysicalTextureCount() const
+//{
+//	return 3;
+//}
+//
+//void MappingTableManager::InitCPUPageTable( const Size3 &blockDim, void *external )
+//{
+//	// Only initialization flag filed, the table entry is determined by cache miss at run time using lazy evaluation policy.
+//	if ( external == nullptr )
+//		pageTable = Linear3DArray<PageTableEntry>( blockDim, nullptr );
+//	else
+//		pageTable = Linear3DArray<PageTableEntry>( blockDim.x, blockDim.y, blockDim.z, (PageTableEntry *)external, false );
+//	size_t blockId = 0;
+//	for ( auto z = 0; z < pageTable.Size().z; z++ )
+//		for ( auto y = 0; y < pageTable.Size().y; y++ )
+//			for ( auto x = 0; x < pageTable.Size().x; x++ ) {
+//				PageTableEntry entry;
+//				entry.x = -1;
+//				entry.y = -1;
+//				entry.z = -1;
+//				entry.SetMapFlag( EM_UNMAPPED );
+//				//entry.w = EM_UNMAPPED;
+//				( pageTable )( x, y, z ) = entry;
+//				lruMap[ blockId++ ] = lruList.end();
+//			}
+//}
+//
+//void MappingTableManager::InitLRUList( const Size3 &physicalMemoryBlock, int unitCount )
+//{
+//	for ( int i = 0; i < unitCount; i++ )
+//		for ( auto z = 0; z < physicalMemoryBlock.z; z++ )
+//			for ( auto y = 0; y < physicalMemoryBlock.y; y++ )
+//				for ( auto x = 0; x < physicalMemoryBlock.x; x++ ) {
+//					lruList.emplace_back(
+//					  PageTableEntryAbstractIndex( -1, -1, -1 ),
+//					  PhysicalMemoryBlockIndex( x, y, z, i ) );
+//				}
+//}
+//
+//MappingTableManager::MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &physicalSpaceSize )
+//{
+//	InitCPUPageTable( virtualSpaceSize, nullptr );
+//	InitLRUList( physicalSpaceSize, 1 );
+//}
+//
+//MappingTableManager::MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &physicalSpaceSize,
+//										  int physicalSpaceCount )
+//{
+//	InitCPUPageTable( virtualSpaceSize, nullptr );
+//	InitLRUList( physicalSpaceSize, physicalSpaceCount );
+//}
+//
+//MappingTableManager::MappingTableManager( const Size3 &virtualSpaceSize, const Size3 &physicalSpaceSize,
+//										  int physicalSpaceCount, void *external )
+//{
+//	assert( external );
+//	InitCPUPageTable( virtualSpaceSize, external );
+//	InitLRUList( physicalSpaceSize, physicalSpaceCount );
+//}
+//
+//MappingTableManager::MappingTableManager( const std::vector<LODPageTableInfo> &infos, const Size3 &physicalSpaceSize, int physicalSpaceCount )
+//{
+//	const int lod = infos.size();
+//	lodPageTables.resize( lod );
+//	blocks.resize( lod );
+//
+//	// lod page table
+//	for ( int i = 0; i < lod; i++ ) {
+//		if ( infos[ i ].external == nullptr )
+//			lodPageTables[ i ] = Linear3DArray<PageTableEntry>( Size3( infos[ i ].virtualSpaceSize ), nullptr );
+//		else
+//			lodPageTables[ i ] = Linear3DArray<PageTableEntry>( infos[ i ].virtualSpaceSize.x, infos[ i ].virtualSpaceSize.y, infos[ i ].virtualSpaceSize.z, (PageTableEntry *)infos[ i ].external, false );
+//		size_t blockId = 0;
+//
+//		for ( auto z = 0; z < lodPageTables[ i ].Size().z; z++ )
+//			for ( auto y = 0; y < lodPageTables[ i ].Size().y; y++ )
+//				for ( auto x = 0; x < lodPageTables[ i ].Size().x; x++ ) {
+//					PageTableEntry entry;
+//					entry.x = -1;
+//					entry.y = -1;
+//					entry.z = -1;
+//					entry.SetMapFlag( EM_UNMAPPED );
+//					//entry.w = EM_UNMAPPED;
+//					( lodPageTables[ i ] )( x, y, z ) = entry;
+//
+//					lruMap[ blockId++ ] = lruList.end();
+//				}
+//	}
+//
+//	// lod lru list
+//
+//	for ( int i = 0; i < physicalSpaceCount; i++ )
+//		for ( auto z = 0; z < physicalSpaceSize.z; z++ )
+//			for ( auto y = 0; y < physicalSpaceSize.y; y++ )
+//				for ( auto x = 0; x < physicalSpaceSize.x; x++ ) {
+//					lruList.emplace_back(
+//					  PageTableEntryAbstractIndex( -1, -1, -1 ),
+//					  PhysicalMemoryBlockIndex( x, y, z, i ) );
+//				}
+//}
+//
+//std::vector<PhysicalMemoryBlockIndex> MappingTableManager::UpdatePageTable( int lod,
+//																			const std::vector<VirtualMemoryBlockIndex> &missedBlockIndices )
+//{
+//	const auto missedBlocks = missedBlockIndices.size();
+//	std::vector<PhysicalMemoryBlockIndex> physicalIndices;
+//	physicalIndices.reserve( missedBlocks );
+//	// Update LRU List
+//	for ( int i = 0; i < missedBlocks; i++ ) {
+//		const auto &index = missedBlockIndices[ i ];
+//		auto &pageTableEntry = lodPageTables[ lod ]( index.x, index.y, index.z );
+//		const size_t flatBlockID = index.z * lodPageTables[ lod ].Size().x * lodPageTables[ lod ].Size().y + index.y * lodPageTables[ lod ].Size().x + index.x;
+//		if ( pageTableEntry.GetMapFlag() == EM_MAPPED ) {
+//			// move the already mapped node to the head
+//			lruList.splice( lruList.begin(), lruList, lruMap[ flatBlockID ] );
+//
+//		} else {
+//			auto &last = lruList.back();
+//			//pageTableEntry.w = EntryMapFlag::EM_MAPPED; // Map the flag of page table entry
+//			pageTableEntry.SetMapFlag( EM_MAPPED );
+//			// last.second is the cache block index
+//			physicalIndices.push_back( last.second );
+//			pageTableEntry.x = last.second.x;  // fill the page table entry
+//			pageTableEntry.y = last.second.y;
+//			pageTableEntry.z = last.second.z;
+//			pageTableEntry.SetTextureUnit( last.second.GetPhysicalStorageUnit() );
+//			if ( last.first.x != -1 )  // detach previous mapped storage
+//			{
+//				lodPageTables[ last.first.lod ]( last.first.x, last.first.y, last.first.z ).SetMapFlag( EM_UNMAPPED );
+//				lruMap[ flatBlockID ] = lruList.end();
+//				blocks[ last.first.lod ]--;
+//			}
+//			// critical section : last
+//			last.first.x = index.x;
+//			last.first.y = index.y;
+//			last.first.z = index.z;
+//
+//			last.first.lod = lod;  //
+//
+//			lruList.splice( lruList.begin(), lruList, --lruList.end() );  // move from tail to head, LRU policy
+//			lruMap[ flatBlockID ] = lruList.begin();
+//			blocks[ lod ]++;
+//		}
+//	}
+//	return physicalIndices;
+//}
 
 }  // namespace vm
 }  // namespace ysl

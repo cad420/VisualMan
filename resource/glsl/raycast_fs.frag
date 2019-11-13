@@ -1,24 +1,19 @@
 #version 430 core
-// struct LIGHT_SOURCE {
-//     vec3 position_;        // light position in world space
-//     vec3 ambientColor_;    // ambient color (r,g,b)
-//     vec3 diffuseColor_;    // diffuse color (r,g,b)
-//     vec3 specularColor_;   // specular color (r,g,b)
-//     vec3 attenuation_;     // attenuation (constant, linear, quadratic)
-// };
-
-// uniform LIGHT_SOURCE lightSource;
-
 
 //
+
 uniform sampler1D texTransfunc;
 uniform sampler2D texStartPos;
 uniform sampler2D texEndPos;
 uniform sampler3D texVolume;
 
-uniform float step;
+
+uniform RayCastingParams{
+	float step;
+};
 
 // illumination params
+
 uniform vec3 lightdir;
 uniform vec3 halfway;
 uniform float ka;
@@ -27,10 +22,11 @@ uniform float shininess;
 uniform float ks;
 
 // 
-in vec2 screenCoord;
+
+layout(location =0)in vec2 screenCoord;
 
 //
-out vec4 fragColor;
+layout(location =0)out vec4 fragColor;
 
 vec3 PhongShading(vec3 samplePos, vec3 diffuseColor)
 {
