@@ -234,7 +234,6 @@ void OutOfCoreVolumeTexture::OnDrawCallFinished( OutOfCorePrimitive *p )
 		if ( blocks == 0 )  // render finished
 			continue;
 		blocks = ( std::min )( memoryEvaluators->EvalPhysicalBlockDim().Prod() * memoryEvaluators->EvalPhysicalTextureCount(), blocks );
-		//std::cout << "Lod:" << curLod << " Blocks:" << blocks << std::endl;
 
 		render_finished = false;
 

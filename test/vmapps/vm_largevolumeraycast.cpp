@@ -112,7 +112,7 @@ namespace ysl
 			 */
 
 			//
-			Context()->SetAutomaticallyUpdate(false);
+			//Context()->SetAutomaticallyUpdate(false);
 
 			const auto w = Context()->GetFramebuffer()->Width();
 			const auto h = Context()->GetFramebuffer()->Height();
