@@ -37,6 +37,7 @@ uniform float kd;
 uniform float shininess;
 uniform float ks;
 uniform mat4 vpl_ModelMatrix;
+uniform mat4 vpl_ViewMatrix;
 
 uniform vec3 fuckPos;
 in vec2 screenCoord;
@@ -69,70 +70,48 @@ layout(std140, binding = 3) buffer LODInfoBuffer{LODInfo lod[];}lodInfoBuffer;
 
 vec2 vSize =vec2(1024,768);
 float aspectRatio = vSize.x/vSize.y;
-float lodTables[10]=
-{
-0.00000000745f,
-0.0000000596f,
-0.000000476f,
-0.00000201f,
-0.000006175f,
-0.0001441f,
-0.001953125f,
-0.15625f,
-0.125f,
-1.f
-};
-//float lodTables[10]=
-//{
-//0.00000000149f,
-//0.000000001192f,
-//0.0000000952f,
-//0.000000402f,
-//0.000001235f,
-//0.00002882f,
-//0.001953125f,
-//0.15625f,
-//0.125f,
-//1.f
-//};
 
 float stepTable[7]=
 {
-	0.0000001,
-	0.0000002,
-	0.0000004,
-	0.0000008,
-	0.0000016,
-	0.0000032,
-	0.0000064
+	0.00000016,
+	0.00000032,
+	0.00000064,
+	0.000000128,
+	0.000000256,
+	0.000000512,
+	0.000001024
 };
 
 //
-int evalLOD(vec3 samplePos)
+int EvalLOD(float d)
 {
-	
-	float d = length(vec3(vpl_ModelMatrix*vec4(samplePos,1.0))-fuckPos);
-	const float fovRadian =  fov * 3.1415926535/180.0;
-	const float a = fovRadian*fovRadian*1.33333 / (1024*768*1.0);
-	const float r =  (a * (d * step + d * step*step + step*step*step/ 3.0));
-	for(int i = 0 ; i < 10;i++)
-	{
-		if (r < lodTables[i])
-		{
-			return clamp(i,0,lodNum-1);
-		}
-	}
+	if(d < 500)return 0;
+    if(d < 1000)return 1;
+	if(d < 2000)return 2;
+	if(d < 4000)return 3;
+	if(d < 8000)return 4;
+	return 5;
+	//const float fovRadian =  fov * 3.1415926535/180.0;
+	//const float a = fovRadian*fovRadian*1.33333 / (1024*768*1.0);
+	//const float r =  (a * (d * step + d * step*step + step*step*step/ 3.0));
+	//for(int i = 0 ; i < 10;i++)
+	//{
+	//	if (r < lodTables[i])
+	//	{
+	//		return clamp(i,0,lodNum-1);
+	//	}
+	//}
 }
 
 vec4 lodColors[7]=
 {
-vec4(1,0,0,1),
-vec4(0,1,0,1),
-vec4(0,0,1,1),
-vec4(1,1.0,0,1),
-vec4(1,0.0,1,1),
-vec4(0,1.0,1,1),
-vec4(1,0.0,0,1)
+vec4(1,0,0,0.005),  //red
+vec4(0,1,0,0.005),  // green
+vec4(0,0,1,0.005),  // blue
+vec4(1,1.0,0,0.005), // yellow
+vec4(1,0.0,1,0.005), // purple
+vec4(0,1.0,1,0.005), // blue+
+vec4(1,0.0,0,0.005)  //
 };
 
 float correlation[7]=
@@ -160,6 +139,51 @@ float correlation[7]=
 #ifdef ILLUMINATION
 vec3 N;
 #endif
+
+float EvalDistanceFromViewToBlockCenterCoord(vec3 samplePos,int curLod){
+	ivec3 pageTableSize = ivec3( lodInfoBuffer.lod[ curLod ].pageTableSize );
+
+	ivec3 volumeDataSizeNoRepeat = lodInfoBuffer.lod[ curLod ].volumeDataSizeNoRepeat.xyz;
+	ivec3 blockDataSizeNoRepeat = lodInfoBuffer.lod[ curLod ].blockDataSizeNoRepeat.xyz;
+
+	// address translation
+	ivec3 entry3DIndex = ivec3( samplePos * volumeDataSizeNoRepeat / vec3( blockDataSizeNoRepeat.xyz * pageTableSize.xyz ) * pageTableSize );
+
+	vec4 center;
+	center.w = 1;
+	center.xyz =  (vec3(entry3DIndex) + vec3(0.5,0.5,0.5))/pageTableSize;
+	vec4 r = vpl_ModelMatrix * center;
+	return distance(fuckPos, r.xyz);
+}
+
+/*
+uint EvalBlockID( vec3 samplePos,int curLod )
+{
+	ivec3 pageTableSize = ivec3( lodInfoBuffer.lod[ curLod ].pageTableSize );
+
+	ivec3 volumeDataSizeNoRepeat = lodInfoBuffer.lod[ curLod ].volumeDataSizeNoRepeat.xyz;
+	ivec3 blockDataSizeNoRepeat = lodInfoBuffer.lod[ curLod ].blockDataSizeNoRepeat.xyz;
+
+	// address translation
+	ivec3 entry3DIndex = ivec3( samplePos * volumeDataSizeNoRepeat / vec3( blockDataSizeNoRepeat.xyz * pageTableSize.xyz ) * pageTableSize );
+	//ivec3 entry3DIndex = ivec3(samplePos*pageTableSize);
+	uint entryFlatIndex = entry3DIndex.z * pageTableSize.x * pageTableSize.y + entry3DIndex.y * pageTableSize.x + entry3DIndex.x;
+
+	return entryFlatIndex;
+}
+
+vec3 EvalBlockColor(vec3 samplePos,int curLod )
+{
+	ivec3 pageTableSize = ivec3( lodInfoBuffer.lod[ curLod ].pageTableSize );
+
+	ivec3 volumeDataSizeNoRepeat = lodInfoBuffer.lod[ curLod ].volumeDataSizeNoRepeat.xyz;
+	ivec3 blockDataSizeNoRepeat = lodInfoBuffer.lod[ curLod ].blockDataSizeNoRepeat.xyz;
+
+	// address translation
+	ivec3 entry3DIndex = ivec3( samplePos * volumeDataSizeNoRepeat / vec3( blockDataSizeNoRepeat.xyz * pageTableSize.xyz ) * pageTableSize );
+	return vec3(entry3DIndex)/pageTableSize;
+}
+*/
 
 vec4 virtualVolumeSample(vec3 samplePos,in out int curLod,out bool mapped,out vec3 blockColor)
 {
@@ -285,8 +309,8 @@ bool isboader(vec3 point)
 
 void main()
 {
-
-	vec3 rayStart = imageLoad(entryPos,ivec2(gl_FragCoord)).xyz;
+    vec4 rayStartInfo =imageLoad(entryPos,ivec2(gl_FragCoord)).xyzw;
+	vec3 rayStart = rayStartInfo.xyz;
 	vec3 rayEnd = imageLoad(endPos,ivec2(gl_FragCoord)).xyz;
 	vec3 start2end = rayEnd - rayStart;
 	vec4 color = imageLoad(interResult,ivec2(gl_FragCoord));
@@ -295,7 +319,7 @@ void main()
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
 	vec3 samplePoint = rayStart;
-
+	int prevLOD = int(rayStartInfo.w);
 	vec4 boundingBoxColor = vec4(1,0,0,0.1);
 
 //	if(start2end.x == 0 && start2end.y == 0 && start2end.z == 0)
@@ -314,36 +338,43 @@ void main()
 		samplePoint.z > 1.0)
 		break;
 
-		int curLod = evalLOD(samplePoint);
-		//int curLod = 5;
+		int curLod = EvalLOD(EvalDistanceFromViewToBlockCenterCoord(samplePoint,prevLOD));
+
 		samplePoint += direction * stepTable[curLod] * (float(i) + 0.5);
-		//samplePoint += direction * 0.00001 * (float(i) + 0.5);
 
 		if(isboader(samplePoint) == true)
 			color = color + boundingBoxColor * vec4(boundingBoxColor.aaa, 1.0) * (1.0 - color.a);
 
 		//sample a scalar at samplePoint
+
 		bool mapped = true;
 		vec3 blockColor;
 		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped,blockColor);
 		if (mapped == false) 
 		{
-			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,0.0));
-			//memoryBarrier();
+			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,float(curLod)));
 			imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
-			//memoryBarrier();
 			discard;
 		}
+
 		vec4 sampledColor = texture(texTransfunc, scalar.r);
 		sampledColor.a = 1-pow((1-sampledColor.a),correlation[curLod]);
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		color.a = color.a + (1-color.a) * sampledColor.a;
 
+
+		// Debug Code
+/*
+		//vec4 blockColor = lodColors[curLod];
+        //blockColor.a = 1;
+		//blockColor.rgb = EvalBlockColor(samplePoint,0);
+		//color = color + blockColor * vec4( blockColor.aaa, 1.0 ) * ( 1.0 - color.a );
+		//color.a = color.a + ( 1 - color.a ) * blockColor.a;
+*/
 		if (color.a > 0.99)
 		{
 			break;
 		}
-
 	}
 
 	imageStore(entryPos,ivec2(gl_FragCoord),vec4(rayEnd ,0.0));		// Terminating flag

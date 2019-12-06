@@ -7,6 +7,7 @@
 #include <VMFoundation/mapingtablemanager.hpp>
 #include "oocprimitive.h"
 #include <VMUtils/ref.hpp>
+#include <VMUtils/json_binding.hpp>
 //#include "rapidjson/reader.h"
 
 namespace ysl
@@ -152,13 +153,16 @@ namespace vm
 //	uint32_t idBufferOffset;
 //	uint32_t pad[ 1 ];
 //};
+//
 
 VISUALMAN_EXPORT_IMPORT LVDFileInfo GetLVDFileInfoFromJson( const std::string &fileName );
+
 
 class VISUALMAN_EXPORT_IMPORT OutOfCoreVolumeTexture : public IOutOfCoreAdapter	 // Dest
 {
 public:
 	explicit OutOfCoreVolumeTexture( const std::string &fileName, std::size_t videoMemory );
+	explicit OutOfCoreVolumeTexture( const LVDFileInfo & lodInfo, std::size_t videoMemory );
 
 	void OnDrawCallStart( OutOfCorePrimitive *p ) override;
 

@@ -222,6 +222,7 @@ namespace ysl {
 			assert(app->glfwWindow == window);
 			switch (action)
 			{
+			case GLFW_REPEAT:
 			case GLFW_PRESS:app->DispatchKeyPressedEvent(TranslateKey(key, scancode, mods)); break;
 			case GLFW_RELEASE:app->DispatchKeyReleasedEvent(TranslateKey(key, scancode, mods)); break;
 			default:std::cout << "Unsupported callback\n";

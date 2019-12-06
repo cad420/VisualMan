@@ -8,12 +8,34 @@
 #include "eventinterface.h"
 #include "viewport.h"
 #include "abstraarray.h"
+#include <VMUtils/json_binding.hpp>
 
 namespace ysl
 {
 namespace vm
 {
 class Viewport;
+
+struct ViewMatrixJSONStruct : ::vm::json::Serializable<ViewMatrixJSONStruct>
+{
+	VM_JSON_FIELD( std::vector<float>, pos );
+	VM_JSON_FIELD( std::vector<float>, up );
+	VM_JSON_FIELD( std::vector<float>, center );
+};
+
+struct PerspMatrixJSONStruct : ::vm::json::Serializable<PerspMatrixJSONStruct>
+{
+	VM_JSON_FIELD( float, fov );
+	VM_JSON_FIELD( float, nearPlane );
+	VM_JSON_FIELD( float, farPlane );
+	VM_JSON_FIELD( float, aspectRatio );
+};
+
+struct CameraJSONStruct : ::vm::json::Serializable<CameraJSONStruct>
+{
+	VM_JSON_FIELD( ViewMatrixJSONStruct, viewMatrix );
+	VM_JSON_FIELD( PerspMatrixJSONStruct, perspectiveMatrix );
+};
 
 class VISUALMAN_EXPORT_IMPORT ViewMatrixWrapper
 {
@@ -42,7 +64,7 @@ public:
 					   const ysl::Point3f &center = { 0, 0, 0 } );
 
 	Vector3f GetFront() const { return m_front; }
-	void SetFront( const Vector3f &front ) { m_front = front.Normalized(); }
+	void SetFront( const Vector3f &front ) { m_front = front.Normalized();}
 	Vector3f GetRight() const { return m_right; }
 	Vector3f GetUp() const { return m_up; }
 	void UpdateCamera( const ysl::Point3f &position, ysl::Vector3f worlUp,
@@ -57,6 +79,7 @@ public:
 	void Rotate( float xOffset, float yOffset );
 	void ProcessMouseScroll( float yOffset );
 	void RotateCamera( const ysl::Vector3f &axis, double theta );
+
 
 private:
 };
@@ -95,11 +118,15 @@ public:
 
 	Vector3f GetFront() const { return viewMatrixWrapper->GetFront(); }
 
+	void SetFront( const Vector3f &front ) { viewMatrixWrapper->SetFront( front ); }
+
 	void SetViewport( Ref<Viewport> vp ) { viewport = std::move( vp ); }
 
 	Vector3f GetUp() const { return viewMatrixWrapper->GetUp(); }
 
 	Point3f GetCenter() const { return viewMatrixWrapper->GetCenter(); }
+
+	void SetCenter( const Point3f &center ) { viewMatrixWrapper->SetCenter( center ); }
 
 	void SetCamera( Ref<ViewMatrixWrapper> viewMatrixWrapper, Ref<Transform> projMatrix );
 
@@ -198,7 +225,7 @@ public:
 
 	void FileDropEvent( const std::vector<std::string> &fileNames ) override{};
 
-	void KeyPressEvent( KeyButton key ) override {}
+	void KeyPressEvent( KeyButton key ) override;
 
 	void KeyReleaseEvent( KeyButton key ) override {}
 

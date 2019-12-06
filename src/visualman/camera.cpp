@@ -228,11 +228,15 @@ Ref<Camera> CreateCamera( const std::string &jsonFileName )
 void ConfigCamera( Camera *camera, const std::string &jsonFileName )
 {
 	if ( !camera ) return;
-	using namespace rapidjson;
-	std::ifstream ifs( jsonFileName );
-	rapidjson::IStreamWrapper isw( ifs );
-	Document d;
-	d.ParseStream( isw );
+	//using namespace rapidjson;
+	//std::ifstream ifs( jsonFileName );
+	//rapidjson::IStreamWrapper isw( ifs );
+	//Document d;
+	//d.ParseStream( isw );
+
+	std::ifstream json( jsonFileName );
+	CameraJSONStruct JSON;
+	json >> JSON;
 
 	// Camera Params
 	// View Matrix: up front center
@@ -241,27 +245,29 @@ void ConfigCamera( Camera *camera, const std::string &jsonFileName )
 	Point3f pos;
 	Vector3f up;
 	Point3f center;
-	pos.x = GetValueByPointerWithDefault( d, "/camera/viewMatrix/pos/0", 0.0f ).GetFloat();
-	pos.y = GetValueByPointerWithDefault( d, "/camera/viewMatrix/pos/1", 0.0f ).GetFloat();
-	pos.z = GetValueByPointerWithDefault( d, "/camera/viewMatrix/pos/2", 10.f ).GetFloat();
 
-	up.x = GetValueByPointerWithDefault( d, "/camera/viewMatrix/up/0", 0.f ).GetFloat();
-	up.y = GetValueByPointerWithDefault( d, "/camera/viewMatrix/up/1", 1.f ).GetFloat();
-	up.z = GetValueByPointerWithDefault( d, "/camera/viewMatrix/up/2", 0.f ).GetFloat();
+	center.x = JSON.viewMatrix.center[ 0 ];
+	center.y = JSON.viewMatrix.center[ 1 ];
+	center.z = JSON.viewMatrix.center[ 2 ];
 
-	center.x = GetValueByPointerWithDefault( d, "/camera/viewMatrix/center/0", 0.f ).GetFloat();
-	center.y = GetValueByPointerWithDefault( d, "/camera/viewMatrix/center/1", 0.f ).GetFloat();
-	center.z = GetValueByPointerWithDefault( d, "/camera/viewMatrix/center/2", 0.f ).GetFloat();
+	pos.x = JSON.viewMatrix.pos[ 0 ];
+	pos.y = JSON.viewMatrix.pos[ 1 ];
+	pos.z = JSON.viewMatrix.pos[ 2 ];
 
-	const float fov = GetValueByPointerWithDefault( d, "/camera/perspectiveMatrix/fov", 60.f ).GetFloat();
-	const float nearPlane = GetValueByPointerWithDefault( d, "/camera/perspectiveMatrix/nearPlane", 0.01f ).GetFloat();
-	const float farPlane = GetValueByPointerWithDefault( d, "/camera/perspectiveMatrix/farPlane", 200.f ).GetFloat();
-	const float aspectRatio = GetValueByPointerWithDefault( d, "/camera/perspectiveMatrix/aspectRatio", 1024.f / 768.f ).GetFloat();
+	up.x = JSON.viewMatrix.up[ 0 ];
+	up.y = JSON.viewMatrix.up[ 1 ];
+	up.z = JSON.viewMatrix.up[ 2 ];
+
+	const float fov = JSON.perspectiveMatrix.fov;
+	const float nearPlane = JSON.perspectiveMatrix.nearPlane;
+	const float farPlane = JSON.perspectiveMatrix.farPlane;
+	const float aspectRatio = JSON.perspectiveMatrix.aspectRatio;
 
 	Transform perspectiveMatrix;
 	perspectiveMatrix.SetGLPerspective( fov, aspectRatio, nearPlane, farPlane );
 
 	camera->SetCamera( pos, up, center, nearPlane, farPlane, aspectRatio, fov );
+
 	//camera->SetProjectionMatrix(perspectiveMatrix);
 	//camera->SetNearPlane(nearPlane);
 	//camera->SetFarPlane(farPlane);
@@ -281,22 +287,22 @@ bool SaveCameraAsJson( Ref<Camera> camera, const std::string &jsonFileName )
 
 	Document d;
 
-	SetValueByPointer( d, "/camera/viewMatrix/pos/0", pos.x );
-	SetValueByPointer( d, "/camera/viewMatrix/pos/1", pos.y );
-	SetValueByPointer( d, "/camera/viewMatrix/pos/2", pos.z );
+	SetValueByPointer( d, "/viewMatrix/pos/0", pos.x );
+	SetValueByPointer( d, "/viewMatrix/pos/1", pos.y );
+	SetValueByPointer( d, "/viewMatrix/pos/2", pos.z );
 
-	SetValueByPointer( d, "/camera/viewMatrix/up/0", up.x );
-	SetValueByPointer( d, "/camera/viewMatrix/up/1", up.y );
-	SetValueByPointer( d, "/camera/viewMatrix/up/2", up.z );
+	SetValueByPointer( d, "/viewMatrix/up/0", up.x );
+	SetValueByPointer( d, "/viewMatrix/up/1", up.y );
+	SetValueByPointer( d, "/viewMatrix/up/2", up.z );
 
-	SetValueByPointer( d, "/camera/viewMatrix/center/0", center.x );
-	SetValueByPointer( d, "/camera/viewMatrix/center/1", center.y );
-	SetValueByPointer( d, "/camera/viewMatrix/center/2", center.z );
+	SetValueByPointer( d, "/viewMatrix/center/0", center.x );
+	SetValueByPointer( d, "/viewMatrix/center/1", center.y );
+	SetValueByPointer( d, "/viewMatrix/center/2", center.z );
 
-	SetValueByPointer( d, "/camera/perspectiveMatrix/fov", fov );
-	SetValueByPointer( d, "/camera/perspectiveMatrix/nearPlane", nearPlane );
-	SetValueByPointer( d, "/camera/perspectiveMatrix/farPlane", farPlane );
-	SetValueByPointer( d, "/camera/perspectiveMatrix/aspectRatio", aspectRatio );
+	SetValueByPointer( d, "/perspectiveMatrix/fov", fov );
+	SetValueByPointer( d, "/perspectiveMatrix/nearPlane", nearPlane );
+	SetValueByPointer( d, "/perspectiveMatrix/farPlane", farPlane );
+	SetValueByPointer( d, "/perspectiveMatrix/aspectRatio", aspectRatio );
 
 	std::ofstream ofs( jsonFileName );
 	if ( !ofs.is_open() ) {
@@ -354,22 +360,52 @@ void CameraManipulator::MouseMoveEvent( MouseButton button, int xpos, int ypos )
 
 		if ( dx == 0.0 && dy == 0.0 )
 			return;
-		if ( ( button & Mouse_Left ) && ( button & Mouse_Right ) ) {
-			const auto directionEx = camera->Up() * dy + dx * camera->Right();
-			camera->Movement( directionEx, 0.002 );
-		} else if ( button == Mouse_Left ) {
-			camera->Rotation( dx, dy );
-		} else if ( button == Mouse_Right && dy != 0.0 ) {
-			const auto directionEx = camera->GetFront() * dy;
-			camera->Movement( directionEx, 1.0 );
-		}
+
+		//if ( ( button & Mouse_Left ) && ( button & Mouse_Right ) ) {
+		//	const auto directionEx = camera->Up() * dy + dx * camera->Right();
+		//	camera->Movement( directionEx, 0.002 );
+		//} else if ( button == Mouse_Left ) {
+		//	camera->Rotation( dx, dy );
+		//} else if ( button == Mouse_Right && dy != 0.0 ) {
+		//	const auto directionEx = camera->GetFront() * dy;
+		//	camera->Movement( directionEx, 1.0 );
+		//}
+
+		const auto front = camera->GetFront().Normalized();
+		const auto up = camera->GetUp().Normalized();
+		const auto right = Vec3f::Cross( front, up );
+		const auto dir = (up * dy - right * dx).Normalized();
+		const auto axis = Vec3f::Cross( dir, front );
+		camera->SetFront( Rotate( axis,5.0 )*front);
+		
+		
 		lastMousePos.x = xpos;
 		lastMousePos.y = ypos;
-
-		//std::cout << camera->ViewMatrix() << std::endl;
 	}
 }
 
+void CameraManipulator::KeyPressEvent( KeyButton key )
+{
+	float sensity = 0.05;
+	if ( camera != nullptr ) {
+		if ( key == KeyButton::Key_W ) {
+			auto dir = camera->GetFront();
+			camera->Movement( sensity * dir.Normalized(), 100 );
+			//mrtAgt->CreateGetCamera()->Movement();
+		} else if ( key == KeyButton::Key_S ) {
+			auto dir = -camera->GetFront();
+			camera->Movement( sensity * dir.Normalized(), 100 );
+		} else if ( key == KeyButton::Key_A ) {
+			auto dir = ( Vec3f::Cross( camera->GetUp(), camera->GetFront() ).Normalized() * sensity );
+			camera->Movement( dir, 100 );
+			camera->SetCenter( camera->GetCenter() + dir );
+		} else if ( key == KeyButton::Key_D ) {
+			auto dir = ( -Vec3f::Cross( camera->GetUp(), camera->GetFront() ).Normalized() ) * sensity;
+			camera->Movement( dir, 100 );
+			camera->SetCenter( camera->GetCenter() + dir );
+		}
+	}
+}
 }  // namespace vm
 
 }  // namespace ysl
