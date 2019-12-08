@@ -6,6 +6,7 @@
 #include <VMFoundation/rawreader.h>
 #include <stb_image_write.h>
 #include <VMUtils/log.hpp>
+#include <VMUtils/timer.hpp>
 
 namespace ysl
 {
@@ -445,6 +446,72 @@ Ref<Texture> MakeTransferFunction1DTexture( const std::string &fileName )
 	std::unique_ptr<float[]> buffer( new float[ 256 * 4 ] );
 	interpulator.FetchData( (float *)( buffer.get() ), 256 );
 	tfTex->SetSubTextureData( buffer.get(), IF_RGBA, IT_FLOAT, 0, 0, 0, 256, 0, 0 );
+	return tfTex;
+}
+
+Ref<Texture> MakePreIntegratedTransferFunction2DTexture( const std::string &fileName )
+{
+	Ref<TexCreateParams> params = MakeRef<TexCreateParams>();
+	params->EnableMipMap( false );
+	params->EnableBorder( false );
+	params->SetSize( 256, 256, 0 );
+	params->SetTextureFormat( TF_RGBA32F );
+	params->SetTextureTarget( TD_TEXTURE_2D );
+	auto tfTex = MakeRef<Texture>();
+	tfTex->SetSetupParams( params );
+	if ( !tfTex->CreateTexture() ) {
+		return nullptr;
+	}
+
+	const ColorInterpulator interpulator( fileName );
+	if ( !interpulator.valid() ) {
+		throw std::runtime_error( "Return Color Table error" );
+	}
+	const std::unique_ptr<float[]> buffer( new float[ 256 * 4 ] );
+	interpulator.FetchData( reinterpret_cast<float *>( buffer.get() ), 256 );
+
+	const int dimension = 256;
+	const std::unique_ptr<float[]> preIntTransferFunction( new float[ dimension * dimension * 4 ] );
+
+
+	{
+
+		::vm::println( "Calculating pre-integrated transfer function..." );
+		::vm::Timer::Scoped _( [&]( auto dt ) {
+			::vm::println( "Time Consuming: {}", dt.s() );
+		} );
+		/*
+	 * Taking alpha in transfer function as t * deltaL, based on code by Klaus Engel
+	 */
+		float rayStep = 1.0;
+		for ( int sb = 0; sb < 256; ++sb ) {
+			for ( int sf = 0; sf <= sb; ++sf ) {
+				const int offset = sf != sb;			// 0 for the same point
+				const int n = 20 + 1 * abs( sb - sf );  // sampling number
+				const float stepWidth = rayStep / n;	// sampling step
+				float rgba[ 4 ] = { 0, 0, 0, 0 };		// accumulated color
+
+				for ( int i = 0; i < n; ++i ) {
+					const float s = sf + ( sb - sf ) * (float)i / n;																					   // assume each subinterval with equal values
+					const float sFrac = s - floor( s );																									   // the fraction part of s in [floor(s), floor(s) + 1]
+					const float opacity = ( buffer[ int( s ) * 4 + 3 ] * ( 1.0 - sFrac ) + buffer[ ( int( s ) + offset ) * 4 + 3 ] * sFrac ) * stepWidth;  // linear interpolation of absorption coefficient in the exponent (ray segment)
+
+					const float temp = std::exp( -rgba[ 3 ] ) * opacity;																	 // visibility mulitiplied alpha
+					rgba[ 0 ] += ( buffer[ int( s ) * 4 + 0 ] * ( 1.0 - sFrac ) + buffer[ ( int( s ) + offset ) * 4 + 0 ] * sFrac ) * temp;  // associated color for the i-th ray segment
+					rgba[ 1 ] += ( buffer[ int( s ) * 4 + 1 ] * ( 1.0 - sFrac ) + buffer[ ( int( s ) + offset ) * 4 + 1 ] * sFrac ) * temp;
+					rgba[ 2 ] += ( buffer[ int( s ) * 4 + 2 ] * ( 1.0 - sFrac ) + buffer[ ( int( s ) + offset ) * 4 + 2 ] * sFrac ) * temp;
+					rgba[ 3 ] += opacity;  // the exponent part of this ray segment
+				}
+
+				preIntTransferFunction[ ( sf * dimension + sb ) * 4 + 0 ] = preIntTransferFunction[ ( sb * dimension + sf ) * 4 + 0 ] = rgba[ 0 ];
+				preIntTransferFunction[ ( sf * dimension + sb ) * 4 + 1 ] = preIntTransferFunction[ ( sb * dimension + sf ) * 4 + 1 ] = rgba[ 1 ];
+				preIntTransferFunction[ ( sf * dimension + sb ) * 4 + 2 ] = preIntTransferFunction[ ( sb * dimension + sf ) * 4 + 2 ] = rgba[ 2 ];
+				preIntTransferFunction[ ( sf * dimension + sb ) * 4 + 3 ] = preIntTransferFunction[ ( sb * dimension + sf ) * 4 + 3 ] = 1.0 - exp( -rgba[ 3 ] );
+			}
+		}
+		tfTex->SetSubTextureData( preIntTransferFunction.get(), IF_RGBA, IT_FLOAT, 0, 0, 0, 256, 256, 0 );
+	}
+
 	return tfTex;
 }
 

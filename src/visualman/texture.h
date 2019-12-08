@@ -166,6 +166,7 @@ Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeVolumeTexture( const std::string &fileN
 Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeImageTexuture( const std::string &fileName );
 Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeTransferFunction1DTexture( const std::string &fileName );
 Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeTransferFunction1DTexture( const std::vector<Color> &colors );
+Ref<Texture> VISUALMAN_EXPORT_IMPORT MakePreIntegratedTransferFunction2DTexture( const std::string &fileName );
 }  // namespace vm
 }  // namespace ysl
 

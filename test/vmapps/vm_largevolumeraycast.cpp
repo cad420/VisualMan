@@ -466,7 +466,11 @@ void VM_LargeVolumeRayCast::SetupTF( const std::string &fileName )
 	assert( rayCastShading );
 	try {
 		const auto tfTex = MakeTransferFunction1DTexture( fileName );
+
+		const auto preTex = MakePreIntegratedTransferFunction2DTexture( fileName );
+		
 		rayCastShading->CreateGetTextureSampler( 4 )->SetTexture( tfTex );
+		rayCastShading->CreateGetTextureSampler( 5 )->SetTexture( preTex );
 	} catch ( std::runtime_error &e ) {
 		::vm::Warning( "Can not load .tf file" );
 		return;

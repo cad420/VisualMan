@@ -239,7 +239,7 @@ vec4 virtualVolumeSample(vec3 samplePos,in out int curLod,out bool mapped,out ve
 			N.x = (texture(cacheVolume2, samplePoint+vec3(step,0,0)).r - texture(cacheVolume2, samplePoint+vec3(-step,0,0) ).r) ;
 			N.y = (texture(cacheVolume2, samplePoint+vec3(0,step,0)).r - texture(cacheVolume2, samplePoint+vec3(0,-step,0) ).r) ;
 			N.z = (texture(cacheVolume2, samplePoint+vec3(0,0,step)).r - texture(cacheVolume2, samplePoint+vec3(0,0,-step) ).r) ;
-			#endif
+			#endif 
 		}else if(texId == 3){
 			samplePoint = samplePoint/textureSize(cacheVolume3,0);
 			scalar = texture(cacheVolume3,samplePoint);
@@ -311,7 +311,7 @@ void main()
 	vec3 rayEnd = imageLoad(endPos,ivec2(gl_FragCoord)).xyz;
 	vec3 start2end = rayEnd - rayStart;
 	vec4 color = imageLoad(interResult,ivec2(gl_FragCoord));
-	vec4 bg = vec4(1.f,1.f,1.f, 1.00f);
+	vec4 bg = vec4(0.f,0.f,0.f, .00f);
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
@@ -340,12 +340,12 @@ void main()
 		samplePoint.z > 1.0)
 		break;
 
-		int curLod =EvalLOD(EvalDistanceFromViewToBlockCenterCoord(samplePoint,prevLOD));
+		int curLod = 0 ;//EvalLOD(EvalDistanceFromViewToBlockCenterCoord(samplePoint,prevLOD));
 
 		samplePoint += direction * stepTable[curLod] * (float(i) + 0.5);
 
-		if(isboader(samplePoint) == true)
-			color = color + boundingBoxColor * vec4(boundingBoxColor.aaa, 1.0) * (1.0 - color.a);
+		//if(isboader(samplePoint) == true)
+		//	color = color + boundingBoxColor * vec4(boundingBoxColor.aaa, 1.0) * (1.0 - color.a);
 
 		//sample a scalar at samplePoint
 
@@ -359,10 +359,13 @@ void main()
 			discard;
 		}
 
-		vec4 sampledColor = texture(texTransfunc, scalar.r);
-		//if(scalar.r < 0.05)sampledColor.a = 0;
-        //else sampledColor = scalar.rrrr;
-		sampledColor.a = 1-pow((1-sampledColor.a),correlation[curLod]);
+		//vec4 sampledColor = texture(texTransfunc, scalar.r);
+		float alpha = 0.05;
+		vec4 sampledColor;
+		float x = (scalar.r - alpha)/(1-alpha);
+		if(scalar.r < alpha)sampledColor.a = 0;
+        else sampledColor = vec4(x,x,x,x);
+		//sampledColor.a = 1-pow((1-sampledColor.a),correlation[curLod]);
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
 		//color.a = color.a + (1-color.a) * sampledColor.a;
 
