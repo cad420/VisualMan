@@ -78,4 +78,5 @@ vm_external_module(
 add_subdirectory("src")
 add_subdirectory("guibinding")
 add_subdirectory("test")
+add_subdirectory("tools")
 

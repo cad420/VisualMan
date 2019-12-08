@@ -85,11 +85,11 @@ float stepTable[7]=
 //
 int EvalLOD(float d)
 {
-	if(d < 500)return 0;
-    if(d < 1000)return 1;
-	if(d < 2000)return 2;
-	if(d < 4000)return 3;
-	if(d < 8000)return 4;
+	if(d < 1000)return 0;
+    if(d < 2000)return 1;
+	if(d < 4000)return 2;
+	if(d < 8000)return 3;
+	if(d < 16000)return 4;
 	return 5;
 	//const float fovRadian =  fov * 3.1415926535/180.0;
 	//const float a = fovRadian*fovRadian*1.33333 / (1024*768*1.0);
@@ -125,16 +125,6 @@ float correlation[7]=
 64
 };
 
-//int evalLOD(vec3 samplePos)
-//{
-//	float d = length(vec3(vpl_ModelMatrix*vec4(samplePos,1)) - fuckPos);
-//	if(d < 100)return 0;
-//	if(d < 300)return 1;
-//	if(d < 500)return 2;
-//	if(d < 800)return 3;
-//	if(d < 1300)return 4;
-//	return 4;
-//}
 
 #ifdef ILLUMINATION
 vec3 N;
@@ -156,7 +146,7 @@ float EvalDistanceFromViewToBlockCenterCoord(vec3 samplePos,int curLod){
 	return distance(fuckPos, r.xyz);
 }
 
-/*
+/* Debug Code
 uint EvalBlockID( vec3 samplePos,int curLod )
 {
 	ivec3 pageTableSize = ivec3( lodInfoBuffer.lod[ curLod ].pageTableSize );
@@ -307,6 +297,13 @@ bool isboader(vec3 point)
 }
 
 
+// A pseudorandom genrator
+float rand(vec2 co)
+{
+ return fract(sin(dot(co.xy, vec2(12.9898,78.233))) * 43758.5453);
+}
+
+
 void main()
 {
     vec4 rayStartInfo =imageLoad(entryPos,ivec2(gl_FragCoord)).xyzw;
@@ -318,9 +315,14 @@ void main()
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
-	vec3 samplePoint = rayStart;
-	int prevLOD = int(rayStartInfo.w);
-	vec4 boundingBoxColor = vec4(1,0,0,0.1);
+	vec3 samplePoint = rayStart; //+ rand(vec2(gl_FragCoord)) * direction*0.001;
+	int prevLOD = int(rayStartInfo.w);// & 0xf;
+  //	if(int((int(rayStartInfo.w) >> 4) & 0xf) == 0)
+  //   {
+  //     samplePoint += rand(vec2(gl_FragCoord)/vec2(1280,760))*direction * 0.006;
+  //   }
+
+	vec4 boundingBoxColor = vec4(1,0,0,1);
 
 //	if(start2end.x == 0 && start2end.y == 0 && start2end.z == 0)
 //	{
@@ -338,7 +340,7 @@ void main()
 		samplePoint.z > 1.0)
 		break;
 
-		int curLod = EvalLOD(EvalDistanceFromViewToBlockCenterCoord(samplePoint,prevLOD));
+		int curLod =EvalLOD(EvalDistanceFromViewToBlockCenterCoord(samplePoint,prevLOD));
 
 		samplePoint += direction * stepTable[curLod] * (float(i) + 0.5);
 
@@ -358,9 +360,11 @@ void main()
 		}
 
 		vec4 sampledColor = texture(texTransfunc, scalar.r);
+		//if(scalar.r < 0.05)sampledColor.a = 0;
+        //else sampledColor = scalar.rrrr;
 		sampledColor.a = 1-pow((1-sampledColor.a),correlation[curLod]);
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
-		color.a = color.a + (1-color.a) * sampledColor.a;
+		//color.a = color.a + (1-color.a) * sampledColor.a;
 
 
 		// Debug Code

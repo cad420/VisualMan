@@ -81,7 +81,6 @@ void main()
 		if (color.a > 0.99)
 			break;
 	}
-
 	if (color.a == 0.0) discard;
 	color = color + vec4(bg.rgb, 0.0) * (1.0 - color.a);
 	color.a = 1.0;

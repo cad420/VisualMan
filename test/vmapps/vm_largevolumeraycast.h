@@ -84,6 +84,7 @@ private:
 	Ref<Aggregate> mrtAgt, raycastAgt, navigationAgt;
 	Ref<OutOfCorePrimitive> oocPrimitive;
 	Ref<Texture> intermediateResult;
+	Ref<Texture> randomOffsets;
 	Vec2i vSize;
 	Ref<Transform> proxyGemoryScaleTrans;
 	Ref<Transform> navigationScale;
