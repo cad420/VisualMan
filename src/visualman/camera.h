@@ -182,6 +182,7 @@ private:
 	float aspectRatio = 1024.0 / 768.0;
 	float nearPlan = 0.01;
 	float farPlan = 1000;
+	
 };
 
 VISUALMAN_EXPORT_IMPORT Ref<Camera> CreateCamera( const std::string &jsonFileName );
@@ -229,9 +230,15 @@ public:
 
 	void KeyReleaseEvent( KeyButton key ) override {}
 
+	void SetFPSCamera( bool enable ) { m_fpsCamera = enable; }
+
+	bool IsFPSCamera() const { return m_fpsCamera; }
+	
 private:
 	Ref<Camera> camera;
 	Vec2i lastMousePos;
+
+	bool m_fpsCamera = true;
 };
 }  // namespace vm
 }  // namespace ysl

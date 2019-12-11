@@ -377,7 +377,9 @@ void VM_LargeVolumeRayCast::KeyPressEvent( KeyButton key )
 		mrtAgt->CreateGetCamera()->GetViewMatrixWrapper()->SetPosition( Point3f{ 0, 0, 0 } );
 		mrtAgt->CreateGetCamera()->SetFov( 60 );
 		mrtAgt->CreateGetCamera()->GetViewMatrixWrapper()->SetCenter( Point3f{ 1000, 1000, 1000 } );
-	} 
+	} else if ( key == KeyButton::Key_F ) {
+		manipulator->SetFPSCamera( !manipulator->IsFPSCamera() );
+	}
 }
 
 void VM_LargeVolumeRayCast::MouseMoveEvent( MouseButton button, int xpos, int ypos )
@@ -429,7 +431,7 @@ void VM_LargeVolumeRayCast::SetupResources( const std::string &fileName )
 
 		oocResources = MakeRef<OutOfCoreVolumeTexture>( lvdInfo, Context()->GetDeviceTotalMemorySize() );
 	} catch ( std::runtime_error &e ) {
-		::vm::Warning( "Can not load lvd file" );
+		::vm::Warning( "{}" ,e.what());
 		return;
 	}
 

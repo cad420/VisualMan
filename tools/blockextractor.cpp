@@ -59,6 +59,9 @@ int main( int argc, char **argv )
 		return 0;
 	}
 
+
+	vm::println( "Block Dim:", reader->Get3DPageCount() );
+	
 	std::unique_ptr<char[]> buf( new char[ blockBytes ] );
 
 	std::memcpy( buf.get(), reader->GetPage(p), blockBytes );

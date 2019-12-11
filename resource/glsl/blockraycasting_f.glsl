@@ -315,12 +315,12 @@ void main()
 	vec3 direction = normalize(start2end);
 	float distance = dot(direction, start2end);
 	int steps = int(distance / step);
-	vec3 samplePoint = rayStart; //+ rand(vec2(gl_FragCoord)) * direction*0.001;
+	vec3 samplePoint = rayStart ;//+  direction*0.001;
 	int prevLOD = int(rayStartInfo.w);// & 0xf;
-  //	if(int((int(rayStartInfo.w) >> 4) & 0xf) == 0)
-  //   {
-  //     samplePoint += rand(vec2(gl_FragCoord)/vec2(1280,760))*direction * 0.006;
-  //   }
+  	//if(int((int(rayStartInfo.w) >> 4) & 0xf) == 0)
+     //{
+     //  samplePoint += direction * 0.001;
+    // }
 
 	vec4 boundingBoxColor = vec4(1,0,0,1);
 
@@ -340,7 +340,7 @@ void main()
 		samplePoint.z > 1.0)
 		break;
 
-		int curLod = 0 ;//EvalLOD(EvalDistanceFromViewToBlockCenterCoord(samplePoint,prevLOD));
+		int curLod = EvalLOD(EvalDistanceFromViewToBlockCenterCoord(samplePoint,prevLOD));
 
 		samplePoint += direction * stepTable[curLod] * (float(i) + 0.5);
 
@@ -354,19 +354,22 @@ void main()
 		vec4 scalar = virtualVolumeSample(samplePoint,curLod,mapped,blockColor);
 		if (mapped == false) 
 		{
-			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,float(curLod)));
+			imageStore(entryPos,ivec2(gl_FragCoord),vec4(samplePoint,float(curLod )));
 			imageStore(interResult,ivec2(gl_FragCoord),vec4(color));
 			discard;
 		}
 
 		//vec4 sampledColor = texture(texTransfunc, scalar.r);
-		float alpha = 0.05;
+		float alpha = 0.03, a = 1.0;
 		vec4 sampledColor;
-		float x = (scalar.r - alpha)/(1-alpha);
+		float x = (scalar.r - alpha)/(a-alpha);
 		if(scalar.r < alpha)sampledColor.a = 0;
+		else if(scalar.r > a )sampledColor=vec4(1,1,1,1);
         else sampledColor = vec4(x,x,x,x);
 		//sampledColor.a = 1-pow((1-sampledColor.a),correlation[curLod]);
 		color = color + sampledColor * vec4(sampledColor.aaa, 1.0) * (1.0 - color.a);
+		//vec4 b = vec4(blockColor,0.001);
+		//color = color + b * vec4(b.aaa, 1.0) * (1.0 - color.a);
 		//color.a = color.a + (1-color.a) * sampledColor.a;
 
 

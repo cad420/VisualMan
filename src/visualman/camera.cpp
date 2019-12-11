@@ -361,24 +361,26 @@ void CameraManipulator::MouseMoveEvent( MouseButton button, int xpos, int ypos )
 		if ( dx == 0.0 && dy == 0.0 )
 			return;
 
-		//if ( ( button & Mouse_Left ) && ( button & Mouse_Right ) ) {
-		//	const auto directionEx = camera->Up() * dy + dx * camera->Right();
-		//	camera->Movement( directionEx, 0.002 );
-		//} else if ( button == Mouse_Left ) {
-		//	camera->Rotation( dx, dy );
-		//} else if ( button == Mouse_Right && dy != 0.0 ) {
-		//	const auto directionEx = camera->GetFront() * dy;
-		//	camera->Movement( directionEx, 1.0 );
-		//}
+		if ( m_fpsCamera == false ) {
+			if ( ( button & Mouse_Left ) && ( button & Mouse_Right ) ) {
+				const auto directionEx = camera->Up() * dy + dx * camera->Right();
+				camera->Movement( directionEx, 0.002 );
+			} else if ( button == Mouse_Left ) {
+				camera->Rotation( dx, dy );
+			} else if ( button == Mouse_Right && dy != 0.0 ) {
+				const auto directionEx = camera->GetFront() * dy;
+				camera->Movement( directionEx, 1.0 );
+			}
 
-		const auto front = camera->GetFront().Normalized();
-		const auto up = camera->GetUp().Normalized();
-		const auto right = Vec3f::Cross( front, up );
-		const auto dir = (up * dy - right * dx).Normalized();
-		const auto axis = Vec3f::Cross( dir, front );
-		camera->SetFront( Rotate( axis,5.0 )*front);
-		
-		
+		} else {
+			const auto front = camera->GetFront().Normalized();
+			const auto up = camera->GetUp().Normalized();
+			const auto right = Vec3f::Cross( front, up );
+			const auto dir = ( up * dy - right * dx ).Normalized();
+			const auto axis = Vec3f::Cross( dir, front );
+			camera->SetFront( Rotate( axis, 5.0 ) * front );
+		}
+
 		lastMousePos.x = xpos;
 		lastMousePos.y = ypos;
 	}
@@ -386,23 +388,25 @@ void CameraManipulator::MouseMoveEvent( MouseButton button, int xpos, int ypos )
 
 void CameraManipulator::KeyPressEvent( KeyButton key )
 {
-	float sensity = 0.05;
+	float sensity = 0.1;
 	if ( camera != nullptr ) {
-		if ( key == KeyButton::Key_W ) {
-			auto dir = camera->GetFront();
-			camera->Movement( sensity * dir.Normalized(), 100 );
-			//mrtAgt->CreateGetCamera()->Movement();
-		} else if ( key == KeyButton::Key_S ) {
-			auto dir = -camera->GetFront();
-			camera->Movement( sensity * dir.Normalized(), 100 );
-		} else if ( key == KeyButton::Key_A ) {
-			auto dir = ( Vec3f::Cross( camera->GetUp(), camera->GetFront() ).Normalized() * sensity );
-			camera->Movement( dir, 100 );
-			camera->SetCenter( camera->GetCenter() + dir );
-		} else if ( key == KeyButton::Key_D ) {
-			auto dir = ( -Vec3f::Cross( camera->GetUp(), camera->GetFront() ).Normalized() ) * sensity;
-			camera->Movement( dir, 100 );
-			camera->SetCenter( camera->GetCenter() + dir );
+		if ( m_fpsCamera == true ) {
+			if ( key == KeyButton::Key_W ) {
+				auto dir = camera->GetFront();
+				camera->Movement( sensity * dir.Normalized(), 100 );
+				//mrtAgt->CreateGetCamera()->Movement();
+			} else if ( key == KeyButton::Key_S ) {
+				auto dir = -camera->GetFront();
+				camera->Movement( sensity * dir.Normalized(), 100 );
+			} else if ( key == KeyButton::Key_A ) {
+				auto dir = ( Vec3f::Cross( camera->GetUp(), camera->GetFront() ).Normalized() * sensity );
+				camera->Movement( dir, 100 );
+				camera->SetCenter( camera->GetCenter() + dir );
+			} else if ( key == KeyButton::Key_D ) {
+				auto dir = ( -Vec3f::Cross( camera->GetUp(), camera->GetFront() ).Normalized() ) * sensity;
+				camera->Movement( dir, 100 );
+				camera->SetCenter( camera->GetCenter() + dir );
+			}
 		}
 	}
 }
