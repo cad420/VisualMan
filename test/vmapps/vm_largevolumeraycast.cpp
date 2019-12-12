@@ -7,11 +7,12 @@
 #include <trivialscenemanager.h>
 #include <VMat/transformation.h>
 #include <VMUtils/log.hpp>
+#include <VMGraphics/objreader.h>
 #include "blitframebuffer.h"
 #include "actoreventcallback.h"
 #include <framebuffer.h>
 #include "drawelements.h"
-
+#include <VMUtils/log.hpp>
 namespace ysl
 {
 namespace vm
@@ -127,7 +128,7 @@ void VM_LargeVolumeRayCast::InitEvent()
 	// entry texture
 	auto entryTexture = MakeRef<Texture>();
 	entryTexture->SetSetupParams( texParam );
-	entryTexture->CreateTexture();  // needless
+	entryTexture->CreateTexture();	// needless
 	// exit texture
 	auto exitTexture = MakeRef<Texture>();
 	exitTexture->SetSetupParams( texParam );
@@ -136,6 +137,12 @@ void VM_LargeVolumeRayCast::InitEvent()
 	intermediateResult = MakeRef<Texture>();
 	intermediateResult->SetSetupParams( texParam );
 	intermediateResult->CreateTexture();
+
+	//Debug hxy
+	// nueral texture
+	auto neuralTexture = MakeRef<Texture>();
+	neuralTexture->SetSetupParams( texParam );
+	neuralTexture->CreateTexture();
 
 	/*[1]Multi Render Targets Aggregation*****************************************
 			 *
@@ -149,14 +156,20 @@ void VM_LargeVolumeRayCast::InitEvent()
 	auto mrtFBO = Context()->CreateFramebufferObject( vSize.x, vSize.y, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0 );
 	mrtFBO->AddTextureAttachment( AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>( entryTexture ) );
 	mrtFBO->AddTextureAttachment( AP_COLOR_ATTACHMENT1, MakeRef<FBOTextureAttachment>( exitTexture ) );
-	//mrtFBO->AddDepthAttachment(depthAttachment);
+	//Debug hxy
+	mrtFBO->AddTextureAttachment( AP_COLOR_ATTACHMENT2, MakeRef<FBOTextureAttachment>( neuralTexture ) );
+	mrtFBO->AddDepthAttachment( MakeRef<FBODepthAttachment>( DBF_DEPTH_COMPONENT24 ) );
 
-	mrtFBO->SetDrawBuffers( RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT1 );
+	//mrtFBO->AddDepthAttachment(depthAttachment);
+	//Debug hxy
+	//mrtFBO->SetDrawBuffers( RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT1 );
+	mrtFBO->SetDrawBuffers( RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT1, RDB_COLOR_ATTACHMENT2 );
 	mrtAgt->Renderers().at( 0 )->SetFramebuffer( mrtFBO );
 	BindCameraEvent( mrtAgt->CreateGetCamera() );
 
 	auto positionShading = MakeRef<Shading>();
 	positionShading->CreateGetEnableStateSet()->Enable( EN_BLEND );
+	positionShading->CreateGetEnableStateSet()->Disable( EN_DEPTH_TEST );
 	positionShading->CreateGetRenderStateSet()->SetRenderState( MakeRef<BlendFuncState>( BF_ONE, BF_ONE, BF_ONE, BF_ONE ), -1 );  // Think why
 	positionShading->CreateGetRenderStateSet()->SetRenderState( MakeRef<FrontFaceState>( FF_CW ), -1 );
 
@@ -169,22 +182,51 @@ void VM_LargeVolumeRayCast::InitEvent()
 	positionGLSL->AttachShader( vertShader );
 	positionGLSL->BindFragDataLocation( 0, "entryPos" );  // MRTs
 	positionGLSL->BindFragDataLocation( 1, "exitPos" );
+	//Debug hxy
 
-	auto artist = MakeRef<Artist>();
-	artist->GetLOD( 0 )->push_back( positionShading );
+	auto geometryArtist = MakeRef<Artist>();
+	geometryArtist->GetLOD( 0 )->push_back( positionShading );
 	auto t = Translate( -0.5, -0.5, -0.5 );
 	auto s = Scale( 1, 1, 1 );
 
 	proxyGemoryScaleTrans = MakeRef<Transform>( s * t );
-	const auto geometryActor = MakeRef<Actor>( nullptr, artist, proxyGemoryScaleTrans );
+	const auto geometryActor = MakeRef<Actor>( nullptr, geometryArtist, proxyGemoryScaleTrans );
 	auto geometryActorCallback = MakeRef<RayCast2ActorEventCallback>();
 	geometryActorCallback->BindToActor( geometryActor );
 
-	auto sceneManager = MakeRef<TrivialSceneManager>();
+	auto neroShading = MakeRef<Shading>();
+	/*auto st = MakeRef<PolygonModeState>();
+	st->SetFrontMode( PM_LINE );
+	st->SetBackMode( PM_LINE );
+	neroShading->CreateGetRenderStateSet()->SetRenderState( st, -1 );*/
+	neroShading->CreateGetEnableStateSet()->Enable( EN_DEPTH_TEST );
+	
+	auto neroGLSL = neroShading->CreateGetProgram();
+	auto neroFragShader = MakeRef<GLSLFragmentShader>();
+	neroFragShader->SetFromFile( R"(glsl/position_n_f.glsl)" );
+	auto neroVertShader = MakeRef<GLSLVertexShader>();
+	neroVertShader->SetFromFile( R"(glsl/position_n_v.glsl)" );
+	neroGLSL->AttachShader( neroFragShader );
+	neroGLSL->AttachShader( neroVertShader );
+	neroGLSL->BindFragDataLocation( 2, "neuralPos" );
+
+	neroArtist = MakeRef<Artist>();
+	neroArtist->GetLOD( 0 )->push_back( neroShading );
+
+	//auto t = Translate( -0.5, -0.5, -0.5 );
+	//auto s = Scale( 1, 1, 1 );
+
+	//neroScaleTrans = MakeRef<Transform>( s * t );
+
+	sceneManager = MakeRef<TrivialSceneManager>();
 	sceneManager->AddActor( geometryActor );
+	//sceneManager->AddActor( neroActor );
+
+	//
 	mrtAgt->SceneManager().push_back( sceneManager );
-	mrtAgt->CreateGetCamera()->GetViewport()->SetClearFlag( CF_CLEAR_COLOR_DEPTH );
+	mrtAgt->CreateGetCamera()->GetViewport()->SetClearFlag( CF_CLEAR_COLOR_DEPTH);
 	mrtAgt->CreateGetCamera()->GetViewport()->SetClearColor( Vec4f{ 0.f, 0.f, 0.f, 1.f } );
+	mrtAgt->CreateGetCamera()->GetViewport()->SetClearDepth( 1 );
 
 	// Thumbnail aggregation
 	navigationAgt = MakeRef<Aggregate>();
@@ -265,6 +307,8 @@ void VM_LargeVolumeRayCast::InitEvent()
 	rayCastShading->CreateGetTextureImageUnit( 4 )->SetTexture( intermediateResult );
 	rayCastShading->CreateGetTextureImageUnit( 2 )->SetTexture( entryTexture );
 	rayCastShading->CreateGetTextureImageUnit( 3 )->SetTexture( exitTexture );
+	//Debug hxy
+	rayCastShading->CreateGetTextureImageUnit( 5 )->SetTexture( neuralTexture );
 
 	rayCastShading->CreateGetUniformSet()->CreateGetUniform( "texTransfunc" )->SetUniformValue( 4 );
 	rayCastShading->CreateGetUniformSet()->CreateGetUniform( "cacheVolume0" )->SetUniformValue( 1 );
@@ -284,12 +328,12 @@ void VM_LargeVolumeRayCast::InitEvent()
 	const auto screenActor = MakeRef<Actor>( nullptr, effect2, proxyGemoryScaleTrans );
 	auto screenActorCallback = MakeRef<ScreenActorEventCallback>( mrtAgt->CreateGetCamera() );
 	oocPrimitive = MakeRef<OutOfCorePrimitive>();
-	screenActorCallback->SetPrimitive( oocPrimitive );  // Out Of Core
+	screenActorCallback->SetPrimitive( oocPrimitive );	// Out Of Core
 	//SetupResources("");
 	//SetupTF("");
 
 	screenActorCallback->BindToActor( screenActor );
-	sceneManager = MakeRef<TrivialSceneManager>();
+	const auto sceneManager = MakeRef<TrivialSceneManager>();
 	sceneManager->AddActor( screenActor );
 
 	raycastAgt->SceneManager().push_back( sceneManager );
@@ -431,7 +475,7 @@ void VM_LargeVolumeRayCast::SetupResources( const std::string &fileName )
 
 		oocResources = MakeRef<OutOfCoreVolumeTexture>( lvdInfo, Context()->GetDeviceTotalMemorySize() );
 	} catch ( std::runtime_error &e ) {
-		::vm::Warning( "{}" ,e.what());
+		::vm::Warning( "{}", e.what() );
 		return;
 	}
 
@@ -454,13 +498,40 @@ void VM_LargeVolumeRayCast::SetupResources( const std::string &fileName )
 	oocPrimitive->SetOutOfCoreResources( oocResources );
 
 	int lodCount = oocResources->GetLODCount();
-	const auto resolution = oocResources->DataResolutionWithPadding( 0 );
+	dataOriginalResolution = oocResources->DataResolutionWithPadding( 0 );
+	dataResolution = oocResources->DataResolution( 0 );
+	padding = oocResources->Padding();
+	
 	auto t = Translate( -0.5, -0.5, -0.5 );
-	auto s = Scale( Vec3f( resolution ) );
+	//auto s = Scale( Vec3f( dataOriginalResolution ) );
+	auto s = Scale( Vec3f( dataResolution ) );
 	auto spacing = Scale( Vec3f( 1, 1, 6 ) );
 	*proxyGemoryScaleTrans = Transform( spacing * s * t );
-	*navigationCameraViewMatrix = ViewMatrixWrapper( Point3f( MinComponent( resolution ), MinComponent( resolution ), MaxComponent( resolution * 2 ) ), Vec3f{ 0, 1, 0 }, Point3f{ 0, 0, 0 } );
+	//*navigationCameraViewMatrix = ViewMatrixWrapper( Point3f( MinComponent( dataOriginalResolution ), MinComponent( dataOriginalResolution ), MaxComponent( dataOriginalResolution * 2 ) ), Vec3f{ 0, 1, 0 }, Point3f{ 0, 0, 0 } );
+	*navigationCameraViewMatrix = ViewMatrixWrapper( Point3f( MinComponent( dataResolution ), 
+		MinComponent( dataResolution ), MaxComponent( dataResolution * 2 ) ),
+													 Vec3f{ 0, 1, 0 }, Point3f{ 0, 0, 0 } );
 	Context()->Update();
+
+	
+}
+
+void VM_LargeVolumeRayCast::SetupNero( const std::string &filename )
+{
+	// reading obj
+
+	//ysl::Vec3i data_volume = dataResolution + padding + padding;
+	ysl::Vec3i data_volume = dataResolution;
+	//data_volume.z += 4 * padding.z;
+
+	const auto neroActor = MakeRef<Actor>( nullptr, neroArtist, nullptr );
+	neroActorCallback = MakeRef<NeroActorEventCallback>( filename, data_volume );
+
+	std::cout << "nerual data resolution : [" << data_volume.x << ","
+			  << data_volume.y << "," << data_volume.z << "]" << std::endl;
+
+	neroActorCallback->BindToActor( neroActor );
+	sceneManager->AddActor( neroActor );
 }
 
 void VM_LargeVolumeRayCast::SetupTF( const std::string &fileName )
@@ -470,7 +541,7 @@ void VM_LargeVolumeRayCast::SetupTF( const std::string &fileName )
 		const auto tfTex = MakeTransferFunction1DTexture( fileName );
 
 		const auto preTex = MakePreIntegratedTransferFunction2DTexture( fileName );
-		
+
 		rayCastShading->CreateGetTextureSampler( 4 )->SetTexture( tfTex );
 		rayCastShading->CreateGetTextureSampler( 5 )->SetTexture( preTex );
 	} catch ( std::runtime_error &e ) {
@@ -504,6 +575,9 @@ void VM_LargeVolumeRayCast::SetupConfigurationFiles( const std::vector<std::stri
 			found = true;
 		} else if ( extension == ".cam" ) {
 			SetupCamera( each );
+			found = true;
+		} else if ( extension == ".obj" ) {
+			SetupNero( each );
 			found = true;
 		}
 		if ( found )

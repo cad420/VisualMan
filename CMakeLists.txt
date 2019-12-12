@@ -1,6 +1,8 @@
 ﻿
 cmake_minimum_required (VERSION 3.8)
 
+set (CMAKE_PREFIX_PATH "C:\\Qt\\Qt5.12.3\\5.12.3\\msvc2017_64\\lib\\cmake\\Qt5")
+
 project ("VisualMan")
 set(CMAKE_CXX_STANDARD 17)				# C++17 is required
 
@@ -12,6 +14,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)		# options for gnu compliler
 	add_compile_options(-fpermissive)
 	add_compile_options(-std=c++17)
 endif()
+
 
 # Shared or static library
 

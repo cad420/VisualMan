@@ -13,15 +13,15 @@
       "variables": [
         {
           "name": "Qt5_DIR",
-          "value": "C:\\lib\\Qt\\Qt5.13.0\\5.13.0\\msvc2017_64\\lib\\cmake\\Qt5"
+          "value": "C:\\Qt\\Qt5.12.3\\5.12.3\\msvc2017_64\\lib\\cmake\\Qt5"
         },
         {
           "name": "glfw3_DIR",
-          "value": "C:\\Program Files\\GLFW\\lib\\cmake\\glfw3"
+          "value": "C:\\Program Files\\glfw3\\lib\\cmake\\glfw3"
         },
         {
           "name": "VM_USE_QT_BINDING",
-          "value": ""
+          "value": "On"
         },
 
         {
@@ -46,11 +46,7 @@
         },
         {
           "name": "VM_BUILD_LZ4ENCODER",
-          "value": "On"
-        },
-        {
-          "name": "LZ4_SDK_DIR",
-          "value": "C:\\lib\\lz4_win64_v1_9_2"
+          "value": "Off"
         }
       ]
     },
@@ -67,11 +63,11 @@
       "variables": [
         {
           "name": "Qt5_DIR",
-          "value": "C:\\lib\\Qt\\Qt5.13.0\\5.13.0\\msvc2017_64\\lib\\cmake\\Qt5"
+          "value": "C:\\Qt\\Qt5.12.3\\5.12.3\\msvc2017_64\\lib\\cmake\\Qt5"
         },
         {
           "name": "glfw3_DIR",
-          "value": "C:\\Program Files\\GLFW\\lib\\cmake\\glfw3"
+          "value": "C:\\Program Files\\glfw3\\lib\\cmake\\glfw3"
         },
         {
           "name": "VM_USE_QT_BINDING",
@@ -123,11 +119,11 @@
       "variables": [
         {
           "name": "Qt5_DIR",
-          "value": "C:\\lib\\Qt\\Qt5.13.0\\5.13.0\\msvc2017_64\\lib\\cmake\\Qt5"
+          "value": "C:\\Qt\\Qt5.12.3\\5.12.3\\msvc2017_64\\lib\\cmake\\Qt5"
         },
         {
           "name": "glfw3_DIR",
-          "value": "C:\\Program Files\\GLFW\\lib\\cmake\\glfw3"
+          "value": "C:\\Program Files\\glfw3\\lib\\cmake\\glfw3"
         },
         {
           "name": "VM_USE_QT_BINDING",
@@ -161,6 +157,10 @@
         {
           "name": "LZ4_SDK_DIR",
           "value": "C:\\lib\\lz4_win64_v1_9_2"
+        },
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "L:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
         }
 
       ]

@@ -35,7 +35,7 @@ public:
 		assert( GetRenderStateSet() );
 		GetRenderStateSet()->SetProgram( program );
 	}
-
+	
 	// RenderState getter and setter
 	Ref<RenderStateSet> CreateGetRenderStateSet() { return renderStateSet ? renderStateSet : ( renderStateSet = MakeRef<RenderStateSet>() ); }
 	Ref<RenderStateSet> GetRenderStateSet() const { return renderStateSet; }

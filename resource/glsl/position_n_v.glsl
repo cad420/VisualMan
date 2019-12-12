@@ -14,9 +14,9 @@ in vec4 vpl_VertexTexCoord2;
 in vec4 vpl_VertexTexCoord3;
 in vec4 vpl_VertexTexCoord4;
 
-out vec3 texCoord;
+out vec3 neuralTexCoord;
 void main()
 {
 	gl_Position = vpl_MVPMatrix * vpl_VertexPosition;
-	texCoord = vec3(vpl_VertexTexCoord0);            //(0,0,0)<--->(1,1,1)
+	neuralTexCoord = vec3(vpl_VertexTexCoord0 );	//(0,0,0)<--->(1,1,1)
 }
