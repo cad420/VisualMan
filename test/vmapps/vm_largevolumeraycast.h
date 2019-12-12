@@ -48,6 +48,8 @@ private:
 	Ref<Primitive> boundingBox;
 };
 
+
+
 class VMAPPS_EXPORT_IMPORT VM_LargeVolumeRayCast : public VisualMan
 {
 public:

@@ -18,7 +18,6 @@ ViewMatrixWrapper::ViewMatrixWrapper( const ysl::Point3f &position, ysl::Vector3
   m_worldUp( worldUp ),
   m_movementSpeed( SPEED ),
   m_mouseSensitivity( SENSITIVITY ),
-  m_center( center ),
   m_zoom( ZOOM )
 {
 	m_right = ysl::Vector3f::Cross( m_front, m_worldUp ).Normalized();
@@ -26,14 +25,33 @@ ViewMatrixWrapper::ViewMatrixWrapper( const ysl::Point3f &position, ysl::Vector3
 	//updateCameraVectors(QVector3D(0,1,0),QVector3D(0,0,0),0);
 }
 
-void ViewMatrixWrapper::UpdateCamera( const ysl::Point3f &position, ysl::Vector3f worldUp, const ysl::Point3f &center )
+	ViewMatrixWrapper::ViewMatrixWrapper( const ysl::Point3f &position, ysl::Vector3f up, const ysl::Vector3f &front ):
+  m_position( position ),
+  m_front( front.Normalized() ),
+  m_worldUp( up ),
+  m_movementSpeed( SPEED ),
+  m_mouseSensitivity( SENSITIVITY ),
+  m_zoom( ZOOM )
+{
+	
+}
+
+void ViewMatrixWrapper::UpdateCamera( const ysl::Point3f &position, ysl::Vector3f worldUp, const ysl::Point3f & center )
 {
 	m_position = position;
-	m_front = center - position;
-	m_worldUp = worldUp;
+	m_front = (center - position).Normalized();
+	m_worldUp = worldUp.Normalized();
 	m_right = ysl::Vector3f::Cross( m_front, m_worldUp ).Normalized();
 	m_up = ysl::Vector3f::Cross( m_right, m_front ).Normalized();
-	m_center = center;
+}
+
+void ViewMatrixWrapper::UpdateCamera( const ysl::Point3f &position, ysl::Vector3f worldUp, const ysl::Vec3f &front )
+{
+	m_position = position;
+	m_front = front.Normalized();
+	m_worldUp = worldUp.Normalized();
+	m_right = ysl::Vector3f::Cross( m_front, m_worldUp ).Normalized();
+	m_up = ysl::Vector3f::Cross( m_right, m_front ).Normalized();
 }
 
 Transform ViewMatrixWrapper::GetViewMatrix() const
@@ -50,8 +68,8 @@ void ViewMatrixWrapper::SetPosition( const Point3f &pos )
 
 void ViewMatrixWrapper::SetCenter( const ysl::Point3f &center )
 {
-	m_center = center;
-	m_front = ( m_center - m_position ).Normalized();
+	//m_center = center;
+	m_front = ( center - m_position ).Normalized();
 	m_right = ysl::Vector3f::Cross( m_front, m_worldUp ).Normalized();
 	m_up = ysl::Vector3f::Cross( m_right, m_front ).Normalized();
 }
@@ -62,14 +80,14 @@ void ViewMatrixWrapper::Move( const ysl::Vector3f &direction, float deltaTime )
 	m_position += velocity;
 }
 
-void ViewMatrixWrapper::Rotate( float xoffset, float yoffset )
+void ViewMatrixWrapper::Rotate( float xoffset, float yoffset, const ysl::Point3f &center )
 {
 	xoffset *= m_mouseSensitivity;
 	yoffset *= m_mouseSensitivity;
 	const auto theta = 4.0 * ( std::fabs( xoffset ) + std::fabs( yoffset ) );
 	const auto v = ( ( m_right * xoffset ) + ( m_up * yoffset ) );
 	const auto axis = ysl::Vector3f::Cross( v, -m_front ).Normalized();
-	RotateCamera( axis, theta );
+	RotateCamera( axis, theta,center );
 }
 
 void ViewMatrixWrapper::ProcessMouseScroll( float yoffset )
@@ -82,12 +100,12 @@ void ViewMatrixWrapper::ProcessMouseScroll( float yoffset )
 		m_zoom = 45.0f;
 }
 
-void ViewMatrixWrapper::RotateCamera( const ysl::Vector3f &axis, double theta )
+void ViewMatrixWrapper::RotateCamera( const ysl::Vector3f &axis, double theta, const ysl::Point3f &center )
 {
 	ysl::Transform rotation;
 	rotation.SetRotate( axis, theta );
 	ysl::Transform translation;
-	translation.SetTranslate( -m_center.x, -m_center.y, -m_center.z );
+	translation.SetTranslate( -center.x, -center.y, -center.z );
 	m_position = translation.Inversed() * ( rotation * ( translation * m_position ) );
 	m_front = ( rotation * m_front.Normalized() );
 	m_up = ( rotation * m_up.Normalized() );
@@ -128,6 +146,21 @@ void Camera::SetCamera( const ysl::Point3f &position, ysl::Vector3f worlUp, cons
 						float nearPlane, float farPlane, float aspectRatio, float fov )
 {
 	viewMatrixWrapper->UpdateCamera( position, worlUp, center );
+
+	this->nearPlan = nearPlane;
+	this->farPlan = farPlane;
+	this->aspectRatio = aspectRatio;
+	this->fov = fov;
+
+	Transform perspectiveMatrix;
+	perspectiveMatrix.SetGLPerspective( fov, aspectRatio, nearPlane, farPlane );
+	SetProjectionMatrix( perspectiveMatrix );
+}
+
+void Camera::SetCamera( const ysl::Point3f &position, ysl::Vector3f worlUp, const ysl::Vector3f & front,
+						float nearPlane, float farPlane, float aspectRatio, float fov )
+{
+	viewMatrixWrapper->UpdateCamera( position, worlUp, front );
 
 	this->nearPlan = nearPlane;
 	this->farPlan = farPlane;
@@ -244,11 +277,11 @@ void ConfigCamera( Camera *camera, const std::string &jsonFileName )
 
 	Point3f pos;
 	Vector3f up;
-	Point3f center;
+	Vector3f front;
 
-	center.x = JSON.viewMatrix.center[ 0 ];
-	center.y = JSON.viewMatrix.center[ 1 ];
-	center.z = JSON.viewMatrix.center[ 2 ];
+	front.x = JSON.viewMatrix.front[ 0 ];
+	front.y = JSON.viewMatrix.front[ 1 ];
+	front.z = JSON.viewMatrix.front[ 2 ];
 
 	pos.x = JSON.viewMatrix.pos[ 0 ];
 	pos.y = JSON.viewMatrix.pos[ 1 ];
@@ -266,8 +299,8 @@ void ConfigCamera( Camera *camera, const std::string &jsonFileName )
 	Transform perspectiveMatrix;
 	perspectiveMatrix.SetGLPerspective( fov, aspectRatio, nearPlane, farPlane );
 
-	camera->SetCamera( pos, up, center, nearPlane, farPlane, aspectRatio, fov );
-
+	camera->SetCamera( pos, up, front, nearPlane, farPlane, aspectRatio, fov );
+	
 	//camera->SetProjectionMatrix(perspectiveMatrix);
 	//camera->SetNearPlane(nearPlane);
 	//camera->SetFarPlane(farPlane);
@@ -277,7 +310,7 @@ bool SaveCameraAsJson( Ref<Camera> camera, const std::string &jsonFileName )
 {
 	using namespace rapidjson;
 	auto pos = camera->GetPosition();
-	auto center = camera->GetCenter();
+	auto front = camera->GetFront();
 	auto up = camera->GetUp();
 
 	auto fov = camera->GetFov();
@@ -295,9 +328,9 @@ bool SaveCameraAsJson( Ref<Camera> camera, const std::string &jsonFileName )
 	SetValueByPointer( d, "/viewMatrix/up/1", up.y );
 	SetValueByPointer( d, "/viewMatrix/up/2", up.z );
 
-	SetValueByPointer( d, "/viewMatrix/center/0", center.x );
-	SetValueByPointer( d, "/viewMatrix/center/1", center.y );
-	SetValueByPointer( d, "/viewMatrix/center/2", center.z );
+	SetValueByPointer( d, "/viewMatrix/front/0", front.x );
+	SetValueByPointer( d, "/viewMatrix/front/1", front.y );
+	SetValueByPointer( d, "/viewMatrix/front/2", front.z );
 
 	SetValueByPointer( d, "/perspectiveMatrix/fov", fov );
 	SetValueByPointer( d, "/perspectiveMatrix/nearPlane", nearPlane );
@@ -366,7 +399,7 @@ void CameraManipulator::MouseMoveEvent( MouseButton button, int xpos, int ypos )
 				const auto directionEx = camera->Up() * dy + dx * camera->Right();
 				camera->Movement( directionEx, 0.002 );
 			} else if ( button == Mouse_Left ) {
-				camera->Rotation( dx, dy );
+				camera->Rotation( dx, dy,{0,0,0});
 			} else if ( button == Mouse_Right && dy != 0.0 ) {
 				const auto directionEx = camera->GetFront() * dy;
 				camera->Movement( directionEx, 1.0 );
@@ -401,11 +434,9 @@ void CameraManipulator::KeyPressEvent( KeyButton key )
 			} else if ( key == KeyButton::Key_A ) {
 				auto dir = ( Vec3f::Cross( camera->GetUp(), camera->GetFront() ).Normalized() * sensity );
 				camera->Movement( dir, 100 );
-				camera->SetCenter( camera->GetCenter() + dir );
 			} else if ( key == KeyButton::Key_D ) {
 				auto dir = ( -Vec3f::Cross( camera->GetUp(), camera->GetFront() ).Normalized() ) * sensity;
 				camera->Movement( dir, 100 );
-				camera->SetCenter( camera->GetCenter() + dir );
 			}
 		}
 	}

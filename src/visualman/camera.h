@@ -20,7 +20,7 @@ struct ViewMatrixJSONStruct : ::vm::json::Serializable<ViewMatrixJSONStruct>
 {
 	VM_JSON_FIELD( std::vector<float>, pos );
 	VM_JSON_FIELD( std::vector<float>, up );
-	VM_JSON_FIELD( std::vector<float>, center );
+	VM_JSON_FIELD( std::vector<float>, front );
 };
 
 struct PerspMatrixJSONStruct : ::vm::json::Serializable<PerspMatrixJSONStruct>
@@ -51,7 +51,7 @@ class VISUALMAN_EXPORT_IMPORT ViewMatrixWrapper
 	Vector3f m_up;
 	Vector3f m_right;  // Redundant
 	Vector3f m_worldUp;
-	Point3f m_center;
+	//Point3f m_center;
 
 	// Camera options
 	float m_movementSpeed;
@@ -62,24 +62,26 @@ public:
 	// Constructor with vectors
 	ViewMatrixWrapper( const ysl::Point3f &position = { 0.0f, 0.0f, 0.0f }, ysl::Vector3f up = { 0.0f, 1.0f, 0.0f },
 					   const ysl::Point3f &center = { 0, 0, 0 } );
+	ViewMatrixWrapper( const ysl::Point3f &position, ysl::Vector3f up,
+					   const ysl::Vector3f &front );
 
 	Vector3f GetFront() const { return m_front; }
-	void SetFront( const Vector3f &front ) { m_front = front.Normalized();}
+	void SetFront( const Vector3f &front ) { m_front = front.Normalized(); }
 	Vector3f GetRight() const { return m_right; }
 	Vector3f GetUp() const { return m_up; }
 	void UpdateCamera( const ysl::Point3f &position, ysl::Vector3f worlUp,
 					   const ysl::Point3f &center );
+	void ViewMatrixWrapper::UpdateCamera( const ysl::Point3f &position, ysl::Vector3f worldUp, const ysl::Vec3f &front );
 	// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
 	Transform GetViewMatrix() const;
 	Point3f GetPosition() const { return m_position; }
 	void SetPosition( const Point3f &pos );
-	Point3f GetCenter() const { return m_center; }
+	//Point3f GetCenter() const { return m_center; }
 	void SetCenter( const ysl::Point3f &center );
 	void Move( const ysl::Vector3f &direction, float deltaTime );
-	void Rotate( float xOffset, float yOffset );
+	void Rotate( float xOffset, float yOffset, const ysl::Point3f &center );
 	void ProcessMouseScroll( float yOffset );
-	void RotateCamera( const ysl::Vector3f &axis, double theta );
-
+	void RotateCamera( const ysl::Vector3f &axis, double theta, const ysl::Point3f &center );
 
 private:
 };
@@ -114,7 +116,7 @@ public:
 
 	Point3f GetPosition() const { return viewMatrixWrapper->GetPosition(); }
 
-	void Rotation( float xoffset, float yoffset ) { viewMatrixWrapper->Rotate( xoffset, yoffset ); }
+	void Rotation( float xoffset, float yoffset,const ysl::Point3f & center ) { viewMatrixWrapper->Rotate( xoffset, yoffset, center); }
 
 	Vector3f GetFront() const { return viewMatrixWrapper->GetFront(); }
 
@@ -124,7 +126,6 @@ public:
 
 	Vector3f GetUp() const { return viewMatrixWrapper->GetUp(); }
 
-	Point3f GetCenter() const { return viewMatrixWrapper->GetCenter(); }
 
 	void SetCenter( const Point3f &center ) { viewMatrixWrapper->SetCenter( center ); }
 
@@ -132,6 +133,10 @@ public:
 
 	void SetCamera( const ysl::Point3f &position, ysl::Vector3f worlUp,
 					const ysl::Point3f &center, float nearPlane, float farPlane, float aspectRatio, float fov );
+
+	void SetCamera( const ysl::Point3f &position, ysl::Vector3f worlUp,
+					const ysl::Vector3f &front, float nearPlane, float farPlane, float aspectRatio, float fov );
+
 
 	float GetFov() const { return fov; }
 
@@ -182,7 +187,6 @@ private:
 	float aspectRatio = 1024.0 / 768.0;
 	float nearPlan = 0.01;
 	float farPlan = 1000;
-	
 };
 
 VISUALMAN_EXPORT_IMPORT Ref<Camera> CreateCamera( const std::string &jsonFileName );
@@ -233,7 +237,7 @@ public:
 	void SetFPSCamera( bool enable ) { m_fpsCamera = enable; }
 
 	bool IsFPSCamera() const { return m_fpsCamera; }
-	
+
 private:
 	Ref<Camera> camera;
 	Vec2i lastMousePos;

@@ -16,6 +16,18 @@ namespace ysl
 {
 namespace vm
 {
+
+
+void PrintCamera( Camera* camera )
+{
+	::vm::println( "Position:{}", camera->GetViewMatrixWrapper()->GetPosition() );
+	::vm::println( "Up:{}", camera->GetViewMatrixWrapper()->GetUp() );
+	::vm::println( "Front:{}", camera->GetViewMatrixWrapper()->GetFront() );
+	::vm::println( "Right:{}", camera->GetViewMatrixWrapper()->GetRight() );
+	::vm::println( "ViewMatrix:{}",camera->GetViewMatrixWrapper()->GetViewMatrix());
+}
+
+
 //using namespace ::vm;
 FrustumEventCallback::FrustumEventCallback( Ref<Camera> camera ) :
   camera( camera )
@@ -373,6 +385,7 @@ void VM_LargeVolumeRayCast::KeyPressEvent( KeyButton key )
 	float sensity = 10;
 	if ( key == KeyButton::Key_C ) {
 		SaveCameraAsJson( mrtAgt->CreateGetCamera(), "vmCamera.cam" );
+		PrintCamera( mrtAgt->CreateGetCamera().get() );
 	} else if ( key == KeyButton::Key_R ) {
 		mrtAgt->CreateGetCamera()->GetViewMatrixWrapper()->SetPosition( Point3f{ 0, 0, 0 } );
 		mrtAgt->CreateGetCamera()->SetFov( 60 );
@@ -484,8 +497,7 @@ void VM_LargeVolumeRayCast::SetupCamera( const std::string &fileName )
 {
 	//const auto camera = CreateCamera(fileName);
 	ConfigCamera( mrtAgt->CreateGetCamera().get(), fileName );
-	std::cout << std::endl
-			  << mrtAgt->CreateGetCamera()->GetViewMatrixWrapper()->GetViewMatrix().Matrix() << std::endl;
+	PrintCamera( mrtAgt->CreateGetCamera().get() );
 	Context()->Update();
 }
 
