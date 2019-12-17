@@ -15,8 +15,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace ysl
-{
 namespace vm
 {
 class EnableStateSet;
@@ -108,17 +106,17 @@ public:
 	/**
 			 * \brief  Returns default framebuffer
 			 */
-	Ref<Framebuffer> GetFramebuffer();
+	VMRef<Framebuffer> GetFramebuffer();
 
-	Ref<FramebufferObject> CreateFramebufferObject();
+	VMRef<FramebufferObject> CreateFramebufferObject();
 	/**
 			 * \brief  Creates and returns a FBO with given parameters
 			 */
-	Ref<FramebufferObject> CreateFramebufferObject( int width, int height, ReadDrawBuffer readBuffer, ReadDrawBuffer drawBuffer );
+	VMRef<FramebufferObject> CreateFramebufferObject( int width, int height, ReadDrawBuffer readBuffer, ReadDrawBuffer drawBuffer );
 
 	virtual void DestroyGLResources();
-	void AddEventListener( Ref<IEventListener> listener );
-	void RemoveEventListener( Ref<IEventListener> listener );
+	void AddEventListener( VMRef<IEventListener> listener );
+	void RemoveEventListener( VMRef<IEventListener> listener );
 	// Event Call
 	virtual void DispatchInitEvent();
 	virtual void DispatchUpdateEvent();
@@ -134,8 +132,8 @@ public:
 	//Rendering State
 
 	// glUseProgram
-	void UseProgram( Ref<const GLSLProgram> program );
-	Ref<const GLSLProgram> GetCurrentProgram() const { return curProgram; }
+	void UseProgram( VMRef<const GLSLProgram> program );
+	VMRef<const GLSLProgram> GetCurrentProgram() const { return curProgram; }
 
 	// glVertexAttribArray
 	void BindVertexArray( const IVertexAttribSet *vas );
@@ -176,9 +174,9 @@ private:
 	std::vector<std::string> extensions;
 
 	//GLFWwindow * windowContext;
-	std::vector<Ref<IEventListener>> listeners;
-	std::vector<Ref<FramebufferObject>> framebufferObjects;
-	Ref<Framebuffer> framebuffer;
+	std::vector<VMRef<IEventListener>> listeners;
+	std::vector<VMRef<FramebufferObject>> framebufferObjects;
+	VMRef<Framebuffer> framebuffer;
 
 	RenderContextFormat format;
 	bool enableUpdate = true;
@@ -190,7 +188,7 @@ private:
 
 	// Current GLSLProgram
 
-	Ref<const GLSLProgram> curProgram = nullptr;
+	VMRef<const GLSLProgram> curProgram = nullptr;
 	std::array<RenderStateBox, RS_RenderState_Count> defaultRenderStates;
 	std::array<EnableState, EN_EnableState_Count> defaultEnables;
 	std::unordered_map<RenderStateType, RenderStateBox> currentRenderStates;
@@ -198,6 +196,5 @@ private:
 };
 
 }  // namespace vm
-}  // namespace ysl
 
 #endif

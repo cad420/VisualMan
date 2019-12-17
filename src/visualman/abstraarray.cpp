@@ -1,13 +1,11 @@
 
 #include "abstraarray.h"
 
-namespace ysl
-{
 namespace vm
 {
 AbstraArray::AbstraArray()
 {
-	bufferObject = MakeRef<BufferObject>();
+	bufferObject = MakeVMRef<BufferObject>();
 }
 
 void AbstraArray::UpdateBufferObject( BufferObjectUpdateMode mode )
@@ -17,4 +15,3 @@ void AbstraArray::UpdateBufferObject( BufferObjectUpdateMode mode )
 	SetbufferObjectDataDirty( false );
 }
 }  // namespace vm
-}  // namespace ysl

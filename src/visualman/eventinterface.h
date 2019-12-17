@@ -4,8 +4,6 @@
 #include "graphictype.h"
 #include <vector>
 
-namespace ysl
-{
 namespace vm
 {
 class RenderContext;
@@ -117,6 +115,5 @@ private:
 	bool eventEnabled = true;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

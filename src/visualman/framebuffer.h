@@ -6,8 +6,6 @@
 #include <vector>
 #include "GL/gl3w.h"
 
-namespace ysl
-{
 namespace vm
 {
 class RenderContext;
@@ -72,6 +70,5 @@ void Framebuffer::SetDrawBuffers( Args &&... args )
 	( drawBuffers.emplace_back( std::forward<Args>( args ) ), ... );
 }
 }  // namespace vm
-}  // namespace ysl
 
 #endif

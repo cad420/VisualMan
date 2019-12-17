@@ -2,72 +2,70 @@
 #include "shading.h"
 #include "shaderprogram.h"
 
-namespace ysl
-{
 namespace vm
 {
-Ref<TextureSampler> Shading::CreateGetTextureSampler( int unitIndex )
+VMRef<TextureSampler> Shading::CreateGetTextureSampler( int unitIndex )
 {
 	auto texSampler = std::static_pointer_cast<TextureSampler>(
 	  CreateGetRenderStateSet()->GetRenderState( RS_TextureSampler, unitIndex ) );
 	if ( texSampler == nullptr ) {
-		texSampler = MakeRef<TextureSampler>();
+		texSampler = MakeVMRef<TextureSampler>();
 		CreateGetRenderStateSet()->SetRenderState( texSampler, unitIndex );
 	}
 	return texSampler;
 }
 
-Ref<TextureImageUnit> Shading::CreateGetTextureImageUnit( int unitIndex )
+VMRef<TextureImageUnit> Shading::CreateGetTextureImageUnit( int unitIndex )
 {
 	auto texImageUnit = std::static_pointer_cast<TextureImageUnit>(
 	  CreateGetRenderStateSet()->GetRenderState( RS_TextureImageUnit, unitIndex ) );
 	if ( texImageUnit == nullptr ) {
-		texImageUnit = MakeRef<TextureImageUnit>();
+		texImageUnit = MakeVMRef<TextureImageUnit>();
 		CreateGetRenderStateSet()->SetRenderState( texImageUnit, unitIndex );
 	}
 	return texImageUnit;
 }
 
-Ref<AtomicCounter> Shading::CreateGetAtomicCounter( int binding )
+VMRef<AtomicCounter> Shading::CreateGetAtomicCounter( int binding )
 {
 	auto atomicCounter = std::static_pointer_cast<AtomicCounter>(
 	  CreateGetRenderStateSet()->GetRenderState( RS_AtomicCounterBuffer, binding ) );
 	if ( !atomicCounter ) {
-		atomicCounter = MakeRef<AtomicCounter>();
+		atomicCounter = MakeVMRef<AtomicCounter>();
 		CreateGetRenderStateSet()->SetRenderState( atomicCounter, binding );
 	}
 	return atomicCounter;
 }
 
-Ref<ShaderStorageBufferObject> Shading::CreateGetSSBO( int binding )
+VMRef<ShaderStorageBufferObject> Shading::CreateGetSSBO( int binding )
 {
 	auto ssbo = std::static_pointer_cast<ShaderStorageBufferObject>(
 	  CreateGetRenderStateSet()->GetRenderState( RS_ShaderStorageBuffer, binding ) );
 	if ( !ssbo ) {
-		ssbo = MakeRef<ShaderStorageBufferObject>();
+		ssbo = MakeVMRef<ShaderStorageBufferObject>();
 		CreateGetRenderStateSet()->SetRenderState( ssbo, binding );
 	}
 	return ssbo;
 }
 
-Ref<UniformBufferObject> Shading::CreateGetUBO( int binding )
+VMRef<UniformBufferObject> Shading::CreateGetUBO( int binding )
 {
 	auto ubo = std::static_pointer_cast<UniformBufferObject>(
 	  CreateGetRenderStateSet()->GetRenderState( RS_UniformBuffer, binding ) );
 	if ( !ubo ) {
-		ubo = MakeRef<UniformBufferObject>();
+		ubo = MakeVMRef<UniformBufferObject>();
 		CreateGetRenderStateSet()->SetRenderState( ubo, binding );
 	}
 	return ubo;
 }
 
-Ref<Shading> MakePhongShading()
+VMRef<Shading> MakePhongShading()
 {
-	auto vertShader = MakeRef<vm::GLSLVertexShader>();
+	auto vertShader = MakeVMRef<vm::GLSLVertexShader>();
 	vertShader->SetFromFile( R"(D:\code\MRE\resource\glsl\trivial_vs.glsl)" );
-	auto fragShader = MakeRef<vm::GLSLFragmentShader>();
+	auto fragShader = MakeVMRef<vm::GLSLFragmentShader>();
 	fragShader->SetFromFile( R"(D:\code\MRE\resource\glsl\trivial_fs.glsl)" );
-	auto shading = MakeRef<vm::Shading>();
+	auto shading = MakeVMRef<vm::Shading>();
 
 	shading->CreateGetProgram()->AttachShader( vertShader );
 	shading->CreateGetProgram()->AttachShader( fragShader );
@@ -83,4 +81,3 @@ Ref<Shading> MakePhongShading()
 	return shading;
 }
 }  // namespace vm
-}  // namespace ysl

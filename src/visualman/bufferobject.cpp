@@ -6,8 +6,6 @@
 
 //#include <GLFW/glfw3.h>
 
-namespace ysl
-{
 namespace vm
 {
 BufferObject::BufferObject( BufferObjectTarget target ) :
@@ -222,4 +220,3 @@ BufferObjectUsage BufferObject::Usage() const
 	return BufferObjectUsage( bufferUsage );
 }
 }  // namespace vm
-}  // namespace ysl

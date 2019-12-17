@@ -3,8 +3,6 @@
 #include "graphictype.h"
 #include "drawarray.h"
 
-namespace ysl
-{
 namespace vm
 {
 DrawArray::DrawArray( int start, int count ) :
@@ -17,4 +15,3 @@ void DrawArray::Render() const
 	GL( glDrawArrays( GetPrimitiveType(), start, count ) );
 }
 }  // namespace vm
-}  // namespace ysl

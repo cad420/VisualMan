@@ -6,8 +6,6 @@
 #include "graphictype.h"
 #include <cassert>
 
-namespace ysl
-{
 namespace vm
 {
 void TransformChangeCallback::UpdateTransform( const GLSLProgram *program,
@@ -74,4 +72,3 @@ void TransformChangeCallback::UpdateTransform( const GLSLProgram *program,
 	}
 }
 }  // namespace vm
-}  // namespace ysl

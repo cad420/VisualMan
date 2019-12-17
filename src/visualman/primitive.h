@@ -9,8 +9,6 @@
 #include "renderable.h"
 #include <VMat/geometry.h>
 
-namespace ysl
-{
 namespace vm
 {
 class AbstraArray;
@@ -23,33 +21,33 @@ class VISUALMAN_EXPORT_IMPORT Primitive : public Renderable,
 public:
 	Primitive() = default;
 	virtual ~Primitive();
-	const std::vector<Ref<AbstrDrawCall>> &DrawCalls() const { return drawCalls; }
-	std::vector<Ref<AbstrDrawCall>> &DrawCalls() { return drawCalls; }
-	//void AddDrawCall(Ref<AbstraDrawCall> dc);
+	const std::vector<VMRef<AbstrDrawCall>> &DrawCalls() const { return drawCalls; }
+	std::vector<VMRef<AbstrDrawCall>> &DrawCalls() { return drawCalls; }
+	//void AddDrawCall(VMRef<AbstraDrawCall> dc);
 	// IVertexAttribSet
-	void SetVertexPositionArray( Ref<AbstraArray> data ) override;
+	void SetVertexPositionArray( VMRef<AbstraArray> data ) override;
 
-	Ref<AbstraArray> GetVertexArray() override { return vertexAttribArrays[ VA_VertexPositionAttrib ]; }
-	Ref<const AbstraArray> GetVertexArray() const override { return vertexAttribArrays[ VA_VertexPositionAttrib ]; }
+	VMRef<AbstraArray> GetVertexArray() override { return vertexAttribArrays[ VA_VertexPositionAttrib ]; }
+	VMRef<const AbstraArray> GetVertexArray() const override { return vertexAttribArrays[ VA_VertexPositionAttrib ]; }
 
-	void SetVertexNormalArray( Ref<AbstraArray> data ) override;
+	void SetVertexNormalArray( VMRef<AbstraArray> data ) override;
 
-	Ref<AbstraArray> GetNormalArray() override { return vertexAttribArrays[ VA_VertexNormalAttrib ]; }
-	Ref<const AbstraArray> GetNormalArray() const override { return vertexAttribArrays[ VA_VertexNormalAttrib ]; }
+	VMRef<AbstraArray> GetNormalArray() override { return vertexAttribArrays[ VA_VertexNormalAttrib ]; }
+	VMRef<const AbstraArray> GetNormalArray() const override { return vertexAttribArrays[ VA_VertexNormalAttrib ]; }
 
-	void SetVertexColorArray( Ref<AbstraArray> data ) override;
+	void SetVertexColorArray( VMRef<AbstraArray> data ) override;
 
-	Ref<AbstraArray> GetColorArray() override { return vertexAttribArrays[ VA_VertexColorAttrib ]; }
-	Ref<const AbstraArray> GetColorArray() const override { return vertexAttribArrays[ VA_VertexColorAttrib ]; }
+	VMRef<AbstraArray> GetColorArray() override { return vertexAttribArrays[ VA_VertexColorAttrib ]; }
+	VMRef<const AbstraArray> GetColorArray() const override { return vertexAttribArrays[ VA_VertexColorAttrib ]; }
 
-	void SetVertexTexCoordArray( Ref<AbstraArray> data ) override;
+	void SetVertexTexCoordArray( VMRef<AbstraArray> data ) override;
 
-	Ref<AbstraArray> GetTexCoordArray() override { return vertexAttribArrays[ VA_VertexTexCoordAttrib ]; }
-	Ref<const AbstraArray> GetTexCoordArray() const override { return vertexAttribArrays[ VA_VertexTexCoordAttrib ]; }
-	void SetVertexAttribArray( VertexAttribArrayIndexType attribLocation, Ref<AbstraArray> data ) override;
+	VMRef<AbstraArray> GetTexCoordArray() override { return vertexAttribArrays[ VA_VertexTexCoordAttrib ]; }
+	VMRef<const AbstraArray> GetTexCoordArray() const override { return vertexAttribArrays[ VA_VertexTexCoordAttrib ]; }
+	void SetVertexAttribArray( VertexAttribArrayIndexType attribLocation, VMRef<AbstraArray> data ) override;
 
-	Ref<AbstraArray> GetVertexAttribArray( int attribLocation ) override { return vertexAttribArrays[ attribLocation ]; }
-	Ref<const AbstraArray> GetVertexAttribArray( int attribLocation ) const override { return vertexAttribArrays[ attribLocation ]; }
+	VMRef<AbstraArray> GetVertexAttribArray( int attribLocation ) override { return vertexAttribArrays[ attribLocation ]; }
+	VMRef<const AbstraArray> GetVertexAttribArray( int attribLocation ) const override { return vertexAttribArrays[ attribLocation ]; }
 
 	void UpdateDirtyBufferObject( BufferObjectUpdateMode mode ) override;
 
@@ -71,8 +69,8 @@ protected:
 			 */
 	bool IsVAOCompletion() const { return vaoCompletion; }
 	unsigned int vaoHandle = 0;
-	std::vector<Ref<AbstrDrawCall>> drawCalls;
-	std::array<Ref<AbstraArray>, VA_VertexAttribArray_Count> vertexAttribArrays;
+	std::vector<VMRef<AbstrDrawCall>> drawCalls;
+	std::array<VMRef<AbstraArray>, VA_VertexAttribArray_Count> vertexAttribArrays;
 	std::array<bool, VA_VertexAttribArray_Count> boundToVAO = { false, false, false, false };
 	bool vaoCompletion = false;
 };
@@ -80,21 +78,20 @@ protected:
 //class GRAPHICS_EXPORT_IMPORT OutOfCorePrimitive :public Primitive
 //{
 //public:
-//	void AddRenderCallback(Ref<IDrawCallEvent>  callback);
+//	void AddRenderCallback(VMRef<IDrawCallEvent>  callback);
 //protected:
 //	void Render_Implement(const Actor* actor, const Shading* shading, const Camera* camera, RenderContext* context) const override;
-//	Ref<IDrawCallEvent> callback;
+//	VMRef<IDrawCallEvent> callback;
 //};
 
-Ref<Primitive> VISUALMAN_EXPORT_IMPORT MakePrimitive( const std::string &fileName );
-Ref<Primitive> VISUALMAN_EXPORT_IMPORT MakePrimitive( const float *position, size_t positionCount, const float *normals, size_t normalCount,
+VMRef<Primitive> VISUALMAN_EXPORT_IMPORT MakePrimitive( const std::string &fileName );
+VMRef<Primitive> VISUALMAN_EXPORT_IMPORT MakePrimitive( const float *position, size_t positionCount, const float *normals, size_t normalCount,
 													  const unsigned *index, size_t indexCount );
 
-Ref<Primitive> VISUALMAN_EXPORT_IMPORT MakeCube( const Bound3f &bound );
-Ref<Primitive> VISUALMAN_EXPORT_IMPORT MakeCubeLines( const Bound3f &bound );
+VMRef<Primitive> VISUALMAN_EXPORT_IMPORT MakeCube( const Bound3f &bound );
+VMRef<Primitive> VISUALMAN_EXPORT_IMPORT MakeCubeLines( const Bound3f &bound );
 
 }  // namespace vm
 
-}  // namespace ysl
 
 #endif

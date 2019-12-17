@@ -7,8 +7,6 @@
 #include "framebuffer.h"
 #include "texture.h"
 
-namespace ysl
-{
 namespace vm
 {
 class FramebufferObject;
@@ -25,7 +23,7 @@ public:
 	void DetachFromAllFBO();
 
 protected:
-	virtual void BindAttachment( Ref<FramebufferObject> fbo, AttachmentBindPoint point ) = 0;
+	virtual void BindAttachment( VMRef<FramebufferObject> fbo, AttachmentBindPoint point ) = 0;
 	std::set<WeakRef<FramebufferObject>, std::owner_less<WeakRef<FramebufferObject>>> frambufferObjects;
 };
 
@@ -48,7 +46,7 @@ public:
 
 protected:
 	virtual int InternalType() = 0;
-	void BindAttachment( Ref<FramebufferObject> fbo, AttachmentBindPoint point ) override;
+	void BindAttachment( VMRef<FramebufferObject> fbo, AttachmentBindPoint point ) override;
 
 	bool storageChanged = false;
 	unsigned int handle = 0;
@@ -152,15 +150,15 @@ class VISUALMAN_EXPORT_IMPORT AbstraFBOTextureAttachment : public AbstraFBOAttac
 	friend class FramebufferObject;
 
 public:
-	AbstraFBOTextureAttachment( Ref<Texture> texture ) :
+	AbstraFBOTextureAttachment( VMRef<Texture> texture ) :
 	  texture( std::move( texture ) ) {}
-	void SetTexture( Ref<Texture> texture ) { this->texture = std::move( texture ); }
-	Ref<Texture> GetTexture() { return texture; }
+	void SetTexture( VMRef<Texture> texture ) { this->texture = std::move( texture ); }
+	VMRef<Texture> GetTexture() { return texture; }
 	void SetMipMapLevel( int mlevel ) { mipMapLevel = mlevel; }
 	int GetMipMapLevel() const { return mipMapLevel; }
 
 protected:
-	Ref<Texture> texture;
+	VMRef<Texture> texture;
 	int mipMapLevel = 0;
 };
 
@@ -172,7 +170,7 @@ class VISUALMAN_EXPORT_IMPORT FBOTextureAttachment : public AbstraFBOTextureAtta
 	friend class FramebufferObject;
 
 public:
-	FBOTextureAttachment( Ref<Texture> texture ) :
+	FBOTextureAttachment( VMRef<Texture> texture ) :
 	  AbstraFBOTextureAttachment( std::move( texture ) )
 	{
 	}
@@ -180,7 +178,7 @@ public:
 	Texture2DTarget GetTexture2DTarget() const { return target; }
 
 protected:
-	void BindAttachment( Ref<FramebufferObject> fbo, AttachmentBindPoint point ) override;
+	void BindAttachment( VMRef<FramebufferObject> fbo, AttachmentBindPoint point ) override;
 	Texture2DTarget target = T2DT_TEXTURE_2D;
 };
 
@@ -212,21 +210,21 @@ public:
 
 	int CheckFramebufferStatus();
 
-	void AddColorAttachment( AttachmentBindPoint point, Ref<FBOColorBufferAttachment> colorAttachment );
+	void AddColorAttachment( AttachmentBindPoint point, VMRef<FBOColorBufferAttachment> colorAttachment );
 
-	void AddTextureAttachment( AttachmentBindPoint point, Ref<AbstraFBOTextureAttachment> texAttachment );
+	void AddTextureAttachment( AttachmentBindPoint point, VMRef<AbstraFBOTextureAttachment> texAttachment );
 
-	void AddDepthAttachment( Ref<FBODepthAttachment> depthAttachment );
+	void AddDepthAttachment( VMRef<FBODepthAttachment> depthAttachment );
 
-	void AddStencilAttachment( Ref<FBOStencilAttachment> stencilAttachment );
+	void AddStencilAttachment( VMRef<FBOStencilAttachment> stencilAttachment );
 
-	void AddDepthStencilAttachment( Ref<FBODepthStencilAttachment> dsAttachment );
+	void AddDepthStencilAttachment( VMRef<FBODepthStencilAttachment> dsAttachment );
 
 	void RemoveAllAttachments();
 
 	void RemoveAttachments( AttachmentBindPoint point );
 
-	void RemoveAttachments( const Ref<AbstraFBOAttachment> &attachment );
+	void RemoveAttachments( const VMRef<AbstraFBOAttachment> &attachment );
 
 	unsigned Handle() const override { return handle; }
 
@@ -235,9 +233,8 @@ public:
 private:
 	unsigned int handle = 0;
 
-	std::map<AttachmentBindPoint, Ref<AbstraFBOAttachment>> attachments;
+	std::map<AttachmentBindPoint, VMRef<AbstraFBOAttachment>> attachments;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

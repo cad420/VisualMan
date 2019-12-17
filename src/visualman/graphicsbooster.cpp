@@ -4,8 +4,6 @@
 #include <iostream>
 #include <filesystem>
 
-namespace ysl
-{
 namespace vm
 {
 Booster *Booster::booster = nullptr;
@@ -46,4 +44,3 @@ void Booster::Init()
 	}
 }
 }  // namespace vm
-}  // namespace ysl

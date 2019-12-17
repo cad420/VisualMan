@@ -1,7 +1,5 @@
 
 #include "oocresources.h"
-namespace ysl
-{
 	namespace vm
 	{
 		OutOfCoreResources::OutOfCoreResources(const std::string & fileName)
@@ -23,10 +21,9 @@ namespace ysl
 
 		}
 
-		void OutOfCoreResources::BindPrimitive(Ref<OutOfCorePrimitive> primitive)
+		void OutOfCoreResources::BindPrimitive(VMRef<OutOfCorePrimitive> primitive)
 		{
 			primitive->RemoveOutOfCoreResources(shared_from_this());
 			primitive->SetOutOfCoreResources(shared_from_this());
 		}
 	}
-}

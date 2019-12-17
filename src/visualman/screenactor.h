@@ -4,24 +4,21 @@
 #include "actor.h"
 #include "primitive.h"
 
-namespace ysl
-{
 namespace vm
 {
 class VISUALMAN_EXPORT_IMPORT ScreenActorEventCallback : public IActorEvent
 {
 public:
-	ScreenActorEventCallback( Ref<Camera> cam );
+	ScreenActorEventCallback( VMRef<Camera> cam );
 	void OnActorRenderStartedEvent( Actor *actor, const Camera *camera, Renderable *renderable, const Shading *shading, int pass ) override;
-	void SetPrimitive( Ref<Primitive> primitive );
-	void BindToActor( Ref<Actor> actor );
+	void SetPrimitive( VMRef<Primitive> primitive );
+	void BindToActor( VMRef<Actor> actor );
 
 private:
-	Ref<Primitive> screenRect;
+	VMRef<Primitive> screenRect;
 	std::vector<float> lodTable;
-	Ref<Camera> mrtCamera;
+	VMRef<Camera> mrtCamera;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

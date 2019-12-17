@@ -4,8 +4,6 @@
 #include <VMat/geometry.h>
 #include "graphictype.h"
 
-namespace ysl
-{
 namespace vm
 {
 class Viewport
@@ -64,5 +62,4 @@ private:
 };
 
 }  // namespace vm
-}  // namespace ysl
 #endif

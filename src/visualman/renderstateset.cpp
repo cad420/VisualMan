@@ -1,11 +1,9 @@
 #include "renderstateset.h"
 #include "shaderprogram.h"
 
-namespace ysl
-{
 namespace vm
 {
-void RenderStateSet::SetRenderState( Ref<RenderState> state, int index )
+void RenderStateSet::SetRenderState( VMRef<RenderState> state, int index )
 {
 	if ( state == nullptr )
 		return;
@@ -40,25 +38,25 @@ void RenderStateSet::RemoveRenderState( RenderStateType type, int index )
 	}
 }
 
-void RenderStateSet::SetProgram( Ref<GLSLProgram> program )
+void RenderStateSet::SetProgram( VMRef<GLSLProgram> program )
 {
 	SetRenderState( program, -1 );
 }
 
-Ref<GLSLProgram> RenderStateSet::CreateGetProgram()
+VMRef<GLSLProgram> RenderStateSet::CreateGetProgram()
 {
 	if ( program )
 		return program;
-	SetRenderState( MakeRef<GLSLProgram>(), -1 );
+	SetRenderState( MakeVMRef<GLSLProgram>(), -1 );
 	return program;
 }
 
-Ref<GLSLProgram> RenderStateSet::GetProgram()
+VMRef<GLSLProgram> RenderStateSet::GetProgram()
 {
 	return program;
 }
 
-Ref<RenderState> RenderStateSet::GetRenderState( RenderStateType type, int index )
+VMRef<RenderState> RenderStateSet::GetRenderState( RenderStateType type, int index )
 {
 	if ( type == RenderStateType::RS_GLSLProgram )
 		return program;
@@ -70,4 +68,3 @@ Ref<RenderState> RenderStateSet::GetRenderState( RenderStateType type, int index
 }
 
 }  // namespace vm
-}  // namespace ysl

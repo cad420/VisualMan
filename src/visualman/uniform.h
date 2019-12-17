@@ -10,14 +10,12 @@
 #include <VMat/geometry.h>
 #include <VMat/transformation.h>
 
-namespace ysl
+namespace vm
 {
 struct Matrix3x3;
 struct Matrix4x4;
-}  // namespace ysl
+}  // namespace vm
 
-namespace ysl
-{
 namespace vm
 {
 enum UniformType
@@ -109,7 +107,8 @@ public:
 	Uniform() :
 	  type( UT_NONE ) {}
 	Uniform( const std::string &name ) :
-	  type( UT_NONE ), name( name ) {}
+	  type( UT_NONE ),
+	  name( name ) {}
 
 	std::string GetName() const { return name; }
 
@@ -235,26 +234,25 @@ class VISUALMAN_EXPORT_IMPORT UniformSet
 {
 public:
 	UniformSet() = default;
-	void SetUniform( Ref<Uniform> uniform );
+	void SetUniform( VMRef<Uniform> uniform );
 
-	Ref<Uniform> GetUniform( const char *name );
-	Ref<Uniform> CreateGetUniform( const char *name )
+	VMRef<Uniform> GetUniform( const char *name );
+	VMRef<Uniform> CreateGetUniform( const char *name )
 	{
 		auto unf = GetUniform( name );
 		if ( unf ) return unf;
-		unf = MakeRef<Uniform>( name );
+		unf = MakeVMRef<Uniform>( name );
 		SetUniform( unf );
 		return unf;
 	}
-	void RemoveUniform( Ref<Uniform> uniform );
+	void RemoveUniform( VMRef<Uniform> uniform );
 	void RemoveUniform( const char *name );
 	void RemoveAllUniforms();
 	const auto &Uniforms() const { return uniforms; }
 	auto &Uniforms() { return uniforms; }
 
 private:
-	std::vector<Ref<Uniform>> uniforms;
+	std::vector<VMRef<Uniform>> uniforms;
 };
 }  // namespace vm
-}  // namespace ysl
 #endif

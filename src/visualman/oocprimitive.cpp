@@ -2,8 +2,6 @@
 #include "oocprimitive.h"
 #include "rendercontext.h"
 
-namespace ysl
-{
 namespace vm
 {
 OutOfCorePrimitive::OutOfCorePrimitive()
@@ -14,7 +12,7 @@ OutOfCorePrimitive::OutOfCorePrimitive()
 		void OnDrawCallStart( OutOfCorePrimitive *p ) override { p->SetRenderFinished( false ); }
 		void OnDrawCallFinished( OutOfCorePrimitive *p ) override { p->SetRenderFinished( true ); }
 	};
-	SetOutOfCoreResources( MakeRef<DefaultOutOfCoreCallback>() );
+	SetOutOfCoreResources( MakeVMRef<DefaultOutOfCoreCallback>() );
 }
 
 void OutOfCorePrimitive::Render( const Actor *actor, const Shading *shading, const Camera *camera,
@@ -39,12 +37,12 @@ void OutOfCorePrimitive::Render( const Actor *actor, const Shading *shading, con
 	} while ( !renderFinished );
 }
 
-void OutOfCorePrimitive::SetOutOfCoreResources( Ref<IOutOfCoreAdapter> e )
+void OutOfCorePrimitive::SetOutOfCoreResources( VMRef<IOutOfCoreAdapter> e )
 {
 	callbacks = e;
 }
 
-void OutOfCorePrimitive::RemoveOutOfCoreResources( Ref<IOutOfCoreAdapter> e )
+void OutOfCorePrimitive::RemoveOutOfCoreResources( VMRef<IOutOfCoreAdapter> e )
 {
 	callbacks = nullptr;
 }
@@ -54,4 +52,3 @@ void OutOfCorePrimitive::RemoveOutOfCoreResources()
 	callbacks = nullptr;
 }
 }  // namespace vm
-}  // namespace ysl

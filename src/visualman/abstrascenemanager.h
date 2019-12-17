@@ -4,8 +4,6 @@
 #include <vector>
 #include <VMat/geometry.h>
 #include "actor.h"
-namespace ysl
-{
 namespace vm
 {
 class Actor;
@@ -16,13 +14,12 @@ public:
 	virtual ~AbstraSceneManager() = default;
 	Bound3f BoundingBox() const { return bound; }
 	void SetBoundingBox( const Bound3f &bound ) { this->bound = bound; }
-	virtual void ExtractActors( std::vector<Ref<Actor>> &actorArray ) = 0;
-	virtual std::vector<Ref<Actor>> Actors() = 0;
+	virtual void ExtractActors( std::vector<VMRef<Actor>> &actorArray ) = 0;
+	virtual std::vector<VMRef<Actor>> Actors() = 0;
 
 protected:
 	Bound3f bound;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

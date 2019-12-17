@@ -8,8 +8,6 @@
 #include <VMUtils/log.hpp>
 #include <VMUtils/timer.hpp>
 
-namespace ysl
-{
 namespace vm
 {
 int GetBaseFormatBySizedFormat( TextureFormat sizedFormat )
@@ -237,7 +235,7 @@ bool Texture::CreateTexture( TextureTarget target,
 							 int h,
 							 int d,
 							 bool border,
-							 Ref<BufferObject> bufferObject,
+							 VMRef<BufferObject> bufferObject,
 							 int samples )
 {
 	DestroyTexture();
@@ -290,6 +288,7 @@ bool Texture::CreateTexture( TextureTarget target,
 	return true;
 }
 
+
 void Texture::SaveTextureAs( const std::string &fileName )
 {
 	int texDim[ 2 ];
@@ -314,7 +313,7 @@ void Texture::DestroyTexture()
 	}
 }
 
-void Texture::SetSetupParams( Ref<TexCreateParams> params )
+void Texture::SetSetupParams( VMRef<TexCreateParams> params )
 {
 	createParams = std::move( params );
 }
@@ -390,9 +389,9 @@ void Texture::SetSubTextureDataUsePBO( int xOffset, int yOffset, int zOffset, in
 	SetSubTextureDataUsePBO( imageFormat, imageType, xOffset, yOffset, zOffset, w, h, d );
 }
 
-Ref<Texture> MakeVolumeTexture( const std::string &fileName, size_t x, size_t y, size_t z )
+VMRef<Texture> MakeVolumeTexture( const std::string &fileName, size_t x, size_t y, size_t z )
 {
-	Ref<TexCreateParams> params = MakeRef<TexCreateParams>();
+	VMRef<TexCreateParams> params = MakeVMRef<TexCreateParams>();
 
 	RawReader rawReader( fileName, { x, y, z }, sizeof( char ) );
 	std::unique_ptr<char[]> buffer( new char[ x * y * z * sizeof( char ) ] );
@@ -400,7 +399,7 @@ Ref<Texture> MakeVolumeTexture( const std::string &fileName, size_t x, size_t y,
 		throw std::runtime_error( "Size read error" );
 	}
 
-	auto texBuffer = MakeRef<BufferObject>();
+	auto texBuffer = MakeVMRef<BufferObject>();
 
 	texBuffer->SetLocalData( buffer.get(), size_t( x ) * y * z );
 
@@ -414,7 +413,7 @@ Ref<Texture> MakeVolumeTexture( const std::string &fileName, size_t x, size_t y,
 
 	texBuffer->ReallocBufferData( BU_STREAM_DRAW, true );
 
-	auto volumeTex = MakeRef<Texture>();
+	auto volumeTex = MakeVMRef<Texture>();
 	volumeTex->SetSetupParams( params );
 	if ( !volumeTex->CreateTexture() ) {
 		return nullptr;
@@ -426,15 +425,15 @@ Ref<Texture> MakeVolumeTexture( const std::string &fileName, size_t x, size_t y,
 	return volumeTex;
 }
 
-Ref<Texture> MakeTransferFunction1DTexture( const std::string &fileName )
+VMRef<Texture> MakeTransferFunction1DTexture( const std::string &fileName )
 {
-	Ref<TexCreateParams> params = MakeRef<TexCreateParams>();
+	VMRef<TexCreateParams> params = MakeVMRef<TexCreateParams>();
 	params->EnableMipMap( false );
 	params->EnableBorder( false );
 	params->SetSize( 256, 0, 0 );
 	params->SetTextureFormat( TF_RGBA32F );
 	params->SetTextureTarget( TD_TEXTURE_1D );
-	auto tfTex = MakeRef<Texture>();
+	auto tfTex = MakeVMRef<Texture>();
 	tfTex->SetSetupParams( params );
 	if ( !tfTex->CreateTexture() ) {
 		return nullptr;
@@ -449,15 +448,15 @@ Ref<Texture> MakeTransferFunction1DTexture( const std::string &fileName )
 	return tfTex;
 }
 
-Ref<Texture> MakePreIntegratedTransferFunction2DTexture( const std::string &fileName )
+VMRef<Texture> MakePreIntegratedTransferFunction2DTexture( const std::string &fileName )
 {
-	Ref<TexCreateParams> params = MakeRef<TexCreateParams>();
+	VMRef<TexCreateParams> params = MakeVMRef<TexCreateParams>();
 	params->EnableMipMap( false );
 	params->EnableBorder( false );
 	params->SetSize( 256, 256, 0 );
 	params->SetTextureFormat( TF_RGBA32F );
 	params->SetTextureTarget( TD_TEXTURE_2D );
-	auto tfTex = MakeRef<Texture>();
+	auto tfTex = MakeVMRef<Texture>();
 	tfTex->SetSetupParams( params );
 	if ( !tfTex->CreateTexture() ) {
 		return nullptr;
@@ -515,15 +514,15 @@ Ref<Texture> MakePreIntegratedTransferFunction2DTexture( const std::string &file
 	return tfTex;
 }
 
-Ref<Texture> MakeTransferFunction1DTexture( const std::vector<Color> &colors )
+VMRef<Texture> MakeTransferFunction1DTexture( const std::vector<Color> &colors )
 {
-	Ref<TexCreateParams> params = MakeRef<TexCreateParams>();
+	VMRef<TexCreateParams> params = MakeVMRef<TexCreateParams>();
 	params->EnableMipMap( false );
 	params->EnableBorder( false );
 	params->SetSize( 256, 0, 0 );
 	params->SetTextureFormat( TF_RGBA32F );
 	params->SetTextureTarget( TD_TEXTURE_1D );
-	auto tfTex = MakeRef<Texture>();
+	auto tfTex = MakeVMRef<Texture>();
 	tfTex->SetSetupParams( params );
 
 	if ( !tfTex->CreateTexture() ) {
@@ -540,4 +539,3 @@ Ref<Texture> MakeTransferFunction1DTexture( const std::vector<Color> &colors )
 	return tfTex;
 }
 }  // namespace vm
-}  // namespace ysl

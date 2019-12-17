@@ -7,16 +7,14 @@
 #include "framebuffer.h"
 #include <VMat/geometry.h>
 
-namespace ysl
-{
 namespace vm
 {
 class VISUALMAN_EXPORT_IMPORT BlitFramebufferEvent : public IRenderEvent
 {
 public:
 	BlitFramebufferEvent() = default;
-	BlitFramebufferEvent( Ref<Framebuffer> srcFB, const Bound2i &srcRect, Ref<Framebuffer> dstFB, const Bound2i &dstRect, BufferBits mask );
-	BlitFramebufferEvent( Ref<Framebuffer> srcFB, Ref<Framebuffer> dstFB, BufferBits mask );
+	BlitFramebufferEvent( VMRef<Framebuffer> srcFB, const Bound2i &srcRect, VMRef<Framebuffer> dstFB, const Bound2i &dstRect, BufferBits mask );
+	BlitFramebufferEvent( VMRef<Framebuffer> srcFB, VMRef<Framebuffer> dstFB, BufferBits mask );
 
 	void SetSrcRect( const Bound2i &rect ) { srcRect = rect; }
 	void SetDstRect( const Bound2i &rect ) { dstRect = rect; }
@@ -25,12 +23,12 @@ public:
 	void SetMask( int mask ) { this->mask = mask; }
 	void SetSrcReadBuffer( ReadDrawBuffer drawBuffer ) { this->drawBuffer = drawBuffer; }
 
-	Ref<Framebuffer> GetReadFramebuffer() { return srcFBO; }
-	Ref<const Framebuffer> GetReadFramebuffer() const { return srcFBO; }
-	Ref<Framebuffer> GetDrawFramebuffer() { return dstFBO; }
-	Ref<const Framebuffer> GetDrawFramebuffer() const { return dstFBO; }
-	void SetReadFramebuffer( Ref<Framebuffer> fb ) { srcFBO = std::move( fb ); }
-	void SetDrawFramebuffer( Ref<Framebuffer> fb ) { dstFBO = std::move( fb ); }
+	VMRef<Framebuffer> GetReadFramebuffer() { return srcFBO; }
+	VMRef<const Framebuffer> GetReadFramebuffer() const { return srcFBO; }
+	VMRef<Framebuffer> GetDrawFramebuffer() { return dstFBO; }
+	VMRef<const Framebuffer> GetDrawFramebuffer() const { return dstFBO; }
+	void SetReadFramebuffer( VMRef<Framebuffer> fb ) { srcFBO = std::move( fb ); }
+	void SetDrawFramebuffer( VMRef<Framebuffer> fb ) { dstFBO = std::move( fb ); }
 
 	bool OnRendererFinishedEvent( const AbstraRenderer *renderer ) override
 	{
@@ -56,13 +54,12 @@ public:
 private:
 	void Blit();
 
-	Ref<Framebuffer> srcFBO;
-	Ref<Framebuffer> dstFBO;
+	VMRef<Framebuffer> srcFBO;
+	VMRef<Framebuffer> dstFBO;
 	Bound2i srcRect{ { 0, 0 }, { 0, 0 } };
 	Bound2i dstRect{ { 0, 0 }, { 0, 0 } };
 	ReadDrawBuffer drawBuffer = RDB_COLOR_ATTACHMENT0;
 	int mask = 0;
 };
 }  // namespace vm
-}  // namespace ysl
 #endif

@@ -10,8 +10,6 @@
 #include <VMUtils/json_binding.hpp>
 //#include "rapidjson/reader.h"
 
-namespace ysl
-{
 namespace vm
 {
 //struct BlockDescriptor
@@ -168,28 +166,28 @@ public:
 
 	void OnDrawCallFinished( OutOfCorePrimitive *p ) override;
 
-	Ref<Texture> GetVolumeTexture() { return volumeDataTexture[ 0 ]; }
-	Ref<const Texture> GetVolumeTexture() const { return volumeDataTexture[ 0 ]; }
+	VMRef<Texture> GetVolumeTexture() { return volumeDataTexture[ 0 ]; }
+	VMRef<const Texture> GetVolumeTexture() const { return volumeDataTexture[ 0 ]; }
 
-	Ref<Texture> GetVolumeTexture( int unit ) { return volumeDataTexture[ unit ]; }
-	Ref<const Texture> GetVolumeTexture( int unit ) const { return volumeDataTexture[ unit ]; }
+	VMRef<Texture> GetVolumeTexture( int unit ) { return volumeDataTexture[ unit ]; }
+	VMRef<const Texture> GetVolumeTexture( int unit ) const { return volumeDataTexture[ unit ]; }
 
 	int GetTextureUnitCount() const { return memoryEvaluators->EvalPhysicalTextureCount(); }
 
-	Ref<BufferObject> GetAtomicCounterBuffer() { return atomicCounterBuffer; }
-	Ref<const BufferObject> GetAtomicCounterBuffer() const { return atomicCounterBuffer; }
+	VMRef<BufferObject> GetAtomicCounterBuffer() { return atomicCounterBuffer; }
+	VMRef<const BufferObject> GetAtomicCounterBuffer() const { return atomicCounterBuffer; }
 
-	Ref<BufferObject> GetBlockIDBuffer() { return blockIdBuffer; }
-	Ref<const BufferObject> GetBlockIDBuffer() const { return blockIdBuffer; }
+	VMRef<BufferObject> GetBlockIDBuffer() { return blockIdBuffer; }
+	VMRef<const BufferObject> GetBlockIDBuffer() const { return blockIdBuffer; }
 
-	Ref<BufferObject> GetHashBuffer() { return hashBuffer; }
-	Ref<const BufferObject> GetHashBuffer() const { return hashBuffer; }
+	VMRef<BufferObject> GetHashBuffer() { return hashBuffer; }
+	VMRef<const BufferObject> GetHashBuffer() const { return hashBuffer; }
 
-	Ref<BufferObject> GetPageTableBuffer() { return pageTableBuffer; }
-	Ref<const BufferObject> GetPageTableBuffer() const { return pageTableBuffer; }
+	VMRef<BufferObject> GetPageTableBuffer() { return pageTableBuffer; }
+	VMRef<const BufferObject> GetPageTableBuffer() const { return pageTableBuffer; }
 
-	Ref<BufferObject> GetLODInfoBuffer() { return lodInfoBuffer; }
-	Ref<const BufferObject> GetLODInfoBuffer() const { return lodInfoBuffer; }
+	VMRef<BufferObject> GetLODInfoBuffer() { return lodInfoBuffer; }
+	VMRef<const BufferObject> GetLODInfoBuffer() const { return lodInfoBuffer; }
 
 	int GetLODCount() const { return lodCount; }
 
@@ -204,7 +202,7 @@ public:
 	[[deprecated]] Vec3i BlockSize() const { return Vec3i( cpuVolumeData[ 0 ]->BlockSize() ); }
 
 	void PrintVideoMemoryUsageInfo();
-	void BindToOutOfCorePrimitive( Ref<OutOfCorePrimitive> oocPrimitive );
+	void BindToOutOfCorePrimitive( VMRef<OutOfCorePrimitive> oocPrimitive );
 	~OutOfCoreVolumeTexture();
 
 private:
@@ -219,9 +217,9 @@ private:
 	size_t totalBlocks = 0;
 	size_t bytes = 0;
 
-	std::vector<Ref<Texture>> volumeDataTexture;
+	std::vector<VMRef<Texture>> volumeDataTexture;
 
-	std::vector<::vm::Ref<MemoryPageAdapter>> cpuVolumeData;
+	std::vector<Ref<MemoryPageAdapter>> cpuVolumeData;
 
 	/**
 			 * \brief Stores the atomic counters for every lod data
@@ -230,28 +228,28 @@ private:
 			 * and the second 4 bytes for the second LOD, etc.
 			 *
 			 */
-	Ref<BufferObject> atomicCounterBuffer;
+	VMRef<BufferObject> atomicCounterBuffer;
 	/**
 			 * \brief Stores the hash table for every lod data.
 			 *
 			 * Using the first section of the hash buffer to store the hash table for the LOD0,
 			 * and the second section of the hash buffer for the second LOD, etc.
 			 */
-	Ref<BufferObject> hashBuffer;
+	VMRef<BufferObject> hashBuffer;
 	/**
 			 * \brief Stores the missed block id for every lod data
 			 *
 			 * Using the first section of the id buffer to store the missed block id for the LOD0,
 			 * and the second section of the hash buffer for the second LOD, etc.
 			 */
-	Ref<BufferObject> blockIdBuffer;
+	VMRef<BufferObject> blockIdBuffer;
 	/**
 			 * \brief Stores the page table for every lod data
 			 *
 			 * Using the first section of the page table buffer to store the page table for the LOD0,
 			 * and the second section of the page table buffer for the second LOD, etc.
 			 */
-	Ref<BufferObject> pageTableBuffer;
+	VMRef<BufferObject> pageTableBuffer;
 	/**
 			 * \brief Stores all the lod information.
 			 *
@@ -259,19 +257,19 @@ private:
 			 *
 			 * \note The memory layout of the buffer is GLSL-dependent. See the definition of \a LODInfo in the fragment shader blockraycasting_f.glsl
 			 */
-	Ref<BufferObject> lodInfoBuffer;
+	VMRef<BufferObject> lodInfoBuffer;
 
 	std::vector<int> blockIdLocalBuffer;
 
 	/**
 			 * \brief Manages and updates the LOD mapping tables.
 			 */
-	Ref<MappingTableManager> mappingTableManager;
+	VMRef<MappingTableManager> mappingTableManager;
 
 	//std::vector<LODPageTableInfo> pageTableInfos;
 
-	//std::vector<Ref<IVideoMemoryParamsEvaluator>> memoryEvaluators;
-	Ref<IVideoMemoryParamsEvaluator> memoryEvaluators;
+	//std::vector<VMRef<IVideoMemoryParamsEvaluator>> memoryEvaluators;
+	VMRef<IVideoMemoryParamsEvaluator> memoryEvaluators;
 	// CPU Volume Cache
 
 	/**
@@ -283,6 +281,5 @@ private:
 	int lodCount = 1;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

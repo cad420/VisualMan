@@ -10,8 +10,6 @@
 #include "graphictype.h"
 #include "uniform.h"
 
-namespace ysl
-{
 namespace vm
 {
 class UniformSet;
@@ -87,10 +85,10 @@ public:
 	bool Link();
 	bool Linked();
 	bool Reload();
-	void AttachShader( Ref<GLSLShader> shader );
-	void DetachShader( Ref<GLSLShader> shader );
+	void AttachShader( VMRef<GLSLShader> shader );
+	void DetachShader( VMRef<GLSLShader> shader );
 	void DetachAllShaders();
-	void ApplyUniformSet( Ref<const UniformSet> set ) const;
+	void ApplyUniformSet( VMRef<const UniformSet> set ) const;
 
 	int GetWorldMatrixUniformLocation() const;
 	int GetViewMatrixUniformLocation() const;
@@ -113,15 +111,15 @@ public:
 	int VertexColorAttribLocation() const;
 	void GetGenericAttribLocation( const char *name );
 
-	Ref<Uniform> GetUniform( const char *name );
+	VMRef<Uniform> GetUniform( const char *name );
 
-	Ref<Uniform> CreateGetUniform( const char *name );
-	Ref<UniformSet> CreateGetUniformSet() { return uniformSet ? uniformSet : uniformSet = MakeRef<UniformSet>(); }
-	Ref<const UniformSet> GetUniformSet() const { return uniformSet; }
-	Ref<UniformSet> GetUniformSet() { return uniformSet; }
+	VMRef<Uniform> CreateGetUniform( const char *name );
+	VMRef<UniformSet> CreateGetUniformSet() { return uniformSet ? uniformSet : uniformSet = MakeVMRef<UniformSet>(); }
+	VMRef<const UniformSet> GetUniformSet() const { return uniformSet; }
+	VMRef<UniformSet> GetUniformSet() { return uniformSet; }
 
 	void RemoveUniform( const char *name );
-	void RemoveUniform( const Ref<Uniform> &uniform );
+	void RemoveUniform( const VMRef<Uniform> &uniform );
 
 	int Handle() const { return handle; }
 	// RenderStateNonIndexed
@@ -156,13 +154,12 @@ private:
 
 	} attribLocations;
 
-	std::vector<Ref<GLSLShader>> shaders;
+	std::vector<VMRef<GLSLShader>> shaders;
 	std::map<std::string, int> fragDataLocation;
-	Ref<UniformSet> uniformSet;
+	VMRef<UniformSet> uniformSet;
 	unsigned int handle = 0;
 	bool linked = false;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

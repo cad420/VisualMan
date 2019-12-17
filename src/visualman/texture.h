@@ -7,10 +7,10 @@
 #include <VMGraphics/spectrum.h>
 #include <vector>
 
-namespace ysl
-{
 namespace vm
 {
+
+
 class TexParams
 {
 public:
@@ -51,8 +51,8 @@ public:
 	void SetTextureFormat( TextureFormat format ) { this->format = format; }
 	TextureFormat GetTextureFormat() const { return this->format; }
 
-	Ref<BufferObject> GetBufferObject() { return bufferObject; }
-	void SetBufferObject( Ref<BufferObject> bo ) { bufferObject = std::move( bo ); }
+	VMRef<BufferObject> GetBufferObject() { return bufferObject; }
+	void SetBufferObject( VMRef<BufferObject> bo ) { bufferObject = std::move( bo ); }
 
 	void EnableBorder( bool enable ) { border = enable; }
 	bool IsBorder() const { return border; }
@@ -73,7 +73,7 @@ private:
 	// Default parameters
 	TextureTarget target = TD_TEXTURE_2D;
 	TextureFormat format = TF_RGBA;
-	Ref<BufferObject> bufferObject;
+	VMRef<BufferObject> bufferObject;
 
 	bool border = false;
 	bool mipMap = false;
@@ -89,7 +89,7 @@ class VISUALMAN_EXPORT_IMPORT Texture
 public:
 	Texture()
 	{
-		texParams = MakeRef<TexParams>();
+		texParams = MakeVMRef<TexParams>();
 	}
 
 	~Texture();
@@ -100,22 +100,22 @@ public:
 						TextureFormat texFormat,
 						int w, int h, int d,
 						bool border,
-						Ref<BufferObject> bufferObject,
+						VMRef<BufferObject> bufferObject,
 						int sampels );
 
 	void DestroyTexture();
 
-	Ref<TexParams> GetTextureParams() { return texParams; }
-	Ref<const TexParams> GetTextureParams() const { return texParams; }
-	void SetTextureParams( Ref<TexParams> params ) { texParams = std::move( params ); }
+	VMRef<TexParams> GetTextureParams() { return texParams; }
+	VMRef<const TexParams> GetTextureParams() const { return texParams; }
+	void SetTextureParams( VMRef<TexParams> params ) { texParams = std::move( params ); }
 
-	Ref<TexCreateParams> GetSetupParams() { return createParams; }
-	Ref<const TexCreateParams> GetSetupParams() const { return createParams; }
+	VMRef<TexCreateParams> GetSetupParams() { return createParams; }
+	VMRef<const TexCreateParams> GetSetupParams() const { return createParams; }
 
-	void SetSetupParams( Ref<TexCreateParams> params );
+	void SetSetupParams( VMRef<TexCreateParams> params );
 
-	Ref<BufferObject> GetBufferObject() { return bufferObject; }
-	Ref<const BufferObject> GetBufferObject() const { return bufferObject; }
+	VMRef<BufferObject> GetBufferObject() { return bufferObject; }
+	VMRef<const BufferObject> GetBufferObject() const { return bufferObject; }
 
 	void SaveTextureAs( const std::string &fileName );
 
@@ -146,9 +146,9 @@ public:
 private:
 	// std::unique_ptr<BufferObject> pixelBufferObject; this is used to swap data between texture and memory
 
-	Ref<BufferObject> bufferObject;
-	Ref<TexCreateParams> createParams = nullptr;
-	Ref<TexParams> texParams = nullptr;
+	VMRef<BufferObject> bufferObject;
+	VMRef<TexCreateParams> createParams = nullptr;
+	VMRef<TexParams> texParams = nullptr;
 	bool dirty = true;
 
 	TextureTarget target = TD_TEXTURE_2D;
@@ -162,12 +162,11 @@ private:
 	unsigned int handle = 0;
 };
 
-Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeVolumeTexture( const std::string &fileName, size_t x, size_t y, size_t z );
-Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeImageTexuture( const std::string &fileName );
-Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeTransferFunction1DTexture( const std::string &fileName );
-Ref<Texture> VISUALMAN_EXPORT_IMPORT MakeTransferFunction1DTexture( const std::vector<Color> &colors );
-Ref<Texture> VISUALMAN_EXPORT_IMPORT MakePreIntegratedTransferFunction2DTexture( const std::string &fileName );
+VMRef<Texture> VISUALMAN_EXPORT_IMPORT MakeVolumeTexture( const std::string &fileName, size_t x, size_t y, size_t z );
+VMRef<Texture> VISUALMAN_EXPORT_IMPORT MakeImageTexuture( const std::string &fileName );
+VMRef<Texture> VISUALMAN_EXPORT_IMPORT MakeTransferFunction1DTexture( const std::string &fileName );
+VMRef<Texture> VISUALMAN_EXPORT_IMPORT MakeTransferFunction1DTexture( const std::vector<Color> &colors );
+VMRef<Texture> VISUALMAN_EXPORT_IMPORT MakePreIntegratedTransferFunction2DTexture( const std::string &fileName );
 }  // namespace vm
-}  // namespace ysl
 
 #endif

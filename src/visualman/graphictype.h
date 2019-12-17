@@ -173,8 +173,10 @@ inline GLenum PrintGLErrorMsg( const char *file, int line )
 
 //#define GRAPHICS_EXPORT_IMPORT
 
+
+
 template <typename Ty>
-using Ref = std::shared_ptr<Ty>;
+using VMRef = std::shared_ptr<Ty>;
 
 template <typename Ty>
 using WeakRef = std::weak_ptr<Ty>;
@@ -189,13 +191,11 @@ template <typename Ty>
 using Set = std::set<Ty>;
 
 template <typename Ty, typename... Args>
-inline Ref<Ty> MakeRef( Args &&... args )
+inline VMRef<Ty> MakeVMRef( Args &&... args )
 {
 	return std::make_shared<Ty>( std::forward<Args>( args )... );
 }
 
-namespace ysl
-{
 namespace vm
 {
 struct Descriptor3D
@@ -217,7 +217,6 @@ struct Descriptor1D
 };
 }  // namespace vm
 
-}  // namespace ysl
 
 // Enum for OpenGL
 

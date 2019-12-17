@@ -8,8 +8,6 @@
 #include "graphictype.h"
 #include <VMFoundation/dataarena.h>
 
-namespace ysl
-{
 namespace vm
 {
 class RenderNode
@@ -73,6 +71,5 @@ private:
 //};
 
 }  // namespace vm
-}  // namespace ysl
 
 #endif

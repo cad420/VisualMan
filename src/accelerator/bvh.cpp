@@ -4,7 +4,7 @@
 #include "../core/interaction.h"
 #include "../mathematics/arithmetic.h"
 
-namespace ysl
+namespace vm
 {
 bool BVHTreeAccelerator::recursiveIntersect( const BVHNode *root, const Ray &ray, Interaction *interac, Float &tMin ) const
 {
@@ -177,4 +177,4 @@ std::unique_ptr<BVHTreeAccelerator::BVHNode>
 	}
 }
 
-}  // namespace ysl
+}  // namespace vm

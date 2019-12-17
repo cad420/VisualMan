@@ -2,8 +2,6 @@
 #include "renderable.h"
 #include <iostream>
 
-namespace ysl
-{
 namespace vm
 {
 void Renderable::Render( const Actor *actor, const Shading *shading, const Camera *camera, RenderContext *context )
@@ -17,4 +15,3 @@ void Renderable::Render( const Actor *actor, const Shading *shading, const Camer
 	Render_Implement( actor, shading, camera, context );
 }
 }  // namespace vm
-}  // namespace ysl

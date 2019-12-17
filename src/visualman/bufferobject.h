@@ -6,8 +6,6 @@
 
 #include "graphictype.h"
 
-namespace ysl
-{
 namespace vm
 {
 class VISUALMAN_EXPORT_IMPORT BufferObject : public LocalBuffer,
@@ -176,5 +174,4 @@ private:
 	void *mappedPointer = nullptr;
 };
 }  // namespace vm
-}  // namespace ysl
 #endif

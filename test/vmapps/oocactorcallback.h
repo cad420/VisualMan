@@ -9,8 +9,6 @@
 #include "oocresources.h"
 
 
-namespace ysl
-{
 	namespace vm
 	{
 
@@ -22,18 +20,17 @@ namespace ysl
 		public:
 			OOCActorEvent();
 			void OnActorRenderStartedEvent(Actor* actor, const Camera* camera, Renderable* renderable, const Shading* shading, int pass) override;
-			void BindToActor(Ref<Actor> actor);
-			Ref<OutOfCorePrimitive> ProxyGeometry() { return proxyGeometry; }
-			Ref<const OutOfCorePrimitive> ProxyGeometry()const { return proxyGeometry; }
-			Ref<OutOfCoreVolumeTexture> GetTexture() { return OutOfCoreVolumeTexture;  }
-			Ref<const OutOfCoreVolumeTexture> GetTexture()const { return OutOfCoreVolumeTexture;  }
+			void BindToActor(VMRef<Actor> actor);
+			VMRef<OutOfCorePrimitive> ProxyGeometry() { return proxyGeometry; }
+			VMRef<const OutOfCorePrimitive> ProxyGeometry()const { return proxyGeometry; }
+			VMRef<OutOfCoreVolumeTexture> GetTexture() { return OutOfCoreVolumeTexture;  }
+			VMRef<const OutOfCoreVolumeTexture> GetTexture()const { return OutOfCoreVolumeTexture;  }
 		private:
-			Ref<OutOfCorePrimitive> proxyGeometry;
-			Ref<OutOfCoreVolumeTexture> OutOfCoreVolumeTexture;
-			Ref<ArrayFloat3> vertexArray;
-			Ref<ArrayFloat3> texCoordArray;
+			VMRef<OutOfCorePrimitive> proxyGeometry;
+			VMRef<OutOfCoreVolumeTexture> OutOfCoreVolumeTexture;
+			VMRef<ArrayFloat3> vertexArray;
+			VMRef<ArrayFloat3> texCoordArray;
 		};
 
 	}
-}
 #endif

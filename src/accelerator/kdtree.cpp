@@ -2,7 +2,7 @@
 #include "kdtree.h"
 #include <vector>
 
-namespace ysl
+namespace vm
 {
 KdTreeAccelerator::KdTreeAccelerator( const std::vector<std::shared_ptr<Shape>> &p,
 									  int isectCost,

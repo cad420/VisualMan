@@ -5,8 +5,6 @@
 #include <cassert>
 #include <fstream>
 
-namespace ysl
-{
 namespace vm
 {
 void GLSLShader::SetFromSource( const std::string &source )
@@ -131,7 +129,7 @@ bool GLSLProgram::Reload()
 	return true;
 }
 
-void GLSLProgram::AttachShader( Ref<GLSLShader> shader )
+void GLSLProgram::AttachShader( VMRef<GLSLShader> shader )
 {
 	// We need implement a state-independent operation
 	if ( shader == nullptr )
@@ -145,7 +143,7 @@ void GLSLProgram::AttachShader( Ref<GLSLShader> shader )
 	//Link();
 }
 
-void GLSLProgram::DetachShader( Ref<GLSLShader> shader )
+void GLSLProgram::DetachShader( VMRef<GLSLShader> shader )
 {
 	if ( handle == 0 )
 		return;
@@ -172,7 +170,7 @@ void GLSLProgram::DetachAllShaders()
 	}
 }
 
-void GLSLProgram::ApplyUniformSet( Ref<const UniformSet> uset ) const
+void GLSLProgram::ApplyUniformSet( VMRef<const UniformSet> uset ) const
 
 {
 	if ( !uset )
@@ -335,12 +333,12 @@ int GLSLProgram::VertexColorAttribLocation() const
 	return attribLocations.vpl_VertexColor;
 }
 
-Ref<Uniform> GLSLProgram::GetUniform( const char *name )
+VMRef<Uniform> GLSLProgram::GetUniform( const char *name )
 {
 	return CreateGetUniformSet()->GetUniform( name );
 }
 
-Ref<Uniform> GLSLProgram::CreateGetUniform( const char *name )
+VMRef<Uniform> GLSLProgram::CreateGetUniform( const char *name )
 {
 	return CreateGetUniformSet()->CreateGetUniform( name );
 }
@@ -351,7 +349,7 @@ void GLSLProgram::RemoveUniform( const char *name )
 		uniformSet->RemoveUniform( name );
 }
 
-void GLSLProgram::RemoveUniform( const Ref<Uniform> &uniform )
+void GLSLProgram::RemoveUniform( const VMRef<Uniform> &uniform )
 {
 	if ( uniform )
 		uniformSet->RemoveUniform( uniform );
@@ -413,4 +411,3 @@ void GLSLProgram::PostLink()
 	GL( attribLocations.vpl_VertexTexCoord[ 4 ] = glGetAttribLocation( handle, "vpl_VertexTexCoord5" ) );
 }
 }  // namespace vm
-}  // namespace ysl

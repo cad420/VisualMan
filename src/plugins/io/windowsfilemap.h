@@ -10,7 +10,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 
-namespace ysl
+namespace vm
 {
 class WindowsFileMapping : public ::vm::EverythingBase<IFileMapping>
 {

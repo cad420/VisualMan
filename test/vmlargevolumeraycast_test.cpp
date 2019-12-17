@@ -6,11 +6,11 @@
 
 int main(int argc, char ** argv)
 {
-	using namespace ysl::vm;
-	using namespace ysl::app;
 	// Load plugins
+	using namespace ysl::app;
+	using namespace vm;
 	
-	ysl::PluginLoader::GetPluginLoader()->LoadPlugins("plugins");
+	PluginLoader::GetPluginLoader()->LoadPlugins("plugins");
 	cmdline::parser a;
 	a.add<int>("width", 'w', "The width of window", false, 1024);
 	a.add<int>("height", 'h', "The height of window", false, 768);
@@ -23,7 +23,7 @@ int main(int argc, char ** argv)
 	a.parse_check(argc, argv);
 
 	VMGLFWWindow window("LVD Renderer", RenderContextFormat(), a.get<int>("width"), a.get<int>("height"));
-	auto app = MakeRef<VM_LargeVolumeRayCast>();
+	auto app = MakeVMRef<VM_LargeVolumeRayCast>();
 	window.AddEventListener(app);
 	auto r = window.Show();
 	return r;

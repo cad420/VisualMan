@@ -6,8 +6,6 @@
 #include "renderstudio.h"
 #include <VMUtils/timer.hpp>
 
-namespace ysl
-{
 namespace vm
 {
 class AbstraSceneManager;
@@ -47,22 +45,21 @@ public:
 
 	virtual void UpdateScene() {}
 
-	Ref<AbstraAggregate> GetAggregate() const { return abstraAggregate; }
+	VMRef<AbstraAggregate> GetAggregate() const { return abstraAggregate; }
 
-	void SetAggregation( Ref<AbstraAggregate> aggregate ) { this->abstraAggregate = std::move( aggregate ); }
+	void SetAggregation( VMRef<AbstraAggregate> aggregate ) { this->abstraAggregate = std::move( aggregate ); }
 
-	void BindCameraEvent( Ref<Camera> camera );
+	void BindCameraEvent( VMRef<Camera> camera );
 
 	double GetFPS() const { return FPS; }
 
 protected:
-	Ref<AbstraAggregate> abstraAggregate;
-	Ref<CameraManipulator> manipulator;
+	VMRef<AbstraAggregate> abstraAggregate;
+	VMRef<CameraManipulator> manipulator;
 	double FPS = 0;
 	int frameCount = 0;
 	::vm::Timer timer;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

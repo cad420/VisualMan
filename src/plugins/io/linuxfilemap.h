@@ -12,7 +12,7 @@
 #include <VMCoreExtension/plugindef.h>
 #include "config.h"
 
-namespace ysl
+namespace vm
 {
 class LinuxFileMapping : public ::vm::EverythingBase<IFileMapping>
 {

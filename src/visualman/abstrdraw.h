@@ -5,8 +5,6 @@
 #include "graphictype.h"
 #include <vector>
 
-namespace ysl
-{
 namespace vm
 {
 class VISUALMAN_EXPORT_IMPORT AbstrDrawCall
@@ -29,5 +27,4 @@ private:
 	//std::vector<Ref<IDrawCallEvent>> events;
 };
 }  // namespace vm
-}  // namespace ysl
 #endif

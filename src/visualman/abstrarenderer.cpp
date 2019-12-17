@@ -2,8 +2,6 @@
 #include "abstrarenderer.h"
 #include "renderevent.h"
 
-namespace ysl
-{
 namespace vm
 {
 void AbstraRenderer::DispatchOnRenderStartedEvent()
@@ -32,14 +30,13 @@ void AbstraRenderer::DispatchOnRenderFinishedEvent()
 	}
 }
 
-void AbstraRenderer::AddRenderStartedEventCallback( Ref<IRenderEvent> callback )
+void AbstraRenderer::AddRenderStartedEventCallback( VMRef<IRenderEvent> callback )
 {
 	startedCallbacks.push_back( std::move( callback ) );
 }
 
-void AbstraRenderer::AddRenderFinishedEventCallback( Ref<IRenderEvent> callback )
+void AbstraRenderer::AddRenderFinishedEventCallback( VMRef<IRenderEvent> callback )
 {
 	finishedCallbacks.push_back( std::move( callback ) );
 }
 }  // namespace vm
-}  // namespace ysl

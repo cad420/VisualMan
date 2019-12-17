@@ -2,7 +2,7 @@
 #ifdef __linux__
 #include "linuxfilemap.h"
 
-namespace ysl
+namespace vm
 {
 bool LinuxFileMapping::Open( const std::string &fileName, size_t fileSize, FileAccess fileFlags, MapAccess mapFlags )
 {

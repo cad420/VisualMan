@@ -9,8 +9,6 @@
 #include "config.h"
 #include "oocprimitive.h"
 
-namespace ysl
-{
 namespace vm
 {
 struct LVDJSONStruct : ::vm::json::Serializable<LVDJSONStruct>
@@ -25,27 +23,27 @@ class ArrayFloat3;
 class FrustumEventCallback : public IActorEvent
 {
 public:
-	FrustumEventCallback( Ref<Camera> camera );
-	void BindFrustumActor( Ref<Actor> actor );
+	FrustumEventCallback( VMRef<Camera> camera );
+	void BindFrustumActor( VMRef<Actor> actor );
 	void OnActorRenderStartedEvent( Actor *actor, const Camera *camera, Renderable *renderable, const Shading *shading, int pass ) override;
-	Ref<Primitive> GetFrustumPrimitive();
+	VMRef<Primitive> GetFrustumPrimitive();
 
 private:
 	void UpdateFrustum();
-	Ref<Primitive> frustum;
-	Ref<Camera> camera;
-	Ref<ArrayFloat3> vertexArray;
+	VMRef<Primitive> frustum;
+	VMRef<Camera> camera;
+	VMRef<ArrayFloat3> vertexArray;
 };
 
 class BoundingBoxEventCallback : public IActorEvent
 {
 public:
 	BoundingBoxEventCallback();
-	void BindBoundingBoxActor( Ref<Actor> actor );
+	void BindBoundingBoxActor( VMRef<Actor> actor );
 	void OnActorRenderStartedEvent( Actor *actor, const Camera *camera, Renderable *renderable, const Shading *shading, int pass ) override;
 
 private:
-	Ref<Primitive> boundingBox;
+	VMRef<Primitive> boundingBox;
 };
 
 
@@ -84,19 +82,18 @@ private:
 	
 	LVDJSONStruct lvdJSON;
 
-	Ref<Shading> rayCastShading;
-	Ref<Aggregate> mrtAgt, raycastAgt, navigationAgt;
-	Ref<OutOfCorePrimitive> oocPrimitive;
-	Ref<Texture> intermediateResult;
-	Ref<Texture> randomOffsets;
+	VMRef<Shading> rayCastShading;
+	VMRef<Aggregate> mrtAgt, raycastAgt, navigationAgt;
+	VMRef<OutOfCorePrimitive> oocPrimitive;
+	VMRef<Texture> intermediateResult;
+	VMRef<Texture> randomOffsets;
 	Vec2i vSize;
-	Ref<Transform> proxyGemoryScaleTrans;
-	Ref<Transform> navigationScale;
-	Ref<ViewMatrixWrapper> navigationCameraViewMatrix;
+	VMRef<Transform> proxyGemoryScaleTrans;
+	VMRef<Transform> navigationScale;
+	VMRef<ViewMatrixWrapper> navigationCameraViewMatrix;
 
-	Ref<Actor> boundingboxActor;
+	VMRef<Actor> boundingboxActor;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

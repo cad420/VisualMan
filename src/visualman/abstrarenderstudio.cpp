@@ -1,8 +1,6 @@
 
 #include "abstrarenderstudio.h"
 
-namespace ysl
-{
 namespace vm
 {
 void AbstraAggregate::DispatchRenderStartedEvent()
@@ -29,14 +27,13 @@ void AbstraAggregate::DispatchRenderFinishedEvent()
 	}
 }
 
-void AbstraAggregate::AddRenderStartedEventCallback( Ref<IRenderEvent> callback )
+void AbstraAggregate::AddRenderStartedEventCallback( VMRef<IRenderEvent> callback )
 {
 	renderStartedcallbacks.push_back( std::move( callback ) );
 }
 
-void AbstraAggregate::AddRenderFinishedEventCallback( Ref<IRenderEvent> callback )
+void AbstraAggregate::AddRenderFinishedEventCallback( VMRef<IRenderEvent> callback )
 {
 	renderFinishedCallbacks.push_back( std::move( callback ) );
 }
 }  // namespace vm
-}  // namespace ysl

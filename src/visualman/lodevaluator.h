@@ -2,8 +2,6 @@
 #ifndef _EVALUATOR_H_
 #define _EVALUATOR_H_
 
-namespace ysl
-{
 namespace vm
 {
 class Camera;
@@ -24,5 +22,4 @@ inline int LODEvaluator::Eval( const Actor *actor, const Camera *camera )
 	return 0;
 }
 }  // namespace vm
-}  // namespace ysl
 #endif

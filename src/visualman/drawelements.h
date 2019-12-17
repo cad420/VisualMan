@@ -8,8 +8,6 @@
 #include "abstrdraw.h"
 #include "abstraarray.h"
 
-namespace ysl
-{
 namespace vm
 {
 class DrawElementsBase : public AbstrDrawCall
@@ -35,7 +33,7 @@ public:
 	using IndexType = typename ArrayType::ScalarType;
 
 	DrawElements( int instances = 1 ) :
-	  indexArray( MakeRef<ArrayType>() )
+	  indexArray( MakeVMRef<ArrayType>() )
 	{
 	}
 
@@ -43,15 +41,15 @@ public:
 	int GetCount() const { return count; }
 	void SetOffset( unsigned int offset ) { this->offset = offset; }
 	unsigned int GetOffset() const { return this->offset; }
-	void SetIndexBuffer( Ref<ArrayType> array ) { indexArray = std::move( array ); }
-	Ref<ArrayType> GetIndexArray() { return indexArray; }
-	Ref<const ArrayType> GetIndexArray() const { return indexArray; }
+	void SetIndexBuffer( VMRef<ArrayType> array ) { indexArray = std::move( array ); }
+	VMRef<ArrayType> GetIndexArray() { return indexArray; }
+	VMRef<const ArrayType> GetIndexArray() const { return indexArray; }
 	void UpdateDirtyBufferObject( BufferObjectUpdateMode mode ) override;
 	void DestroyBufferObject() override;
 	void Render() const override;
 
 private:
-	Ref<ArrayType> indexArray;
+	VMRef<ArrayType> indexArray;
 	int count = -1;
 	unsigned int offset = 0;
 };
@@ -116,10 +114,9 @@ class VISUALMAN_EXPORT_IMPORT DrawElementsUInt : public DrawElements<ArrayUInt>
 {
 public:
 	DrawElementsUInt( int instance = 1 ) :
-	  DrawElements<ysl::vm::ArrayUInt>( instance ) {}
+	  DrawElements<vm::ArrayUInt>( instance ) {}
 };
 
 }  // namespace vm
-}  // namespace ysl
 
 #endif

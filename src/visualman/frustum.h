@@ -8,7 +8,7 @@
 #include <vector>
 #include "camera.h"
 
-namespace ysl
+namespace vm
 {
 class VISUALMAN_EXPORT_IMPORT Frustum
 {

@@ -9,18 +9,16 @@
 #include "actor.h"
 #include "rendercontext.h"
 
-namespace ysl
-{
 	namespace vm
 	{
 
 		void VM_Mesh::InitEvent()
 		{
 			//InitDefault();
-			auto  vertShader = MakeRef<vm::GLSLVertexShader>();
+			auto  vertShader = MakeVMRef<vm::GLSLVertexShader>();
 			vertShader->SetFromFile(R"(glsl\trivial_vs.glsl)");
 			assert(vertShader->Compile());
-			auto fragShader = MakeRef<vm::GLSLFragmentShader>();
+			auto fragShader = MakeVMRef<vm::GLSLFragmentShader>();
 			fragShader->SetFromFile(R"(glsl\trivial_fs.glsl)");
 			assert(fragShader->Compile());
 			//Vec3f viewPos{ 0,0,5 };
@@ -30,15 +28,15 @@ namespace ysl
 			//auto teapotPrimitive = MakePrimitive(R"(D:\Desktop\teapot.obj)");
 
 
-			auto abstraAggregate = MakeRef<vm::Aggregate>();
+			auto abstraAggregate = MakeVMRef<vm::Aggregate>();
 
-			auto triSceneMnger = MakeRef<vm::TrivialSceneManager>();
+			auto triSceneMnger = MakeVMRef<vm::TrivialSceneManager>();
 
 			abstraAggregate->SceneManager().push_back(triSceneMnger);
 
-			auto artist = MakeRef<vm::Artist>();
+			auto artist = MakeVMRef<vm::Artist>();
 
-			auto shading = MakeRef<vm::Shading>();
+			auto shading = MakeVMRef<vm::Shading>();
 
 			shading->CreateGetProgram()->AttachShader(vertShader);
 
@@ -48,11 +46,11 @@ namespace ysl
 			Vec3f lightPos{ 10,10,5.0 };
 			Vec4f objectColor{ .4,0.3,0.8,1};
 
-			auto scale = MakeRef<Transform>();
+			auto scale = MakeVMRef<Transform>();
 
 			//scale->SetScale(Vec3f{ 480,720,120 }.Normalized());
 
-			const auto actor1 = MakeRef<vm::Actor>(bunnyPrimitive, artist, scale);
+			const auto actor1 = MakeVMRef<vm::Actor>(bunnyPrimitive, artist, scale);
 
 			
 			//const auto actor2 = MakeRef<vm::Actor>(teapotPrimitive, artist, nullptr);
@@ -69,8 +67,8 @@ namespace ysl
 
 			shading->CreateGetEnableStateSet()->Enable(EN_DEPTH_TEST);
 			shading->CreateGetEnableStateSet()->Enable(EN_CULL_FACE);
-			shading->CreateGetRenderStateSet()->SetRenderState(MakeRef<CullFaceState>(PF_FRONT), -1);
-			auto actorEvent = MakeRef<MarchingCubeActorCallback>();
+			shading->CreateGetRenderStateSet()->SetRenderState(MakeVMRef<CullFaceState>(PF_FRONT), -1);
+			auto actorEvent = MakeVMRef<MarchingCubeActorCallback>();
 			actor1->AddActorRenderEventCallback(actorEvent);
 
 			//actor2->AddActorRenderEventCallback(actorEvent);
@@ -99,4 +97,3 @@ namespace ysl
 		}
 
 	}
-}

@@ -5,13 +5,11 @@
 #include "oocprimitive.h"
 #include "oocresources.h"
 
-namespace ysl
-{
 	namespace vm
 	{
 		OOCActorEvent::OOCActorEvent()
 		{
-			proxyGeometry = MakeRef<OutOfCorePrimitive>();
+			proxyGeometry = MakeVMRef<OutOfCorePrimitive>();
 
 			Bound3f bound({ 0,0,0 }, { 1,1,1 });
 			Point3f points[8];
@@ -31,19 +29,19 @@ namespace ysl
 				1,3,5,3,7,5
 			};
 
-			auto vertexIndex = MakeRef<ArrayUInt>();
+			auto vertexIndex = MakeVMRef<ArrayUInt>();
 			vertexIndex->GetBufferObject()->SetLocalData(indices, sizeof(indices));
-			vertexArray = MakeRef<ArrayFloat3>();
-			texCoordArray = MakeRef<ArrayFloat3>();
+			vertexArray = MakeVMRef<ArrayFloat3>();
+			texCoordArray = MakeVMRef<ArrayFloat3>();
 			vertexArray->GetBufferObject()->SetLocalData(points, sizeof(points));
 			texCoordArray->GetBufferObject()->SetLocalData(texCoords, sizeof(texCoords));
 			proxyGeometry->SetVertexPositionArray(vertexArray);
 			proxyGeometry->SetVertexTexCoordArray(texCoordArray);
-			auto drawCall = MakeRef<DrawElementsUInt>();
+			auto drawCall = MakeVMRef<DrawElementsUInt>();
 			drawCall->SetIndexBuffer(vertexIndex);
 			proxyGeometry->DrawCalls().push_back(drawCall);
 			// bind resources
-			auto oocresource = MakeRef<OutOfCoreResources>();
+			auto oocresource = MakeVMRef<OutOfCoreResources>();
 
 			oocresource->BindPrimitive(proxyGeometry);
 
@@ -57,7 +55,7 @@ namespace ysl
 
 		}
 
-		void OOCActorEvent::BindToActor(Ref<Actor> actor)
+		void OOCActorEvent::BindToActor(VMRef<Actor> actor)
 		{
 			if (actor)
 			{
@@ -78,4 +76,3 @@ namespace ysl
 		}
 
 	}
-}

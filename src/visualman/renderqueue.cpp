@@ -1,7 +1,5 @@
 
 #include "renderqueue.h"
-namespace ysl
-{
 namespace vm
 {
 void RenderQueue::Sort()
@@ -11,4 +9,3 @@ void RenderQueue::Sort()
 	} );
 }
 }  // namespace vm
-}  // namespace ysl

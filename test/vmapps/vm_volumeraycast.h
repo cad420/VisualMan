@@ -6,8 +6,6 @@
 #include "graphictype.h"
 #include "trivialscenemanager.h"
 
-namespace ysl
-{
 	namespace vm
 	{
 
@@ -22,10 +20,9 @@ namespace ysl
 		private:
 			void AddBoundingBox();
 
-			Ref<RayCastActorEventCallback> rayCastCallback;
-			Ref<TrivialSceneManager> sceneManager;
+			VMRef<RayCastActorEventCallback> rayCastCallback;
+			VMRef<TrivialSceneManager> sceneManager;
 		};
 	}
-}
 
 #endif

@@ -1,8 +1,6 @@
 
 #include "uniform.h"
 #include <cstring>	// for memcpy
-namespace ysl
-{
 namespace vm
 {
 void Uniform::SetUniform1i( int count, const int *value )
@@ -284,7 +282,7 @@ int Uniform::Count() const
 	return cnt;
 }
 
-void UniformSet::SetUniform( Ref<Uniform> uniform )
+void UniformSet::SetUniform( VMRef<Uniform> uniform )
 {
 	auto exist = false;
 	for ( auto &u : uniforms ) {
@@ -297,7 +295,7 @@ void UniformSet::SetUniform( Ref<Uniform> uniform )
 		uniforms.push_back( std::move( uniform ) );
 }
 
-Ref<Uniform> UniformSet::GetUniform( const char *name )
+VMRef<Uniform> UniformSet::GetUniform( const char *name )
 {
 	for ( auto each : uniforms ) {
 		if ( each->GetName() == name )
@@ -306,7 +304,7 @@ Ref<Uniform> UniformSet::GetUniform( const char *name )
 	return nullptr;
 }
 
-void UniformSet::RemoveUniform( Ref<Uniform> uniform )
+void UniformSet::RemoveUniform( VMRef<Uniform> uniform )
 {
 	for ( auto it = uniforms.begin(); it != uniforms.end(); ) {
 		if ( ( *it )->GetName() == uniform->GetName() ) {
@@ -330,8 +328,7 @@ void UniformSet::RemoveUniform( const char *name )
 
 void UniformSet::RemoveAllUniforms()
 {
-	//uniforms.swap(std::vector<Ref<Uniform>>());
-	std::vector<Ref<Uniform>>().swap( uniforms );
+	//uniforms.swap(std::vector<VMRef<Uniform>>());
+	std::vector<VMRef<Uniform>>().swap( uniforms );
 }
 }  // namespace vm
-}  // namespace ysl

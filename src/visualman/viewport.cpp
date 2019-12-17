@@ -2,8 +2,6 @@
 #include "viewport.h"
 #include "graphictype.h"
 
-namespace ysl
-{
 namespace vm
 {
 void Viewport::Activate() const
@@ -41,4 +39,3 @@ void Viewport::Activate() const
 	}
 }
 }  // namespace vm
-}  // namespace ysl

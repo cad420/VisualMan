@@ -10,8 +10,6 @@
 #include "drawelements.h"
 #include "abstrdraw.h"
 
-namespace ysl
-{
 namespace vm
 {
 Primitive::~Primitive()
@@ -19,7 +17,7 @@ Primitive::~Primitive()
 	DestroyVAO();
 }
 
-void Primitive::SetVertexPositionArray( Ref<AbstraArray> data )
+void Primitive::SetVertexPositionArray( VMRef<AbstraArray> data )
 {
 	//if (vertexAttribArrays[VA_VertexPositionAttrib] == data)
 	//	return;
@@ -29,7 +27,7 @@ void Primitive::SetVertexPositionArray( Ref<AbstraArray> data )
 	SetVertexAttribArray( VA_VertexPositionAttrib, std::move( data ) );
 }
 
-void Primitive::SetVertexNormalArray( Ref<AbstraArray> data )
+void Primitive::SetVertexNormalArray( VMRef<AbstraArray> data )
 {
 	//if (vertexAttribArrays[VA_VertexNormalAttrib] == data)
 	//	return;
@@ -39,7 +37,7 @@ void Primitive::SetVertexNormalArray( Ref<AbstraArray> data )
 	SetVertexAttribArray( VA_VertexNormalAttrib, std::move( data ) );
 }
 
-void Primitive::SetVertexColorArray( Ref<AbstraArray> data )
+void Primitive::SetVertexColorArray( VMRef<AbstraArray> data )
 {
 	//if (vertexAttribArrays[VA_VertexColorAttrib] == data)
 	//	return;
@@ -49,7 +47,7 @@ void Primitive::SetVertexColorArray( Ref<AbstraArray> data )
 	SetVertexAttribArray( VA_VertexColorAttrib, std::move( data ) );
 }
 
-void Primitive::SetVertexTexCoordArray( Ref<AbstraArray> data )
+void Primitive::SetVertexTexCoordArray( VMRef<AbstraArray> data )
 {
 	//if (vertexAttribArrays[VA_VertexTexCoordAttrib] == data)
 	//	return;
@@ -59,7 +57,7 @@ void Primitive::SetVertexTexCoordArray( Ref<AbstraArray> data )
 	SetVertexAttribArray( VA_VertexTexCoordAttrib, std::move( data ) );
 }
 
-void Primitive::SetVertexAttribArray( VertexAttribArrayIndexType attribLocation, Ref<AbstraArray> data )
+void Primitive::SetVertexAttribArray( VertexAttribArrayIndexType attribLocation, VMRef<AbstraArray> data )
 {
 	if ( vertexAttribArrays[ attribLocation ] == data )
 		return;
@@ -186,7 +184,7 @@ void Primitive::rebind2VAO()
 
 //}
 
-Ref<Primitive> MakePrimitive( const std::string &fileName )
+VMRef<Primitive> MakePrimitive( const std::string &fileName )
 {
 	ObjReader objReader( fileName );
 
@@ -194,7 +192,7 @@ Ref<Primitive> MakePrimitive( const std::string &fileName )
 		throw std::runtime_error( "can not load .obj file" );
 	}
 
-	auto vertex = MakeRef<ArrayFloat3>();
+	auto vertex = MakeVMRef<ArrayFloat3>();
 	//vertex->GetBufferObject()->SetBufferData(objReader.GetVertexBytes(),
 	//	objReader.GetVertices().data(),
 	//	BU_STATIC_DRAW);
@@ -203,7 +201,7 @@ Ref<Primitive> MakePrimitive( const std::string &fileName )
 
 	//vertex->SetbufferObjectDataDirty(false);
 
-	auto normals = MakeRef<ArrayFloat3>();
+	auto normals = MakeVMRef<ArrayFloat3>();
 	//normals->GetBufferObject()->SetBufferData(objReader.GetNormalBytes(),
 	//	objReader.GetNormals().data(),
 	//	BU_STATIC_DRAW);
@@ -212,7 +210,7 @@ Ref<Primitive> MakePrimitive( const std::string &fileName )
 
 	//normals->SetbufferObjectDataDirty(false);
 
-	auto vertexIndex = MakeRef<ArrayUInt>();
+	auto vertexIndex = MakeVMRef<ArrayUInt>();
 	//vertexIndex->GetBufferObject()->SetBufferData(objReader.GetVertexIndicesBytes(),
 	//	objReader.GetFaceIndices().data(),
 	//	BU_STATIC_DRAW);
@@ -220,11 +218,11 @@ Ref<Primitive> MakePrimitive( const std::string &fileName )
 	vertexIndex->GetBufferObject()->SetLocalData( (char *)objReader.GetFaceIndices().data(), objReader.GetVertexIndicesBytes() );
 	//vertexIndex->SetbufferObjectDataDirty(false);
 
-	auto primitive = MakeRef<Primitive>();
+	auto primitive = MakeVMRef<Primitive>();
 	primitive->SetVertexPositionArray( vertex );
 	primitive->SetVertexNormalArray( normals );
 
-	auto drawElemUi = MakeRef<DrawElementsUInt>( 1 );
+	auto drawElemUi = MakeVMRef<DrawElementsUInt>( 1 );
 	drawElemUi->SetIndexBuffer( vertexIndex );
 
 	primitive->DrawCalls().push_back( drawElemUi );
@@ -232,10 +230,10 @@ Ref<Primitive> MakePrimitive( const std::string &fileName )
 	return primitive;
 }
 
-Ref<Primitive> MakePrimitive( const float *position, size_t positionCount, const float *normal,
+VMRef<Primitive> MakePrimitive( const float *position, size_t positionCount, const float *normal,
 							  size_t normalCount, const unsigned *index, size_t indexCount )
 {
-	auto vertex = MakeRef<ArrayFloat3>();
+	auto vertex = MakeVMRef<ArrayFloat3>();
 	//vertex->GetBufferObject()->SetBufferData(objReader.GetVertexBytes(),
 	//	objReader.GetVertices().data(),
 	//	BU_STATIC_DRAW);
@@ -244,7 +242,7 @@ Ref<Primitive> MakePrimitive( const float *position, size_t positionCount, const
 
 	//vertex->SetbufferObjectDataDirty(false);
 
-	auto normals = MakeRef<ArrayFloat3>();
+	auto normals = MakeVMRef<ArrayFloat3>();
 	//normals->GetBufferObject()->SetBufferData(objReader.GetNormalBytes(),
 	//	objReader.GetNormals().data(),
 	//	BU_STATIC_DRAW);
@@ -253,7 +251,7 @@ Ref<Primitive> MakePrimitive( const float *position, size_t positionCount, const
 
 	//normals->SetbufferObjectDataDirty(false);
 
-	auto vertexIndex = MakeRef<ArrayUInt>();
+	auto vertexIndex = MakeVMRef<ArrayUInt>();
 	//vertexIndex->GetBufferObject()->SetBufferData(objReader.GetVertexIndicesBytes(),
 	//	objReader.GetFaceIndices().data(),
 	//	BU_STATIC_DRAW);
@@ -261,11 +259,11 @@ Ref<Primitive> MakePrimitive( const float *position, size_t positionCount, const
 	vertexIndex->GetBufferObject()->SetLocalData( index, indexCount * sizeof( float ) * 3 );
 	//vertexIndex->SetbufferObjectDataDirty(false);
 
-	auto primitive = MakeRef<Primitive>();
+	auto primitive = MakeVMRef<Primitive>();
 	primitive->SetVertexPositionArray( vertex );
 	primitive->SetVertexNormalArray( normals );
 
-	auto drawElemUi = MakeRef<DrawElementsUInt>( 1 );
+	auto drawElemUi = MakeVMRef<DrawElementsUInt>( 1 );
 	drawElemUi->SetIndexBuffer( vertexIndex );
 
 	primitive->DrawCalls().push_back( drawElemUi );
@@ -273,9 +271,9 @@ Ref<Primitive> MakePrimitive( const float *position, size_t positionCount, const
 	return primitive;
 }
 
-Ref<Primitive> MakeCubeLines( const Bound3f &bound )
+VMRef<Primitive> MakeCubeLines( const Bound3f &bound )
 {
-	auto proxyGeometry = MakeRef<Primitive>();
+	auto proxyGeometry = MakeVMRef<Primitive>();
 
 	Point3f points[ 8 ];
 
@@ -285,14 +283,14 @@ Ref<Primitive> MakeCubeLines( const Bound3f &bound )
 
 	unsigned int indices[] = { 0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 0, 4, 1, 5, 3, 7, 2, 6 };
 
-	auto vertexIndex = MakeRef<ArrayUInt>();
+	auto vertexIndex = MakeVMRef<ArrayUInt>();
 	vertexIndex->GetBufferObject()->SetLocalData( indices, sizeof( indices ) );
-	auto vertexArray = MakeRef<ArrayFloat3>();
+	auto vertexArray = MakeVMRef<ArrayFloat3>();
 
 	vertexArray->GetBufferObject()->SetLocalData( points, sizeof( points ) );
 	proxyGeometry->SetVertexPositionArray( vertexArray );
 
-	auto drawCall = MakeRef<DrawElementsUInt>();
+	auto drawCall = MakeVMRef<DrawElementsUInt>();
 	drawCall->SetPrimitiveType( PT_LINES );
 
 	drawCall->SetIndexBuffer( vertexIndex );
@@ -300,9 +298,9 @@ Ref<Primitive> MakeCubeLines( const Bound3f &bound )
 	return proxyGeometry;
 }
 
-Ref<Primitive> MakeCube( const Bound3f &bound )
+VMRef<Primitive> MakeCube( const Bound3f &bound )
 {
-	auto proxyGeometry = MakeRef<Primitive>();
+	auto proxyGeometry = MakeVMRef<Primitive>();
 
 	Point3f points[ 8 ];
 
@@ -326,11 +324,11 @@ Ref<Primitive> MakeCube( const Bound3f &bound )
 						-1, 1, 1,
 						1, 1, 1 };
 
-	auto vertexIndex = MakeRef<ArrayUInt>();
+	auto vertexIndex = MakeVMRef<ArrayUInt>();
 	vertexIndex->GetBufferObject()->SetLocalData( indices, sizeof( indices ) );
-	auto vertexArray = MakeRef<ArrayFloat3>();
-	auto texCoordArray = MakeRef<ArrayFloat3>();
-	auto normalArray = MakeRef<ArrayFloat3>();
+	auto vertexArray = MakeVMRef<ArrayFloat3>();
+	auto texCoordArray = MakeVMRef<ArrayFloat3>();
+	auto normalArray = MakeVMRef<ArrayFloat3>();
 
 	vertexArray->GetBufferObject()->SetLocalData( points, sizeof( points ) );
 
@@ -344,11 +342,10 @@ Ref<Primitive> MakeCube( const Bound3f &bound )
 
 	proxyGeometry->SetVertexNormalArray( normalArray );
 
-	auto drawCall = MakeRef<DrawElementsUInt>();
+	auto drawCall = MakeVMRef<DrawElementsUInt>();
 
 	drawCall->SetIndexBuffer( vertexIndex );
 	proxyGeometry->DrawCalls().push_back( drawCall );
 	return proxyGeometry;
 }
 }  // namespace vm
-}  // namespace ysl

@@ -6,8 +6,6 @@
 #include <mutex>
 #include "graphictype.h"
 
-namespace ysl
-{
 namespace vm
 {
 class VISUALMAN_EXPORT_IMPORT Booster
@@ -26,5 +24,4 @@ private:
 	static std::string exePath;
 };
 }  // namespace vm
-}  // namespace ysl
 #endif

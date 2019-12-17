@@ -2,7 +2,7 @@
 #ifdef _WIN32
 #include "windowsfilemap.h"
 
-namespace ysl
+namespace vm
 {
 void WindowsFileMapping::PrintLastErrorMsg()
 {
@@ -164,6 +164,6 @@ std::vector<std::string> WindowsFileMappingFactory::Keys() const
 }
 }  // namespace ysl
 
-EXPORT_PLUGIN_FACTORY_IMPLEMENT( ysl::WindowsFileMappingFactory )
+EXPORT_PLUGIN_FACTORY_IMPLEMENT( vm::WindowsFileMappingFactory )
 
 #endif /*_WIN32*/

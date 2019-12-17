@@ -9,8 +9,6 @@
 #include "abstrarenderstudio.h"
 #include "renderer.h"
 
-namespace ysl
-{
 namespace vm
 {
 class VISUALMAN_EXPORT_IMPORT Aggregate : public AbstraAggregate
@@ -19,27 +17,27 @@ public:
 	Aggregate()
 	{
 		//camera = MakeRef<Camera>();  // A default camera
-		renderers.push_back( MakeRef<Renderer>() );
+		renderers.push_back( MakeVMRef<Renderer>() );
 	}
-	void SetCamera( const Ref<Camera> &camera ) { this->camera = camera; }
-	Ref<Camera> CreateGetCamera() { return camera ? camera : ( camera = MakeRef<Camera>() ); }
+	void SetCamera( const VMRef<Camera> &camera ) { this->camera = camera; }
+	VMRef<Camera> CreateGetCamera() { return camera ? camera : ( camera = MakeVMRef<Camera>() ); }
 
 	void Render() override;
 
-	std::vector<Ref<AbstraSceneManager>> &SceneManager() { return sceneManagers; }
-	const std::vector<Ref<AbstraSceneManager>> &SceneManager() const { return sceneManagers; }
+	std::vector<VMRef<AbstraSceneManager>> &SceneManager() { return sceneManagers; }
+	const std::vector<VMRef<AbstraSceneManager>> &SceneManager() const { return sceneManagers; }
 
-	std::vector<Ref<Renderer>> &Renderers() { return renderers; }
-	const std::vector<Ref<Renderer>> &Renderers() const { return renderers; }
+	std::vector<VMRef<Renderer>> &Renderers() { return renderers; }
+	const std::vector<VMRef<Renderer>> &Renderers() const { return renderers; }
 
 protected:
-	std::vector<Ref<AbstraSceneManager>> sceneManagers;
-	std::vector<Ref<Renderer>> renderers;
-	std::vector<Ref<Actor>> actorQueue;	 // extract from scene manager
-	Ref<Camera> camera;
+	std::vector<VMRef<AbstraSceneManager>> sceneManagers;
+	std::vector<VMRef<Renderer>> renderers;
+	std::vector<VMRef<Actor>> actorQueue;	 // extract from scene manager
+	VMRef<Camera> camera;
 
 private:
-	RenderQueue MakeRenderQueue( const std::vector<Ref<Actor>> &queue );
+	RenderQueue MakeRenderQueue( const std::vector<VMRef<Actor>> &queue );
 };
 
 /**
@@ -49,13 +47,12 @@ class VISUALMAN_EXPORT_IMPORT SerializedAggregates : public AbstraAggregate	 // 
 {
 public:
 	void Render() override;
-	std::vector<Ref<AbstraAggregate>> &GetAggregates() { return aggregates; }
-	const std::vector<Ref<AbstraAggregate>> &GetAggregates() const { return aggregates; }
+	std::vector<VMRef<AbstraAggregate>> &GetAggregates() { return aggregates; }
+	const std::vector<VMRef<AbstraAggregate>> &GetAggregates() const { return aggregates; }
 
 private:
-	std::vector<Ref<AbstraAggregate>> aggregates;
+	std::vector<VMRef<AbstraAggregate>> aggregates;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

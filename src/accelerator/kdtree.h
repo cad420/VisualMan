@@ -5,7 +5,7 @@
 #include <vector>
 #include "../core/shape.h"
 
-namespace ysl
+namespace vm
 {
 /**
 	 * \brief It's worthwhile to keep the kd tree node small for cache-friendly, 
@@ -78,6 +78,6 @@ private:
 	AABB bounds;
 };
 
-}  // namespace ysl
+}  // namespace vm
 
 #endif /*_KDTREE_H_*/

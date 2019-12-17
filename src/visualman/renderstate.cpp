@@ -6,8 +6,6 @@
 #include "texture.h"
 #include <cassert>
 
-namespace ysl
-{
 namespace vm
 {
 void DepthFuncState::Apply( int index, const Camera *camera, RenderContext *context ) const
@@ -155,4 +153,3 @@ void PolygonModeState::Apply( int index, const Camera *camera, RenderContext *co
 	}
 }
 }  // namespace vm
-}  // namespace ysl

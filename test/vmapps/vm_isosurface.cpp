@@ -7,23 +7,21 @@
 #include <trivialscenemanager.h>
 #include <VMFoundation/rawreader.h>
 
-namespace ysl
-{
 	namespace vm
 	{
 		void VM_ISOSurface::InitEvent()
 		{
 			SetupPrimitive();
-			auto artist = MakeRef<Artist>();
+			auto artist = MakeVMRef<Artist>();
 			artist->GetLOD(0)->push_back(MakePhongShading());
-			auto scale = MakeRef<Transform>();
+			auto scale = MakeVMRef<Transform>();
 			scale->SetScale(Vec3f{ 0.1,0.1,0.1 });
-			auto actor = MakeRef<Actor>(surface, artist, scale);
+			auto actor = MakeVMRef<Actor>(surface, artist, scale);
 
-			auto sceneManager = MakeRef<TrivialSceneManager>();
+			auto sceneManager = MakeVMRef<TrivialSceneManager>();
 			sceneManager->AddActor(actor);
 
-			SetAggregation(MakeRef<Aggregate>());
+			SetAggregation(MakeVMRef<Aggregate>());
 			std::static_pointer_cast<Aggregate>(GetAggregate())->SceneManager().push_back(sceneManager);
 			std::static_pointer_cast<Aggregate>(GetAggregate())->Renderers()[0]->SetFramebuffer(Context()->GetFramebuffer());
 			std::static_pointer_cast<Aggregate>(GetAggregate())->CreateGetCamera()->GetViewport()->SetClearFlag(CF_CLEAR_COLOR_DEPTH);
@@ -36,7 +34,7 @@ namespace ysl
 			RawReader reader(R"(D:\scidata\head.raw)", Size3{ 256,256,225 }, 1);
 			buffer.resize(256 * 256 * 225ULL);
 			reader.readRegion(Size3{ 0,0,0 }, Size3{ 256,256,225 }, buffer.data());
-			meshGen = MakeRef<MeshGenerator>(buffer.data(), Size3{ 256,256,225 });
+			meshGen = MakeVMRef<MeshGenerator>(buffer.data(), Size3{ 256,256,225 });
 		}
 		void VM_ISOSurface::UpdateScene()
 		{
@@ -44,7 +42,7 @@ namespace ysl
 		}
 		void VM_ISOSurface::SetNewData(const unsigned char* data, const Size3& size)
 		{
-			meshGen = MakeRef<MeshGenerator>(data, size);
+			meshGen = MakeVMRef<MeshGenerator>(data, size);
 			isoValue = 0;
 			Context()->Update();
 		}
@@ -66,14 +64,14 @@ namespace ysl
 
 		void VM_ISOSurface::SetupPrimitive()
 		{
-			surface = MakeRef<Primitive>();
-			const auto vertexPos = MakeRef<ArrayFloat3>();
-			const auto vertexNormal = MakeRef<ArrayFloat3>();
-			const auto vertexIndex = MakeRef<ArrayUInt>();
+			surface = MakeVMRef<Primitive>();
+			const auto vertexPos = MakeVMRef<ArrayFloat3>();
+			const auto vertexNormal = MakeVMRef<ArrayFloat3>();
+			const auto vertexIndex = MakeVMRef<ArrayUInt>();
 			surface->SetVertexPositionArray(vertexPos);
 			surface->SetVertexNormalArray(vertexNormal);
 
-			auto drawElemCall = MakeRef<DrawElementsUInt>();
+			auto drawElemCall = MakeVMRef<DrawElementsUInt>();
 			drawElemCall->SetIndexBuffer(vertexIndex);
 			surface->DrawCalls().push_back(drawElemCall);
 
@@ -103,4 +101,3 @@ namespace ysl
 			changed = false;
 		}
 	}
-}

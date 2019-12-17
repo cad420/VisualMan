@@ -5,8 +5,6 @@
 #include "graphictype.h"
 #include <VMUtils/log.hpp>
 
-namespace ysl
-{
 namespace vm
 {
 void Aggregate::Render()
@@ -81,7 +79,7 @@ void Aggregate::Render()
 		renderer->Render( renderQueue, camera );
 	}
 }
-RenderQueue Aggregate::MakeRenderQueue( const std::vector<Ref<Actor>> &queue )
+RenderQueue Aggregate::MakeRenderQueue( const std::vector<VMRef<Actor>> &queue )
 {
 	// For every actor
 
@@ -98,7 +96,7 @@ RenderQueue Aggregate::MakeRenderQueue( const std::vector<Ref<Actor>> &queue )
 			const auto renderable = actor->GetRenderable( primitiveLOD );
 			const auto shadingLOD = artist->EvalLOD( actor.get(), camera.get() );
 
-			Ref<ShadingPasses> shadingPasses = artist->GetLOD( shadingLOD );
+			VMRef<ShadingPasses> shadingPasses = artist->GetLOD( shadingLOD );
 
 			RenderNode *node = nullptr;
 
@@ -129,7 +127,7 @@ RenderQueue Aggregate::MakeRenderQueue( const std::vector<Ref<Actor>> &queue )
 				if ( !program->Linked() )
 					program->Link();
 
-				Ref<RenderStateSet> stateSet = shading->GetRenderStateSet();
+				VMRef<RenderStateSet> stateSet = shading->GetRenderStateSet();
 				assert( stateSet );
 				if ( stateSet ) {
 					// find texture
@@ -157,4 +155,3 @@ void SerializedAggregates::Render()
 	}
 }
 }  // namespace vm
-}  // namespace ysl

@@ -4,8 +4,6 @@
 #include "graphictype.h"
 #include <cassert>
 
-namespace ysl
-{
 namespace vm
 {
 bool Framebuffer::CheckBuffer()
@@ -38,4 +36,3 @@ void Framebuffer::BindDrawBuffers()
 	}
 }
 }  // namespace vm
-}  // namespace ysl

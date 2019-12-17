@@ -7,8 +7,6 @@
 
 #include <vector>
 
-namespace ysl
-{
 namespace vm
 {
 class VISUALMAN_EXPORT_IMPORT AbstraAggregate
@@ -18,14 +16,13 @@ public:
 	virtual void Render() = 0;
 	void DispatchRenderStartedEvent();
 	void DispatchRenderFinishedEvent();
-	void AddRenderStartedEventCallback( Ref<IRenderEvent> callback );
-	void AddRenderFinishedEventCallback( Ref<IRenderEvent> callback );
+	void AddRenderStartedEventCallback( VMRef<IRenderEvent> callback );
+	void AddRenderFinishedEventCallback( VMRef<IRenderEvent> callback );
 
 protected:
-	std::vector<Ref<IRenderEvent>> renderStartedcallbacks;
-	std::vector<Ref<IRenderEvent>> renderFinishedCallbacks;
+	std::vector<VMRef<IRenderEvent>> renderStartedcallbacks;
+	std::vector<VMRef<IRenderEvent>> renderFinishedCallbacks;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

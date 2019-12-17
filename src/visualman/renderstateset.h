@@ -4,8 +4,6 @@
 #include "graphictype.h"
 #include "abstrarenderstate.h"
 
-namespace ysl
-{
 namespace vm
 {
 class GLSLProgram;
@@ -17,19 +15,18 @@ class VISUALMAN_EXPORT_IMPORT RenderStateSet
 
 public:
 	RenderStateSet() = default;
-	void SetRenderState( Ref<RenderState> state, int index );
-	Ref<RenderState> GetRenderState( RenderStateType type, int index );
+	void SetRenderState( VMRef<RenderState> state, int index );
+	VMRef<RenderState> GetRenderState( RenderStateType type, int index );
 	void RemoveRenderState( RenderStateType type, int index );
-	void SetProgram( Ref<GLSLProgram> program );
-	Ref<GLSLProgram> CreateGetProgram();
-	Ref<GLSLProgram> GetProgram();
+	void SetProgram( VMRef<GLSLProgram> program );
+	VMRef<GLSLProgram> CreateGetProgram();
+	VMRef<GLSLProgram> GetProgram();
 	//const auto & RenderStateBox()const { return renderStates; }
 	//std::vector<RenderStateBox> RenderStateBox() { return renderStates; }
 private:
 	std::vector<RenderStateBox> renderStates;
-	Ref<GLSLProgram> program;
+	VMRef<GLSLProgram> program;
 };
 
 }  // namespace vm
-}  // namespace ysl
 #endif

@@ -2,13 +2,11 @@
 #ifndef _TRANSFORMCHANGECALLBACK_H_
 #define _TRANSFORMCHANGECALLBACK_H_
 
-namespace ysl
+namespace vm
 {
 class Transform;
 }
 
-namespace ysl
-{
 namespace vm
 {
 class GLSLProgram;
@@ -26,6 +24,5 @@ public:
 private:
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

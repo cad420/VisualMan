@@ -7,8 +7,6 @@
 #include <VMGraphics/marchingcubes.h>
 #include "config.h"
 
-namespace ysl
-{
 	namespace vm
 	{
 		class VMAPPS_EXPORT_IMPORT VM_ISOSurface :public VisualMan
@@ -23,13 +21,12 @@ namespace ysl
 			void SetupPrimitive();
 			void UpdatePrimitive();
 
-			Ref<MeshGenerator> meshGen = nullptr;
-			Ref<Primitive> surface = nullptr;
+			VMRef<MeshGenerator> meshGen = nullptr;
+			VMRef<Primitive> surface = nullptr;
 			std::vector<unsigned char> buffer;
 			bool changed = true;
 			int isoValue = 128;
 		};
 	}
-}
 
 #endif

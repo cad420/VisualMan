@@ -11,13 +11,13 @@
 int main( int argc, char **argv )
 {
 	cmdline::parser a;
-	ysl::PluginLoader::GetPluginLoader()->LoadPlugins( "plugins" );
+	vm::PluginLoader::GetPluginLoader()->LoadPlugins( "plugins" );
 	a.add<std::string>( "if", 'i', "input file", true );
 	a.add<std::string>( "of", 'o', "output file", false, "a" );
 	a.add<std::string>( "fmt", 'f', "file format", true, ".lvd" );
 	a.parse_check( argc, argv );
 	const auto key = a.get<std::string>( "fmt" );
-	auto reader = ysl::PluginLoader::CreatePlugin<I3DBlockFilePluginInterface>( key );
+	auto reader = vm::PluginLoader::CreatePlugin<I3DBlockFilePluginInterface>( key );
 	if ( reader == nullptr ) {
 		vm::println( "failed to load plugin for {}", key );
 		return 0;
@@ -66,8 +66,8 @@ int main( int argc, char **argv )
 
 	const auto p = reader->GetPadding();	  // padding
 	const auto bs = reader->Get3DPageSize();  // page size
-	const auto _ = bs - 2 * ysl::Size3( p, p, p );
-	const ysl::Vec3i bsnp = ysl::Vec3i( _.x, _.y, _.z );  // block size without padding
+	const auto _ = bs - 2 * vm::Size3( p, p, p );
+	const vm::Vec3i bsnp = vm::Vec3i( _.x, _.y, _.z );  // block size without padding
 
 	::vm::println( "PageSize: {}", bs );
 	::vm::println( "PageSizeNoPadding: {}", bsnp );
@@ -95,12 +95,12 @@ int main( int argc, char **argv )
 		for ( int yb = 0; yb < pageCount.y; yb++ ) {
 			for ( int xb = 0; xb < pageCount.x; xb++ ) {
 				// for each block, read the all the strip memory region of x direction
-				const auto bid = ysl::Linear( { xb, yb, zb }, { pageCount.x, pageCount.y } );
+				const auto bid = vm::Linear( { xb, yb, zb }, { pageCount.x, pageCount.y } );
 				const auto block = reinterpret_cast<const char *>( reader->GetPage( bid ) );
 				for ( int sz = 0; sz < lastSlice; sz++ ) {
 					for ( int sy = 0; sy < bsnp.y; sy++ ) {
-						const auto blockBegin = ysl::Linear( { p, p + sy, p + sz }, { bs.x, bs.y } );
-						const auto bufBegin = ysl::Linear( { xb * bsnp.x, yb * bsnp.y, sz }, { ods.x, ods.y } );
+						const auto blockBegin = vm::Linear( { p, p + sy, p + sz }, { bs.x, bs.y } );
+						const auto bufBegin = vm::Linear( { xb * bsnp.x, yb * bsnp.y, sz }, { ods.x, ods.y } );
 						memcpy( buf.data() + bufBegin, block + blockBegin, bsnp.x );
 					}
 				}

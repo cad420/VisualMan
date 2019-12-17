@@ -4,8 +4,6 @@
 #include <iostream>
 #include "abstrdraw.h"
 
-namespace ysl
-{
 namespace vm
 {
 class DrawArray : public AbstrDrawCall
@@ -24,5 +22,4 @@ private:
 	int count = 0;
 };
 }  // namespace vm
-}  // namespace ysl
 #endif

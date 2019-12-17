@@ -2,8 +2,6 @@
 #ifndef _RENDERABLE_H_
 #define _RENDERBALE_H_
 #include "graphictype.h"
-namespace ysl
-{
 namespace vm
 {
 class Shading;
@@ -35,6 +33,5 @@ private:
 	bool enableBufferObject = true;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

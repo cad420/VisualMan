@@ -1,8 +1,7 @@
 #include "frustum.h"
 #include <VMat/transformation.h>
 //#include "camera.h"
-
-namespace ysl
+namespace vm
 {
 Frustum::Frustum( const vm::Camera &camera )
 {
@@ -32,5 +31,4 @@ void Frustum::Init( const vm::Camera &camera )
 	planes[ 4 ] = Plane( Rotate( right, aspectRatio * fov / 2.f ) * up, pos );
 	planes[ 5 ] = Plane( Rotate( right, -aspectRatio * fov / 2.f ) * ( -up ), pos );
 }
-
-}  // namespace ysl
+}  // namespace vm

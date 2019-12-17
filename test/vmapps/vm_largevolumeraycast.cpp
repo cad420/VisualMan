@@ -12,8 +12,6 @@
 #include <framebuffer.h>
 #include "drawelements.h"
 
-namespace ysl
-{
 namespace vm
 {
 void PrintCamera( Camera *camera )
@@ -26,28 +24,28 @@ void PrintCamera( Camera *camera )
 }
 
 //using namespace ::vm;
-FrustumEventCallback::FrustumEventCallback( Ref<Camera> camera ) :
+FrustumEventCallback::FrustumEventCallback( VMRef<Camera> camera ) :
   camera( camera )
 {
-	frustum = MakeRef<Primitive>();
+	frustum = MakeVMRef<Primitive>();
 	if ( camera ) {
-		const auto vertexIndex = MakeRef<ArrayUInt>();
+		const auto vertexIndex = MakeVMRef<ArrayUInt>();
 		unsigned int indices[ 24 ] = { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 };
 		vertexIndex->GetBufferObject()->SetLocalData( indices, sizeof( indices ) );
 		vertexIndex->GetBufferObject()->ReallocBufferData( sizeof( indices ), indices, BU_STATIC_DRAW );
 		vertexIndex->SetbufferObjectDataDirty( false );
-		auto drawCall = MakeRef<DrawElementsUInt>();
+		auto drawCall = MakeVMRef<DrawElementsUInt>();
 		drawCall->SetPrimitiveType( PT_LINES );
 		drawCall->SetIndexBuffer( vertexIndex );
 		drawCall->SetLineWidth( 2.f );
-		const auto vertexPositionArray = MakeRef<ArrayFloat3>();
+		const auto vertexPositionArray = MakeVMRef<ArrayFloat3>();
 		frustum->SetVertexPositionArray( vertexPositionArray );
 		frustum->DrawCalls().push_back( drawCall );
 		UpdateFrustum();
 	}
 }
 
-void FrustumEventCallback::BindFrustumActor( Ref<Actor> actor )
+void FrustumEventCallback::BindFrustumActor( VMRef<Actor> actor )
 {
 	if ( actor ) {
 		auto shared_this = std::static_pointer_cast<FrustumEventCallback>( shared_from_this() );
@@ -66,7 +64,7 @@ void FrustumEventCallback::OnActorRenderStartedEvent( Actor *actor,
 	UpdateFrustum();
 }
 
-Ref<Primitive> FrustumEventCallback::GetFrustumPrimitive()
+VMRef<Primitive> FrustumEventCallback::GetFrustumPrimitive()
 {
 	return frustum;
 }
@@ -85,7 +83,7 @@ BoundingBoxEventCallback::BoundingBoxEventCallback()
 	boundingBox->DrawCalls().at( 0 )->SetLineWidth( 3.f );
 }
 
-void BoundingBoxEventCallback::BindBoundingBoxActor( Ref<Actor> actor )
+void BoundingBoxEventCallback::BindBoundingBoxActor( VMRef<Actor> actor )
 {
 	if ( actor ) {
 		auto shared_this = std::static_pointer_cast<BoundingBoxEventCallback>( shared_from_this() );
@@ -129,20 +127,20 @@ void VM_LargeVolumeRayCast::InitEvent()
 	const auto h = Context()->GetFramebuffer()->Height();
 	vSize = Vec2i{ w, h };
 
-	auto texParam = MakeRef<TexCreateParams>();
+	auto texParam = MakeVMRef<TexCreateParams>();
 	texParam->SetSize( vSize.x, vSize.y, 0 );
 	texParam->SetTextureFormat( TF_RGBA32F );
 	texParam->SetTextureTarget( TD_TEXTURE_2D );
 	// entry texture
-	auto entryTexture = MakeRef<Texture>();
+	auto entryTexture = MakeVMRef<Texture>();
 	entryTexture->SetSetupParams( texParam );
 	entryTexture->CreateTexture();  // needless
 	// exit texture
-	auto exitTexture = MakeRef<Texture>();
+	auto exitTexture = MakeVMRef<Texture>();
 	exitTexture->SetSetupParams( texParam );
 	exitTexture->CreateTexture();
 	// intermediate result texture
-	intermediateResult = MakeRef<Texture>();
+	intermediateResult = MakeVMRef<Texture>();
 	intermediateResult->SetSetupParams( texParam );
 	intermediateResult->CreateTexture();
 
@@ -153,81 +151,81 @@ void VM_LargeVolumeRayCast::InitEvent()
 			 * control this camera to interact.
 			 *****************************************************************************/
 
-	mrtAgt = MakeRef<Aggregate>();
+	mrtAgt = MakeVMRef<Aggregate>();
 	//auto depthAttachment = MakeRef<vm::FBODepthAttachment>(DepthBufferFormat::DBF_DEPTH_COMPONENT24);
 	auto mrtFBO = Context()->CreateFramebufferObject( vSize.x, vSize.y, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0 );
-	mrtFBO->AddTextureAttachment( AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>( entryTexture ) );
-	mrtFBO->AddTextureAttachment( AP_COLOR_ATTACHMENT1, MakeRef<FBOTextureAttachment>( exitTexture ) );
+	mrtFBO->AddTextureAttachment( AP_COLOR_ATTACHMENT0, MakeVMRef<FBOTextureAttachment>( entryTexture ) );
+	mrtFBO->AddTextureAttachment( AP_COLOR_ATTACHMENT1, MakeVMRef<FBOTextureAttachment>( exitTexture ) );
 	//mrtFBO->AddDepthAttachment(depthAttachment);
 
 	mrtFBO->SetDrawBuffers( RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT1 );
 	mrtAgt->Renderers().at( 0 )->SetFramebuffer( mrtFBO );
 	BindCameraEvent( mrtAgt->CreateGetCamera() );
 
-	auto positionShading = MakeRef<Shading>();
+	auto positionShading = MakeVMRef<Shading>();
 	positionShading->CreateGetEnableStateSet()->Enable( EN_BLEND );
-	positionShading->CreateGetRenderStateSet()->SetRenderState( MakeRef<BlendFuncState>( BF_ONE, BF_ONE, BF_ONE, BF_ONE ), -1 );  // Think why
-	positionShading->CreateGetRenderStateSet()->SetRenderState( MakeRef<FrontFaceState>( FF_CW ), -1 );
+	positionShading->CreateGetRenderStateSet()->SetRenderState( MakeVMRef<BlendFuncState>( BF_ONE, BF_ONE, BF_ONE, BF_ONE ), -1 );  // Think why
+	positionShading->CreateGetRenderStateSet()->SetRenderState( MakeVMRef<FrontFaceState>( FF_CW ), -1 );
 
 	auto positionGLSL = positionShading->CreateGetProgram();
-	auto fragShader = MakeRef<GLSLFragmentShader>();
+	auto fragShader = MakeVMRef<GLSLFragmentShader>();
 	fragShader->SetFromFile( R"(glsl/position_f.glsl)" );
-	auto vertShader = MakeRef<GLSLVertexShader>();
+	auto vertShader = MakeVMRef<GLSLVertexShader>();
 	vertShader->SetFromFile( R"(glsl/position_v.glsl)" );
 	positionGLSL->AttachShader( fragShader );
 	positionGLSL->AttachShader( vertShader );
 	positionGLSL->BindFragDataLocation( 0, "entryPos" );  // MRTs
 	positionGLSL->BindFragDataLocation( 1, "exitPos" );
 
-	auto artist = MakeRef<Artist>();
+	auto artist = MakeVMRef<Artist>();
 	artist->GetLOD( 0 )->push_back( positionShading );
 	auto t = Translate( -0.5, -0.5, -0.5 );
 	auto s = Scale( 1, 1, 1 );
 
-	proxyGemoryScaleTrans = MakeRef<Transform>( s * t );
-	const auto geometryActor = MakeRef<Actor>( nullptr, artist, proxyGemoryScaleTrans );
-	auto geometryActorCallback = MakeRef<RayCast2ActorEventCallback>();
+	proxyGemoryScaleTrans = MakeVMRef<Transform>( s * t );
+	const auto geometryActor = MakeVMRef<Actor>( nullptr, artist, proxyGemoryScaleTrans );
+	auto geometryActorCallback = MakeVMRef<RayCast2ActorEventCallback>();
 	geometryActorCallback->BindToActor( geometryActor );
 
-	auto sceneManager = MakeRef<TrivialSceneManager>();
+	auto sceneManager = MakeVMRef<TrivialSceneManager>();
 	sceneManager->AddActor( geometryActor );
 	mrtAgt->SceneManager().push_back( sceneManager );
 	mrtAgt->CreateGetCamera()->GetViewport()->SetClearFlag( CF_CLEAR_COLOR_DEPTH );
 	mrtAgt->CreateGetCamera()->GetViewport()->SetClearColor( Vec4f{ 0.f, 0.f, 0.f, 1.f } );
 
 	// Thumbnail aggregation
-	navigationAgt = MakeRef<Aggregate>();
-	auto frustumShading = MakeRef<Shading>();
+	navigationAgt = MakeVMRef<Aggregate>();
+	auto frustumShading = MakeVMRef<Shading>();
 	frustumShading->CreateGetEnableStateSet()->Enable( EN_DEPTH_TEST );
 	frustumShading->CreateGetUniformSet()->CreateGetUniform( "object_color" )->SetUniform4f( 1, Vec4f{ 0, 0, 1, 1 }.ConstData() );
 
 	//navigationShading->CreateGetUniformSet()->CreateGetUniform("view_pos")->SetUniform3f(1, Vec3f{ 1,1,1 }.ConstData());
 
 	auto navigationGLSL = frustumShading->CreateGetProgram();
-	auto navigationVertShader = MakeRef<GLSLVertexShader>();
+	auto navigationVertShader = MakeVMRef<GLSLVertexShader>();
 	navigationVertShader->SetFromFile( R"(glsl/trivial_no_illumination_vs.glsl)" );
-	auto navigationFragShader = MakeRef<GLSLFragmentShader>();
+	auto navigationFragShader = MakeVMRef<GLSLFragmentShader>();
 	navigationFragShader->SetFromFile( R"(glsl/trivial_no_illumination_fs.glsl)" );
 	navigationGLSL->AttachShader( navigationFragShader );
 	navigationGLSL->AttachShader( navigationVertShader );
 
-	auto frustumArtist = MakeRef<Artist>();
+	auto frustumArtist = MakeVMRef<Artist>();
 	frustumArtist->GetLOD( 0 )->push_back( frustumShading );
-	auto frustumActor = MakeRef<Actor>( nullptr, frustumArtist, nullptr );
-	auto frustumActorEventCallback = MakeRef<FrustumEventCallback>( mrtAgt->CreateGetCamera() );
+	auto frustumActor = MakeVMRef<Actor>( nullptr, frustumArtist, nullptr );
+	auto frustumActorEventCallback = MakeVMRef<FrustumEventCallback>( mrtAgt->CreateGetCamera() );
 	frustumActorEventCallback->BindFrustumActor( frustumActor );
 
-	auto boundingboxShading = MakeRef<Shading>();
+	auto boundingboxShading = MakeVMRef<Shading>();
 	boundingboxShading->CreateGetProgram()->AttachShader( navigationFragShader );
 	boundingboxShading->CreateGetProgram()->AttachShader( navigationVertShader );
 	boundingboxShading->CreateGetUniformSet()->CreateGetUniform( "object_color" )->SetUniform4f( 1, Vec4f{ 1, 0, 0, 1 }.ConstData() );
 
-	auto boundingBoxArtist = MakeRef<Artist>();
+	auto boundingBoxArtist = MakeVMRef<Artist>();
 	boundingBoxArtist->GetLOD( 0 )->push_back( boundingboxShading );
 
-	navigationScale = MakeRef<Transform>();
-	boundingboxActor = MakeRef<Actor>( nullptr, boundingBoxArtist, proxyGemoryScaleTrans );
-	auto boundingboxEventCallback = MakeRef<BoundingBoxEventCallback>();
+	navigationScale = MakeVMRef<Transform>();
+	boundingboxActor = MakeVMRef<Actor>( nullptr, boundingBoxArtist, proxyGemoryScaleTrans );
+	auto boundingboxEventCallback = MakeVMRef<BoundingBoxEventCallback>();
 	boundingboxEventCallback->BindBoundingBoxActor( boundingboxActor );
 
 	/*
@@ -235,12 +233,12 @@ void VM_LargeVolumeRayCast::InitEvent()
 			 * maybe there is something wrong when using smart pointer. such as circular reference
 			 */
 
-	auto navigationSceneManager = MakeRef<TrivialSceneManager>();
+	auto navigationSceneManager = MakeVMRef<TrivialSceneManager>();
 	navigationSceneManager->AddActor( frustumActor );
 	navigationSceneManager->AddActor( boundingboxActor );
 	navigationAgt->SceneManager().push_back( navigationSceneManager );
 	navigationAgt->Renderers().at( 0 )->SetFramebuffer( Context()->GetFramebuffer() );
-	navigationCameraViewMatrix = MakeRef<ViewMatrixWrapper>( Point3f{ 5, 5, 5 }, Vec3f{ 0, 1, 0 }, Point3f{ 0, 0, 0 } );
+	navigationCameraViewMatrix = MakeVMRef<ViewMatrixWrapper>( Point3f{ 5, 5, 5 }, Vec3f{ 0, 1, 0 }, Point3f{ 0, 0, 0 } );
 	navigationAgt->CreateGetCamera()->SetViewMatrixWrapper( navigationCameraViewMatrix );
 	navigationAgt->CreateGetCamera()->GetViewport()->SetClearFlag( CF_CLEAR_COLOR_DEPTH );
 	navigationAgt->CreateGetCamera()->GetViewport()->SetClearColor( Vec4f{ 1.f, 1.f, 1.f, 1.f } );
@@ -256,18 +254,18 @@ void VM_LargeVolumeRayCast::InitEvent()
 			 * resources swapping.
 			 *********************************************************************************/
 
-	raycastAgt = MakeRef<Aggregate>();
+	raycastAgt = MakeVMRef<Aggregate>();
 	auto intermediateFBO = Context()->CreateFramebufferObject( vSize.x, vSize.y, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0 );
-	intermediateFBO->AddTextureAttachment( AP_COLOR_ATTACHMENT0, MakeRef<FBOTextureAttachment>( intermediateResult ) );
+	intermediateFBO->AddTextureAttachment( AP_COLOR_ATTACHMENT0, MakeVMRef<FBOTextureAttachment>( intermediateResult ) );
 	intermediateFBO->SetDrawBuffers( RDB_COLOR_ATTACHMENT0 );
 	//intermediateFBO->AddDepthAttachment(depthAttachment);
 	intermediateFBO->CheckFramebufferStatus();
 
-	rayCastShading = MakeRef<Shading>();
+	rayCastShading = MakeVMRef<Shading>();
 	auto raycastGLSL = rayCastShading->CreateGetProgram();
-	auto fs = MakeRef<GLSLFragmentShader>();
+	auto fs = MakeVMRef<GLSLFragmentShader>();
 	fs->SetFromFile( R"(glsl/blockraycasting_f.glsl)" );
-	auto vs = MakeRef<GLSLVertexShader>();
+	auto vs = MakeVMRef<GLSLVertexShader>();
 	vs->SetFromFile( R"(glsl/raycast_vs.glsl)" );
 	raycastGLSL->AttachShader( fs );
 	raycastGLSL->AttachShader( vs );
@@ -287,18 +285,18 @@ void VM_LargeVolumeRayCast::InitEvent()
 	rayCastShading->CreateGetUniformSet()->CreateGetUniform( "lightdir" )->SetUniform3f( 1, lightDir.Data() );
 	rayCastShading->CreateGetUniformSet()->CreateGetUniform( "halfway" )->SetUniform3f( 1, lightDir.Data() );
 
-	auto effect2 = MakeRef<Artist>();
+	auto effect2 = MakeVMRef<Artist>();
 	effect2->GetLOD( 0 )->push_back( rayCastShading );
 
-	const auto screenActor = MakeRef<Actor>( nullptr, effect2, proxyGemoryScaleTrans );
-	auto screenActorCallback = MakeRef<ScreenActorEventCallback>( mrtAgt->CreateGetCamera() );
-	oocPrimitive = MakeRef<OutOfCorePrimitive>();
+	const auto screenActor = MakeVMRef<Actor>( nullptr, effect2, proxyGemoryScaleTrans );
+	auto screenActorCallback = MakeVMRef<ScreenActorEventCallback>( mrtAgt->CreateGetCamera() );
+	oocPrimitive = MakeVMRef<OutOfCorePrimitive>();
 	screenActorCallback->SetPrimitive( oocPrimitive );  // Out Of Core
 	//SetupResources("");
 	//SetupTF("");
 
 	screenActorCallback->BindToActor( screenActor );
-	sceneManager = MakeRef<TrivialSceneManager>();
+	sceneManager = MakeVMRef<TrivialSceneManager>();
 	sceneManager->AddActor( screenActor );
 
 	raycastAgt->SceneManager().push_back( sceneManager );
@@ -306,7 +304,7 @@ void VM_LargeVolumeRayCast::InitEvent()
 	auto rect = Bound2i{ { 0, 0 }, { vSize.x, vSize.y } };
 
 	// This object will blit the final redering result into default framebuffer
-	auto blit = MakeRef<BlitFramebufferEvent>( intermediateFBO, rect, Context()->GetFramebuffer(), rect, BufferBits::VM_BB_COLOR_BUFFER_BIT );
+	auto blit = MakeVMRef<BlitFramebufferEvent>( intermediateFBO, rect, Context()->GetFramebuffer(), rect, BufferBits::VM_BB_COLOR_BUFFER_BIT );
 	raycastAgt->Renderers().at( 0 )->AddRenderFinishedEventCallback( blit );
 	//raycastAgt->SetCamera(camera);
 	raycastAgt->CreateGetCamera()->SetViewMatrixWrapper( mrtAgt->CreateGetCamera()->GetViewMatrixWrapper() );
@@ -314,7 +312,7 @@ void VM_LargeVolumeRayCast::InitEvent()
 	raycastAgt->CreateGetCamera()->GetViewport()->SetClearFlag( CF_CLEAR_COLOR );
 	raycastAgt->CreateGetCamera()->GetViewport()->SetClearColor( Vec4f{ 0.f, 0.f, 0.f, 0.f } );
 
-	auto outOfCoreAgts = MakeRef<SerializedAggregates>();
+	auto outOfCoreAgts = MakeVMRef<SerializedAggregates>();
 	SetAggregation( outOfCoreAgts );
 	outOfCoreAgts->GetAggregates().push_back( mrtAgt );
 
@@ -410,8 +408,7 @@ void VM_LargeVolumeRayCast::UpdateEvent()
 	timer.duration();
 	std::string title = "LVD Render -- fps:" + std::to_string( GetFPS() );
 	Context()->SetWindowTitle( title );
-	if ( outFileName.empty() == false ) 
-	{
+	if ( outFileName.empty() == false ) {
 		intermediateResult->SaveTextureAs( "E:\\Desktop\\res.png" );
 		Context()->Terminate();
 	}
@@ -435,7 +432,7 @@ void VM_LargeVolumeRayCast::SetupResources( const std::string &fileName )
 {
 	assert( oocPrimitive );
 	assert( rayCastShading );
-	Ref<OutOfCoreVolumeTexture> oocResources;
+	VMRef<OutOfCoreVolumeTexture> oocResources;
 
 	try {
 		std::ifstream json( fileName );
@@ -445,7 +442,7 @@ void VM_LargeVolumeRayCast::SetupResources( const std::string &fileName )
 		lvdInfo.samplingRate = lvdJSON.samplingRate;
 		lvdInfo.spacing = { lvdJSON.spacing[ 0 ], lvdJSON.spacing[ 1 ], lvdJSON.spacing[ 2 ] };
 
-		oocResources = MakeRef<OutOfCoreVolumeTexture>( lvdInfo, Context()->GetDeviceTotalMemorySize() *1024);
+		oocResources = MakeVMRef<OutOfCoreVolumeTexture>( lvdInfo, Context()->GetDeviceTotalMemorySize() * 1024 );
 	} catch ( std::runtime_error &e ) {
 		::vm::Warning( "{}", e.what() );
 		return;
@@ -529,4 +526,3 @@ void VM_LargeVolumeRayCast::SetupConfigurationFiles( const std::vector<std::stri
 	}
 }
 }  // namespace vm
-}  // namespace ysl

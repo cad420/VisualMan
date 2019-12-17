@@ -6,17 +6,15 @@
 #include "renderable.h"
 #include "transformchangecallback.h"
 
-namespace ysl
-{
 namespace vm
 {
 Renderer::Renderer()
 {
-	transformCallback = MakeRef<TransformChangeCallback>();
+	transformCallback = MakeVMRef<TransformChangeCallback>();
 }
 
 void Renderer::Render( const RenderQueue &renderQueue,
-					   const Ref<Camera> &camera )
+					   const VMRef<Camera> &camera )
 {
 	// active framebuffer and get context from fb
 
@@ -113,4 +111,3 @@ void Renderer::Render( const RenderQueue &renderQueue,
 	}
 }
 }  // namespace vm
-}  // namespace ysl

@@ -4,8 +4,6 @@
 #include <vector>
 #include "graphictype.h"
 
-namespace ysl
-{
 namespace vm
 {
 class EnableStateSet
@@ -54,6 +52,5 @@ private:
 	//bool blendingEnable = false;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

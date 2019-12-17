@@ -3,13 +3,11 @@
 #include "rendercontext.h"
 #include <VMUtils/log.hpp>
 
-namespace ysl
-{
 namespace vm
 {
 void VisualMan::InitDefault()
 {
-	auto aggre = MakeRef<Aggregate>();
+	auto aggre = MakeVMRef<Aggregate>();
 	abstraAggregate = aggre;
 	// A frame has created a camera,
 	//We just need to bind it to the manipulator
@@ -17,7 +15,7 @@ void VisualMan::InitDefault()
 }
 VisualMan::VisualMan()
 {
-	manipulator = MakeRef<CameraManipulator>();
+	manipulator = MakeVMRef<CameraManipulator>();
 }
 
 void VisualMan::DestroyEvent()
@@ -106,9 +104,8 @@ void VisualMan::FileDropEvent( const std::vector<std::string> &fileNames )
 	(void)fileNames;
 }
 
-void VisualMan::BindCameraEvent( Ref<Camera> camera )
+void VisualMan::BindCameraEvent( VMRef<Camera> camera )
 {
 	manipulator->SetCamera( camera );
 }
 }  // namespace vm
-}  // namespace ysl

@@ -1,7 +1,7 @@
 
 #include "lvdfilereader.h"
 
-namespace ysl
+namespace vm
 {
 }
-EXPORT_PLUGIN_FACTORY_IMPLEMENT( ysl::LVDFileReaderFactory )
+EXPORT_PLUGIN_FACTORY_IMPLEMENT( vm::LVDFileReaderFactory )

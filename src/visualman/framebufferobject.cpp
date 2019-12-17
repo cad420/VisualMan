@@ -5,8 +5,6 @@
 #include <cassert>
 #include <iostream>
 
-namespace ysl
-{
 namespace vm
 {
 void AbstraFBOAttachment::DetachFromAllFBO()
@@ -60,7 +58,7 @@ void FBORenderBufferAttachment::InitStorage( int w, int h, int samples )
 	storageChanged = false;
 }
 
-void FBORenderBufferAttachment::BindAttachment( Ref<FramebufferObject> fbo, AttachmentBindPoint point )
+void FBORenderBufferAttachment::BindAttachment( VMRef<FramebufferObject> fbo, AttachmentBindPoint point )
 {
 	assert( fbo );
 	CreateRenderBuffer();
@@ -75,7 +73,7 @@ void FBORenderBufferAttachment::BindAttachment( Ref<FramebufferObject> fbo, Atta
 	GL( glNamedFramebufferRenderbuffer( fbo->Handle(), point, GL_RENDERBUFFER, handle ) );
 }
 
-void FBOTextureAttachment::BindAttachment( Ref<FramebufferObject> fbo, AttachmentBindPoint point )
+void FBOTextureAttachment::BindAttachment( VMRef<FramebufferObject> fbo, AttachmentBindPoint point )
 {
 	assert( fbo );
 
@@ -174,7 +172,7 @@ int FramebufferObject::CheckFramebufferStatus()
 }
 
 void FramebufferObject::AddColorAttachment( AttachmentBindPoint point,
-											Ref<FBOColorBufferAttachment> colorAttachment )
+											VMRef<FBOColorBufferAttachment> colorAttachment )
 {
 	assert( point >= AP_COLOR_ATTACHMENT0 && point <= AP_COLOR_ATTACHMENT15 );
 	CreateFrambufferObject();
@@ -186,7 +184,7 @@ void FramebufferObject::AddColorAttachment( AttachmentBindPoint point,
 }
 
 void FramebufferObject::AddTextureAttachment( AttachmentBindPoint point,
-											  Ref<AbstraFBOTextureAttachment> texAttachment )
+											  VMRef<AbstraFBOTextureAttachment> texAttachment )
 {
 	assert( point >= AP_COLOR_ATTACHMENT0 && point <= AP_COLOR_ATTACHMENT15 );
 	CreateFrambufferObject();
@@ -197,7 +195,7 @@ void FramebufferObject::AddTextureAttachment( AttachmentBindPoint point,
 	attachments[ point ] = std::move( texAttachment );	// remove old attachment attached on this point
 }
 
-void FramebufferObject::AddDepthAttachment( Ref<FBODepthAttachment> depthAttachment )
+void FramebufferObject::AddDepthAttachment( VMRef<FBODepthAttachment> depthAttachment )
 {
 	CreateFrambufferObject();
 	//RemoveAttachments(point);
@@ -207,7 +205,7 @@ void FramebufferObject::AddDepthAttachment( Ref<FBODepthAttachment> depthAttachm
 	attachments[ AP_DEPTH_ATTACHMENT ] = std::move( depthAttachment );
 }
 
-void FramebufferObject::AddStencilAttachment( Ref<FBOStencilAttachment> stencilAttachment )
+void FramebufferObject::AddStencilAttachment( VMRef<FBOStencilAttachment> stencilAttachment )
 {
 	CreateFrambufferObject();
 	const auto thisFBO = std::static_pointer_cast<FramebufferObject>( shared_from_this() );
@@ -216,7 +214,7 @@ void FramebufferObject::AddStencilAttachment( Ref<FBOStencilAttachment> stencilA
 	attachments[ AP_DEPTH_ATTACHMENT ] = std::move( stencilAttachment );
 }
 
-void FramebufferObject::AddDepthStencilAttachment( Ref<FBODepthStencilAttachment> dsAttachment )
+void FramebufferObject::AddDepthStencilAttachment( VMRef<FBODepthStencilAttachment> dsAttachment )
 {
 	CreateFrambufferObject();
 	const auto thisFBO = std::static_pointer_cast<FramebufferObject>( shared_from_this() );
@@ -227,8 +225,8 @@ void FramebufferObject::AddDepthStencilAttachment( Ref<FBODepthStencilAttachment
 
 void FramebufferObject::RemoveAllAttachments()
 {
-	//std::swap(attachments, std::map<AttachmentBindPoint, Ref<AbstraFBOAttachment>>());
-	std::map<AttachmentBindPoint, Ref<AbstraFBOAttachment>>().swap( attachments );
+	//std::swap(attachments, std::map<AttachmentBindPoint, VMRef<AbstraFBOAttachment>>());
+	std::map<AttachmentBindPoint, VMRef<AbstraFBOAttachment>>().swap( attachments );
 }
 
 void FramebufferObject::RemoveAttachments( AttachmentBindPoint point )
@@ -240,7 +238,7 @@ void FramebufferObject::RemoveAttachments( AttachmentBindPoint point )
 	}
 }
 
-void FramebufferObject::RemoveAttachments( const Ref<AbstraFBOAttachment> &attachment )
+void FramebufferObject::RemoveAttachments( const VMRef<AbstraFBOAttachment> &attachment )
 {
 	std::vector<AttachmentBindPoint> points;
 	for ( auto it = attachments.begin(); it != attachments.end(); ++it ) {
@@ -254,4 +252,3 @@ void FramebufferObject::RemoveAttachments( const Ref<AbstraFBOAttachment> &attac
 	}
 }
 }  // namespace vm
-}  // namespace ysl

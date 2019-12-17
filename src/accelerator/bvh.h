@@ -5,7 +5,7 @@
 #include <vector>
 #include "../graphicfoundation/shape.h"
 
-namespace ysl
+namespace vm
 {
 class Interaction;
 
@@ -81,6 +81,6 @@ private:
 											 std::vector<std::shared_ptr<Shape>> &orderedShapes );
 };
 
-}  // namespace ysl
+}  // namespace vm
 
 #endif	// BVH_H

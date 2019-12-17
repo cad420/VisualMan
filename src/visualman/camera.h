@@ -10,20 +10,18 @@
 #include "abstraarray.h"
 #include <VMUtils/json_binding.hpp>
 
-namespace ysl
-{
 namespace vm
 {
 class Viewport;
 
-struct ViewMatrixJSONStruct : ::vm::json::Serializable<ViewMatrixJSONStruct>
+struct ViewMatrixJSONStruct : json::Serializable<ViewMatrixJSONStruct>
 {
 	VM_JSON_FIELD( std::vector<float>, pos );
 	VM_JSON_FIELD( std::vector<float>, up );
 	VM_JSON_FIELD( std::vector<float>, front );
 };
 
-struct PerspMatrixJSONStruct : ::vm::json::Serializable<PerspMatrixJSONStruct>
+struct PerspMatrixJSONStruct : json::Serializable<PerspMatrixJSONStruct>
 {
 	VM_JSON_FIELD( float, fov );
 	VM_JSON_FIELD( float, nearPlane );
@@ -31,7 +29,7 @@ struct PerspMatrixJSONStruct : ::vm::json::Serializable<PerspMatrixJSONStruct>
 	VM_JSON_FIELD( float, aspectRatio );
 };
 
-struct CameraJSONStruct : ::vm::json::Serializable<CameraJSONStruct>
+struct CameraJSONStruct : json::Serializable<CameraJSONStruct>
 {
 	VM_JSON_FIELD( ViewMatrixJSONStruct, viewMatrix );
 	VM_JSON_FIELD( PerspMatrixJSONStruct, perspectiveMatrix );
@@ -60,28 +58,28 @@ class VISUALMAN_EXPORT_IMPORT ViewMatrixWrapper
 
 public:
 	// Constructor with vectors
-	ViewMatrixWrapper( const ysl::Point3f &position = { 0.0f, 0.0f, 0.0f }, ysl::Vector3f up = { 0.0f, 1.0f, 0.0f },
-					   const ysl::Point3f &center = { 0, 0, 0 } );
-	ViewMatrixWrapper( const ysl::Point3f &position, ysl::Vector3f up,
-					   const ysl::Vector3f &front );
+	ViewMatrixWrapper( const Point3f &position = { 0.0f, 0.0f, 0.0f }, Vector3f up = { 0.0f, 1.0f, 0.0f },
+					   const Point3f &center = { 0, 0, 0 } );
+	ViewMatrixWrapper( const Point3f &position, Vector3f up,
+					   const Vector3f &front );
 
 	Vector3f GetFront() const { return m_front; }
 	void SetFront( const Vector3f &front ) { m_front = front.Normalized(); }
 	Vector3f GetRight() const { return m_right; }
 	Vector3f GetUp() const { return m_up; }
-	void UpdateCamera( const ysl::Point3f &position, ysl::Vector3f worlUp,
-					   const ysl::Point3f &center );
-	void ViewMatrixWrapper::UpdateCamera( const ysl::Point3f &position, ysl::Vector3f worldUp, const ysl::Vec3f &front );
+	void UpdateCamera( const Point3f &position, Vector3f worlUp,
+					   const Point3f &center );
+	void ViewMatrixWrapper::UpdateCamera( const Point3f &position, Vector3f worldUp, const Vec3f &front );
 	// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
 	Transform GetViewMatrix() const;
 	Point3f GetPosition() const { return m_position; }
 	void SetPosition( const Point3f &pos );
 	//Point3f GetCenter() const { return m_center; }
-	void SetCenter( const ysl::Point3f &center );
-	void Move( const ysl::Vector3f &direction, float deltaTime );
-	void Rotate( float xOffset, float yOffset, const ysl::Point3f &center );
+	void SetCenter( const Point3f &center );
+	void Move( const Vector3f &direction, float deltaTime );
+	void Rotate( float xOffset, float yOffset, const Point3f &center );
 	void ProcessMouseScroll( float yOffset );
-	void RotateCamera( const ysl::Vector3f &axis, double theta, const ysl::Point3f &center );
+	void RotateCamera( const Vector3f &axis, double theta, const Point3f &center );
 
 private:
 };
@@ -96,11 +94,11 @@ public:
 
 	Transform ViewMatrix() const { return viewMatrixWrapper->GetViewMatrix(); }
 
-	Ref<ViewMatrixWrapper> GetViewMatrixWrapper() { return viewMatrixWrapper; }
+	VMRef<ViewMatrixWrapper> GetViewMatrixWrapper() { return viewMatrixWrapper; }
 
-	Ref<const ViewMatrixWrapper> GetViewMatrixWrapper() const { return viewMatrixWrapper; }
+	VMRef<const ViewMatrixWrapper> GetViewMatrixWrapper() const { return viewMatrixWrapper; }
 
-	void SetViewMatrixWrapper( Ref<ViewMatrixWrapper> viewMatrixWrapper ) { this->viewMatrixWrapper = std::move( viewMatrixWrapper ); }
+	void SetViewMatrixWrapper( VMRef<ViewMatrixWrapper> viewMatrixWrapper ) { this->viewMatrixWrapper = std::move( viewMatrixWrapper ); }
 
 	void SetProjectionMatrix( const Transform &projection );
 
@@ -108,34 +106,34 @@ public:
 
 	Transform ProjectViewMatrix() const { return ( *projMatrix ) * ViewMatrix(); }
 
-	Ref<Transform> GetPerspectiveMatrix() { return projMatrix; }
+	VMRef<Transform> GetPerspectiveMatrix() { return projMatrix; }
 
-	Ref<const Transform> GetPerspectiveMatrix() const { return projMatrix; }
+	VMRef<const Transform> GetPerspectiveMatrix() const { return projMatrix; }
 
-	void SetPerspectiveMatrix( Ref<Transform> persp ) { projMatrix = std::move( persp ); }
+	void SetPerspectiveMatrix( VMRef<Transform> persp ) { projMatrix = std::move( persp ); }
 
 	Point3f GetPosition() const { return viewMatrixWrapper->GetPosition(); }
 
-	void Rotation( float xoffset, float yoffset,const ysl::Point3f & center ) { viewMatrixWrapper->Rotate( xoffset, yoffset, center); }
+	void Rotation( float xoffset, float yoffset,const Point3f & center ) { viewMatrixWrapper->Rotate( xoffset, yoffset, center); }
 
 	Vector3f GetFront() const { return viewMatrixWrapper->GetFront(); }
 
 	void SetFront( const Vector3f &front ) { viewMatrixWrapper->SetFront( front ); }
 
-	void SetViewport( Ref<Viewport> vp ) { viewport = std::move( vp ); }
+	void SetViewport( VMRef<Viewport> vp ) { viewport = std::move( vp ); }
 
 	Vector3f GetUp() const { return viewMatrixWrapper->GetUp(); }
 
 
 	void SetCenter( const Point3f &center ) { viewMatrixWrapper->SetCenter( center ); }
 
-	void SetCamera( Ref<ViewMatrixWrapper> viewMatrixWrapper, Ref<Transform> projMatrix );
+	void SetCamera( VMRef<ViewMatrixWrapper> viewMatrixWrapper, VMRef<Transform> projMatrix );
 
-	void SetCamera( const ysl::Point3f &position, ysl::Vector3f worlUp,
-					const ysl::Point3f &center, float nearPlane, float farPlane, float aspectRatio, float fov );
+	void SetCamera( const Point3f &position, Vector3f worlUp,
+					const Point3f &center, float nearPlane, float farPlane, float aspectRatio, float fov );
 
-	void SetCamera( const ysl::Point3f &position, ysl::Vector3f worlUp,
-					const ysl::Vector3f &front, float nearPlane, float farPlane, float aspectRatio, float fov );
+	void SetCamera( const Point3f &position, Vector3f worlUp,
+					const Vector3f &front, float nearPlane, float farPlane, float aspectRatio, float fov );
 
 
 	float GetFov() const { return fov; }
@@ -166,9 +164,9 @@ public:
 
 	void SetAspectRation( float aspect ) { aspectRatio = aspect; }
 
-	Ref<Viewport> GetViewport() { return viewport; }
+	VMRef<Viewport> GetViewport() { return viewport; }
 
-	Ref<const Viewport> GetViewport() const { return viewport; }
+	VMRef<const Viewport> GetViewport() const { return viewport; }
 
 	Vec3f Up() const { return viewMatrixWrapper->GetUp(); }
 
@@ -180,30 +178,30 @@ public:
 
 private:
 	void UpdateProjMatrix() { projMatrix->SetGLPerspective( fov, aspectRatio, nearPlan, farPlan ); }
-	Ref<ViewMatrixWrapper> viewMatrixWrapper;
-	Ref<Transform> projMatrix;
-	Ref<Viewport> viewport;
+	VMRef<ViewMatrixWrapper> viewMatrixWrapper;
+	VMRef<Transform> projMatrix;
+	VMRef<Viewport> viewport;
 	float fov = 60;
 	float aspectRatio = 1024.0 / 768.0;
 	float nearPlan = 0.01;
 	float farPlan = 1000;
 };
 
-VISUALMAN_EXPORT_IMPORT Ref<Camera> CreateCamera( const std::string &jsonFileName );
+VISUALMAN_EXPORT_IMPORT VMRef<Camera> CreateCamera( const std::string &jsonFileName );
 VISUALMAN_EXPORT_IMPORT void ConfigCamera( Camera *camera, const std::string &jsonFileName );
-VISUALMAN_EXPORT_IMPORT bool SaveCameraAsJson( Ref<Camera> camera, const std::string &jsonFileName );
+VISUALMAN_EXPORT_IMPORT bool SaveCameraAsJson( VMRef<Camera> camera, const std::string &jsonFileName );
 
 class VISUALMAN_EXPORT_IMPORT CameraManipulator : public IEventListener
 {
 public:
-	CameraManipulator( Ref<Camera> camera = nullptr ) :
+	CameraManipulator( VMRef<Camera> camera = nullptr ) :
 	  camera( std::move( camera ) ) {}
 
-	void SetCamera( Ref<Camera> camera ) { this->camera = std::move( camera ); }
+	void SetCamera( VMRef<Camera> camera ) { this->camera = std::move( camera ); }
 
-	Ref<Camera> GetCamera() { return camera; }
+	VMRef<Camera> GetCamera() { return camera; }
 
-	Ref<const Camera> GetCamera() const { return camera; }
+	VMRef<const Camera> GetCamera() const { return camera; }
 
 	void InitEvent() override {}
 
@@ -239,12 +237,12 @@ public:
 	bool IsFPSCamera() const { return m_fpsCamera; }
 
 private:
-	Ref<Camera> camera;
+	VMRef<Camera> camera;
 	Vec2i lastMousePos;
-
 	bool m_fpsCamera = true;
 };
+
+
 }  // namespace vm
-}  // namespace ysl
 
 #endif

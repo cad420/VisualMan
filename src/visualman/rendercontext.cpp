@@ -12,18 +12,16 @@
 #include <cassert>
 #include <vector>
 
-namespace ysl
-{
 namespace vm
 {
 RenderContext::RenderContext() :
-  framebuffer( MakeRef<Framebuffer>( this, 800, 600, RDB_BACK_LEFT, RDB_BACK_LEFT ) )  // A default frambuffer
+  framebuffer( MakeVMRef<Framebuffer>( this, 800, 600, RDB_BACK_LEFT, RDB_BACK_LEFT ) )  // A default frambuffer
 {
 	int width = 800, height = 600;
 }
 
 RenderContext::RenderContext( int w, int h ) :
-  framebuffer( MakeRef<Framebuffer>( this, w, h, RDB_BACK_LEFT, RDB_BACK_LEFT ) )
+  framebuffer( MakeVMRef<Framebuffer>( this, w, h, RDB_BACK_LEFT, RDB_BACK_LEFT ) )
 {
 }
 
@@ -56,8 +54,8 @@ void RenderContext::DestroyGLResources()
 	InitDefaultRenderEnable();
 	InitDefaultRenderEnable();
 
-	std::vector<Ref<IEventListener>>().swap( listeners );
-	std::vector<Ref<FramebufferObject>>().swap( framebufferObjects );
+	std::vector<VMRef<IEventListener>>().swap( listeners );
+	std::vector<VMRef<FramebufferObject>>().swap( framebufferObjects );
 	framebuffer = nullptr;
 	curProgram = nullptr;
 	std::unordered_map<RenderStateType, RenderStateBox>().swap( currentRenderStates );
@@ -79,26 +77,26 @@ bool RenderContext::IsTerminate()
 	return terminate;
 }
 
-Ref<Framebuffer> RenderContext::GetFramebuffer()
+VMRef<Framebuffer> RenderContext::GetFramebuffer()
 {
 	assert( framebuffer );
 	return framebuffer;
 }
 
-Ref<FramebufferObject> RenderContext::CreateFramebufferObject()
+VMRef<FramebufferObject> RenderContext::CreateFramebufferObject()
 {
 	return CreateFramebufferObject( 0, 0, RDB_COLOR_ATTACHMENT0, RDB_COLOR_ATTACHMENT0 );
 }
 
-Ref<FramebufferObject> RenderContext::CreateFramebufferObject( int width, int height, ReadDrawBuffer readBuffer,
+VMRef<FramebufferObject> RenderContext::CreateFramebufferObject( int width, int height, ReadDrawBuffer readBuffer,
 															   ReadDrawBuffer drawBuffer )
 {
-	framebufferObjects.push_back( MakeRef<FramebufferObject>( this, width, height, readBuffer, drawBuffer ) );
+	framebufferObjects.push_back( MakeVMRef<FramebufferObject>( this, width, height, readBuffer, drawBuffer ) );
 	framebufferObjects.back()->CreateFrambufferObject();
 	return framebufferObjects.back();
 }
 
-void RenderContext::AddEventListener( Ref<IEventListener> listener )
+void RenderContext::AddEventListener( VMRef<IEventListener> listener )
 {
 	if ( listener && listener->context == nullptr ) {
 		listener->context = this;
@@ -109,7 +107,7 @@ void RenderContext::AddEventListener( Ref<IEventListener> listener )
 	}
 }
 
-void RenderContext::RemoveEventListener( Ref<IEventListener> listener )
+void RenderContext::RemoveEventListener( VMRef<IEventListener> listener )
 {
 	if ( listener && listener->context == this ) {
 		for ( auto it = listeners.begin(); it != listeners.end(); ) {
@@ -239,7 +237,7 @@ void RenderContext::DispatchFileDropEvent( const std::vector<std::string> &fileN
 	}
 }
 
-void RenderContext::UseProgram( Ref<const GLSLProgram> program )
+void RenderContext::UseProgram( VMRef<const GLSLProgram> program )
 {
 	assert( program );
 	GL( glUseProgram( program->Handle() ) );
@@ -476,45 +474,45 @@ void RenderContext::InitDefaultRenderState()
 	// Non-index state
 	//defaultRenderStates[RS_AlphaFunc] = RenderStateBox(MakeRef<DepthFuncState>(FU_LESS), 0);
 
-	defaultRenderStates[ RS_BlendFunc ] = RenderStateBox( MakeRef<BlendFuncState>( BF_SRC_COLOR, BF_SRC_ALPHA, BF_ONE_MINUS_SRC_COLOR, BF_ONE_MINUS_DST_ALPHA ), 0 );
-	defaultRenderStates[ RS_CullFace ] = RenderStateBox( MakeRef<CullFaceState>( PF_BACK ), 0 );
-	defaultRenderStates[ RS_DepthFunc ] = RenderStateBox( MakeRef<DepthFuncState>( FU_LESS ), 0 );
-	defaultRenderStates[ RS_BlendEquation ] = RenderStateBox( MakeRef<BlendEquationState>( BE_FUNC_ADD, BE_FUNC_ADD ), 0 );
-	defaultRenderStates[ RS_PolygonMode ] = RenderStateBox( MakeRef<PolygonModeState>( PM_FILL, PM_FILL ), 0 );
-	defaultRenderStates[ RS_FrontFace ] = RenderStateBox( MakeRef<FrontFaceState>(), 0 );
-	defaultRenderStates[ RS_LineWidth ] = RenderStateBox( MakeRef<LineWidthState>( 1.0 ), 0 );
+	defaultRenderStates[ RS_BlendFunc ] = RenderStateBox( MakeVMRef<BlendFuncState>( BF_SRC_COLOR, BF_SRC_ALPHA, BF_ONE_MINUS_SRC_COLOR, BF_ONE_MINUS_DST_ALPHA ), 0 );
+	defaultRenderStates[ RS_CullFace ] = RenderStateBox( MakeVMRef<CullFaceState>( PF_BACK ), 0 );
+	defaultRenderStates[ RS_DepthFunc ] = RenderStateBox( MakeVMRef<DepthFuncState>( FU_LESS ), 0 );
+	defaultRenderStates[ RS_BlendEquation ] = RenderStateBox( MakeVMRef<BlendEquationState>( BE_FUNC_ADD, BE_FUNC_ADD ), 0 );
+	defaultRenderStates[ RS_PolygonMode ] = RenderStateBox( MakeVMRef<PolygonModeState>( PM_FILL, PM_FILL ), 0 );
+	defaultRenderStates[ RS_FrontFace ] = RenderStateBox( MakeVMRef<FrontFaceState>(), 0 );
+	defaultRenderStates[ RS_LineWidth ] = RenderStateBox( MakeVMRef<LineWidthState>( 1.0 ), 0 );
 
 	//defaultRenderStates[RS_StencilFunc] = RenderStateBox(new StencilFunc, 0);
 	//defaultRenderStates[RS_StencilMask] = RenderStateBox(new StencilMask, 0);
 	//defaultRenderStates[RS_StencilOp] = RenderStateBox(new StencilOp, 0);
 
-	defaultRenderStates[ RS_GLSLProgram ] = RenderStateBox( MakeRef<GLSLProgram>(), 0 );
+	defaultRenderStates[ RS_GLSLProgram ] = RenderStateBox( MakeVMRef<GLSLProgram>(), 0 );
 
 	// indexed state
 
 	// Texture Sampler
 	for ( int i = 0; i < maxInteger.MAX_TEXTURE_IMAGE_UNITE; i++ ) {
-		defaultRenderStates[ RS_TextureSampler + i ] = RenderStateBox( MakeRef<TextureSampler>(), i );
+		defaultRenderStates[ RS_TextureSampler + i ] = RenderStateBox( MakeVMRef<TextureSampler>(), i );
 	}
 
 	// SSBO
 	for ( int i = 0; i < maxInteger.MAX_SHADER_STORAGE_BINDINGS; i++ ) {
-		defaultRenderStates[ RS_ShaderStorageBuffer + i ] = RenderStateBox( MakeRef<ShaderStorageBufferObject>(), i );
+		defaultRenderStates[ RS_ShaderStorageBuffer + i ] = RenderStateBox( MakeVMRef<ShaderStorageBufferObject>(), i );
 	}
 
 	// AtomicCounterBuffer
 	for ( int i = 0; i < maxInteger.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS; i++ ) {
-		defaultRenderStates[ RS_AtomicCounterBuffer + i ] = RenderStateBox( MakeRef<AtomicCounter>(), i );
+		defaultRenderStates[ RS_AtomicCounterBuffer + i ] = RenderStateBox( MakeVMRef<AtomicCounter>(), i );
 	}
 
 	// Image Units
 
 	for ( int i = 0; i < maxInteger.MAX_IMAGE_UNITS; i++ ) {
-		defaultRenderStates[ RS_TextureImageUnit + i ] = RenderStateBox( MakeRef<TextureImageUnit>(), i );
+		defaultRenderStates[ RS_TextureImageUnit + i ] = RenderStateBox( MakeVMRef<TextureImageUnit>(), i );
 	}
 
 	for ( int i = 0; i < maxInteger.MAX_UNIFORM_BLOCKS_COUNT; i++ ) {
-		defaultRenderStates[ RS_UniformBuffer + i ] = RenderStateBox( MakeRef<UniformBufferObject>(), i );
+		defaultRenderStates[ RS_UniformBuffer + i ] = RenderStateBox( MakeVMRef<UniformBufferObject>(), i );
 	}
 }
 
@@ -540,4 +538,3 @@ bool RenderContext::CheckSupportForExtension( const std::string &ext )
 }
 
 }  // namespace vm
-}  // namespace ysl

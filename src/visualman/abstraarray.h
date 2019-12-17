@@ -6,8 +6,6 @@
 #include "bufferobject.h"
 #include <VMat/transformation.h>
 
-namespace ysl
-{
 namespace vm
 {
 class VISUALMAN_EXPORT_IMPORT AbstraArray
@@ -23,9 +21,9 @@ public:
 
 	AbstraArray &operator=( AbstraArray &&other ) noexcept = default;
 
-	Ref<BufferObject> GetBufferObject() { return bufferObject; }
+	VMRef<BufferObject> GetBufferObject() { return bufferObject; }
 
-	Ref<const BufferObject> GetBufferObject() const { return bufferObject; }
+	VMRef<const BufferObject> GetBufferObject() const { return bufferObject; }
 
 	/**
 			 * \brief  Returns the data pointer pointing to local memory. Nullptr is returned if
@@ -74,7 +72,7 @@ public:
 	virtual ~AbstraArray() {}
 
 private:
-	Ref<BufferObject> bufferObject;
+	VMRef<BufferObject> bufferObject;
 	BufferObjectUsage usage = BU_STATIC_DRAW;
 	bool dirtyData = true;	// indicates whether the GPU data is dirty
 };
@@ -146,6 +144,5 @@ class ArrayUInt : public Array<unsigned int, unsigned int, 1, GL_UNSIGNED_INT>
 {
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

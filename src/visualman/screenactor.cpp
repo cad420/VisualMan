@@ -6,14 +6,12 @@
 #include "camera.h"
 #include "actor.h"
 
-namespace ysl
-{
 namespace vm
 {
-ScreenActorEventCallback::ScreenActorEventCallback( Ref<Camera> cam )
+ScreenActorEventCallback::ScreenActorEventCallback( VMRef<Camera> cam )
 {
 	// Init a screen primitive
-	SetPrimitive( MakeRef<Primitive>() );
+	SetPrimitive( MakeVMRef<Primitive>() );
 	for ( int i = 0; i < 10; i++ ) {
 		lodTable.push_back( 1.0 / std::pow( 8, 10 - i - 1 ) );
 	}
@@ -29,10 +27,10 @@ void ScreenActorEventCallback::OnActorRenderStartedEvent( Actor *actor, const Ca
 	}
 }
 
-void ScreenActorEventCallback::SetPrimitive( Ref<Primitive> primitive )
+void ScreenActorEventCallback::SetPrimitive( VMRef<Primitive> primitive )
 {
-	auto vertexNDC = MakeRef<ArrayFloat2>();
-	auto texCoord = MakeRef<ArrayFloat2>();
+	auto vertexNDC = MakeVMRef<ArrayFloat2>();
+	auto texCoord = MakeVMRef<ArrayFloat2>();
 
 	float v[] = {
 		-1.f, 1.0f,
@@ -59,11 +57,11 @@ void ScreenActorEventCallback::SetPrimitive( Ref<Primitive> primitive )
 	primitive->SetVertexPositionArray( vertexNDC );
 	primitive->SetVertexTexCoordArray( texCoord );
 	//draw call
-	primitive->DrawCalls().push_back( MakeRef<DrawArray>( 0, 6 ) );
+	primitive->DrawCalls().push_back( MakeVMRef<DrawArray>( 0, 6 ) );
 	screenRect = primitive;
 }
 
-void ScreenActorEventCallback::BindToActor( Ref<Actor> actor )
+void ScreenActorEventCallback::BindToActor( VMRef<Actor> actor )
 {
 	const auto sharedThis = std::static_pointer_cast<ScreenActorEventCallback>( shared_from_this() );
 	actor->RemoveActorRenderEventCallback( sharedThis );
@@ -71,4 +69,3 @@ void ScreenActorEventCallback::BindToActor( Ref<Actor> actor )
 	actor->SetRenderable( screenRect, 0 );
 }
 }  // namespace vm
-}  // namespace ysl

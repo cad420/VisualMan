@@ -8,11 +8,9 @@
 #include "rapidjson/pointer.h"
 #include "rapidjson/writer.h"
 
-namespace ysl
-{
 namespace vm
 {
-ViewMatrixWrapper::ViewMatrixWrapper( const ysl::Point3f &position, ysl::Vector3f worldUp, const ysl::Point3f &center ) :
+ViewMatrixWrapper::ViewMatrixWrapper( const Point3f &position, Vector3f worldUp, const Point3f &center ) :
   m_position( position ),
   m_front( center - position ),
   m_worldUp( worldUp ),
@@ -20,12 +18,12 @@ ViewMatrixWrapper::ViewMatrixWrapper( const ysl::Point3f &position, ysl::Vector3
   m_mouseSensitivity( SENSITIVITY ),
   m_zoom( ZOOM )
 {
-	m_right = ysl::Vector3f::Cross( m_front, m_worldUp ).Normalized();
-	m_up = ysl::Vector3f::Cross( m_right, m_front ).Normalized();
+	m_right = Vector3f::Cross( m_front, m_worldUp ).Normalized();
+	m_up = Vector3f::Cross( m_right, m_front ).Normalized();
 	//updateCameraVectors(QVector3D(0,1,0),QVector3D(0,0,0),0);
 }
 
-	ViewMatrixWrapper::ViewMatrixWrapper( const ysl::Point3f &position, ysl::Vector3f up, const ysl::Vector3f &front ):
+	ViewMatrixWrapper::ViewMatrixWrapper( const Point3f &position, Vector3f up, const Vector3f &front ):
   m_position( position ),
   m_front( front.Normalized() ),
   m_worldUp( up ),
@@ -36,27 +34,27 @@ ViewMatrixWrapper::ViewMatrixWrapper( const ysl::Point3f &position, ysl::Vector3
 	
 }
 
-void ViewMatrixWrapper::UpdateCamera( const ysl::Point3f &position, ysl::Vector3f worldUp, const ysl::Point3f & center )
+void ViewMatrixWrapper::UpdateCamera( const Point3f &position, Vector3f worldUp, const Point3f & center )
 {
 	m_position = position;
 	m_front = (center - position).Normalized();
 	m_worldUp = worldUp.Normalized();
-	m_right = ysl::Vector3f::Cross( m_front, m_worldUp ).Normalized();
-	m_up = ysl::Vector3f::Cross( m_right, m_front ).Normalized();
+	m_right = Vector3f::Cross( m_front, m_worldUp ).Normalized();
+	m_up = Vector3f::Cross( m_right, m_front ).Normalized();
 }
 
-void ViewMatrixWrapper::UpdateCamera( const ysl::Point3f &position, ysl::Vector3f worldUp, const ysl::Vec3f &front )
+void ViewMatrixWrapper::UpdateCamera( const Point3f &position, Vector3f worldUp, const Vec3f &front )
 {
 	m_position = position;
 	m_front = front.Normalized();
 	m_worldUp = worldUp.Normalized();
-	m_right = ysl::Vector3f::Cross( m_front, m_worldUp ).Normalized();
-	m_up = ysl::Vector3f::Cross( m_right, m_front ).Normalized();
+	m_right = Vector3f::Cross( m_front, m_worldUp ).Normalized();
+	m_up = Vector3f::Cross( m_right, m_front ).Normalized();
 }
 
 Transform ViewMatrixWrapper::GetViewMatrix() const
 {
-	ysl::Transform vi;
+	Transform vi;
 	vi.SetLookAt( m_position, m_position + m_front, m_up );
 	return vi;
 }
@@ -66,27 +64,27 @@ void ViewMatrixWrapper::SetPosition( const Point3f &pos )
 	m_position = pos;
 }
 
-void ViewMatrixWrapper::SetCenter( const ysl::Point3f &center )
+void ViewMatrixWrapper::SetCenter( const Point3f &center )
 {
 	//m_center = center;
 	m_front = ( center - m_position ).Normalized();
-	m_right = ysl::Vector3f::Cross( m_front, m_worldUp ).Normalized();
-	m_up = ysl::Vector3f::Cross( m_right, m_front ).Normalized();
+	m_right = Vector3f::Cross( m_front, m_worldUp ).Normalized();
+	m_up = Vector3f::Cross( m_right, m_front ).Normalized();
 }
 
-void ViewMatrixWrapper::Move( const ysl::Vector3f &direction, float deltaTime )
+void ViewMatrixWrapper::Move( const Vector3f &direction, float deltaTime )
 {
 	const auto velocity = m_movementSpeed * direction * deltaTime;
 	m_position += velocity;
 }
 
-void ViewMatrixWrapper::Rotate( float xoffset, float yoffset, const ysl::Point3f &center )
+void ViewMatrixWrapper::Rotate( float xoffset, float yoffset, const Point3f &center )
 {
 	xoffset *= m_mouseSensitivity;
 	yoffset *= m_mouseSensitivity;
 	const auto theta = 4.0 * ( std::fabs( xoffset ) + std::fabs( yoffset ) );
 	const auto v = ( ( m_right * xoffset ) + ( m_up * yoffset ) );
-	const auto axis = ysl::Vector3f::Cross( v, -m_front ).Normalized();
+	const auto axis = Vector3f::Cross( v, -m_front ).Normalized();
 	RotateCamera( axis, theta,center );
 }
 
@@ -100,17 +98,17 @@ void ViewMatrixWrapper::ProcessMouseScroll( float yoffset )
 		m_zoom = 45.0f;
 }
 
-void ViewMatrixWrapper::RotateCamera( const ysl::Vector3f &axis, double theta, const ysl::Point3f &center )
+void ViewMatrixWrapper::RotateCamera( const Vector3f &axis, double theta, const Point3f &center )
 {
-	ysl::Transform rotation;
+	Transform rotation;
 	rotation.SetRotate( axis, theta );
-	ysl::Transform translation;
+	Transform translation;
 	translation.SetTranslate( -center.x, -center.y, -center.z );
 	m_position = translation.Inversed() * ( rotation * ( translation * m_position ) );
 	m_front = ( rotation * m_front.Normalized() );
 	m_up = ( rotation * m_up.Normalized() );
-	m_right = ysl::Vector3f::Cross( m_front, m_up );
-	m_up = ysl::Vector3f::Cross( m_right, m_front );
+	m_right = Vector3f::Cross( m_front, m_up );
+	m_up = Vector3f::Cross( m_right, m_front );
 	m_front.Normalize();
 	m_right.Normalize();
 	m_up.Normalize();
@@ -118,9 +116,9 @@ void ViewMatrixWrapper::RotateCamera( const ysl::Vector3f &axis, double theta, c
 
 Camera::Camera( const Point3f &position, Vector3f up, const Point3f &center )
 {
-	viewMatrixWrapper = MakeRef<ViewMatrixWrapper>( position, up, center );
-	viewport = MakeRef<Viewport>();
-	projMatrix = MakeRef<Transform>();
+	viewMatrixWrapper = MakeVMRef<ViewMatrixWrapper>( position, up, center );
+	viewport = MakeVMRef<Viewport>();
+	projMatrix = MakeVMRef<Transform>();
 	projMatrix->SetGLPerspective( fov, aspectRatio, nearPlan, farPlan );
 }
 
@@ -134,7 +132,7 @@ const Transform &Camera::ProjectionMatrix() const
 	return *projMatrix;
 }
 
-void Camera::SetCamera( Ref<ViewMatrixWrapper> viewMatrixWrapper, Ref<Transform> projMatrix )
+void Camera::SetCamera( VMRef<ViewMatrixWrapper> viewMatrixWrapper, VMRef<Transform> projMatrix )
 {
 	if ( viewMatrixWrapper )
 		this->viewMatrixWrapper = viewMatrixWrapper;
@@ -142,7 +140,7 @@ void Camera::SetCamera( Ref<ViewMatrixWrapper> viewMatrixWrapper, Ref<Transform>
 		this->projMatrix = projMatrix;
 }
 
-void Camera::SetCamera( const ysl::Point3f &position, ysl::Vector3f worlUp, const ysl::Point3f &center,
+void Camera::SetCamera( const Point3f &position, Vector3f worlUp, const Point3f &center,
 						float nearPlane, float farPlane, float aspectRatio, float fov )
 {
 	viewMatrixWrapper->UpdateCamera( position, worlUp, center );
@@ -157,7 +155,7 @@ void Camera::SetCamera( const ysl::Point3f &position, ysl::Vector3f worlUp, cons
 	SetProjectionMatrix( perspectiveMatrix );
 }
 
-void Camera::SetCamera( const ysl::Point3f &position, ysl::Vector3f worlUp, const ysl::Vector3f & front,
+void Camera::SetCamera( const Point3f &position, Vector3f worlUp, const Vector3f & front,
 						float nearPlane, float farPlane, float aspectRatio, float fov )
 {
 	viewMatrixWrapper->UpdateCamera( position, worlUp, front );
@@ -214,11 +212,11 @@ std::vector<Point3f> Camera::GetFrustumLines() const
 	ptr[ 5 ] = farCenter + farHalfWidth * ( right ) + farHalfHeight * ( -up );
 	ptr[ 6 ] = farCenter + farHalfWidth * ( right ) + farHalfHeight * ( up );
 	ptr[ 7 ] = farCenter + farHalfWidth * ( -right ) + farHalfHeight * ( up );
-	//auto lines = MakeRef<ArrayFloat3>();
+	//auto lines = MakeVMRef<ArrayFloat3>();
 	//lines->GetBufferObject()->SetLocalData(ptr, sizeof(ptr));
 	return ptr;
 }
-Ref<Camera> CreateCamera( const std::string &jsonFileName )
+VMRef<Camera> CreateCamera( const std::string &jsonFileName )
 {
 	using namespace rapidjson;
 	std::ifstream ifs( jsonFileName );
@@ -250,7 +248,7 @@ Ref<Camera> CreateCamera( const std::string &jsonFileName )
 	const float farPlane = GetValueByPointerWithDefault( d, "/camera/perspectiveMatrix/farPlane", 200.f ).GetFloat();
 	const float aspectRatio = GetValueByPointerWithDefault( d, "/camera/perspectiveMatrix/aspectRatio", 1024.f / 768.f ).GetFloat();
 
-	auto camera = MakeRef<Camera>( pos, up, center );
+	auto camera = MakeVMRef<Camera>( pos, up, center );
 	//Transform perspectiveMatrix;
 	//perspectiveMatrix.SetGLPerspective(fov, aspectRatio, nearPlane, farPlane);
 	//camera->SetProjectionMatrix(perspectiveMatrix);
@@ -306,7 +304,7 @@ void ConfigCamera( Camera *camera, const std::string &jsonFileName )
 	//camera->SetFarPlane(farPlane);
 }
 
-bool SaveCameraAsJson( Ref<Camera> camera, const std::string &jsonFileName )
+bool SaveCameraAsJson( VMRef<Camera> camera, const std::string &jsonFileName )
 {
 	using namespace rapidjson;
 	auto pos = camera->GetPosition();
@@ -443,4 +441,3 @@ void CameraManipulator::KeyPressEvent( KeyButton key )
 }
 }  // namespace vm
 
-}  // namespace ysl

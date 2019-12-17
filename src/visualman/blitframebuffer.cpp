@@ -2,12 +2,10 @@
 #include "blitframebuffer.h"
 #include "graphictype.h"
 
-namespace ysl
-{
 namespace vm
 {
-BlitFramebufferEvent::BlitFramebufferEvent( Ref<Framebuffer> srcFB, const Bound2i &srcRect,
-											Ref<Framebuffer> dstFB, const Bound2i &dstRect, BufferBits mask ) :
+BlitFramebufferEvent::BlitFramebufferEvent( VMRef<Framebuffer> srcFB, const Bound2i &srcRect,
+											VMRef<Framebuffer> dstFB, const Bound2i &dstRect, BufferBits mask ) :
   srcFBO( std::move( srcFB ) ),
   srcRect( srcRect ),
   dstFBO( std::move( dstFB ) ),
@@ -16,7 +14,7 @@ BlitFramebufferEvent::BlitFramebufferEvent( Ref<Framebuffer> srcFB, const Bound2
 {
 }
 
-BlitFramebufferEvent::BlitFramebufferEvent( Ref<Framebuffer> srcFB, Ref<Framebuffer> dstFB, BufferBits mask ) :
+BlitFramebufferEvent::BlitFramebufferEvent( VMRef<Framebuffer> srcFB, VMRef<Framebuffer> dstFB, BufferBits mask ) :
   srcFBO( std::move( srcFB ) ),
   dstFBO( std::move( dstFB ) ),
   mask( mask )
@@ -41,4 +39,3 @@ void BlitFramebufferEvent::Blit()
 
 }  // namespace vm
 
-}  // namespace ysl

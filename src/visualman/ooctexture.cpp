@@ -11,8 +11,6 @@
 #include <VMUtils/vmnew.hpp>
 #include "VMat/numeric.h"
 
-namespace ysl
-{
 namespace vm
 {
 void OutOfCoreVolumeTexture::PrintVideoMemoryUsageInfo()
@@ -44,7 +42,7 @@ void OutOfCoreVolumeTexture::PrintVideoMemoryUsageInfo()
 	::vm::Log( "--------------End-----------------------------" );
 }
 
-void OutOfCoreVolumeTexture::BindToOutOfCorePrimitive( Ref<OutOfCorePrimitive> oocPrimitive )
+void OutOfCoreVolumeTexture::BindToOutOfCorePrimitive( VMRef<OutOfCorePrimitive> oocPrimitive )
 {
 	if ( oocPrimitive ) {
 		oocPrimitive->RemoveOutOfCoreResources( shared_from_this() );
@@ -81,7 +79,7 @@ void OutOfCoreVolumeTexture::SetSubTextureDataUsePBO( const std::vector<BlockDes
 
 void OutOfCoreVolumeTexture::InitVolumeTextures()
 {
-	auto texSetupParams = MakeRef<TexCreateParams>();
+	auto texSetupParams = MakeVMRef<TexCreateParams>();
 	
 	const auto texSize = memoryEvaluators->EvalPhysicalTextureSize();
 
@@ -93,7 +91,7 @@ void OutOfCoreVolumeTexture::InitVolumeTextures()
 
 	for ( int i = 0; i < memoryEvaluators->EvalPhysicalTextureCount(); i++ )
 	{
-		auto vTex = MakeRef<Texture>();  // gpu volume data cache size
+		auto vTex = MakeVMRef<Texture>();  // gpu volume data cache size
 		vTex->SetSetupParams( texSetupParams );
 		vTex->CreateTexture();
 		volumeDataTexture.push_back( vTex );
@@ -144,7 +142,7 @@ private:
 	int textureUnitCount = 0;
 	Size3 finalBlockDim = { 0, 0, 0 };
 public:
-	MyEvaluator( const ysl::Size3 &virtualDim, const Size3 &blockSize, std::size_t videoMemory ):
+	MyEvaluator( const Size3 &virtualDim, const Size3 &blockSize, std::size_t videoMemory ):
 	  virtualDim( virtualDim ),
 	  blockSize( blockSize ),
 	  videoMem( videoMemory )
@@ -199,7 +197,7 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 		cpuVolumeData[ i ] = VM_NEW<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
 	}
 	
-	memoryEvaluators = MakeRef<MyEvaluator>( cpuVolumeData[ 0 ]->BlockDim(), cpuVolumeData[ 0 ]->BlockSize(), videoMemory );
+	memoryEvaluators = MakeVMRef<MyEvaluator>( cpuVolumeData[ 0 ]->BlockDim(), cpuVolumeData[ 0 ]->BlockSize(), videoMemory );
 
 	InitVolumeTextures();
 	///[0] Gather buffer size before creating buffers
@@ -229,7 +227,7 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 	}
 
 	/// [1] Create Page Table Buffer and mapping table mananger
-	pageTableBuffer = MakeRef<BufferObject>();
+	pageTableBuffer = MakeVMRef<BufferObject>();
 	pageTableBuffer->CreateImmutableBufferObject( pageTableTotalEntries * sizeof( MappingTableManager::PageTableEntry ), nullptr, storage_flags );
 	const auto pageTablePtr = pageTableBuffer->MapBufferRange( 0, pageTableTotalEntries * sizeof( MappingTableManager::PageTableEntry ), mapping_flags );
 	assert( pageTablePtr );
@@ -238,14 +236,14 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 		pageTableInfos[ i ].external = (MappingTableManager::PageTableEntry *)pageTablePtr + pageTableInfos[ i ].offset;
 	}
 
-	mappingTableManager = MakeRef<MappingTableManager>( pageTableInfos,  // Create Mapping table for lods
+	mappingTableManager = MakeVMRef<MappingTableManager>( pageTableInfos,  // Create Mapping table for lods
 														memoryEvaluators->EvalPhysicalBlockDim(),
 														memoryEvaluators->EvalPhysicalTextureCount() );
 
 	///[2] Create Atomic Buffer
 
 	const size_t atomicBufferBytes = lodCount * sizeof( uint32_t );
-	atomicCounterBuffer = MakeRef<BufferObject>( VM_BT_ATOMIC_COUNTER_BUFFER );
+	atomicCounterBuffer = MakeVMRef<BufferObject>( VM_BT_ATOMIC_COUNTER_BUFFER );
 	std::vector<uint32_t> zeroBuffer( lodCount, 0 );
 	atomicCounterBuffer->SetLocalData( zeroBuffer.data(), atomicBufferBytes );
 	atomicCounterBuffer->CreateImmutableBufferObject( atomicBufferBytes, nullptr, storage_flags );
@@ -256,19 +254,19 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 
 	//const auto idBufferBytes = memoryEvaluators->EvalIDBufferCount() * sizeof(int32_t);
 
-	blockIdBuffer = MakeRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
+	blockIdBuffer = MakeVMRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
 	blockIdBuffer->CreateImmutableBufferObject( idBufferTotalBlocks * sizeof( uint32_t ), nullptr, storage_flags );
 	blockIdBuffer->MapBufferRange( 0, idBufferTotalBlocks, mapping_flags );
 
 	///[4] Create Hash Buffer
-	hashBuffer = MakeRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
+	hashBuffer = MakeVMRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
 	std::vector<uint32_t> emptyBuffer( hashBufferTotalBlocks, 0 );
 	hashBuffer->SetLocalData( emptyBuffer.data(), emptyBuffer.size() );
 	hashBuffer->CreateImmutableBufferObject( hashBufferTotalBlocks * sizeof( uint32_t ), nullptr, storage_flags );
 	hashBuffer->MapBufferRange( 0, hashBufferTotalBlocks, mapping_flags );
 
 	///[5] Create LOD Info Buffer
-	lodInfoBuffer = MakeRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
+	lodInfoBuffer = MakeVMRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
 	const auto lodInfoBytes = sizeof( _std140_layout_LODInfo ) * lodInfo.size();
 	lodInfoBuffer->CreateImmutableBufferObject( lodInfoBytes, lodInfo.data(), storage_flags );
 
@@ -283,10 +281,10 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const LVDFileInfo &fileInfo, std
 	lodInfo.resize( lodCount );
 
 	for ( int i = 0; i < lodCount; i++ ) {
-		//cpuVolumeData[ i ] = MakeRef<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
+		//cpuVolumeData[ i ] = MakeVMRef<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
 		cpuVolumeData[ i ] = VM_NEW<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
 	}
-	memoryEvaluators = MakeRef<MyEvaluator>( cpuVolumeData[ 0 ]->BlockDim(), cpuVolumeData[ 0 ]->BlockSize(), videoMemory );
+	memoryEvaluators = MakeVMRef<MyEvaluator>( cpuVolumeData[ 0 ]->BlockDim(), cpuVolumeData[ 0 ]->BlockSize(), videoMemory );
 
 	InitVolumeTextures();
 	///[0] Gather buffer size before creating buffers
@@ -316,7 +314,7 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const LVDFileInfo &fileInfo, std
 	}
 
 	/// [1] Create Page Table Buffer and mapping table mananger
-	pageTableBuffer = MakeRef<BufferObject>();
+	pageTableBuffer = MakeVMRef<BufferObject>();
 	pageTableBuffer->CreateImmutableBufferObject( pageTableTotalEntries * sizeof( MappingTableManager::PageTableEntry ), nullptr, storage_flags );
 	const auto pageTablePtr = pageTableBuffer->MapBufferRange( 0, pageTableTotalEntries * sizeof( MappingTableManager::PageTableEntry ), mapping_flags );
 	assert( pageTablePtr );
@@ -325,14 +323,14 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const LVDFileInfo &fileInfo, std
 		pageTableInfos[ i ].external = (MappingTableManager::PageTableEntry *)pageTablePtr + pageTableInfos[ i ].offset;
 	}
 
-	mappingTableManager = MakeRef<MappingTableManager>( pageTableInfos,  // Create Mapping table for lods
+	mappingTableManager = MakeVMRef<MappingTableManager>( pageTableInfos,  // Create Mapping table for lods
 														memoryEvaluators->EvalPhysicalBlockDim(),
 														memoryEvaluators->EvalPhysicalTextureCount() );
 
 	///[2] Create Atomic Buffer
 
 	const size_t atomicBufferBytes = lodCount * sizeof( uint32_t );
-	atomicCounterBuffer = MakeRef<BufferObject>( VM_BT_ATOMIC_COUNTER_BUFFER );
+	atomicCounterBuffer = MakeVMRef<BufferObject>( VM_BT_ATOMIC_COUNTER_BUFFER );
 	std::vector<uint32_t> zeroBuffer( lodCount, 0 );
 	atomicCounterBuffer->SetLocalData( zeroBuffer.data(), atomicBufferBytes );
 	atomicCounterBuffer->CreateImmutableBufferObject( atomicBufferBytes, nullptr, storage_flags );
@@ -343,19 +341,19 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const LVDFileInfo &fileInfo, std
 
 	//const auto idBufferBytes = memoryEvaluators->EvalIDBufferCount() * sizeof(int32_t);
 
-	blockIdBuffer = MakeRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
+	blockIdBuffer = MakeVMRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
 	blockIdBuffer->CreateImmutableBufferObject( idBufferTotalBlocks * sizeof( uint32_t ), nullptr, storage_flags );
 	blockIdBuffer->MapBufferRange( 0, idBufferTotalBlocks, mapping_flags );
 
 	///[4] Create Hash Buffer
-	hashBuffer = MakeRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
+	hashBuffer = MakeVMRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
 	std::vector<uint32_t> emptyBuffer( hashBufferTotalBlocks, 0 );
 	hashBuffer->SetLocalData( emptyBuffer.data(), emptyBuffer.size() );
 	hashBuffer->CreateImmutableBufferObject( hashBufferTotalBlocks * sizeof( uint32_t ), nullptr, storage_flags );
 	hashBuffer->MapBufferRange( 0, hashBufferTotalBlocks, mapping_flags );
 
 	///[5] Create LOD Info Buffer
-	lodInfoBuffer = MakeRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
+	lodInfoBuffer = MakeVMRef<BufferObject>( VM_BT_SHADER_STORAGE_BUFFER );
 	const auto lodInfoBytes = sizeof( _std140_layout_LODInfo ) * lodInfo.size();
 	lodInfoBuffer->CreateImmutableBufferObject( lodInfoBytes, lodInfo.data(), storage_flags );
 
@@ -598,4 +596,3 @@ void OutOfCoreVolumeTexture::OnDrawCallFinished( OutOfCorePrimitive *p )
 //}
 
 }  // namespace vm
-}  // namespace ysl

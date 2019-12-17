@@ -7,13 +7,11 @@
 #include <cassert>
 #include <iostream>
 
-namespace ysl
-{
 namespace vm
 {
 RayCastActorEventCallback::RayCastActorEventCallback()
 {
-	proxyGeometry = MakeRef<Primitive>();
+	proxyGeometry = MakeVMRef<Primitive>();
 
 	Bound3f bound( { 0, 0, 0 }, { 1, 1, 1 } );
 	Point3f points[ 8 ];
@@ -31,15 +29,15 @@ RayCastActorEventCallback::RayCastActorEventCallback()
 		1, 3, 5, 3, 7, 5
 	};
 
-	auto vertexIndex = MakeRef<ArrayUInt>();
+	auto vertexIndex = MakeVMRef<ArrayUInt>();
 	vertexIndex->GetBufferObject()->SetLocalData( indices, sizeof( indices ) );
-	vertexArray = MakeRef<ArrayFloat3>();
-	texCoordArray = MakeRef<ArrayFloat3>();
+	vertexArray = MakeVMRef<ArrayFloat3>();
+	texCoordArray = MakeVMRef<ArrayFloat3>();
 	vertexArray->GetBufferObject()->SetLocalData( points, sizeof( points ) );
 	texCoordArray->GetBufferObject()->SetLocalData( texCoords, sizeof( texCoords ) );
 	proxyGeometry->SetVertexPositionArray( vertexArray );
 	proxyGeometry->SetVertexTexCoordArray( texCoordArray );
-	auto drawCall = MakeRef<DrawElementsUInt>();
+	auto drawCall = MakeVMRef<DrawElementsUInt>();
 	drawCall->SetIndexBuffer( vertexIndex );
 	proxyGeometry->DrawCalls().push_back( drawCall );
 }
@@ -62,7 +60,7 @@ void RayCastActorEventCallback::OnActorRenderStartedEvent( Actor *actor,
 	}
 }
 
-void RayCastActorEventCallback::BindToActor( Ref<Actor> actor )
+void RayCastActorEventCallback::BindToActor( VMRef<Actor> actor )
 {
 	if ( actor ) {
 		const auto shared_this = std::static_pointer_cast<RayCastActorEventCallback>( shared_from_this() );
@@ -74,7 +72,7 @@ void RayCastActorEventCallback::BindToActor( Ref<Actor> actor )
 
 RayCast2ActorEventCallback::RayCast2ActorEventCallback()
 {
-	proxyGeometry = MakeRef<Primitive>();
+	proxyGeometry = MakeVMRef<Primitive>();
 
 	Bound3f bound( { 0, 0, 0 }, { 1, 1, 1 } );
 	Point3f points[ 8 ];
@@ -93,15 +91,15 @@ RayCast2ActorEventCallback::RayCast2ActorEventCallback()
 		1, 3, 5, 3, 7, 5
 	};
 
-	auto vertexIndex = MakeRef<ArrayUInt>();
+	auto vertexIndex = MakeVMRef<ArrayUInt>();
 	vertexIndex->GetBufferObject()->SetLocalData( indices, sizeof( indices ) );
-	vertexArray = MakeRef<ArrayFloat3>();
-	texCoordArray = MakeRef<ArrayFloat3>();
+	vertexArray = MakeVMRef<ArrayFloat3>();
+	texCoordArray = MakeVMRef<ArrayFloat3>();
 	vertexArray->GetBufferObject()->SetLocalData( points, sizeof( points ) );
 	texCoordArray->GetBufferObject()->SetLocalData( texCoords, sizeof( texCoords ) );
 	proxyGeometry->SetVertexPositionArray( vertexArray );
 	proxyGeometry->SetVertexTexCoordArray( texCoordArray );
-	auto drawCall = MakeRef<DrawElementsUInt>();
+	auto drawCall = MakeVMRef<DrawElementsUInt>();
 	drawCall->SetIndexBuffer( vertexIndex );
 	proxyGeometry->DrawCalls().push_back( drawCall );
 }
@@ -122,7 +120,7 @@ void RayCast2ActorEventCallback::OnActorRenderStartedEvent( Actor *actor,
 	}
 }
 
-void RayCast2ActorEventCallback::BindToActor( Ref<Actor> actor )
+void RayCast2ActorEventCallback::BindToActor( VMRef<Actor> actor )
 {
 	if ( actor ) {
 		const auto shared_this = std::static_pointer_cast<RayCast2ActorEventCallback>( shared_from_this() );
@@ -133,4 +131,3 @@ void RayCast2ActorEventCallback::BindToActor( Ref<Actor> actor )
 }
 
 }  // namespace vm
-}  // namespace ysl

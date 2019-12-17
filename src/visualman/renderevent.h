@@ -2,8 +2,6 @@
 #ifndef _RENDEREVENT_H_
 #define _RENDEREVENT_H_
 
-namespace ysl
-{
 namespace vm
 {
 class AbstraAggregate;
@@ -26,6 +24,5 @@ protected:
 	bool eventEnable = true;
 };
 }  // namespace vm
-}  // namespace ysl
 
 #endif

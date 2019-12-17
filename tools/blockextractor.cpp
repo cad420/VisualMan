@@ -10,7 +10,7 @@
 int main( int argc, char **argv )
 {
 	cmdline::parser a;
-	ysl::PluginLoader::GetPluginLoader()->LoadPlugins( "plugins" );
+	vm::PluginLoader::GetPluginLoader()->LoadPlugins( "plugins" );
 
 	a.add<std::string>( "if", 'i', "input file", true );
 	a.add<std::string>( "of", 'o', "output file", false, "a.out" );
@@ -28,7 +28,7 @@ int main( int argc, char **argv )
 	const auto y = a.get<int>( "yb" );
 	const auto z = a.get<int>( "zb" );
 
-	auto reader = ysl::PluginLoader::CreatePlugin<I3DBlockFilePluginInterface>( key );
+	auto reader = vm::PluginLoader::CreatePlugin<I3DBlockFilePluginInterface>( key );
 	if ( reader == nullptr ) {
 		vm::println( "failed to load plugin for {}",key );
 		return 0;
@@ -43,18 +43,18 @@ int main( int argc, char **argv )
 	const auto blockBytes = reader->Get3DPageSize().Prod();
 	const auto pageCount = reader->Get3DPageCount();
 
-	ysl::Point3i coord;
+	vm::Point3i coord;
 	size_t p = 0;
 	if ( x != -1 && y != -1 && z != -1 ) 
 	{
-		coord = ysl::Point3i( x, y, z );
-		p = ysl::Linear( coord, { pageCount.x, pageCount.y } );
+		coord = vm::Point3i( x, y, z );
+		p = vm::Linear( coord, { pageCount.x, pageCount.y } );
 	} else {
 		p = a.get<size_t>( "block" );
 	}
 	if ( p >= pageCount.Prod() ) 
 	{
-		const auto P = ysl::Dim( p, {pageCount.x,pageCount.y} );
+		const auto P = vm::Dim( p, {pageCount.x,pageCount.y} );
 		vm::println( "block id is out of range: request is {} ({}), but {} ({}) in total.", p,P, pageCount.Prod() ,pageCount);
 		return 0;
 	}

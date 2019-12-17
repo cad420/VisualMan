@@ -5,8 +5,6 @@
 #include <visualman.h>
 #include "config.h"
 
-namespace ysl
-{
 	namespace vm
 	{
 
@@ -17,10 +15,9 @@ namespace ysl
 			void InitEvent() override;
 		private:
 			void SetupAggregate();				// This may be a virtual function
-			Ref<Texture> entryTexture;
-			Ref<Texture> exitTexture;
+			VMRef<Texture> entryTexture;
+			VMRef<Texture> exitTexture;
 		};
 	}
-}
 
 #endif

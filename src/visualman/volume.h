@@ -7,8 +7,6 @@
 #include <VMat/geometry.h>
 #include <VMFoundation/dataarena.h>
 
-namespace ysl
-{
 namespace vm
 {
 enum VoxelFormat
@@ -56,9 +54,11 @@ public:
 	Any() :
 	  m_tpIndex( std::type_index( typeid( void ) ) ) {}
 	Any( const Any &other ) :
-	  m_ptr( other.Clone() ), m_tpIndex( other.m_tpIndex ) {}
+	  m_ptr( other.Clone() ),
+	  m_tpIndex( other.m_tpIndex ) {}
 	Any( Any &&other ) noexcept :
-	  m_ptr( std::move( other.m_ptr ) ), m_tpIndex( other.m_tpIndex ) {}
+	  m_ptr( std::move( other.m_ptr ) ),
+	  m_tpIndex( other.m_tpIndex ) {}
 
 	template <typename U, class = typename std::enable_if<!std::is_same<typename std::decay<U>::type, Any>::value, U>::type>
 	Any( U &&value ) :
@@ -141,7 +141,8 @@ class AbstraVolume
 {
 public:
 	AbstraVolume( VoxelFormat format, VoxelType type ) :
-	  format( format ), type( type ) {}
+	  format( format ),
+	  type( type ) {}
 	AbstraVolume( const AbstraVolume & ) = delete;
 	AbstraVolume &operator=( const AbstraVolume & ) = delete;
 	AbstraVolume( AbstraVolume && ) = delete;
@@ -162,6 +163,5 @@ private:
 };
 
 }  // namespace vm
-}  // namespace ysl
 
 #endif

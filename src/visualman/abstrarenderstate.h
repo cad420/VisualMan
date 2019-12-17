@@ -5,8 +5,6 @@
 #include "camera.h"
 #include <vector>
 
-namespace ysl
-{
 namespace vm
 {
 class RenderContext;
@@ -48,7 +46,7 @@ class RenderStateBox
 {
 public:
 	RenderStateBox() = default;
-	RenderStateBox( Ref<RenderState> state, int i ) :
+	RenderStateBox( VMRef<RenderState> state, int i ) :
 	  rawRenderState( std::move( state ) ), index( i ) {}
 	RenderStateType StateType() const
 	{
@@ -64,11 +62,10 @@ public:
 	{
 		rawRenderState->Apply( index, camera, context );
 	}
-	Ref<RenderState> rawRenderState;
+	VMRef<RenderState> rawRenderState;
 	int index = -1;
 };
 
 }  // namespace vm
-}  // namespace ysl
 
 #endif

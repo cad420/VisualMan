@@ -4,8 +4,6 @@
 #include "primitive.h"
 #include <memory>
 
-namespace ysl
-{
 namespace vm
 {
 class OutOfCorePrimitive;
@@ -23,15 +21,14 @@ public:
 	OutOfCorePrimitive();
 
 	void Render( const Actor *actor, const Shading *shading, const Camera *camera, RenderContext *context ) override;
-	void SetOutOfCoreResources( Ref<IOutOfCoreAdapter> e );
-	void RemoveOutOfCoreResources( Ref<IOutOfCoreAdapter> e );
+	void SetOutOfCoreResources( VMRef<IOutOfCoreAdapter> e );
+	void RemoveOutOfCoreResources( VMRef<IOutOfCoreAdapter> e );
 	void RemoveOutOfCoreResources();
 	void SetRenderFinished( bool finished ) { renderFinished = finished; }
 
 private:
-	Ref<IOutOfCoreAdapter> callbacks;
+	VMRef<IOutOfCoreAdapter> callbacks;
 	bool renderFinished = false;
 };
 }  // namespace vm
-}  // namespace ysl
 #endif

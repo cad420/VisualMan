@@ -3,8 +3,6 @@
 #include "abstrarenderstate.h"
 #include "bufferobject.h"
 
-namespace ysl
-{
 namespace vm
 {
 class Texture;
@@ -30,14 +28,14 @@ public:
 	AtomicCounter( const std::string &name ) :
 	  RenderStateIndexed( RS_AtomicCounterBuffer ), atomicName( name ) {}
 	void Apply( int index, const Camera *camera, RenderContext *context ) const override;
-	void SetBufferObject( Ref<BufferObject> buffer ) { bufferObject = std::move( buffer ); }
-	Ref<const BufferObject> GetBufferObject() const { return bufferObject; }
-	Ref<BufferObject> GetBufferObject() { return bufferObject; }
+	void SetBufferObject( VMRef<BufferObject> buffer ) { bufferObject = std::move( buffer ); }
+	VMRef<const BufferObject> GetBufferObject() const { return bufferObject; }
+	VMRef<BufferObject> GetBufferObject() { return bufferObject; }
 	std::string GetAtomicCounterName() const { return atomicName; }
 	void SetAtomicCounterName( const std::string &name ) { atomicName = name; }
 
 private:
-	Ref<BufferObject> bufferObject;
+	VMRef<BufferObject> bufferObject;
 	std::string atomicName;
 };
 
@@ -52,12 +50,12 @@ public:
 
 	void Apply( int index, const Camera *camera, RenderContext *context ) const override;
 
-	void SetBufferObject( Ref<BufferObject> buffer ) { bufferObject = std::move( buffer ); }
-	Ref<const BufferObject> GetBufferObject() const { return bufferObject; }
-	Ref<BufferObject> GetBufferObject() { return bufferObject; }
+	void SetBufferObject( VMRef<BufferObject> buffer ) { bufferObject = std::move( buffer ); }
+	VMRef<const BufferObject> GetBufferObject() const { return bufferObject; }
+	VMRef<BufferObject> GetBufferObject() { return bufferObject; }
 
 private:
-	Ref<BufferObject> bufferObject;
+	VMRef<BufferObject> bufferObject;
 };
 
 class VISUALMAN_EXPORT_IMPORT ShaderStorageBufferObject : public RenderStateIndexed
@@ -68,14 +66,14 @@ public:
 	ShaderStorageBufferObject( const std::string &name ) :
 	  RenderStateIndexed( RS_ShaderStorageBuffer ), storageBufferName( name ) {}
 	void Apply( int index, const Camera *camera, RenderContext *context ) const override;
-	void SetBufferObject( Ref<BufferObject> buffer ) { bufferObject = std::move( buffer ); }
-	Ref<const BufferObject> GetBufferObject() const { return bufferObject; }
-	Ref<BufferObject> GetBufferObject() { return bufferObject; }
+	void SetBufferObject( VMRef<BufferObject> buffer ) { bufferObject = std::move( buffer ); }
+	VMRef<const BufferObject> GetBufferObject() const { return bufferObject; }
+	VMRef<BufferObject> GetBufferObject() { return bufferObject; }
 	std::string GetShaderStorageBufferName() const { return storageBufferName; }
 	void SetShaderStorageBufferName( const std::string &name ) { storageBufferName = name; }
 
 private:
-	Ref<BufferObject> bufferObject;
+	VMRef<BufferObject> bufferObject;
 	std::string storageBufferName;
 	//unsigned int offset = 0;		// reserved field
 };
@@ -87,14 +85,14 @@ public:
 	TextureSampler() :
 	  RenderStateIndexed( RS_TextureSampler ) {}
 	void Apply( int index, const Camera *camera, RenderContext *context ) const override;
-	void SetTexture( Ref<Texture> texture ) { this->texture = std::move( texture ); }
+	void SetTexture( VMRef<Texture> texture ) { this->texture = std::move( texture ); }
 	//void SetImageUnitName(const std::string & name) { imageUnitName = name; }
 	//std::string GetImageUnitName()const { return imageUnitName; }
-	Ref<Texture> GetTexture() { return texture; }
-	Ref<const Texture> GetTexture() const { return texture; }
+	VMRef<Texture> GetTexture() { return texture; }
+	VMRef<const Texture> GetTexture() const { return texture; }
 
 private:
-	Ref<Texture> texture;
+	VMRef<Texture> texture;
 	//std::string imageUnitName;
 	//ImageUnitInfo unitInfo;
 };
@@ -113,12 +111,12 @@ public:
 	TextureImageUnit() :
 	  RenderStateIndexed( RS_TextureImageUnit ) {}
 	void Apply( int index, const Camera *camera, RenderContext *context ) const override;
-	void SetTexture( Ref<Texture> texture ) { this->texture = std::move( texture ); }
-	Ref<Texture> GetTexture() { return texture; }
-	Ref<const Texture> GetTexture() const { return texture; }
+	void SetTexture( VMRef<Texture> texture ) { this->texture = std::move( texture ); }
+	VMRef<Texture> GetTexture() { return texture; }
+	VMRef<const Texture> GetTexture() const { return texture; }
 
 private:
-	Ref<Texture> texture;
+	VMRef<Texture> texture;
 	//std::string imageUnitName;
 };
 
@@ -267,6 +265,5 @@ private:
 //};
 
 }  // namespace vm
-}  // namespace ysl
 
 #endif

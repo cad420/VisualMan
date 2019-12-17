@@ -9,7 +9,7 @@
 #include <VMCoreExtension/plugin.h>
 #include <VMCoreExtension/i3dblockfileplugininterface.h>
 
-namespace ysl
+namespace vm
 {
 class LVDFileReader : public vm::EverythingBase<I3DBlockFilePluginInterface>
 {
@@ -60,7 +60,7 @@ public:
 	}
 };
 
-}  // namespace ysl
-EXPORT_PLUGIN_FACTORY( ysl::LVDFileReaderFactory )
+}  // namespace 
+EXPORT_PLUGIN_FACTORY( vm::LVDFileReaderFactory )
 
 #endif
