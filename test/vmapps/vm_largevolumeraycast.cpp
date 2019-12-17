@@ -16,17 +16,14 @@ namespace ysl
 {
 namespace vm
 {
-
-
-void PrintCamera( Camera* camera )
+void PrintCamera( Camera *camera )
 {
 	::vm::println( "Position:{}", camera->GetViewMatrixWrapper()->GetPosition() );
 	::vm::println( "Up:{}", camera->GetViewMatrixWrapper()->GetUp() );
 	::vm::println( "Front:{}", camera->GetViewMatrixWrapper()->GetFront() );
 	::vm::println( "Right:{}", camera->GetViewMatrixWrapper()->GetRight() );
-	::vm::println( "ViewMatrix:{}",camera->GetViewMatrixWrapper()->GetViewMatrix());
+	::vm::println( "ViewMatrix:{}", camera->GetViewMatrixWrapper()->GetViewMatrix() );
 }
-
 
 //using namespace ::vm;
 FrustumEventCallback::FrustumEventCallback( Ref<Camera> camera ) :
@@ -326,6 +323,7 @@ void VM_LargeVolumeRayCast::InitEvent()
 	//outOfCoreAgts->GetAggregates().push_back(navigationAgt);
 
 	SetupConfigurationFiles( { jsonFile, tfFunctionFile } );
+	//timer.start();
 }
 
 void VM_LargeVolumeRayCast::UpdateScene()
@@ -334,6 +332,10 @@ void VM_LargeVolumeRayCast::UpdateScene()
 	//cam->GetViewMatrixWrapper()->RotateCamera(cam->GetUp(), 10);
 	//cam->Movement(cam->GetFront().Normalized(),100);
 	//cam->SetFov(int(cam->GetFov())-2);
+
+	timer.stop();
+	::vm::println( "Time per frame:{}", timer.duration() );
+	timer.start();
 }
 
 void VM_LargeVolumeRayCast::DestroyEvent()
@@ -405,11 +407,12 @@ void VM_LargeVolumeRayCast::MouseMoveEvent( MouseButton button, int xpos, int yp
 void VM_LargeVolumeRayCast::UpdateEvent()
 {
 	VisualMan::UpdateEvent();
-
+	timer.duration();
 	std::string title = "LVD Render -- fps:" + std::to_string( GetFPS() );
 	Context()->SetWindowTitle( title );
-	if ( outFileName.empty() == false ) {
-		intermediateResult->SaveTextureAs( "D:\\Desktop\\res.png" );
+	if ( outFileName.empty() == false ) 
+	{
+		intermediateResult->SaveTextureAs( "E:\\Desktop\\res.png" );
 		Context()->Terminate();
 	}
 }
@@ -442,9 +445,9 @@ void VM_LargeVolumeRayCast::SetupResources( const std::string &fileName )
 		lvdInfo.samplingRate = lvdJSON.samplingRate;
 		lvdInfo.spacing = { lvdJSON.spacing[ 0 ], lvdJSON.spacing[ 1 ], lvdJSON.spacing[ 2 ] };
 
-		oocResources = MakeRef<OutOfCoreVolumeTexture>( lvdInfo, Context()->GetDeviceTotalMemorySize() );
+		oocResources = MakeRef<OutOfCoreVolumeTexture>( lvdInfo, Context()->GetDeviceTotalMemorySize() *1024);
 	} catch ( std::runtime_error &e ) {
-		::vm::Warning( "{}" ,e.what());
+		::vm::Warning( "{}", e.what() );
 		return;
 	}
 
@@ -467,13 +470,15 @@ void VM_LargeVolumeRayCast::SetupResources( const std::string &fileName )
 	oocPrimitive->SetOutOfCoreResources( oocResources );
 
 	int lodCount = oocResources->GetLODCount();
-	const auto resolution = oocResources->DataResolutionWithPadding( 0 );
+	const auto resolution = oocResources->DataResolution( 0 );
+	::vm::println( "Data Resolution: {}", resolution );
 	auto t = Translate( -0.5, -0.5, -0.5 );
 	auto s = Scale( Vec3f( resolution ) );
 	auto spacing = Scale( Vec3f( 1, 1, 6 ) );
 	*proxyGemoryScaleTrans = Transform( spacing * s * t );
 	*navigationCameraViewMatrix = ViewMatrixWrapper( Point3f( MinComponent( resolution ), MinComponent( resolution ), MaxComponent( resolution * 2 ) ), Vec3f{ 0, 1, 0 }, Point3f{ 0, 0, 0 } );
 	Context()->Update();
+	outFileName = "result";
 }
 
 void VM_LargeVolumeRayCast::SetupTF( const std::string &fileName )
@@ -483,7 +488,7 @@ void VM_LargeVolumeRayCast::SetupTF( const std::string &fileName )
 		const auto tfTex = MakeTransferFunction1DTexture( fileName );
 
 		const auto preTex = MakePreIntegratedTransferFunction2DTexture( fileName );
-		
+
 		rayCastShading->CreateGetTextureSampler( 4 )->SetTexture( tfTex );
 		rayCastShading->CreateGetTextureSampler( 5 )->SetTexture( preTex );
 	} catch ( std::runtime_error &e ) {
@@ -498,6 +503,7 @@ void VM_LargeVolumeRayCast::SetupCamera( const std::string &fileName )
 	//const auto camera = CreateCamera(fileName);
 	ConfigCamera( mrtAgt->CreateGetCamera().get(), fileName );
 	PrintCamera( mrtAgt->CreateGetCamera().get() );
+	timer.start();
 	Context()->Update();
 }
 

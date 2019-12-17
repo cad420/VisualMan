@@ -6,6 +6,8 @@
 #include <VMUtils/log.hpp>
 #include <VMat/numeric.h>
 
+//#define USE_MAPPING
+
 int main( int argc, char **argv )
 {
 	cmdline::parser a;
@@ -30,11 +32,13 @@ int main( int argc, char **argv )
 
 	vm::println( "Total blocks:{}", pageCount );
 
+#ifdef USE_MAPPING
 	::vm::Ref<IFileMapping> file;
 #ifdef _WIN32
 	file = ysl::PluginLoader::CreatePlugin<IFileMapping>( "windows" );
 #else
 	file = ysl::PluginLoader::CreatePlugin<IFileMapping>( "linux" );
+#endif
 #endif
 
 	const auto ods = reader->GetDataSizeWithoutPadding();  // original data size
@@ -45,7 +49,7 @@ int main( int argc, char **argv )
 	ss >> out;
 
 	::vm::println( "Data Size:{}", ods );
-
+#ifdef USE_MAPPING
 	try {
 		if ( file->Open( out, ods.Prod(), FileAccess::ReadWrite, MapAccess::ReadWrite ) == false ) {
 			::vm::println( "Failed to open file {}", a.get<std::string>( "of" ) );
@@ -58,6 +62,8 @@ int main( int argc, char **argv )
 	if ( data == nullptr ) {
 		::vm::println( "Failed to map file" );
 	}
+#endif
+
 	const auto p = reader->GetPadding();	  // padding
 	const auto bs = reader->Get3DPageSize();  // page size
 	const auto _ = bs - 2 * ysl::Size3( p, p, p );
@@ -66,27 +72,69 @@ int main( int argc, char **argv )
 	::vm::println( "PageSize: {}", bs );
 	::vm::println( "PageSizeNoPadding: {}", bsnp );
 
+	std::ofstream fileStream( out, std::ios::binary );
+	if ( fileStream.is_open() == false ) {
+		::vm::println( "Failed to open file: {}", out );
+		return 1;
+	}
+	const auto bufSize = ods.x * ods.y * bsnp.z;
+	std::vector<char> buf;
+	buf.reserve( bufSize );
+	::vm::println( "Buf Size: {}", bufSize );
+
+	auto totalBytes = 0;
+	for ( int zb = 0; zb < pageCount.z; zb++ ) {
+		bool end = false;
+		int lastSlice = bsnp.z;
+		size_t realBuf = bufSize;
+		if (zb == pageCount.z - 1) 
+		{
+			lastSlice = ods.z % bsnp.z;
+			realBuf = ods.x * ods.y * lastSlice;
+		}
+		for ( int yb = 0; yb < pageCount.y; yb++ ) {
+			for ( int xb = 0; xb < pageCount.x; xb++ ) {
+				// for each block, read the all the strip memory region of x direction
+				const auto bid = ysl::Linear( { xb, yb, zb }, { pageCount.x, pageCount.y } );
+				const auto block = reinterpret_cast<const char *>( reader->GetPage( bid ) );
+				for ( int sz = 0; sz < lastSlice; sz++ ) {
+					for ( int sy = 0; sy < bsnp.y; sy++ ) {
+						const auto blockBegin = ysl::Linear( { p, p + sy, p + sz }, { bs.x, bs.y } );
+						const auto bufBegin = ysl::Linear( { xb * bsnp.x, yb * bsnp.y, sz }, { ods.x, ods.y } );
+						memcpy( buf.data() + bufBegin, block + blockBegin, bsnp.x );
+					}
+				}
+			}
+		}
+		totalBytes += realBuf;
+		fileStream.write( buf.data(), realBuf );
+		vm::println( "Level: {}, Bytes: {} = {} x {} x {}", zb ,realBuf,ods.x,ods.y,lastSlice);
+	}
+	vm::println( "Written bytes in total: {}", totalBytes );
+
+	
+#ifdef USE_MAPPING
 	for ( int z = 0; z < ods.z; z++ ) {
-		const auto zb = z/ bsnp.z ;  // block x id
-		for ( int y = 0; y < ods.y; y++ ) {				  // block y id
-			const auto yb =  y/ bsnp.y ;
+		const auto zb = z / bsnp.z;			 // block x id
+		for ( int y = 0; y < ods.y; y++ ) {  // block y id
+			const auto yb = y / bsnp.y;
 			for ( int x = 0; x < ods.x; x++ ) {
-				const auto xb =  x/bsnp.x ;
-				
+				const auto xb = x / bsnp.x;
+
 				const auto bid = ysl::Linear( { int( xb ), int( yb ), int( zb ) }, { pageCount.x, pageCount.y } );  // linear block id
-				//::vm::println( "Block: {} ==> [{}]",ysl::Size3{xb,yb,zb},bid  );
 				const auto block = reader->GetPage( bid );
 				const auto globalOffset = ysl::Linear( { x, y, z }, { ods.x, ods.y } );
 				assert( globalOffset < ods.Prod() );
 				const ysl::Point3i pos = { x % bsnp.x + p, y % bsnp.y + p, z % bsnp.z + p };
-				//::vm::println( "{},{},{},{},{},{},{},{}",y,globalOffset, ysl::Vec3i( xb, yb, zb ),bid, pos,x,y,z );
 				const auto blockOffset = ysl::Linear( pos, { bs.x, bs.y } );
 				assert( blockOffset < bs.Prod() );
+
 				*( reinterpret_cast<char *>( data ) + globalOffset ) = *( reinterpret_cast<const char *>( block ) + blockOffset );
-				//std::cout << globalOffset << " " << blockOffset << std::endl;
 			}
 		}
 	}
 	file->Close();
+#endif
+
 	return 0;
 }

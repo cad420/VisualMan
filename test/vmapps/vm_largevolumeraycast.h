@@ -79,6 +79,8 @@ private:
 	std::string outFileName;
 	std::string jsonFile;
 	std::string tfFunctionFile;
+
+	::vm::Timer timer;
 	
 	LVDJSONStruct lvdJSON;
 
