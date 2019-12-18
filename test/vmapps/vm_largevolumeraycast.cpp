@@ -475,7 +475,7 @@ void VM_LargeVolumeRayCast::SetupResources( const std::string &fileName )
 	*proxyGemoryScaleTrans = Transform( spacing * s * t );
 	*navigationCameraViewMatrix = ViewMatrixWrapper( Point3f( MinComponent( resolution ), MinComponent( resolution ), MaxComponent( resolution * 2 ) ), Vec3f{ 0, 1, 0 }, Point3f{ 0, 0, 0 } );
 	Context()->Update();
-	outFileName = "result";
+	//outFileName = "result";
 }
 
 void VM_LargeVolumeRayCast::SetupTF( const std::string &fileName )

@@ -60,6 +60,7 @@ void OutOfCoreVolumeTexture::SetSubTextureDataUsePBO( const std::vector<BlockDes
 	assert( volumeDataTexture[ 0 ]->Handle() );
 
 	const auto blockSize = cpuVolumeData[ lod ]->BlockSize();
+	
 	//const auto textureId = volumeDataTexture[lod]->Handle();
 	//const auto blockBytes = this->bytes;
 
@@ -194,7 +195,10 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 
 	for ( int i = 0; i < lodCount; i++ ) 
 	{
-		cpuVolumeData[ i ] = VM_NEW<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
+		cpuVolumeData[ i ] = VM_NEW<MemoryPageAdapter>( fileInfo.fileNames[ i ] ,[](I3DBlockFilePluginInterface * p)
+		{
+			return Size3{ 10, 10, 10 };
+		});
 	}
 	
 	memoryEvaluators = MakeVMRef<MyEvaluator>( cpuVolumeData[ 0 ]->BlockDim(), cpuVolumeData[ 0 ]->BlockSize(), videoMemory );
