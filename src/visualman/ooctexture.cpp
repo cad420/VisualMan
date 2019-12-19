@@ -52,6 +52,7 @@ void OutOfCoreVolumeTexture::BindToOutOfCorePrimitive( VMRef<OutOfCorePrimitive>
 
 OutOfCoreVolumeTexture::~OutOfCoreVolumeTexture()
 {
+
 }
 
 void OutOfCoreVolumeTexture::SetSubTextureDataUsePBO( const std::vector<BlockDescriptor> &data, int lod )
@@ -193,9 +194,18 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const std::string &fileName, std
 	cpuVolumeData.resize( lodCount );
 	lodInfo.resize( lodCount );
 
+
+
 	for ( int i = 0; i < lodCount; i++ ) 
 	{
-		cpuVolumeData[ i ] = VM_NEW<MemoryPageAdapter>( fileInfo.fileNames[ i ] ,[](I3DBlockFilePluginInterface * p)
+		const auto cap = fileName.substr( fileName.find_last_of( '.' ) );
+		auto p = PluginLoader::CreatePlugin<I3DBlockFilePluginInterface>( cap );
+		if ( p == nullptr ) {
+			throw std::runtime_error( "Failed to load the plugin that is able to read " + cap + "file" );
+		}
+		p->Open( fileName );
+
+		cpuVolumeData[ i ] = VM_NEW<Block3DCache>( p ,[](I3DBlockFilePluginInterface * p)
 		{
 			return Size3{ 10, 10, 10 };
 		});
@@ -286,7 +296,7 @@ OutOfCoreVolumeTexture::OutOfCoreVolumeTexture( const LVDFileInfo &fileInfo, std
 
 	for ( int i = 0; i < lodCount; i++ ) {
 		//cpuVolumeData[ i ] = MakeVMRef<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
-		cpuVolumeData[ i ] = VM_NEW<MemoryPageAdapter>( fileInfo.fileNames[ i ] );
+		cpuVolumeData[ i ] = VM_NEW<Block3DCache>( fileInfo.fileNames[ i ] );
 	}
 	memoryEvaluators = MakeVMRef<MyEvaluator>( cpuVolumeData[ 0 ]->BlockDim(), cpuVolumeData[ 0 ]->BlockSize(), videoMemory );
 

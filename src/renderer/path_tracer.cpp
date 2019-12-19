@@ -9,7 +9,7 @@
 #include <ctime>
 #include "numeric.h"
 
-namespace ysl
+namespace vm
 {
 #define DIRECT_ILLUMINATION
 #define GI

@@ -219,7 +219,7 @@ private:
 
 	std::vector<VMRef<Texture>> volumeDataTexture;
 
-	std::vector<Ref<MemoryPageAdapter>> cpuVolumeData;
+	std::vector<Ref<Block3DCache>> cpuVolumeData;
 
 	/**
 			 * \brief Stores the atomic counters for every lod data

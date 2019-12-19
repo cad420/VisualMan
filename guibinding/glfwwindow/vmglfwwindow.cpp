@@ -5,7 +5,7 @@
 #include <renderstudio.h>
 #include <thread>
 
-namespace ysl
+namespace vm
 {
 namespace app
 {

@@ -4,7 +4,7 @@
 
 #include "../graphicfoundation/spectrum.h"
 
-namespace ysl
+namespace vm
 {
 class Scene;
 class Ray;

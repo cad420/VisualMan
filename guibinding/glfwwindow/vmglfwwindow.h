@@ -16,7 +16,7 @@
 #define GLFWWINDOW_EXPORT_IMPORT
 #endif
 
-namespace ysl
+namespace vm
 {
 	namespace app
 	{

@@ -67,9 +67,6 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}
 message(STATUS ${OpenMP_EXE_LINKER_FLAGS})
 endif()
 
-
-
-
 include(scripts/external.cmake)
 
 vm_external_module(

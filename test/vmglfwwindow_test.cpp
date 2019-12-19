@@ -9,7 +9,7 @@
 int main(int argc, char ** argv)
 {
 	using namespace vm;
-	using namespace ysl::app;
+	using namespace vm::app;
 	//Booster booster(argc, argv);
 	VMGLFWWindow window("Test GLFW Window", RenderContextFormat(), 800, 600);
 	auto appMesh = MakeVMRef<VM_VolumeRayCast2>();

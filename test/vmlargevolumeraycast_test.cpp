@@ -7,7 +7,7 @@
 int main(int argc, char ** argv)
 {
 	// Load plugins
-	using namespace ysl::app;
+	using namespace vm::app;
 	using namespace vm;
 	
 	PluginLoader::GetPluginLoader()->LoadPlugins("plugins");
