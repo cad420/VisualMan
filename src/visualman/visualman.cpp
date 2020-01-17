@@ -27,10 +27,16 @@ void VisualMan::DestroyEvent()
 void VisualMan::UpdateEvent()
 {
 	timer.stop();
-	const auto dur = timer.duration().us() * 1.0 / 1000000;
-	if ( dur > 0.5 ) {
+	const auto dur = timer.duration().s();
+	if ( dur > 1.0 ) 
+	{
 		FPS = frameCount / dur;
 		frameCount = 0;
+		if ( fpsResult.size() >= 50 ) {
+			std::cout << "Full\n";
+			fpsResult.pop_front();
+		}
+		fpsResult.push_back( FPS );
 		timer.start();
 	}
 	frameCount++;
@@ -62,32 +68,26 @@ void VisualMan::DeletedEvent( RenderContext *context )
 
 void VisualMan::MousePressEvent( MouseButton button, int xpos, int ypos )
 {
-	//std::cout << "Assembly::MousePressEvent:" << button << " " << xpos << " " << ypos << std::endl;
 }
 
 void VisualMan::MouseReleaseEvent( MouseButton button, int xpos, int ypos )
 {
-	//std::cout << "Assembly::MouseReleaseEvent:"<<button<<" "<<xpos<<" "<<ypos<< std::endl;
 }
 
 void VisualMan::MouseMoveEvent( MouseButton button, int xpos, int ypos )
 {
-	//std::cout << "Assembly::MouseMoveEvent:" << button << " " << xpos << " " << ypos << std::endl;
 }
 
 void VisualMan::MouseWheelEvent( int ydegree, int xdegree )
 {
-	//std::cout << "Assembly::MouseWheelEvent:" << xdegree << " " << ydegree << std::endl;
 }
 
 void VisualMan::KeyPressEvent( KeyButton key )
 {
-	//std::cout << "Assembly::MouseReleaseEvent:"<<key << std::endl;
 }
 
 void VisualMan::KeyReleaseEvent( KeyButton key )
 {
-	//std::cout << "Assembly::KeyReleaseEvent:"<< key<<  std::endl;
 }
 
 void VisualMan::ResizeEvent( int w, int h )
@@ -108,4 +108,6 @@ void VisualMan::BindCameraEvent( VMRef<Camera> camera )
 {
 	manipulator->SetCamera( camera );
 }
+
+
 }  // namespace vm

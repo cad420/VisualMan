@@ -5,6 +5,7 @@
 #include "primitive.h"
 
 #include <VMGraphics/marchingcubes.h>
+#include <VMat/geometry.h>
 #include "config.h"
 
 namespace vm

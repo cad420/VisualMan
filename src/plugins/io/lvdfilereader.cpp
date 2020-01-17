@@ -3,5 +3,9 @@
 
 namespace vm
 {
+
 }
-EXPORT_PLUGIN_FACTORY_IMPLEMENT( vm::LVDFileReaderFactory )
+
+VM_REGISTER_PLUGIN_FACTORY_IMPL( LVDFileReaderFactory )
+EXPORT_PLUGIN_FACTORY_IMPLEMENT( LVDFileReaderFactory )
+

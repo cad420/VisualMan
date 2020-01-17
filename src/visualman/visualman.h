@@ -53,12 +53,15 @@ public:
 
 	double GetFPS() const { return FPS; }
 
+	const std::deque<float> &GetFPSSerial() const { return fpsResult; }
+
 protected:
 	VMRef<AbstraAggregate> abstraAggregate;
 	VMRef<CameraManipulator> manipulator;
 	double FPS = 0;
-	int frameCount = 0;
-	::vm::Timer timer;
+	std::deque<float> fpsResult;
+	size_t frameCount = 0;
+	Timer timer;
 };
 }  // namespace vm
 

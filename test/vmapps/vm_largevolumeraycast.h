@@ -8,6 +8,7 @@
 #include <string>
 #include "config.h"
 #include "oocprimitive.h"
+#include "ooctexture.h"
 
 namespace vm
 {
@@ -48,6 +49,9 @@ private:
 
 
 
+
+
+
 class VMAPPS_EXPORT_IMPORT VM_LargeVolumeRayCast : public VisualMan
 {
 public:
@@ -77,11 +81,12 @@ private:
 	std::string outFileName;
 	std::string jsonFile;
 	std::string tfFunctionFile;
+	std::string lodsFileName;
+	Vec3i dataResolution;
 
-	::vm::Timer timer;
-	
+
+	Timer timer;
 	LVDJSONStruct lvdJSON;
-
 	VMRef<Shading> rayCastShading;
 	VMRef<Aggregate> mrtAgt, raycastAgt, navigationAgt;
 	VMRef<OutOfCorePrimitive> oocPrimitive;
@@ -91,7 +96,7 @@ private:
 	VMRef<Transform> proxyGemoryScaleTrans;
 	VMRef<Transform> navigationScale;
 	VMRef<ViewMatrixWrapper> navigationCameraViewMatrix;
-
+	VMRef<OutOfCoreVolumeTexture> oocTexture;
 	VMRef<Actor> boundingboxActor;
 };
 }  // namespace vm

@@ -10,17 +10,29 @@
 #include "blitframebuffer.h"
 #include "actoreventcallback.h"
 #include <framebuffer.h>
+#include <filesystem>
 #include "drawelements.h"
+#include <random>
 
 namespace vm
 {
+std::string GetTimeStampString()
+{
+	using namespace std::chrono;
+	time_t tt = system_clock::to_time_t( system_clock::now() );
+	std::string stamp = ctime( &tt );
+	std::replace( stamp.begin(), stamp.end(), ':', '-' );
+	stamp.pop_back();
+	return stamp;
+}
+
 void PrintCamera( Camera *camera )
 {
-	::vm::println( "Position:{}", camera->GetViewMatrixWrapper()->GetPosition() );
-	::vm::println( "Up:{}", camera->GetViewMatrixWrapper()->GetUp() );
-	::vm::println( "Front:{}", camera->GetViewMatrixWrapper()->GetFront() );
-	::vm::println( "Right:{}", camera->GetViewMatrixWrapper()->GetRight() );
-	::vm::println( "ViewMatrix:{}", camera->GetViewMatrixWrapper()->GetViewMatrix() );
+	println( "Position:{}", camera->GetViewMatrixWrapper()->GetPosition() );
+	println( "Up:{}", camera->GetViewMatrixWrapper()->GetUp() );
+	println( "Front:{}", camera->GetViewMatrixWrapper()->GetFront() );
+	println( "Right:{}", camera->GetViewMatrixWrapper()->GetRight() );
+	println( "ViewMatrix:{}", camera->GetViewMatrixWrapper()->GetViewMatrix() );
 }
 
 //using namespace ::vm;
@@ -104,6 +116,7 @@ VM_LargeVolumeRayCast::VM_LargeVolumeRayCast( bool offline, const std::string &o
   jsonFile( jsonFileName ),
   tfFunctionFile( tfFilename )
 {
+	//fps.resize( 100 );
 }
 
 void VM_LargeVolumeRayCast::InitEvent()
@@ -331,19 +344,41 @@ void VM_LargeVolumeRayCast::UpdateScene()
 	//cam->Movement(cam->GetFront().Normalized(),100);
 	//cam->SetFov(int(cam->GetFov())-2);
 
-	timer.stop();
-	::vm::println( "Time per frame:{}", timer.duration() );
-	timer.start();
+	//timer.stop();
+	//println( "Time per frame:{}", timer.duration() );
+	//timer.start();
 }
 
 void VM_LargeVolumeRayCast::DestroyEvent()
 {
+	// output log file
+	std::string fileName = "E:\\Desktop\\lab\\log_" + GetTimeStampString() + ".txt";
+	std::ofstream logFile( fileName );
+	if ( logFile.is_open() ) {
+		if ( lodsFileName.empty() == false ) fprintln( logFile, "file: {}", lodsFileName );
+		oocTexture->PrintVideoMemoryUsageInfo( logFile );
+		oocTexture->PrintBlockResidenceInfo( logFile );
+
+		std::stringstream ss;
+		for ( int i = 0; i < fpsResult.size(); i++ ) 
+		{
+			fprint( ss, "{}, ", fpsResult[ i ] );
+		}
+		const std::string strFPS{ std::istreambuf_iterator<char>{ ss }, std::istreambuf_iterator<char>{} };
+		fprintln( logFile, "{}", strFPS );
+
+	} else {
+		eprintln( "Failed to open log file" );
+	}
+
 	rayCastShading.reset();
 	mrtAgt = nullptr;
 	raycastAgt = nullptr;
 	oocPrimitive.reset();
 	proxyGemoryScaleTrans = nullptr;
 	intermediateResult = nullptr;
+	oocTexture = nullptr;
+
 	VisualMan::DestroyEvent();
 }
 
@@ -387,11 +422,16 @@ void VM_LargeVolumeRayCast::KeyPressEvent( KeyButton key )
 		SaveCameraAsJson( mrtAgt->CreateGetCamera(), "vmCamera.cam" );
 		PrintCamera( mrtAgt->CreateGetCamera().get() );
 	} else if ( key == KeyButton::Key_R ) {
-		mrtAgt->CreateGetCamera()->GetViewMatrixWrapper()->SetPosition( Point3f{ 0, 0, 0 } );
-		mrtAgt->CreateGetCamera()->SetFov( 60 );
-		mrtAgt->CreateGetCamera()->GetViewMatrixWrapper()->SetCenter( Point3f{ 1000, 1000, 1000 } );
+		using std::default_random_engine;
+		using std::uniform_int_distribution;
+		default_random_engine e( time( 0 ) );
+		uniform_int_distribution<int> u(0,100000);
+		mrtAgt->CreateGetCamera()->GetViewMatrixWrapper()->SetPosition( Point3f( u(e)%dataResolution.x,u(e)%dataResolution.y,u(e)&dataResolution.z ) );
+		
 	} else if ( key == KeyButton::Key_F ) {
 		manipulator->SetFPSCamera( !manipulator->IsFPSCamera() );
+	} else if ( key == KeyButton::Key_S ) {
+		intermediateResult->SaveTextureAs( "E:\\Desktop\\lab\\res_" + GetTimeStampString() + ".png" );
 	}
 }
 
@@ -405,8 +445,10 @@ void VM_LargeVolumeRayCast::MouseMoveEvent( MouseButton button, int xpos, int yp
 void VM_LargeVolumeRayCast::UpdateEvent()
 {
 	VisualMan::UpdateEvent();
-	timer.duration();
-	std::string title = "LVD Render -- fps:" + std::to_string( GetFPS() );
+	//timer.duration();
+	const auto curFps = GetFPS();
+	std::string title = "LVD Render -- fps:" + std::to_string( curFps );
+	
 	Context()->SetWindowTitle( title );
 	if ( outFileName.empty() == false ) {
 		intermediateResult->SaveTextureAs( "E:\\Desktop\\res.png" );
@@ -444,7 +486,7 @@ void VM_LargeVolumeRayCast::SetupResources( const std::string &fileName )
 
 		oocResources = MakeVMRef<OutOfCoreVolumeTexture>( lvdInfo, Context()->GetDeviceTotalMemorySize() * 1024 );
 	} catch ( std::runtime_error &e ) {
-		::vm::Warning( "{}", e.what() );
+		Warning( "{}", e.what() );
 		return;
 	}
 
@@ -468,12 +510,12 @@ void VM_LargeVolumeRayCast::SetupResources( const std::string &fileName )
 
 	int lodCount = oocResources->GetLODCount();
 	const auto resolution = oocResources->DataResolution( 0 );
-	::vm::println( "Data Resolution: {}", resolution );
 	auto t = Translate( -0.5, -0.5, -0.5 );
 	auto s = Scale( Vec3f( resolution ) );
 	auto spacing = Scale( Vec3f( 1, 1, 6 ) );
 	*proxyGemoryScaleTrans = Transform( spacing * s * t );
 	*navigationCameraViewMatrix = ViewMatrixWrapper( Point3f( MinComponent( resolution ), MinComponent( resolution ), MaxComponent( resolution * 2 ) ), Vec3f{ 0, 1, 0 }, Point3f{ 0, 0, 0 } );
+	oocTexture = oocResources;
 	Context()->Update();
 	//outFileName = "result";
 }
@@ -489,7 +531,7 @@ void VM_LargeVolumeRayCast::SetupTF( const std::string &fileName )
 		rayCastShading->CreateGetTextureSampler( 4 )->SetTexture( tfTex );
 		rayCastShading->CreateGetTextureSampler( 5 )->SetTexture( preTex );
 	} catch ( std::runtime_error &e ) {
-		::vm::Warning( "Can not load .tf file" );
+		Warning( "Can not load .tf file" );
 		return;
 	}
 	Context()->Update();
@@ -499,8 +541,6 @@ void VM_LargeVolumeRayCast::SetupCamera( const std::string &fileName )
 {
 	//const auto camera = CreateCamera(fileName);
 	ConfigCamera( mrtAgt->CreateGetCamera().get(), fileName );
-	PrintCamera( mrtAgt->CreateGetCamera().get() );
-	timer.start();
 	Context()->Update();
 }
 
@@ -516,6 +556,8 @@ void VM_LargeVolumeRayCast::SetupConfigurationFiles( const std::vector<std::stri
 			found = true;
 		} else if ( extension == ".lods" ) {
 			SetupResources( each );
+			std::filesystem::path p = each;
+			lodsFileName = p.filename().string();
 			found = true;
 		} else if ( extension == ".cam" ) {
 			SetupCamera( each );

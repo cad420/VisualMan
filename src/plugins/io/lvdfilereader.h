@@ -2,7 +2,6 @@
 #ifndef _LVDFILEREADER_H_
 #define _LVDFILEREADER_H_
 
-#include "config.h"
 #include <VMFoundation/lvdreader.h>
 #include <VMUtils/vmnew.hpp>
 #include <VMUtils/ieverything.hpp>
@@ -45,7 +44,11 @@ public:
 private:
 };
 
-class LVDFileReaderFactory : public IPluginFactory
+
+}  // namespace 
+
+
+class LVDFileReaderFactory : public vm::IPluginFactory
 {
 public:
 	DECLARE_PLUGIN_FACTORY( "visualman.blockdata.io" )
@@ -54,13 +57,13 @@ public:
 	{
 		if ( key == ".lvd" ) {
 			//return std::make_unique<LVDFileReader>();
-			return VM_NEW<LVDFileReader>();
+			return VM_NEW<vm::LVDFileReader>();
 		}
 		return nullptr;
 	}
 };
 
-}  // namespace 
-EXPORT_PLUGIN_FACTORY( vm::LVDFileReaderFactory )
+VM_REGISTER_PLUGIN_FACTORY_DECL( LVDFileReaderFactory )
+EXPORT_PLUGIN_FACTORY( LVDFileReaderFactory )
 
 #endif

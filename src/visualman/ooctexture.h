@@ -4,7 +4,7 @@
 #include "texture.h"
 #include <vector>
 #include <VMFoundation/largevolumecache.h>
-#include <VMFoundation/mapingtablemanager.hpp>
+#include <VMFoundation/mappingtablemanager.h>
 #include "oocprimitive.h"
 #include <VMUtils/ref.hpp>
 #include <VMUtils/json_binding.hpp>
@@ -159,7 +159,7 @@ VISUALMAN_EXPORT_IMPORT LVDFileInfo GetLVDFileInfoFromJson( const std::string &f
 class VISUALMAN_EXPORT_IMPORT OutOfCoreVolumeTexture : public IOutOfCoreAdapter	 // Dest
 {
 public:
-	explicit OutOfCoreVolumeTexture( const std::string &fileName, std::size_t videoMemory );
+	//explicit OutOfCoreVolumeTexture( const std::string &fileName, std::size_t videoMemory );
 	explicit OutOfCoreVolumeTexture( const LVDFileInfo & lodInfo, std::size_t videoMemory );
 
 	void OnDrawCallStart( OutOfCorePrimitive *p ) override;
@@ -201,7 +201,8 @@ public:
 
 	[[deprecated]] Vec3i BlockSize() const { return Vec3i( cpuVolumeData[ 0 ]->BlockSize() ); }
 
-	void PrintVideoMemoryUsageInfo();
+	void PrintVideoMemoryUsageInfo( std::ostream &os );
+	void PrintBlockResidenceInfo( std::ostream &os );
 	void BindToOutOfCorePrimitive( VMRef<OutOfCorePrimitive> oocPrimitive );
 	~OutOfCoreVolumeTexture();
 

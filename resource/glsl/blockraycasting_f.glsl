@@ -109,15 +109,15 @@ float stepTable[ 7 ] = {
 int EvalLOD( float d )
 {
 	int lod;
-	if ( d < 1600 )
+	if ( d < 1500 )
 		lod = 0;
-	else if ( d < 3200 )
+	else if ( d < 3000)
 		lod = 1;
-	else if ( d < 6400 )
+	else if ( d < 6000)
 		lod = 2;
-	else if ( d < 12800 )
+	else if ( d < 8000)
 		lod = 3;
-	else if ( d < 25600 )
+	else if ( d < 10000)
 		lod = 4;
 	else
 		lod = 5;
@@ -171,9 +171,9 @@ float EvalDistanceFromViewToBlockCenterCoord( vec3 samplePos, int curLod )
 
 	vec4 center;
 	center.w = 1;
-	center.xyz = ( vec3( entry3DIndex ) + vec3( 0.5, 0.5, 0.5 ) ) / pageTableSize;
+	center.xyz = ( vec3( entry3DIndex ) + vec3( 0.5, 0.5, 0.5 ) ) / vec3(pageTableSize);
 	vec4 r = vpl_ModelMatrix * center;
-	return distance( fuckPos, r.xyz );
+	return distance( fuckPos, r.xyz/r.w );
 }
 
 /* Debug Code

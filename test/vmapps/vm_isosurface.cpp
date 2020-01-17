@@ -33,7 +33,7 @@
 
 			RawReader reader(R"(D:\scidata\head.raw)", Size3{ 256,256,225 }, 1);
 			buffer.resize(256 * 256 * 225ULL);
-			reader.readRegion(Size3{ 0,0,0 }, Size3{ 256,256,225 }, buffer.data());
+			reader.readRegion(Vec3i{ 0,0,0 }, Size3{ 256,256,225 }, buffer.data());
 			meshGen = MakeVMRef<MeshGenerator>(buffer.data(), Size3{ 256,256,225 });
 		}
 		void VM_ISOSurface::UpdateScene()
